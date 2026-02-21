@@ -3,7 +3,9 @@
 ## Project Overview
 Habit RPG is a gamified habit tracker with RPG mechanics. Users can create habits, earn XP, level up, join guilds, do quests, and fight bosses.
 
-![Logo](docs/Logo.png)
+<p align="center">
+<img src="docs/Logo.png" alt="Logo" width="300"/>
+</p>
 
 ## Features
 
@@ -59,3 +61,4 @@ Habit RPG is a gamified habit tracker with RPG mechanics. Users can create habit
 - Auth: OAuth2
 - UI: Kotlin multiplatform 
 - Testing: Gherkin
+- Deployment: Kubernetes
