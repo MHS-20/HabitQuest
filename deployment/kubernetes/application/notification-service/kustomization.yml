@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/myhabitquest/notification-service/k8s?ref=main
+- github.com/MHS-20/habitquest/notification-service/k8s?ref=main
 
 patches:
 - path: patch-env.yml
@@ -17,7 +17,7 @@ configMapGenerator:
 
 images:
 - name: notification-service
-  newName: ghcr.io/myhabitquest/notification-service
+  newName: ghcr.io/MHS-20/notification-service
   newTag: fd8e1e0577c2eb0ca59976f00a33fe16cf0d72df
 
 replicas:

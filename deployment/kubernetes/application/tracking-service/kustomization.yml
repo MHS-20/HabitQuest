@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/myhabitquest/tracking-service/k8s?ref=main
+- github.com/MHS-20/habitquest/tracking-service/k8s?ref=main
 
 patches:
 - path: patch-env.yml
@@ -17,7 +17,7 @@ configMapGenerator:
 
 images:
 - name: tracking-service
-  newName: ghcr.io/myhabitquest/tracking-service
+  newName: ghcr.io/MHS-20/tracking-service
   newTag: 75fb8b475b7857d2a24ebf20d45c80b61c53c8e1
 
 replicas:
