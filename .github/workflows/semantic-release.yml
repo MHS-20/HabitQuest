@@ -47,23 +47,24 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator
 
-      - name: Run Semantic Release (service scoped)
+      - name: Run Semantic Release
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SERVICE: ${{ env.SERVICE }}
         run: |
-          echo "Running semantic-release for service: $SERVICE"
-
-          # Tag formato <service>-v<semver>
-          OUTPUT=$(npx semantic-release --tag-format "${SERVICE}-v\${version}" 2>&1 || true)
+          # Run semantic-release, capture output, don't fail if no release
+          cd $SERVICE
+          OUTPUT=$(npx semantic-release 2>&1 || true)
           echo "$OUTPUT"
-
+          
           if echo "$OUTPUT" | grep -q "Created tag"; then
             VERSION=$(echo "$OUTPUT" | grep -oP '(?<=Created tag ).*')
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           else
+            echo "No release created"
             echo "version=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Login to GHCR
         if: steps.semantic.outputs.version != ''
