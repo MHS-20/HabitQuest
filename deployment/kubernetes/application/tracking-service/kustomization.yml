@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- github.com/myhabitquest/tracking-service/k8s?ref=main
+
+patches:
+- path: patch-env.yml
+- path: patch-resources.yml
+- path: patch-volumes.yml
+
+configMapGenerator:
+- behavior: merge
+  files:
+  - application.yml
+  name: tracking-config
+
+images:
+- name: tracking-service
+  newName: ghcr.io/myhabitquest/tracking-service
+  newTag: 75fb8b475b7857d2a24ebf20d45c80b61c53c8e1
+
+replicas:
+- count: 1
+  name: tracking-service

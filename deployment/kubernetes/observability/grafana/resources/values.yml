@@ -1,0 +1,96 @@
+adminUser: admin
+adminPassword: admin
+
+service:
+  type: ClusterIP
+
+persistence:
+  enabled: false
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: "default"
+        orgId: 1
+        folder: ""
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    folder: /var/lib/grafana/dashboards
+    searchNamespace: ALL
+
+dashboardsConfigMaps:
+  default: grafana-dashboards
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    deleteDatasources:
+      - name: Prometheus
+      - name: Tempo
+      - name: Loki
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus-habitquest
+        access: proxy
+        orgId: 1
+        url: http://habitquest-prometheus-server.prometheus-system.svc.cluster.local:9090
+        basicAuth: false
+        isDefault: false
+        version: 1
+        editable: true
+      - name: Tempo
+        type: tempo
+        uid: tempo-habitquest
+        access: proxy
+        orgId: 1
+        url: http://tempo.prometheus-system.svc.cluster.local:3100
+        basicAuth: false
+        isDefault: false
+        version: 1
+        editable: true
+        jsonData:
+          httpMethod: GET
+          tracesToLogs:
+            datasourceUid: "loki-habitquest"
+            tags: ["instance", "pod", "namespace", "hostname"]
+            mappedTags:
+              - key: "service.name"
+                value: "application"
+            mapTagNamesEnabled: true
+            spanStartTimeShift: "1h"
+            spanEndTimeShift: "1h"
+            filterByTraceID: true
+            filterBySpanID: false
+            lokiSearch: true
+          lokiSearch:
+            datasourceUid: "loki-habitquest"
+          serviceMap:
+            datasourceUid: "prometheus-habitquest"
+          search:
+            hide: false
+          nodeGraph:
+            enabled: true
+      - name: Loki
+        type: loki
+        uid: loki-habitquest
+        access: proxy
+        orgId: 1
+        url: http://loki.logging.svc.cluster.local:3100
+        basicAuth: false
+        isDefault: true
+        version: 1
+        editable: true
+        jsonData:
+          derivedFields:
+            - datasourceUid: tempo-habitquest
+              matcherRegex: '\[.+,(.+?),'
+              name: TraceID
+              url: "$${__value.raw}"

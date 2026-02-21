@@ -1,0 +1,13 @@
+loki:
+  serviceName: loki
+  servicePort: 3100
+  serviceScheme: http
+
+config:
+  outputs: |
+    [OUTPUT]
+        Name        loki
+        Match       *
+        Host        loki
+        Port        3100
+        Labels      job=fluent-bit

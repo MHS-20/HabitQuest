@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    db: habitquest-postgres
+data:
+  init.sql: |
+    CREATE DATABASE habitquestdb_tracking;
+    CREATE DATABASE habitquestdb_marketplace;
+    CREATE DATABASE habitquestdb_guild;
+    CREATE DATABASE habitquestdb_quest;
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: habitquest-postgres
+  labels:
+    db: habitquest-postgres
+spec:
+  selector:
+    matchLabels:
+      db: habitquest-postgres
+  template:
+    metadata:
+      labels:
+        db: habitquest-postgres
+    spec:
+      containers:
+        - name: habitquest-postgres
+          image: postgres:14.12
+          env:
+            - name: POSTGRES_USER
+              value: user
+            - name: POSTGRES_PASSWORD
+              value: password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 60Mi
+            limits:
+              cpu: 200m
+              memory: 120Mi
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: postgres-config-volume
+      volumes:
+        - name: postgres-config-volume
+          configMap:
+            name: postgres-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: habitquest-postgres
+  labels:
+    db: habitquest-postgres
+spec:
+  type: ClusterIP
+  selector:
+    db: habitquest-postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

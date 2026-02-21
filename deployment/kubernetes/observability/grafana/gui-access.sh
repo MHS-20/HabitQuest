@@ -1,0 +1,1 @@
+kubectl -n grafana port-forward svc/crewcash-grafana 3000:80

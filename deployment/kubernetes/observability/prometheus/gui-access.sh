@@ -1,0 +1,1 @@
+kubectl -n prometheus-system port-forward svc/habitquest-prometheus-server 8080:80

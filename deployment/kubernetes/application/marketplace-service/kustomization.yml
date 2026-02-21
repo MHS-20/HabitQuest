@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- github.com/myhabitquest/marketplace-service/k8s?ref=main
+
+patches:
+- path: patch-env.yml
+- path: patch-resources.yml
+- path: patch-volumes.yml
+
+configMapGenerator:
+- behavior: merge
+  files:
+  - application.yml
+  name: marketplace-config
+
+images:
+- name: marketplace-service
+  newName: ghcr.io/myhabitquest/marketplace-service
+  newTag: bcd0c657d38d3bacef97b50b922216af01b0cbe7
+
+replicas:
+- count: 1
+  name: marketplace-service

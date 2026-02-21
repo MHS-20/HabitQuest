@@ -1,0 +1,46 @@
+fullnameOverride: habitquest-keycloak
+commonAnnotations:
+  app: habitquest-keycloak
+image:
+  registry: public.ecr.aws
+  repository: bitnami/keycloak
+  tag: 25.0.4
+extraEnvVars:
+  - name: KEYCLOAK_EXTRA_ARGS
+    value: "--import-realm"
+  - name: KC_HTTP_ENABLED
+    value: "true"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+extraVolumeMounts:
+  - name: config-volume
+    mountPath: "/opt/bitnami/keycloak/data/import"
+    readOnly: true
+extraVolumes:
+  - name: config-volume
+    configMap:
+      name: keycloak-config
+startupProbe:
+  enabled: false
+resources:
+  requests:
+    cpu: 0.2
+    memory: 756Mi
+  limits:
+    cpu: 2
+    memory: 756Mi
+service:
+  type: LoadBalancer
+  port: 80
+postgresql:
+  enabled: true
+  image:
+    registry: public.ecr.aws
+    repository: bitnami/postgresql
+    tag: 18.0.0
+  auth:
+    username: keycloak
+    password: keycloak
+    database: keycloak

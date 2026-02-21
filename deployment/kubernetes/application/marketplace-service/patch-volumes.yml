@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marketplace-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: marketplace-service
+          volumeMounts:
+            - name: postgres-credentials-volume
+              mountPath: /workspace/secrets/postgres
+            - name: rabbitmq-credentials-volume
+              mountPath: /workspace/secrets/rabbitmq
+            - name: keycloak-issuer-resourceserver-secret-volume
+              mountPath: /workspace/secrets/keycloak
+      volumes:
+        - name: postgres-credentials-volume
+          secret:
+            secretName: habitquest-postgres-marketplace-credentials
+        - name: rabbitmq-credentials-volume
+          secret:
+            secretName: habitquest-rabbitmq-credentials
+        - name: keycloak-issuer-resourceserver-secret-volume
+          secret:
+            secretName: keycloak-issuer-resourceserver-secret

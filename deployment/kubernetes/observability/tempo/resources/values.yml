@@ -1,0 +1,30 @@
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 3100
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+config: |
+  server:
+    http_listen_port: 3200
+    grpc_listen_port: 9095
+
+  distributor:
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /tmp/tempo/blocks
+
+  usage_report:
+    reporting_enabled: false

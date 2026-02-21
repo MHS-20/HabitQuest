@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- github.com/myhabitquest/guild-service/k8s?ref=main
+
+patches:
+- path: patch-env.yml
+- path: patch-resources.yml
+- path: patch-volumes.yml
+
+configMapGenerator:
+- behavior: merge
+  files:
+  - application.yml
+  name: guild-config
+
+images:
+- name: guild-service
+  newName: ghcr.io/myhabitquest/guild-service
+  newTag: 302d9b022193793b486db08f9ef1492946dbdef9
+
+replicas:
+- count: 2
+  name: guild-service
