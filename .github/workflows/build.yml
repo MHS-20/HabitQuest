@@ -63,6 +63,8 @@ jobs:
     strategy:
       matrix:
         service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+      fail-fast: false
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v6
@@ -91,7 +93,7 @@ jobs:
     needs: 
       - build
       - detect-changes
-    if: ${{ needs.detect-changes.outputs.services != '[]' }}
+    if: ${{success() && needs.detect-changes.outputs.services != '[]'}}
     runs-on: ubuntu-22.04
     permissions:
       contents: write
