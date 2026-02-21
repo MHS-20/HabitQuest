@@ -1,0 +1,176 @@
+name: Build and Package (Monorepo Microservices)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  REGISTRY: ghcr.io
+  VERSION: ${{ github.sha }}
+
+jobs:
+
+  commit-lint:
+    name: Run Commit Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: wagoid/commitlint-github-action@v5
+
+  k8s-validate:
+    name: Validate Kubernetes Manifests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: alexellis/setup-arkade@v3
+      - uses: alexellis/arkade-get@master
+        with:
+          kustomize: latest
+          kubeconform: latest
+      - run: |
+          kustomize build k8s | kubeconform --strict -
+
+  detect-changes:
+    name: Detect Changed Services
+    runs-on: ubuntu-22.04
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            notification-service:
+              - 'notification-service/**'
+            tracking-service:
+              - 'tracking-service/**'
+            marketplace-service:
+              - 'marketplace-service/**'
+            guild-service:
+              - 'guild-service/**'
+            edge-service:
+              - 'edge-service/**'
+            quest-service:
+              - 'quest-service/**'
+
+  build:
+    name: Build & Test Changed Services
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.services != '[]' }}
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Build service
+        run: |
+          chmod +x gradlew
+          ./gradlew :services:${{ matrix.service }}:build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}-jar
+          path: services/${{ matrix.service }}/build/libs/*.jar
+
+  package-scan-publish:
+    name: Package, Scan & Publish
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.service }}-jar
+          path: services/${{ matrix.service }}/build/libs/
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --file services/${{ matrix.service }}/Dockerfile \
+            --tag ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }} \
+            services/${{ matrix.service }}
+
+      - name: Scan Docker image
+        uses: anchore/scan-action@v3
+        id: scan
+        with:
+          image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }}
+          fail-build: false
+          severity-cutoff: high
+
+      - name: Upload vulnerability report
+        uses: github/codeql-action/upload-sarif@v3
+        if: success() || failure()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image (SHA tag)
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }}
+
+      - name: Push image (latest)
+        run: |
+          docker tag \
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }} \
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:latest
+
+          docker push \
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:latest
+
+      - name: Trigger Update Manifest workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: update_manifest
+          client-payload: |
+            {
+              "app_image": "${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}",
+              "app_name": "${{ matrix.service }}",
+              "app_version": "${{ env.VERSION }}"
+            }
+      
+      - name: Trigger Semantic Release
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: microservice_semantic_release
+          client-payload: |
+            {
+              "service": "${{ matrix.service }}",
+              "image": "${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}"
+            }
