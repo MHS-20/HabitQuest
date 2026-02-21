@@ -68,7 +68,7 @@ jobs:
         service: ${{ fromJson(needs.detect-changes.outputs.services) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -87,13 +87,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.service }}-jar
-          path: services/${{ matrix.service }}/build/libs/*.jar
+          path: ${{ matrix.service }}/build/libs/*.jar
 
   package-scan-publish:
     name: Package, Scan & Publish
     needs: 
       - build
       - detect-changes
+    if: ${{ needs.detect-changes.outputs.services != '[]' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -105,20 +106,20 @@ jobs:
         service: ${{ fromJson(needs.detect-changes.outputs.services) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.service }}-jar
-          path: services/${{ matrix.service }}/build/libs/
+          path: ${{ matrix.service }}/build/libs/
 
       - name: Build Docker image
         run: |
           docker build \
-            --file services/${{ matrix.service }}/Dockerfile \
+            --file ${{ matrix.service }}/Dockerfile \
             --tag ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }} \
-            services/${{ matrix.service }}
+            ${{ matrix.service }}
 
       - name: Scan Docker image
         uses: anchore/scan-action@v3
@@ -129,7 +130,7 @@ jobs:
           severity-cutoff: high
 
       - name: Upload vulnerability report
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: success() || failure()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}

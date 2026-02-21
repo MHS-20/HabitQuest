@@ -1,0 +1,9 @@
+spring:
+  redis:
+    host: habitquest-redis
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://habitquest-keycloak/realms/habitquest

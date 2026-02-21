@@ -1,0 +1,19 @@
+spring:
+#  cloud:
+#    gateway:
+#      routes: []  # no actual routes
+#  redis:
+#    host: localhost
+#    port: 6379
+#    timeout: 1s
+#    enabled: false
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          keycloak:
+#            client-id: test
+#            client-secret: test
+#        provider:
+#          keycloak:
+#            issuer-uri: http://localhost:9999  # dummy
