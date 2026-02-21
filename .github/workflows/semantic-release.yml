@@ -94,7 +94,7 @@ jobs:
           event-type: update_manifest
           client-payload: |
             {
-              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}",
-              "app_name": "${{ matrix.service }}",
+              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE }}/${{ env.SERVICE }}",
+              "app_name": "${{ env.SERVICE }}",
               "app_version": "${{ steps.semantic.outputs.version }}"
             }
