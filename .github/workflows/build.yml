@@ -114,18 +114,23 @@ jobs:
           name: ${{ matrix.service }}-jar
           path: ${{ matrix.service }}/build/libs/
 
+      - name: Set lowercase image name
+        id: vars
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Build Docker image
         run: |
           docker build \
             --file ${{ matrix.service }}/Dockerfile \
-            --tag ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }} \
+            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }} \
             ${{ matrix.service }}
 
       - name: Scan Docker image
         uses: anchore/scan-action@v3
         id: scan
         with:
-          image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }}
           fail-build: false
           severity-cutoff: high
 
@@ -144,16 +149,16 @@ jobs:
 
       - name: Push image (SHA tag)
         run: |
-          docker push ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }}
 
       - name: Push image (latest)
         run: |
           docker tag \
-            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.VERSION }} \
-            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }} \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:latest
 
           docker push \
-            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:latest
 
       - name: Trigger Update Manifest workflow
         uses: peter-evans/repository-dispatch@v3
@@ -162,7 +167,7 @@ jobs:
           event-type: update_manifest
           client-payload: |
             {
-              "app_image": "${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}",
+              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}",
               "app_name": "${{ matrix.service }}",
               "app_version": "${{ env.VERSION }}"
             }
@@ -176,5 +181,5 @@ jobs:
           client-payload: |
             {
               "service": "${{ matrix.service }}",
-              "image": "${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}"
+              "image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}"
             }
