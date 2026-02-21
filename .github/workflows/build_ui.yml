@@ -1,0 +1,117 @@
+name: Build and Package
+
+on:
+  push:
+    paths:
+      - 'habitquest-ui/**'
+      - '.github/workflows/build_ui.yml'
+  pull_request:
+    paths:
+      - 'habitquest-ui/**'
+      - '.github/workflows/build_ui.yml'
+
+jobs:
+  commit-lint:
+    name: Run Commit Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Run Commit Lint
+        uses: wagoid/commitlint-github-action@v5
+
+  static-scan:
+    name: Static Vulnerability Scan
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Code vulnerability scanning
+        uses: anchore/scan-action@v3
+        id: scan
+        with:
+          path: "${{ github.workspace }}"
+          fail-build: false
+          severity-cutoff: high
+      - name: Upload vulnerability report
+        uses: github/codeql-action/upload-sarif@v3
+        if: success() || failure()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+  build:
+    name: Build and Test (Kotlin Multiplatform)
+    runs-on: ubuntu-22.04
+    needs: [ commit-lint, static-scan ]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Set up Node (for Kotlin/JS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache Gradle and Gradle Wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-build-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/build.gradle*') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-build-
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node-${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
+          restore-keys: |
+            node-${{ runner.os }}-modules-
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./habitquest-ui/gradlew
+
+      - name: Run Gradle build (KMP targets)
+        # Exclude Android release assemble to avoid requiring Android SDK on Linux runners.
+        run: |
+          cd habitquest-ui && ./gradlew --no-daemon clean build -x :composeApp:assembleRelease
+
+      - name: Build Kotlin/JS production bundle
+        run: |
+          cd habitquest-ui && ./gradlew --no-daemon :composeApp:jsBrowserProductionWebpack || true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            habitquest-ui/build/**
+            habitquest-ui/composeApp/build/**
+
+  lint-reports:
+    name: Upload Lint & Reports (if any)
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: build_outputs/
+      - name: Upload lint reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports
+          path: |
+            habitquest-ui/build/reports/**
+            habitquest-ui/composeApp/build/reports/**
