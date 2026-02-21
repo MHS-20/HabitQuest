@@ -13,7 +13,7 @@ env:
 
 jobs:
   deliver:
-    name: Deliver release candidate to production
+    name: Deliver release candidate
     runs-on: ubuntu-22.04
 
     steps:
