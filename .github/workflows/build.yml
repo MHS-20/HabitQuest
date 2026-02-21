@@ -2,9 +2,6 @@ name: Build and Package (Monorepo Microservices)
 
 on:
   push:
-    branches:
-      - main
-      - develop
 
 env:
   REGISTRY: ghcr.io
@@ -160,18 +157,6 @@ jobs:
 
           docker push \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:latest
-
-      - name: Trigger Update Manifest workflow
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: update_manifest
-          client-payload: |
-            {
-              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}",
-              "app_name": "${{ matrix.service }}",
-              "app_version": "${{ env.VERSION }}"
-            }
       
       - name: Trigger Semantic Release
         if: github.ref == 'refs/heads/main'

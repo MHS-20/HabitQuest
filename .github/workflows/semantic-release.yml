@@ -9,6 +9,8 @@ permissions:
   issues: write
   packages: write
   pull-requests: write
+  actions: write
+  security-events: write
 
 env:
   REGISTRY: ghcr.io
@@ -49,8 +51,12 @@ jobs:
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SERVICE: ${{ env.SERVICE }}
         run: |
-          OUTPUT=$(npx semantic-release 2>&1 || true)
+          echo "Running semantic-release for service: $SERVICE"
+
+          # Tag formato <service>-v<semver>
+          OUTPUT=$(npx semantic-release --tag-format "${SERVICE}-v\${version}" 2>&1 || true)
           echo "$OUTPUT"
 
           if echo "$OUTPUT" | grep -q "Created tag"; then
@@ -58,7 +64,6 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           else
             echo "version=" >> $GITHUB_OUTPUT
-          fi
 
       - name: Login to GHCR
         if: steps.semantic.outputs.version != ''
@@ -79,3 +84,16 @@ jobs:
           VERSION=${{ steps.semantic.outputs.version }}
           docker tag $IMAGE:latest $IMAGE:$VERSION
           docker push $IMAGE:$VERSION
+
+      - name: Trigger Update Manifest workflow
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: update_manifest
+          client-payload: |
+            {
+              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}",
+              "app_name": "${{ matrix.service }}",
+              "app_version": "${{ steps.semantic.outputs.version }}"
+            }
