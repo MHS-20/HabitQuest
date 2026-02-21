@@ -1,0 +1,31 @@
+name: Update Manifests
+
+on:
+  repository_dispatch:
+    types: [update_manifest]
+
+concurrency: release-${{ github.event.client_payload.app_name }}
+
+env:
+  OWNER: MHS-20
+  REGISTRY: ghcr.io
+  DEPLOY_REPO: habitquest
+
+jobs:
+  deliver:
+    name: Deliver release candidate to production
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Deliver application to production
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          repository: ${{ env.OWNER }}/${{ env.DEPLOY_REPO }}
+          event-type: app_delivery
+          client-payload: |
+            {
+              "app_image": "${{ github.event.client_payload.app_image }}",
+              "app_name": "${{ github.event.client_payload.app_name }}",
+              "app_version": "${{ github.event.client_payload.app_version }}"
+            }
