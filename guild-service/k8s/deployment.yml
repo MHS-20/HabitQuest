@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guild-service
+  labels:
+    app: guild-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guild-service
+  template:
+    metadata:
+      labels:
+        app: guild-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "9003"
+    spec:
+      containers:
+        - name: guild-service
+          image: guild-service
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "sh", "-c", "sleep 5" ]
+          ports:
+            - containerPort: 9003
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9003
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9003
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          volumeMounts:
+            - name: guild-config-volume
+              mountPath: /workspace/config
+      volumes:
+        - name: guild-config-volume
+          configMap:
+            name: guild-config

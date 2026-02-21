@@ -1,0 +1,16 @@
+spring:
+  flyway:
+    url: jdbc:postgresql://habitquest-postgres/habitquestdb_guild
+  r2dbc:
+    url: r2dbc:postgresql://habitquest-postgres/habitquestdb_guild
+  # rabbitmq:
+  #   host: guild-rabbitmq
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://habitquest-keycloak/realms/HabitQuest
+# app:
+#   rabbit:
+#     exchange: payment.exchange
+#     exchange-type: fanout

@@ -91,7 +91,9 @@ jobs:
 
   package-scan-publish:
     name: Package, Scan & Publish
-    needs: build
+    needs: 
+      - build
+      - detect-changes
     runs-on: ubuntu-22.04
     permissions:
       contents: read
