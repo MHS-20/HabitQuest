@@ -79,6 +79,7 @@ jobs:
 
       - name: Build service
         run: |
+          cd ${{ matrix.service }}
           chmod +x gradlew
           ./gradlew :services:${{ matrix.service }}:build
 
