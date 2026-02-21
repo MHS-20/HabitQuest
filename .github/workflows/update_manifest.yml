@@ -1,8 +1,8 @@
-name: Deploy
+name: Update Manifest
 
 on:
   repository_dispatch:
-    types: [app_delivery]
+    types: [update_manifest]
 
 jobs:
   update:

@@ -3,7 +3,7 @@ name: Terraform Provisioning
 on:
   workflow_dispatch:
 #  workflow_run:
-#    workflows: ['Deploy']
+#    workflows: ['Update Manifest']
 #    types: [completed]
 concurrency:
   group: deploy
