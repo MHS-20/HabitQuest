@@ -1,0 +1,76 @@
+name: Terraform Provisioning
+
+on:
+  workflow_dispatch:
+#  workflow_run:
+#    workflows: ['Deploy']
+#    types: [completed]
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::471112759337:role/github-actions-terraform-role
+          aws-region: eu-central-1
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        env:
+          TF_VAR_terraform_role_arn: "arn:aws:iam::471112759337:role/github-actions-terraform-role"
+        working-directory: ./terraform
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_terraform_role_arn: "arn:aws:iam::471112759337:role/github-actions-terraform-role"
+        run: terraform apply -auto-approve tfplan
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.28.0'
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.13.0'
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --region eu-central-1 --name "${{ env.EKS_CLUSTER_NAME }}"
+        env:
+          EKS_CLUSTER_NAME: my-eks-cluster
+
+      - name: Deploy Infrastructure Components
+        run: |
+          chmod +x deployment/kubernetes/platform/deployPlatform.sh
+          ./deployment/kubernetes/platform/deployPlatform.sh
+          chmod +x deployment/kubernetes/observability/deployObservability.sh
+          ./deployment/kubernetes/observability/deployObservability.sh
