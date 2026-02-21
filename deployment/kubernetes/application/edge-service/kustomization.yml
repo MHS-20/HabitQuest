@@ -18,8 +18,8 @@ configMapGenerator:
 
 images:
 - name: edge-service
-  newName: ghcr.io/MHS-20/edge-service
-  newTag: fb52f3f9ddc92e31a7ef9b9eed897d219cbc5ce4
+  newName: ghcr.io/mhs-20/habitquest/edge-service
+  newTag: 21f5d4d46da941ffb5cd46bc8b917665a4ef4351
 
 replicas:
 - count: 1
