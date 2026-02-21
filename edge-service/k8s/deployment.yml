@@ -29,14 +29,16 @@ spec:
           ports:
             - containerPort: 9000
           env:
-            - name: WALLET_SERVICE_URL
-              value: http://wallet-service
-            - name: SHARING_SERVICE_URL
-              value: http://sharing-service
-            - name: PAYMENT_SERVICE_URL
-              value: http://payment-service
-            - name: SPA_URL
-              value: http://habitquest-ui
+            - name: TRACKING_SERVICE_URL
+              value: http://tracking-service
+            - name: MARKETPLACE_SERVICE_URL
+              value: http://marketplace-service
+            - name: QUEST_SERVICE_URL
+              value: http://quest-service
+            - name: NOTIFICATION_SERVICE_URL  
+              value: http://notification-service
+            - name: GUILD_SERVICE_URL  
+              value: http://guild-service
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
