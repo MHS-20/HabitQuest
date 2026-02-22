@@ -1,4 +1,171 @@
-## login.feature
+## Equipment Feature
+
+```gherkin
+Feature: Equipment Management
+
+  As a player
+  I want to equip or remove weapons and armor
+  So that my avatar stats change accordingly
+
+  Scenario: Equip a weapon
+    Given an avatar with strength equal to 10
+    And a weapon that grants +3 strength
+    When the player equips the weapon
+    Then the avatar strength should become 13
+    And the weapon should be marked as equipped
+
+  Scenario: Equip an armor
+    Given an avatar with robustness equal to 12
+    And an armor that grants +5 robustness
+    When the player equips the armor
+    Then the avatar robustness should become 17
+    And the armor should be marked as equipped
+
+  Scenario: Remove equipped weapon
+    Given an avatar with a weapon equipped that grants +3 strength
+    And base strength equal to 10
+    When the player removes the weapon
+    Then the avatar strength should return to 10
+    And the weapon should no longer be equipped
+
+  Scenario: Cannot equip two weapons in the same slot
+    Given an avatar with a weapon equipped in the main hand slot
+    When the player tries to equip another weapon in the same slot
+    Then the operation should be rejected
+    And the original weapon should remain equipped
+```
+
+## Invetory Feature
+
+```gherkin
+Feature: Use Consumable Items from Inventory
+
+  As a player
+  I want to use consumable items from my inventory
+  So that I can restore health or mana during gameplay
+
+  Scenario: Use health potion successfully
+    Given an avatar with current health 40
+    And maximum health 100
+    And a health potion that restores 30 health points
+    And the avatar has 1 health potion in inventory
+    When the player uses the health potion
+    Then the avatar current health should become 70
+    And the health potion quantity should decrease by 1
+
+  Scenario: Health cannot exceed maximum value
+    Given an avatar with current health 90
+    And maximum health 100
+    And a health potion that restores 30 health points
+    And the avatar has 1 health potion in inventory
+    When the player uses the health potion
+    Then the avatar current health should become 100
+    And the health potion quantity should decrease by 1
+
+  Scenario: Use mana potion successfully
+    Given an avatar with current mana 20
+    And maximum mana 80
+    And a mana potion that restores 40 mana points
+    And the avatar has 2 mana potions in inventory
+    When the player uses a mana potion
+    Then the avatar current mana should become 60
+    And the mana potion quantity should decrease by 1
+
+  Scenario: Cannot use potion if none available
+    Given an avatar with 0 health potions in inventory
+    When the player tries to use a health potion
+    Then the operation should be rejected
+    And the avatar health should remain unchanged
+
+  Scenario: Cannot use potion if avatar is already at maximum health
+    Given an avatar with current health 100
+    And maximum health 100
+    And the avatar has 1 health potion in inventory
+    When the player tries to use the health potion
+    Then the operation should be rejected
+    And the potion quantity should remain unchanged
+
+  Scenario: Using potion removes item if quantity reaches zero
+    Given an avatar with 1 mana potion in inventory
+    And current mana 10
+    And maximum mana 100
+    And the mana potion restores 50 mana points
+    When the player uses the mana potion
+    Then the avatar current mana should become 60
+    And the mana potion should no longer exist in inventory
+```
+
+## Levelup Feature
+
+```gherkin
+Feature: Experience and Level Management
+
+  As a player
+  I want my avatar to gain experience and level up
+  So that I can increase my stats and unlock skill points
+
+  Scenario: Avatar gains experience without leveling up
+    Given an avatar with 80 XP and level 1
+    And the level up threshold is 100 XP
+    When the avatar receives 10 XP
+    Then the avatar total XP should be 90
+    And the avatar level should remain 1
+    And no skill point should be awarded
+
+  Scenario: Avatar levels up when reaching threshold
+    Given an avatar with 90 XP and level 1
+    And the level up threshold is 100 XP
+    When the avatar receives 20 XP
+    Then the avatar level should become 2
+    And the avatar should receive 1 skill point
+    And the avatar stats should increase according to level up rules
+
+  Scenario: Avatar levels up multiple times if enough XP is gained
+    Given an avatar with 90 XP and level 1
+    And the next two level thresholds are 100 XP and 200 XP
+    When the avatar receives 150 XP
+    Then the avatar level should become 3
+    And the avatar should receive 2 skill points
+```
+
+## Skillpoint Feature
+
+```gherkin
+Feature: Skill Point Allocation
+
+  As a player
+  I want to spend skill points to increase my avatar stats
+  So that I can specialize my character
+
+  Scenario: Spend skill point to increase strength
+    Given an avatar with 1 available skill point
+    And strength equal to 10
+    When the player allocates 1 point to strength
+    Then strength should become 11
+    And available skill points should become 0
+
+  Scenario: Spend skill point to increase intelligence
+    Given an avatar with 2 available skill points
+    And intelligence equal to 8
+    When the player allocates 1 point to intelligence
+    Then intelligence should become 9
+    And available skill points should become 1
+
+  Scenario: Spend skill point to increase robustness
+    Given an avatar with 1 available skill point
+    And robustness equal to 12
+    When the player allocates 1 point to robustness
+    Then robustness should become 13
+    And available skill points should become 0
+
+  Scenario: Cannot allocate skill point if none are available
+    Given an avatar with 0 available skill points
+    When the player tries to allocate 1 point to strength
+    Then the operation should be rejected
+    And strength should remain unchanged
+```
+
+## Login Feature
 
 ```gherkin
 Feature: User registration and authentication
@@ -18,9 +185,10 @@ Feature: User registration and authentication
     Given a registered user
     When the user provides an incorrect password
     Then the system denies authentication
+
 ```
 
-## combat.feature
+## Combat Feature
 
 ```gherkin
 Feature: Guild boss fight
@@ -47,9 +215,10 @@ Feature: Guild boss fight
     When the system verifies the state
     Then it publishes a BossDefeated event
     And distributes rewards to guild members
+
 ```
 
-## guild.feature
+## Guild Feature
 
 ```gherkin
 Feature: Guild management
@@ -69,9 +238,10 @@ Feature: Guild management
     Given a guild leader
     When the leader promotes a member to Officer
     Then the system updates the member's role
+
 ```
 
-## messaging.feature
+## Messaging Feature
 
 ```gherkin
 Feature: Guild chat system
@@ -86,9 +256,10 @@ Feature: Guild chat system
     Given a user who is not a guild member
     When the user attempts to access the guild chat
     Then the system denies access
+
 ```
 
-## shop.feature
+## Shop Feature
 
 ```gherkin
 Feature: Marketplace management
@@ -116,9 +287,10 @@ Feature: Marketplace management
     Then the system removes the item from the inventory
     And the system credits the user with the corresponding in-game currency
     And publishes an ItemSold event
+
 ```
 
-## quest.feature
+## Quest Feature
 
 ```gherkin
 Feature: Quest management
@@ -138,9 +310,10 @@ Feature: Quest management
     When the quest duration ends
     Then the system distributes the rewards
     And publishes a QuestCompleted event
+
 ```
 
-## gamification.feature
+## Gamification Feature
 
 ```gherkin
 Feature: Character progression system
@@ -162,9 +335,10 @@ Feature: Character progression system
     When the system applies the penalty
     Then the character's HP decreases
     And HP does not go below zero
+
 ```
 
-## habit.feature
+## Habit Feature
 
 ```gherkin
 Feature: Habit management
@@ -186,5 +360,6 @@ Feature: Habit management
     When the system performs the scheduled check
     Then it records the habit as missed
     And publishes a HabitMissed event
+
 ```
 
