@@ -1,4 +1,4 @@
-Feature: Shop management
+Feature: Marketplace management
 
   Scenario: View item catalog
     Given an authenticated user
@@ -15,3 +15,11 @@ Feature: Shop management
     Given a user with insufficient currency
     When the user attempts to purchase an item
     Then the system rejects the purchase
+
+  Scenario: Sell an item successfully
+    Given an authenticated user
+    And the user has an item in their inventory
+    When the user selects the item and chooses to sell it
+    Then the system removes the item from the inventory
+    And the system credits the user with the corresponding in-game currency
+    And publishes an ItemSold event
