@@ -4,8 +4,8 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 	id("checkstyle")
 	id("pmd")
-	id("com.github.spotbugs") version "5.2.3"
-	id("com.diffplug.spotless") version "6.25.0"
+	id("com.github.spotbugs") version "6.4.8"
+	id("com.diffplug.spotless") version "8.2.1"
 }
 
 group = "habitquest"
@@ -22,12 +22,9 @@ repositories {
 	mavenCentral()
 }
 
-extra["otelVersion"] = "2.21.0"
-extra["springCloudVersion"] = "2025.0.0"
-extra["testcontainersVersion"] = "1.19.8"
-
-val otelVersion: String by project
-val springCloudVersion: String by project
+val otelVersion = "2.23.0"
+val springCloudVersion = "2025.0.0"
+val testcontainersVersion = "2.0.3"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -54,16 +51,16 @@ dependencyManagement {
 }
 
 checkstyle {
-    toolVersion = "10.15.0"
+    toolVersion = "13.2.0"
     configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
 }
 
 pmd {
-    toolVersion = "7.16.0"
+    toolVersion = "7.21.0"
 }
 
 spotbugs {
-    toolVersion = "4.8.3"
+    toolVersion = "4.9.7"
 }
 
 spotless {

@@ -1,11 +1,11 @@
 plugins {
 	java
-	id("org.springframework.boot") version "4.0.3"
-	id("io.spring.dependency-management") version "1.1.7"
-	id("checkstyle")
-	id("pmd")
-	id("com.github.spotbugs") version "5.2.3"
-	id("com.diffplug.spotless") version "6.25.0"
+    id("org.springframework.boot") version "4.0.3"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("checkstyle")
+    id("pmd")
+    id("com.github.spotbugs") version "6.4.8"
+    id("com.diffplug.spotless") version "8.2.1"
 }
 
 group = "habitquest"
@@ -22,18 +22,15 @@ repositories {
 	mavenCentral()
 }
 
-extra["springCloudVersion"] = "2025.0.0"
-extra["testcontainersVersion"] = "1.19.8"
-extra["otelVersion"] = "2.21.0"
-
-val springCloudVersion: String by project
-val testcontainersVersion: String by project
-val otelVersion: String by project
+val otelVersion = "2.23.0"
+val springCloudVersion = "2025.0.0"
+val testcontainersVersion = "2.0.3"
 
 dependencies {
 	// Spring Boot
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
 	// Spring Cloud
@@ -53,27 +50,27 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("io.projectreactor:reactor-test")
-	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-reactive-test")
 }
 
 dependencyManagement {
 	imports {
-		mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
 		mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
 	}
 }
 
 checkstyle {
-    toolVersion = "10.15.0"
+    toolVersion = "13.2.0"
     configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
 }
 
 pmd {
-    toolVersion = "7.16.0"
+    toolVersion = "7.21.0"
 }
 
 spotbugs {
-    toolVersion = "4.8.3"
+    toolVersion = "4.9.7"
 }
 
 spotless {

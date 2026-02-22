@@ -1,0 +1,22 @@
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - SaveSession
+      routes: []
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: test
+            client-secret: test
+            scope: openid
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost/login/oauth2/code/keycloak
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/test
+            authorization-uri: http://localhost:8080/realms/test/protocol/openid-connect/auth
+            token-uri: http://localhost:8080/realms/test/protocol/openid-connect/token
+            jwk-set-uri: http://localhost:8080/realms/test/protocol/openid-connect/certs

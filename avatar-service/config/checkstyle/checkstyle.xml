@@ -15,7 +15,7 @@
     <module name="NewlineAtEndOfFile"/>
 
     <module name="LineLength">
-        <property name="max" value="150"/>
+        <property name="max" value="100"/>
         <property name="ignorePattern"
                   value="^package.*|^import.*|a href|http://|https://|ftp://"/>
     </module>

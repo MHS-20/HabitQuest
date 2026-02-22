@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    function:
+      definition: ""
+    stream:
+      bindings: {}
+  rabbitmq:
+    host: localhost
+    port: 5672
