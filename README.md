@@ -4,7 +4,7 @@
 HabitQuest is a gamified habit tracker with RPG mechanics. Users can create habits, earn XP, level up, join guilds, do quests, and fight bosses.
 
 <p align="center">
-<img src="docs/Logo.png" alt="Logo" width="300"/>
+<img src="Logo.png" alt="Logo" width="300"/>
 </p>
 
 ## Features
