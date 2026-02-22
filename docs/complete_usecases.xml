@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Claude" version="21.0.0">
+  <diagram name="Use Case Diagram" id="usecase-main">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="3000" pageHeight="4200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== ACTORS ==================== -->
+
+        <!-- User Actor -->
+        <mxCell id="actor_user" value="User" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1800" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Guest Actor -->
+        <mxCell id="actor_guest" value="Guest" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Guild Leader Actor -->
+        <mxCell id="actor_leader" value="Guild Leader" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="2700" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Guild Member Actor -->
+        <mxCell id="actor_member" value="Guild Member" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="3000" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Scheduler System Actor -->
+        <mxCell id="actor_scheduler" value="Scheduler&#xa;System" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2880" y="1000" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Notification System Actor -->
+        <mxCell id="actor_notif_sys" value="Notification&#xa;System" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2880" y="1200" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- OAuth Provider Actor -->
+        <mxCell id="actor_oauth" value="OAuth&#xa;Provider" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2880" y="80" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Gamification Engine Actor -->
+        <mxCell id="actor_game_engine" value="Gamification&#xa;Engine" style="shape=mxgraph.uml.actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2880" y="600" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== IDENTITY & ACCESS ==================== -->
+        <mxCell id="sys_identity" value="Identity &amp; Access Service" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;strokeColor=#005073;fillColor=#E6F3FF;" vertex="1" parent="1">
+          <mxGeometry x="200" y="40" width="380" height="360" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_register_email" value="Register via Email/Password" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="80" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_register_oauth" value="Register via OAuth" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="145" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_authenticate" value="Authenticate via Token" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="210" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_manage_profile" value="Manage User Profile" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="275" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_stats_char" value="View Character Statistics" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="340" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Identity border -->
+        <mxCell id="border_identity" value="Identity &amp; Access Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#005073;fillColor=none;dashed=0;swimlaneLine=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="40" width="380" height="370" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== HABIT MANAGEMENT ==================== -->
+        <mxCell id="border_habit" value="Habit Management Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#006600;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="440" width="380" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_create_habit" value="Create Habit" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="480" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_define_frequency" value="Define Habit Frequency" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="545" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_add_tags" value="Associate Tags to Habit" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="610" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_configure_penalty" value="Configure Penalties" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="675" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_edit_habit" value="Edit Habit" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="740" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_delete_habit" value="Delete Habit" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="805" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_complete_habit" value="Mark Habit as Completed" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="870" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== GAMIFICATION ==================== -->
+        <mxCell id="border_gamification" value="Gamification Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#993300;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="970" width="380" height="620" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_detect_noncompletion" value="Detect Habit Non-Completion" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1010" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_emit_domain_event" value="Emit Domain Event" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1075" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_award_xp" value="Award Experience Points (XP)" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1140" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_calculate_xp" value="Calculate XP by Difficulty" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1205" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_level_up" value="Handle Level Progression" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1270" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_increase_stats" value="Increase Character Statistics" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1335" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_reduce_hp" value="Reduce HP on Missed Habit" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1400" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_maintain_char_state" value="Maintain Character State" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1465" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_prevent_stat_below_zero" value="Prevent HP/Mana Below Zero" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1530" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== NOTIFICATION ==================== -->
+        <mxCell id="border_notification" value="Notification Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#660066;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1620" width="380" height="380" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_create_reminder" value="Create Reminder" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1660" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_configure_reminder" value="Configure Reminder Time/Frequency" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1725" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_edit_reminder" value="Edit/Delete Reminder" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1790" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_send_notification" value="Send Push/Email Notification" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1855" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_schedule_reminder" value="Execute Scheduled Reminders" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1920" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== SHOP & INVENTORY ==================== -->
+        <mxCell id="border_shop" value="Shop &amp; Inventory Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#CC6600;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="2030" width="380" height="510" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_view_catalog" value="View Item Catalog" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2070" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_purchase_item" value="Purchase Item" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2135" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_sell_item" value="Sell Item" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2200" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_inventory" value="View Inventory" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2265" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_equip_item" value="Equip/Remove Item" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2330" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_consume_item" value="Consume Item" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2395" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_apply_equipment_bonus" value="Apply Equipment Stat Bonus" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2460" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== GUILD ==================== -->
+        <mxCell id="border_guild" value="Guild Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#003399;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="2570" width="380" height="370" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_create_guild" value="Create Guild" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2610" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_request_join" value="Request to Join Guild" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2675" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_invite_member" value="Invite User to Guild" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2740" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_manage_members" value="Manage Members (Promote/Remove)" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2805" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_assign_roles" value="Assign Guild Roles" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="2870" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== MESSAGING ==================== -->
+        <mxCell id="border_messaging" value="Messaging Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#336633;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="2970" width="380" height="370" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_send_message" value="Send Guild Chat Message" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3010" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_realtime_updates" value="Receive Real-Time Updates" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3075" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_history" value="View Message History" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3140" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_restrict_chat" value="Restrict Chat to Guild Members" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3205" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_notify_new_message" value="Notify New Messages" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3270" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== QUEST ==================== -->
+        <mxCell id="border_quest" value="Quest Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#996600;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="3370" width="380" height="440" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_create_public_quest" value="Create Public Quest" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3410" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_join_quest" value="Join Public Quest" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3475" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_replicate_habits" value="Replicate Quest Habits to Plan" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3540" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_track_quest_progress" value="Track Individual Quest Progress" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3605" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_assign_quest_rewards" value="Assign Quest Rewards" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3670" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_create_guild_quest" value="Create Private Guild Quest" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3735" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_prevent_expired_join" value="Prevent Joining Expired Quests" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3800" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== COMBAT ==================== -->
+        <mxCell id="border_combat" value="Combat Service" style="swimlane;startSize=30;fontStyle=1;fontSize=14;strokeColor=#990000;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="3840" width="380" height="510" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc_initiate_boss" value="Initiate Boss Fight" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3880" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_perform_attack" value="Perform Attack" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="3945" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_use_spell" value="Use Spell" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="4010" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_calculate_damage" value="Calculate Damage" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="4075" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_update_boss_state" value="Update Boss State in Real Time" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="4140" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_distribute_combat_rewards" value="Distribute Combat Rewards" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="4205" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_apply_defeat_penalty" value="Apply Defeat Penalties" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="4270" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_handle_concurrency" value="Handle Concurrent Combat Actions" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="4335" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: Guest -> Identity ==================== -->
+        <mxCell id="e_guest_register_email" style="endArrow=none;" edge="1" source="actor_guest" target="uc_register_email" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_guest_register_oauth" style="endArrow=none;" edge="1" source="actor_guest" target="uc_register_oauth" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_guest_authenticate" style="endArrow=none;" edge="1" source="actor_guest" target="uc_authenticate" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- User -> Identity -->
+        <mxCell id="e_user_manage_profile" style="endArrow=none;" edge="1" source="actor_user" target="uc_manage_profile" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_view_stats_char" style="endArrow=none;" edge="1" source="actor_user" target="uc_view_stats_char" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- OAuth Provider -> register_oauth -->
+        <mxCell id="e_oauth_register" style="endArrow=none;" edge="1" source="actor_oauth" target="uc_register_oauth" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: User -> Habit ==================== -->
+        <mxCell id="e_user_create_habit" style="endArrow=none;" edge="1" source="actor_user" target="uc_create_habit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_edit_habit" style="endArrow=none;" edge="1" source="actor_user" target="uc_edit_habit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_delete_habit" style="endArrow=none;" edge="1" source="actor_user" target="uc_delete_habit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_complete_habit" style="endArrow=none;" edge="1" source="actor_user" target="uc_complete_habit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: Gamification Engine -> Gamification ==================== -->
+        <mxCell id="e_engine_detect" style="endArrow=none;" edge="1" source="actor_game_engine" target="uc_detect_noncompletion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_engine_maintain" style="endArrow=none;" edge="1" source="actor_game_engine" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: User -> Notification ==================== -->
+        <mxCell id="e_user_create_reminder" style="endArrow=none;" edge="1" source="actor_user" target="uc_create_reminder" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_edit_reminder" style="endArrow=none;" edge="1" source="actor_user" target="uc_edit_reminder" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Scheduler -> Notification -->
+        <mxCell id="e_scheduler_execute" style="endArrow=none;" edge="1" source="actor_scheduler" target="uc_schedule_reminder" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Notification System -> send_notification -->
+        <mxCell id="e_notif_sys_send" style="endArrow=none;" edge="1" source="actor_notif_sys" target="uc_send_notification" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: User -> Shop ==================== -->
+        <mxCell id="e_user_view_catalog" style="endArrow=none;" edge="1" source="actor_user" target="uc_view_catalog" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_purchase" style="endArrow=none;" edge="1" source="actor_user" target="uc_purchase_item" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_sell" style="endArrow=none;" edge="1" source="actor_user" target="uc_sell_item" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_view_inventory" style="endArrow=none;" edge="1" source="actor_user" target="uc_view_inventory" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_equip" style="endArrow=none;" edge="1" source="actor_user" target="uc_equip_item" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_consume" style="endArrow=none;" edge="1" source="actor_user" target="uc_consume_item" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: User/Leader -> Guild ==================== -->
+        <mxCell id="e_user_create_guild" style="endArrow=none;" edge="1" source="actor_user" target="uc_create_guild" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_request_join" style="endArrow=none;" edge="1" source="actor_user" target="uc_request_join" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_leader_invite" style="endArrow=none;" edge="1" source="actor_leader" target="uc_invite_member" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_leader_manage" style="endArrow=none;" edge="1" source="actor_leader" target="uc_manage_members" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: Guild Member -> Messaging ==================== -->
+        <mxCell id="e_member_send_msg" style="endArrow=none;" edge="1" source="actor_member" target="uc_send_message" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_member_view_history" style="endArrow=none;" edge="1" source="actor_member" target="uc_view_history" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: User -> Quest ==================== -->
+        <mxCell id="e_user_create_quest" style="endArrow=none;" edge="1" source="actor_user" target="uc_create_public_quest" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_join_quest" style="endArrow=none;" edge="1" source="actor_user" target="uc_join_quest" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_leader_create_guild_quest" style="endArrow=none;" edge="1" source="actor_leader" target="uc_create_guild_quest" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ASSOCIATIONS: Guild Member/Leader -> Combat ==================== -->
+        <mxCell id="e_leader_initiate_boss" style="endArrow=none;" edge="1" source="actor_leader" target="uc_initiate_boss" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_member_attack" style="endArrow=none;" edge="1" source="actor_member" target="uc_perform_attack" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_member_spell" style="endArrow=none;" edge="1" source="actor_member" target="uc_use_spell" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== INCLUDE / EXTEND RELATIONS ==================== -->
+
+        <!-- create_habit <<include>> define_frequency -->
+        <mxCell id="inc_habit_freq" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_create_habit" target="uc_define_frequency" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- create_habit <<extend>> add_tags -->
+        <mxCell id="ext_habit_tags" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_add_tags" target="uc_create_habit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- create_habit <<extend>> configure_penalty -->
+        <mxCell id="ext_habit_penalty" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_configure_penalty" target="uc_create_habit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- complete_habit <<include>> emit_domain_event -->
+        <mxCell id="inc_complete_event" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_complete_habit" target="uc_emit_domain_event" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- detect_noncompletion <<include>> emit_domain_event -->
+        <mxCell id="inc_detect_event" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_detect_noncompletion" target="uc_emit_domain_event" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- emit_domain_event <<include>> award_xp (on completion) -->
+        <mxCell id="inc_event_xp" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_award_xp" target="uc_emit_domain_event" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- emit_domain_event <<extend>> reduce_hp (on non-completion) -->
+        <mxCell id="ext_event_hp" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_reduce_hp" target="uc_detect_noncompletion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- award_xp <<include>> calculate_xp -->
+        <mxCell id="inc_xp_calc" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_award_xp" target="uc_calculate_xp" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- award_xp <<extend>> level_up -->
+        <mxCell id="ext_xp_levelup" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_level_up" target="uc_award_xp" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- level_up <<include>> increase_stats -->
+        <mxCell id="inc_level_stats" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_level_up" target="uc_increase_stats" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- level_up / increase_stats <<include>> maintain_char_state -->
+        <mxCell id="inc_stats_state" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_increase_stats" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- reduce_hp <<include>> maintain_char_state -->
+        <mxCell id="inc_hp_state" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_reduce_hp" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- reduce_hp <<include>> prevent_below_zero -->
+        <mxCell id="inc_hp_zero" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_reduce_hp" target="uc_prevent_stat_below_zero" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- create_reminder <<include>> configure_reminder -->
+        <mxCell id="inc_reminder_config" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_create_reminder" target="uc_configure_reminder" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- schedule_reminder <<include>> send_notification -->
+        <mxCell id="inc_schedule_send" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_schedule_reminder" target="uc_send_notification" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- equip_item <<include>> apply_equipment_bonus -->
+        <mxCell id="inc_equip_bonus" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_equip_item" target="uc_apply_equipment_bonus" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- apply_equipment_bonus <<include>> maintain_char_state -->
+        <mxCell id="inc_bonus_state" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_apply_equipment_bonus" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- consume_item <<extend>> maintain_char_state (restore HP/mana) -->
+        <mxCell id="ext_consume_state" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_consume_item" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- manage_members <<include>> assign_roles -->
+        <mxCell id="inc_manage_roles" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_manage_members" target="uc_assign_roles" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- send_message <<include>> restrict_chat -->
+        <mxCell id="inc_send_restrict" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_send_message" target="uc_restrict_chat" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- send_message <<include>> realtime_updates -->
+        <mxCell id="inc_send_realtime" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_send_message" target="uc_realtime_updates" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- send_message <<extend>> notify_new_message -->
+        <mxCell id="ext_send_notify" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_notify_new_message" target="uc_send_message" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- join_quest <<include>> replicate_habits -->
+        <mxCell id="inc_join_replicate" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_join_quest" target="uc_replicate_habits" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- join_quest <<include>> prevent_expired_join -->
+        <mxCell id="inc_join_expired" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_join_quest" target="uc_prevent_expired_join" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- track_quest_progress <<extend>> assign_quest_rewards -->
+        <mxCell id="ext_progress_reward" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_assign_quest_rewards" target="uc_track_quest_progress" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- replicate_habits <<include>> track_quest_progress -->
+        <mxCell id="inc_replicate_track" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_replicate_habits" target="uc_track_quest_progress" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- perform_attack <<include>> calculate_damage -->
+        <mxCell id="inc_attack_damage" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_perform_attack" target="uc_calculate_damage" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- use_spell <<include>> calculate_damage -->
+        <mxCell id="inc_spell_damage" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_use_spell" target="uc_calculate_damage" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- use_spell <<include>> prevent_stat_below_zero (mana check) -->
+        <mxCell id="inc_spell_mana" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_use_spell" target="uc_prevent_stat_below_zero" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- perform_attack <<include>> prevent_stat_below_zero (HP check) -->
+        <mxCell id="inc_attack_hp" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_perform_attack" target="uc_prevent_stat_below_zero" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- calculate_damage <<include>> update_boss_state -->
+        <mxCell id="inc_damage_boss" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_calculate_damage" target="uc_update_boss_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- update_boss_state <<include>> handle_concurrency -->
+        <mxCell id="inc_boss_concurrency" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_update_boss_state" target="uc_handle_concurrency" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- update_boss_state <<extend>> distribute_combat_rewards (on victory) -->
+        <mxCell id="ext_boss_rewards" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_distribute_combat_rewards" target="uc_update_boss_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- update_boss_state <<extend>> apply_defeat_penalty (on defeat) -->
+        <mxCell id="ext_boss_penalty" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_apply_defeat_penalty" target="uc_update_boss_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- distribute_combat_rewards <<include>> maintain_char_state -->
+        <mxCell id="inc_combat_rewards_state" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_distribute_combat_rewards" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- assign_quest_rewards <<include>> maintain_char_state -->
+        <mxCell id="inc_quest_rewards_state" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" source="uc_assign_quest_rewards" target="uc_maintain_char_state" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
