@@ -17,8 +17,8 @@ configMapGenerator:
 
 images:
 - name: marketplace-service
-  newName: ghcr.io/MHS-20/marketplace-service
-  newTag: bcd0c657d38d3bacef97b50b922216af01b0cbe7
+  newName: ghcr.io/ghcr.io/mhs-20/habitquest/marketplace-service/marketplace-service
+  newTag: marketplace-v1.0.1
 
 replicas:
 - count: 1
