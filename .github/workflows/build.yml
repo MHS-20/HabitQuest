@@ -53,6 +53,8 @@ jobs:
               - 'edge-service/**'
             quest-service:
               - 'quest-service/**'
+            avatar-service:
+              - 'avatar-service/**'
 
   build:
     name: Build & Test Changed Services
