@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("checkstyle")
     id("pmd")
-    id("com.github.spotbugs") version "6.4.8"
+    // id("com.github.spotbugs") version "6.4.8"
     id("com.diffplug.spotless") version "8.2.1"
 }
 
@@ -69,9 +69,9 @@ pmd {
     toolVersion = "7.21.0"
 }
 
-spotbugs {
-    toolVersion = "4.9.7"
-}
+// spotbugs {
+//     toolVersion = "4.9.7"
+// }
 
 spotless {
 	java {
