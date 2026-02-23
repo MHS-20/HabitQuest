@@ -107,6 +107,15 @@ subprojects {
     }
 }
 
+tasks.register("checkAll") {
+    dependsOn(subprojects.map { "${it.path}:checkstyleMain" })
+    dependsOn(subprojects.map { "${it.path}:pmdMain" })
+    // dependsOn(subprojects.map { "${it.path}:spotlessApply" })
+    // dependsOn(subprojects.map { "${it.path}:spotbugsMain" })
+    dependsOn(subprojects.map { "${it.path}:test" })
+
+}
+
 /**
  * Spring Boot solo ai moduli applicativi
  */
