@@ -16,7 +16,13 @@ plugins {
 
 gitHooks {
     preCommit {
-        tasks("build")
+        tasks(
+            // "spotlessApply",
+            // "spotbugsMain",
+            "pmdMain",
+            "checkstyleMain",
+            "test"
+        )
     }
     createHooks()
 }

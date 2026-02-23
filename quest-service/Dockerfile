@@ -4,7 +4,7 @@ ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} quest-service.jar
 RUN java -Djarmode=layertools -jar quest-service.jar extract
 
-FROM eclipse-temurin:21
+FROM eclipse-temurin:21-jre
 WORKDIR /workspace
 COPY --from=builder /workspace/dependencies/ ./
 COPY --from=builder /workspace/spring-boot-loader/ ./
