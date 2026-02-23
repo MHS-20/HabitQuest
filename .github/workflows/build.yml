@@ -80,9 +80,9 @@ jobs:
 
       - name: Build service
         run: |
-          cd ${{ matrix.service }}
+          # cd ${{ matrix.service }}
           chmod +x gradlew
-          ./gradlew build:${{ matrix.service }}
+          ./gradlew ${{ matrix.service }}:build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
