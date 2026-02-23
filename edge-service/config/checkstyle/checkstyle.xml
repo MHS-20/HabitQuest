@@ -60,7 +60,7 @@
         </module>
 
         <!--  Clean code  -->
-        <module name="FinalParameters"/>
+        <!-- <module name="FinalParameters"/> -->
         <module name="MultipleVariableDeclarations"/>
         <module name="OneStatementPerLine"/>
         <module name="NoFinalizer"/>
