@@ -10,6 +10,8 @@ public class Avatar implements Entity<String> {
     private Level level;
     private Health health;
     private Mana mana;
+    private PlayerStats playerStats;
+    
 
     @Override
     public String getId() {
