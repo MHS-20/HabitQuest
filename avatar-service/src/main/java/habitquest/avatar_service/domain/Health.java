@@ -2,8 +2,6 @@ package habitquest.avatar_service.domain;
 
 import common.ddd.ValueObject;
 
-import java.util.Objects;
-
 public record Health(Integer current, Integer max) implements ValueObject {
 
     public Health {
