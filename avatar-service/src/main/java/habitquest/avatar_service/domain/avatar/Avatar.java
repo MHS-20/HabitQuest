@@ -1,6 +1,9 @@
-package habitquest.avatar_service.domain;
+package habitquest.avatar_service.domain.avatar;
 
 import common.ddd.Entity;
+import habitquest.avatar_service.domain.items.EquippedItems;
+import habitquest.avatar_service.domain.items.Inventory;
+import habitquest.avatar_service.domain.stats.AvatarStats;
 
 public class Avatar implements Entity<String> {
   private final String id;
@@ -11,7 +14,7 @@ public class Avatar implements Entity<String> {
   private Level level;
   private Health health;
   private Mana mana;
-  private PlayerStats playerStats;
+  private AvatarStats avatarStats;
 
   public Avatar(String id) {
     this.id = id;

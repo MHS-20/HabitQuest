@@ -1,12 +1,12 @@
-package habitquest.avatar_service.domain;
+package habitquest.avatar_service.domain.stats;
 
 import common.ddd.Aggregate;
 
-public class PlayerStats implements Aggregate<String> {
+public class AvatarStats implements Aggregate<String> {
 
   private String id;
 
-  public PlayerStats(String id) {
+  public AvatarStats(String id) {
     this.id = id;
   }
 
