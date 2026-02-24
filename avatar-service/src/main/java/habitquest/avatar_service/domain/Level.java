@@ -1,14 +1,15 @@
 package habitquest.avatar_service.domain;
 
-import common.ddd.Entity;
+import common.ddd.ValueObject;
 
-public class Level implements Entity<String> {
-    private final Integer levelNumber;
-    private final Experience experienceRequired;
+import java.util.Objects;
 
-    public Level(Integer levelNumber, Experience experienceRequired) {
-        this.levelNumber = levelNumber;
-        this.experienceRequired = experienceRequired;
+public record Level(Integer levelNumber, Experience experienceRequired) implements ValueObject {
+    public Level {
+        Objects.requireNonNull(experienceRequired);
+        if (levelNumber < 1) {
+            throw new IllegalArgumentException("Level number must be at least 1");
+        }
     }
 
     public boolean canLevelUp(Experience currentExperience) {
@@ -17,18 +18,5 @@ public class Level implements Entity<String> {
 
     public Level levelUp(Experience nextLevelRequirement) {
         return new Level(levelNumber + 1, nextLevelRequirement);
-    }
-
-    @Override
-    public String getId() {
-        return "";
-    }
-
-    public Integer getLevelNumber() {
-        return levelNumber;
-    }
-
-    public Experience getExperienceRequired() {
-        return experienceRequired;
     }
 }

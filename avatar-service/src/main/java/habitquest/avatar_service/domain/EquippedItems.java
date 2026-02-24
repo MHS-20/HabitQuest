@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class EquippedItems implements Aggregate<String> {
+    private final String id;
     private List<Item> items;
-
     public List<Item> getItems() {
         return items;
     }
 
+    public EquippedItems(String id) {
+        this.id = id;
+    }
     public void equipItem(Item item) {
         Objects.requireNonNull(item);
         items.add(item);
@@ -26,6 +29,6 @@ public class EquippedItems implements Aggregate<String> {
 
     @Override
     public String getId() {
-        return "";
+        return this.id;
     }
 }
