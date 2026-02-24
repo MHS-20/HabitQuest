@@ -1,6 +1,6 @@
-package habitquest.avatar_service.domain;
+package habitquest.avatar_service.domain.stats;
 
-public record Defense(BaseStat stat) implements PlayerStat {
+public record Defense(BaseStat stat) implements AvatarStat {
 
   public Defense(int value) {
     this(new BaseStat(value));
@@ -12,7 +12,7 @@ public record Defense(BaseStat stat) implements PlayerStat {
   }
 
   @Override
-  public int value() {
+  public Integer value() {
     return stat.value();
   }
 }

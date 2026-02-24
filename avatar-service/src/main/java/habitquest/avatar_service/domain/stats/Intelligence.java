@@ -1,8 +1,8 @@
-package habitquest.avatar_service.domain;
+package habitquest.avatar_service.domain.stats;
 
 import java.util.Objects;
 
-public record Intelligence(BaseStat stat) implements PlayerStat {
+public record Intelligence(BaseStat stat) implements AvatarStat {
   public Intelligence {
     Objects.requireNonNull(stat);
   }
@@ -17,7 +17,7 @@ public record Intelligence(BaseStat stat) implements PlayerStat {
   }
 
   @Override
-  public int value() {
+  public Integer value() {
     return stat.value();
   }
 }
