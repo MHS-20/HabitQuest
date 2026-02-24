@@ -6,7 +6,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class Inventory implements Aggregate<String> {
+    private final String id;
     private List<Item> items;
+
+    public Inventory(String id) {
+        this.id = id;
+    }
 
     public List<Item> getItems() {
         return items;
