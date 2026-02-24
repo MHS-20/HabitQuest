@@ -1,4 +1,4 @@
-package habitquest.avatar_service.domain;
+package habitquest.avatar_service.domain.items;
 
 import common.ddd.ValueObject;
 
