@@ -3,7 +3,7 @@ package habitquest.avatar_service.domain;
 import common.ddd.ValueObject;
 
 public interface PlayerStat extends ValueObject {
-    PlayerStat increment();
+  PlayerStat increment();
 
-    int value();
+  int value();
 }
