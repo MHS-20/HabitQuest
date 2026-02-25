@@ -13,7 +13,7 @@ jobs:
   commit-lint:
     name: Run Commit Lint
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot'
+    if: github.actor != 'dependabot[bot]'
     steps:
       - run: echo "Actor is ${{ github.actor }}"
       - uses: wagoid/commitlint-github-action@v5
