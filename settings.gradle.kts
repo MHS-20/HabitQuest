@@ -1,13 +1,13 @@
 rootProject.name = "habitquest"
 
 include(
-    "tracking-service",
-    "notification-service",
-    "avatar-service",
-    "marketplace-service",
-    "quest-service",
-    "guild-service",
-    "edge-service"
+    "services:tracking-service",
+    "services:notification-service",
+    "services:avatar-service",
+    "services:marketplace-service",
+    "services:quest-service",
+    "services:guild-service",
+    "services:edge-service"
 )
 
 plugins {

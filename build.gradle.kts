@@ -99,11 +99,11 @@ subprojects {
     // }
 
     tasks.named("compileJava") {
-        //dependsOn("spotlessCheck")
+        //dependsOn("spotlessApply")
     }
 
     tasks.withType<Checkstyle>().configureEach {
-        //dependsOn("spotlessCheck")
+        //dependsOn("spotlessApply")
     }
 }
 
@@ -113,26 +113,17 @@ tasks.register("checkAll") {
     // dependsOn(subprojects.map { "${it.path}:spotlessApply" })
     // dependsOn(subprojects.map { "${it.path}:spotbugsMain" })
     dependsOn(subprojects.map { "${it.path}:test" })
-
 }
 
 /**
  * Spring Boot solo ai moduli applicativi
  */
-configure(
-    listOf(
-        project(":tracking-service"),
-        project(":edge-service"),
-        project(":notification-service"),
-        project(":avatar-service"),
-        project(":marketplace-service"),
-        project(":quest-service"),
-        project(":guild-service"),
-    )
-) {
-    apply(plugin = "org.springframework.boot")
+project(":services") {
+    subprojects {
+        apply(plugin = "org.springframework.boot")
 
-    tasks.named<Jar>("jar") {
-        enabled = false
+        tasks.named<Jar>("jar") {
+            enabled = false
+        }
     }
 }
