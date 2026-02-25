@@ -16,4 +16,9 @@ public record Armor(BaseItem baseItem, int defensePower) implements Item {
     public String description() {
         return baseItem.description();
     }
+
+    public Integer getValue() {
+        return defensePower;
+    }
+
 }

@@ -16,4 +16,8 @@ public record Weapon(BaseItem baseItem, int attackPower) implements Item {
     public String description() {
         return baseItem.description();
     }
+
+    public Integer getValue() {
+        return attackPower;
+    }
 }
