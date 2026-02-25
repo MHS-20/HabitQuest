@@ -2,7 +2,7 @@ package habitquest.avatar_service.domain.stats;
 
 public record Strength(BaseStat stat) implements AvatarStat {
 
-  public Strength(int value) {
+  public Strength(Integer value) {
     this(new BaseStat(value));
   }
 

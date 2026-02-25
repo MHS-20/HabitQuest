@@ -2,5 +2,4 @@ package habitquest.avatar_service.domain.events;
 
 import habitquest.avatar_service.domain.avatar.Mana;
 
-public record IncreasedMaxMana(Mana mana) implements AvatarEvent {
-}
+public record IncreasedMaxMana(Mana mana) implements AvatarEvent {}

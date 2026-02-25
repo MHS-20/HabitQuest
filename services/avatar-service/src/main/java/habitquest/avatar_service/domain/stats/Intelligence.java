@@ -7,7 +7,7 @@ public record Intelligence(BaseStat stat) implements AvatarStat {
     Objects.requireNonNull(stat);
   }
 
-  public Intelligence(int value) {
+  public Intelligence(Integer value) {
     this(new BaseStat(value));
   }
 

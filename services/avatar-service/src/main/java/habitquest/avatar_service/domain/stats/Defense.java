@@ -2,7 +2,7 @@ package habitquest.avatar_service.domain.stats;
 
 public record Defense(BaseStat stat) implements AvatarStat {
 
-  public Defense(int value) {
+  public Defense(Integer value) {
     this(new BaseStat(value));
   }
 
