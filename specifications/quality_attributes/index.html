@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Quality Attributes - HabitQuest Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quality Attributes";
+        var mkdocs_page_input_path = "specifications/quality_attributes.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../requirements/">Requirements</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Quality Attributes</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-edge-service">1. Edge Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-tracking-service">2. Tracking Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-avatar">3. Avatar</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-marketplace-service">4. Marketplace Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-tracking-service">5. Tracking Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-notification-service">6. Notification Service</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ubiquitous_language/">Ubiquitous Language</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../user_stories/">User Stories</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Quality Attributes</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quality-attributes-habit-tracking-rpg">Quality Attributes – Habit Tracking RPG</h1>
+<h2 id="1-edge-service">1. Edge Service</h2>
+<ul>
+<li>In caso di errore interno, deve restituire una risposta HTTP valida (4xx/5xx) entro 2 secondi.</li>
+<li>Il tempo medio di risposta per login/registrazione deve essere ≤ 500 ms.</li>
+<li>Il 95% delle richieste deve completarsi entro 1 secondo.</li>
+</ul>
+<hr />
+<h2 id="2-tracking-service">2. Tracking Service</h2>
+<ul>
+<li>Creazione o aggiornamento di un habit ≤ 500 ms nel 95% dei casi.</li>
+<li>Recupero lista habit utente ≤ 700 ms nel 95% dei casi.</li>
+<li>Dopo il completamento di un habit, lo stato aggiornato deve essere visibile entro 1 secondo.</li>
+<li>Nessuna duplicazione di habit per lo stesso utente con stesso nome.</li>
+<li>In caso di errore database, il sistema non deve perdere dati già confermati.</li>
+</ul>
+<hr />
+<h2 id="3-avatar">3. Avatar</h2>
+<ul>
+<li>Un oggetto non può avere quantità negativa.</li>
+<li>Ogni operazione di aggiunta/rimozione deve essere atomica.</li>
+<li>Recupero inventario utente ≤ 500 ms nel 95% dei casi.</li>
+<li>Aggiornamento quantità oggetto ≤ 500 ms nel 95% dei casi.</li>
+<li>Dopo una modifica, il nuovo stato dell’inventario deve essere coerente in tutte le chiamate successive.</li>
+</ul>
+<hr />
+<h2 id="4-marketplace-service">4. Marketplace Service</h2>
+<ul>
+<li>Acquisto o vendita oggetto ≤ 700 ms nel 95% dei casi.</li>
+<li>Recupero lista oggetti nel negozio ≤ 500 ms.</li>
+<li>In una vendita: valuta aumentata e oggetto rimosso devono avvenire nella stessa transazione.</li>
+<li>Se una delle due operazioni fallisce, nessuna modifica deve essere applicata.</li>
+<li>Non è possibile vendere un oggetto non presente nell’inventario.</li>
+<li>Il saldo utente non può diventare negativo dopo un acquisto.</li>
+</ul>
+<hr />
+<h2 id="5-tracking-service">5. Tracking Service</h2>
+<ul>
+<li>Calcolo ricompensa XP ≤ 500 ms.</li>
+<li>Aggiornamento livello utente ≤ 500 ms nel 95% dei casi.</li>
+<li>Nessuna doppia assegnazione di XP per lo stesso evento.</li>
+<li>Gli eventi già processati non devono essere rielaborati.</li>
+</ul>
+<hr />
+<h2 id="6-notification-service">6. Notification Service</h2>
+<ul>
+<li>Creazione notifica ≤ 300 ms.</li>
+<li>Invio notifica asincrona entro 5 secondi dalla generazione.</li>
+<li>In caso di fallimento invio, deve essere previsto almeno 1 tentativo di retry.</li>
+<li>Le notifiche fallite devono essere loggate.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../requirements/" class="btn btn-neutral float-left" title="Requirements"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../quality_attributes_scenarios/" class="btn btn-neutral float-right" title="Quality Attribute Scenarios">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../requirements/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../quality_attributes_scenarios/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
