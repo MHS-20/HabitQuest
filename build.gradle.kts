@@ -16,7 +16,7 @@ plugins {
 group = "habitquest"
 version = "0.0.1-SNAPSHOT"
 
-val otelVersion = "2.23.0"
+val otelVersion = "2.25.0"
 val springCloudVersion = "2025.0.0"
 val testcontainersVersion = "2.0.3"
 val testKeycloakVersion by extra("4.1.1")
