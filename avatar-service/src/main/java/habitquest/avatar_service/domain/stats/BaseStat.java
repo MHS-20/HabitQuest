@@ -10,4 +10,5 @@ public record BaseStat(Integer value) implements AvatarStat {
   public BaseStat increment() {
     return new BaseStat(value + 1);
   }
+
 }
