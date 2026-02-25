@@ -63,7 +63,7 @@ subprojects {
         testImplementation("org.testcontainers:testcontainers-junit-jupiter")
 
         constraints { 
-            implementation("org.springframework.cloud:spring-cloud-gateway-server:4.3.2") { 
+            implementation("org.springframework.cloud:spring-cloud-gateway-server:4.3.3") { 
                 because("fix GHSA-fwxx-wv44-7qfg / CVE-2025-41253") // not available in BOM
             } 
         }
