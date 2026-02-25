@@ -1,10 +1,8 @@
 package habitquest.avatar_service.domain.items;
 
-import java.util.Objects;
-
 public record HealthPotion(BaseItem baseItem, Integer healingPower) implements Item {
-  public HealthPotion {
-    Objects.requireNonNull(baseItem);
+  public HealthPotion(String name, String description, Integer healingPower) {
+    this(new BaseItem(name, description), healingPower);
     if (healingPower < 0) {
       throw new IllegalArgumentException("Healing power cannot be negative");
     }

@@ -1,10 +1,8 @@
 package habitquest.avatar_service.domain.items;
 
-import java.util.Objects;
-
 public record Weapon(BaseItem baseItem, Integer attackPower) implements Item {
-  public Weapon {
-    Objects.requireNonNull(baseItem);
+  public Weapon(String name, String description, Integer attackPower) {
+    this(new BaseItem(name, description), attackPower);
     if (attackPower < 0) {
       throw new IllegalArgumentException("Attack power cannot be negative");
     }
