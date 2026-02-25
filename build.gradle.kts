@@ -28,7 +28,6 @@ allprojects {
 }
 
 subprojects {
-
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
     // apply(plugin = "com.diffplug.spotless")
@@ -115,13 +114,15 @@ tasks.register("checkAll") {
     dependsOn(subprojects.map { "${it.path}:test" })
 }
 
-/**
- * Spring Boot solo ai moduli applicativi
- */
+project(":services") {
+    tasks.withType<Jar> {
+        enabled = false
+    }
+}
+
 project(":services") {
     subprojects {
         apply(plugin = "org.springframework.boot")
-
         tasks.named<Jar>("jar") {
             enabled = false
         }

@@ -1,13 +1,13 @@
-name: Build and Package
+name: Build and Package Multiplatform UI
 
 on:
   push:
     paths:
-      - 'habitquest-ui/**'
+      - 'services/habitquest-ui/**'
       - '.github/workflows/build_ui.yml'
   pull_request:
     paths:
-      - 'habitquest-ui/**'
+      - 'services/habitquest-ui/**'
       - '.github/workflows/build_ui.yml'
 
 jobs:
@@ -77,24 +77,24 @@ jobs:
             node-${{ runner.os }}-modules-
 
       - name: Grant execute permission for Gradle wrapper
-        run: chmod +x ./habitquest-ui/gradlew
+        run: chmod +x ./services/habitquest-ui/gradlew
 
       - name: Run Gradle build (KMP targets)
         # Exclude Android release assemble to avoid requiring Android SDK on Linux runners.
         run: |
-          cd habitquest-ui && ./gradlew --no-daemon clean build -x :composeApp:assembleRelease
+          cd services/habitquest-ui && ./gradlew --no-daemon clean build -x :composeApp:assembleRelease
 
       - name: Build Kotlin/JS production bundle
         run: |
-          cd habitquest-ui && ./gradlew --no-daemon :composeApp:jsBrowserProductionWebpack || true
+          cd services/habitquest-ui && ./gradlew --no-daemon :composeApp:jsBrowserProductionWebpack || true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
-            habitquest-ui/build/**
-            habitquest-ui/composeApp/build/**
+            services/habitquest-ui/build/**
+            services/habitquest-ui/composeApp/build/**
 
   lint-reports:
     name: Upload Lint & Reports (if any)
@@ -108,10 +108,11 @@ jobs:
         with:
           name: build-artifacts
           path: build_outputs/
+
       - name: Upload lint reports
         uses: actions/upload-artifact@v4
         with:
           name: lint-reports
           path: |
-            habitquest-ui/build/reports/**
-            habitquest-ui/composeApp/build/reports/**
+            services/habitquest-ui/build/reports/**
+            services/habitquest-ui/composeApp/build/reports/**

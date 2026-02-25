@@ -54,7 +54,7 @@ jobs:
           SERVICE: ${{ env.SERVICE }}
         run: |
           # Run semantic-release, capture output, don't fail if no release
-          cd $SERVICE
+          cd services/$SERVICE
           OUTPUT=$(npx semantic-release 2>&1 || true)
           echo "$OUTPUT"
           
