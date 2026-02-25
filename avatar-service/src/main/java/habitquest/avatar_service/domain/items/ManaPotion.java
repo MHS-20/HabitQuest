@@ -16,4 +16,8 @@ public record ManaPotion(BaseItem baseItem, int restoringPower) implements Item 
     public String description() {
         return baseItem.description();
     }
+
+    public Integer getValue() {
+        return restoringPower;
+    }
 }
