@@ -16,4 +16,8 @@ public record HealthPotion(BaseItem baseItem, int healingPower) implements Item 
     public String description() {
         return baseItem.description();
     }
+
+    public Integer getValue() {
+        return healingPower;
+    }
 }
