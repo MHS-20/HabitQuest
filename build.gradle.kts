@@ -6,7 +6,7 @@ import org.gradle.jvm.tasks.Jar
 plugins {
     id("org.springframework.boot") version "4.0.3" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
-    // id("com.diffplug.spotless") version "8.2.1" apply false
+    id("com.diffplug.spotless") version "8.2.1" apply false
     // id("com.github.spotbugs") version "6.4.8" apply false
     id("checkstyle")
     id("pmd")
@@ -30,7 +30,7 @@ allprojects {
 subprojects {
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
-    // apply(plugin = "com.diffplug.spotless")
+    apply(plugin = "com.diffplug.spotless")
     // apply(plugin = "com.github.spotbugs")
     apply(plugin = "checkstyle")
     apply(plugin = "pmd")
@@ -86,30 +86,30 @@ subprojects {
     //     toolVersion = "4.9.7"
     // }
 
-    // configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-    //     java {
-    //         target("src/**/*.java")
-    //         targetExclude("**/build/**", "**/generated/**")
-    //         googleJavaFormat()
-    //         removeUnusedImports()
-    //         trimTrailingWhitespace()
-    //         endWithNewline()
-    //     }
-    // }
+     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+         java {
+             target("src/**/*.java")
+             targetExclude("**/build/**", "**/generated/**")
+             googleJavaFormat()
+             removeUnusedImports()
+             trimTrailingWhitespace()
+             endWithNewline()
+         }
+     }
 
     tasks.named("compileJava") {
-        //dependsOn("spotlessApply")
+        dependsOn("spotlessApply")
     }
 
     tasks.withType<Checkstyle>().configureEach {
-        //dependsOn("spotlessApply")
+        dependsOn("spotlessApply")
     }
 }
 
 tasks.register("checkAll") {
     dependsOn(subprojects.map { "${it.path}:checkstyleMain" })
     dependsOn(subprojects.map { "${it.path}:pmdMain" })
-    // dependsOn(subprojects.map { "${it.path}:spotlessApply" })
+     dependsOn(subprojects.map { "${it.path}:spotlessApply" })
     // dependsOn(subprojects.map { "${it.path}:spotbugsMain" })
     dependsOn(subprojects.map { "${it.path}:test" })
 }
