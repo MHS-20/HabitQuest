@@ -1,4 +1,4 @@
-site_name: HabitQuest Documentation
+site_name: HabitQuest
 nav:
   - Home: index.md
   - Requirements: specifications/requirements.md
@@ -6,4 +6,6 @@ nav:
   - Quality Attribute Scenarios: specifications/quality_attributes_scenarios.md
   - Ubiquitous Language: specifications/ubiquitous_language.md
   - User Stories: specifications/user_stories.md
+  - Use Cases: useCases/use_cases.md
+  - Event Storming: eventStorming/event_storming.md
 theme: readthedocs
