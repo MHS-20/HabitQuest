@@ -1,0 +1,9 @@
+site_name: HabitQuest Documentation
+nav:
+  - Home: index.md
+  - Requirements: specifications/requirements.md
+  - Quality Attributes: specifications/quality_attributes.md
+  - Quality Attribute Scenarios: specifications/quality_attributes_scenarios.md
+  - Ubiquitous Language: specifications/ubiquitous_language.md
+  - User Stories: specifications/user_stories.md
+theme: readthedocs
