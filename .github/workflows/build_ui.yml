@@ -14,9 +14,12 @@ jobs:
   commit-lint:
     name: Run Commit Lint
     runs-on: ubuntu-22.04
+    if: github.actor != 'dependabot[bot]'
     steps:
-      - name: Run Commit Lint
-        uses: wagoid/commitlint-github-action@v5
+      - run: echo "Actor is ${{ github.actor }}"
+      - uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: commitlint.config.js
 
   static-scan:
     name: Static Vulnerability Scan

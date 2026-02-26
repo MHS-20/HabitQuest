@@ -1,7 +1,6 @@
 package habitquest.avatar_service.domain.items;
 
 import common.ddd.Aggregate;
-
 import java.util.List;
 import java.util.Objects;
 
