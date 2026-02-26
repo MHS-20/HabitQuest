@@ -1,10 +1,9 @@
-package habitquest.tracking.domain;
+package habitquest.quest.domain;
 
 import common.ddd.Aggregate;
-import habitquest.tracking.domain.reminder.Recurrence;
+import habitquest.quest.domain.reminder.Recurrence;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public class Habit implements Aggregate<String> {
   private final String id;
@@ -13,13 +12,9 @@ public class Habit implements Aggregate<String> {
   private String description;
   private Recurrence recurrence;
   private LocalDate lastAttendedDate;
-  private String avatarId;
-  private Optional<String> associatedQuestId;
 
-  public Habit(String id, String avatarId) {
+  public Habit(String id) {
     this.id = id;
-    this.avatarId = avatarId;
-    this.associatedQuestId = Optional.empty();
   }
 
   public void attendHabit(LocalDate date) {
