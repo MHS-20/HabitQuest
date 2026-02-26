@@ -1,3 +1,5 @@
 package habitquest.guild.domain.events;
 
-public record GuildJoined(String guildId) implements GuildEvent {}
+import habitquest.guild.domain.guild.GuildMember;
+
+public record GuildJoined(String guildId, GuildMember member) implements GuildEvent {}
