@@ -19,6 +19,6 @@ public class Battle implements Aggregate<String> {
   public void endBattle() {}
 
   public String getId() {
-    return battleId;
+    return this.battleId;
   }
 }

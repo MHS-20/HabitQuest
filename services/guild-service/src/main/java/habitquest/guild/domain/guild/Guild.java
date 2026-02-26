@@ -14,6 +14,6 @@ public class Guild implements Aggregate<String> {
   }
 
   public String getId() {
-    return this.getId();
+    return this.id;
   }
 }
