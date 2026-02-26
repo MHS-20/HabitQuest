@@ -1,3 +1,3 @@
 package habitquest.guild.domain.events;
 
-public interface GuildEvent {}
+public interface GuildEvent extends DomainEvent {}
