@@ -7,8 +7,8 @@ public class GuildMember implements Entity<String> {
   private String nickname;
   private GuildRole role;
 
-  public GuildMember(String id) {
-    this.avatarId = id;
+  public GuildMember(String avatarId) {
+    this.avatarId = avatarId;
   }
 
   @Override
