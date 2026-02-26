@@ -94,18 +94,18 @@ jobs:
           name: ${{ matrix.service }}-jar
           path: services/${{ matrix.service }}/build/libs/*.jar
 
-    build-aggregate:
-        name: Build Aggregate Status
-        runs-on: ubuntu-22.04
-        needs: [ detect-changes, build ]
-        if: always()
-        steps:
-          - name: Fail if build failed
-            run: |
-              if [[ "${{ needs.build.result }}" == "failure" ]]; then
-                echo "One or more builds failed"
-                exit 1
-              fi
+  build-aggregate:
+    name: Build Aggregate Status
+    runs-on: ubuntu-22.04
+    needs: [ detect-changes, build ]
+    if: always()
+    steps:
+      - name: Fail if build failed
+        run: |
+          if [[ "${{ needs.build.result }}" == "failure" ]]; then
+            echo "One or more builds failed"
+            exit 1
+          fi
 
   package-scan-publish:
     name: Package, Scan & Publish
@@ -190,17 +190,17 @@ jobs:
               "image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}"
             }
 
-    package-aggregate:
-      name: Package Aggregate Status
-      runs-on: ubuntu-22.04
-      needs:
-        - detect-changes
-        - package-scan-publish
-      if: always()
-      steps:
-        - name: Evaluate package results
-          run: |
-            if [[ "${{ needs.package-scan-publish.result }}" == "failure" ]]; then
-              echo "One or more package jobs failed"
-              exit 1
-            fi
+  package-aggregate:
+    name: Package Aggregate Status
+    runs-on: ubuntu-22.04
+    needs:
+      - detect-changes
+      - package-scan-publish
+    if: always()
+    steps:
+      - name: Evaluate package results
+        run: |
+          if [[ "${{ needs.package-scan-publish.result }}" == "failure" ]]; then
+            echo "One or more package jobs failed"
+            exit 1
+          fi
