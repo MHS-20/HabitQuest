@@ -28,6 +28,7 @@ allprojects {
 }
 
 subprojects {
+    if (project.name == "services") return@subprojects
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "com.diffplug.spotless")
@@ -61,12 +62,6 @@ subprojects {
 
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-
-        constraints { 
-            implementation("org.springframework.cloud:spring-cloud-gateway-server:4.3.2") { 
-                because("fix GHSA-fwxx-wv44-7qfg / CVE-2025-41253") // not available in BOM
-            } 
-        }
     }
 
     tasks.withType<Test> {
@@ -107,17 +102,12 @@ subprojects {
 }
 
 tasks.register("checkAll") {
-    dependsOn(subprojects.map { "${it.path}:checkstyleMain" })
-    dependsOn(subprojects.map { "${it.path}:pmdMain" })
-     dependsOn(subprojects.map { "${it.path}:spotlessApply" })
-    // dependsOn(subprojects.map { "${it.path}:spotbugsMain" })
-    dependsOn(subprojects.map { "${it.path}:test" })
-}
-
-project(":services") {
-    tasks.withType<Jar> {
-        enabled = false
-    }
+    val appProjects = subprojects.filter { it.path != ":services" }
+    dependsOn(appProjects.map { "${it.path}:checkstyleMain" })
+    dependsOn(appProjects.map { "${it.path}:pmdMain" })
+     dependsOn(appProjects.map { "${it.path}:spotlessApply" })
+    // dependsOn(appProjects.map { "${it.path}:spotbugsMain" })
+    dependsOn(appProjects.map { "${it.path}:test" })
 }
 
 project(":services") {

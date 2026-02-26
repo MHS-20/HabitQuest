@@ -1,3 +1,5 @@
 package habitquest.guild.domain.events;
 
-public interface GuildEvent {}
+import common.ddd.DomainEvent;
+
+public interface GuildEvent extends DomainEvent {}
