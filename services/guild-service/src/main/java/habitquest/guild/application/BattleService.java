@@ -8,17 +8,21 @@ import habitquest.guild.domain.battle.boss.BossStatus;
 @InBoundPort
 public interface BattleService {
 
-    Battle getBattle(String battleId);
-    String getGuildId(String battleId);
+  Battle getBattle(String battleId);
 
-    BossEnemy getBoss(String battleId);
+  String getGuildId(String battleId);
 
-    Integer getNumOfTurns(String battleId);
-    void updateNumOfTurns(String battleId, Integer numOfTurns);
+  BossEnemy getBoss(String battleId);
 
-    Integer getCurrentTurn(String battleId);
-    void updateCurrentTurn(String battleId, Integer currentTurn);
+  Integer getNumOfTurns(String battleId);
 
-    BossStatus getBossRemainingHealth(String battleId);
-    void updateBossRemainingHealth(String battleId, BossStatus bossStatus);
+  void updateNumOfTurns(String battleId, Integer numOfTurns);
+
+  Integer getCurrentTurn(String battleId);
+
+  void updateCurrentTurn(String battleId, Integer currentTurn);
+
+  BossStatus getBossRemainingHealth(String battleId);
+
+  void updateBossRemainingHealth(String battleId, BossStatus bossStatus);
 }
