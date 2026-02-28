@@ -9,11 +9,11 @@ import habitquest.avatar.domain.stats.AvatarStats;
 @InBoundPort
 public interface AvatarService {
 
-  Avatar createAvatar(String name);
+  String createAvatar(String name);
 
   Avatar getAvatarById(String id) throws AvatarNotFoundExpection;
 
-  Avatar updateAvatar(String id, Avatar updatedAvatar) throws AvatarNotFoundExpection;
+  void updateAvatar(String id, Avatar updatedAvatar) throws AvatarNotFoundExpection;
 
   void deleteAvatar(String id) throws AvatarNotFoundExpection;
 
@@ -37,22 +37,22 @@ public interface AvatarService {
   AvatarStats getAvatarStats(String avatarId) throws AvatarNotFoundExpection;
 
   // Updaters
-  Avatar updateName(String avatarId, String name) throws AvatarNotFoundExpection;
+  void updateName(String avatarId, String name) throws AvatarNotFoundExpection;
 
-  Avatar updateMoney(String avatarId, Money money) throws AvatarNotFoundExpection;
+  void updateMoney(String avatarId, Money money) throws AvatarNotFoundExpection;
 
-  Avatar updateInventory(String avatarId, Inventory inventory) throws AvatarNotFoundExpection;
+  void updateInventory(String avatarId, Inventory inventory) throws AvatarNotFoundExpection;
 
-  Avatar updateEquippedItems(String avatarId, EquippedItems equippedItems)
+  void updateEquippedItems(String avatarId, EquippedItems equippedItems)
       throws AvatarNotFoundExpection;
 
-  Avatar updateExperience(String avatarId, Experience experience) throws AvatarNotFoundExpection;
+  void updateExperience(String avatarId, Experience experience) throws AvatarNotFoundExpection;
 
-  Avatar updateLevel(String avatarId, Level level) throws AvatarNotFoundExpection;
+  void updateLevel(String avatarId, Level level) throws AvatarNotFoundExpection;
 
-  Avatar updateHealth(String avatarId, Health health) throws AvatarNotFoundExpection;
+  void updateHealth(String avatarId, Health health) throws AvatarNotFoundExpection;
 
-  Avatar updateMana(String avatarId, Mana mana) throws AvatarNotFoundExpection;
+  void updateMana(String avatarId, Mana mana) throws AvatarNotFoundExpection;
 
-  Avatar updateAvatarStats(String avatarId, AvatarStats avatarStats) throws AvatarNotFoundExpection;
+  void updateAvatarStats(String avatarId, AvatarStats avatarStats) throws AvatarNotFoundExpection;
 }
