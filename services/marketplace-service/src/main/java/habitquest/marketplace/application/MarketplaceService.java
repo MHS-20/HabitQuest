@@ -7,22 +7,29 @@ import java.util.List;
 
 @InBoundPort
 public interface MarketplaceService {
-    Marketplace getMarketplace(String marketplaceId);
-    List<Item> getItems(String marketplaceId);
-    void updateItems(String marketplaceId, List<Item> items);
+  Marketplace getMarketplace(String marketplaceId);
 
-    List<Armor> getArmors(String marketplaceId);
-    void addArmors(String marketplaceId, List<Armor> armors);
+  List<Item> getItems(String marketplaceId);
 
-    List<Weapon> getWeapons(String marketplaceId);
-    void addWeapons(String marketplaceId, List<Weapon> weapons);
+  void updateItems(String marketplaceId, List<Item> items);
 
-    List<Potion> getPotions(String marketplaceId);
-    void addPotions(String marketplaceId, List<Potion> potions);
+  List<Armor> getArmors(String marketplaceId);
 
-    List<HealthPotion> getHealthPotions(String marketplaceId);
-    void addHealthPotions(String marketplaceId, List<HealthPotion> healthPotions);
+  void addArmors(String marketplaceId, List<Armor> armors);
 
-    List<ManaPotion> getManaPotions(String marketplaceId);
-    void addManaPotions(String marketplaceId, List<ManaPotion> manaPotions);
+  List<Weapon> getWeapons(String marketplaceId);
+
+  void addWeapons(String marketplaceId, List<Weapon> weapons);
+
+  List<Potion> getPotions(String marketplaceId);
+
+  void addPotions(String marketplaceId, List<Potion> potions);
+
+  List<HealthPotion> getHealthPotions(String marketplaceId);
+
+  void addHealthPotions(String marketplaceId, List<HealthPotion> healthPotions);
+
+  List<ManaPotion> getManaPotions(String marketplaceId);
+
+  void addManaPotions(String marketplaceId, List<ManaPotion> manaPotions);
 }
