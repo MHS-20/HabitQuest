@@ -7,11 +7,6 @@ public record Defense(BaseStat stat) implements Stat {
   }
 
   @Override
-  public Defense increment() {
-    return new Defense(stat.increment());
-  }
-
-  @Override
   public Integer value() {
     return stat.value();
   }

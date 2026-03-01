@@ -1,4 +1,4 @@
-package habitquest.guild.domain.events;
+package habitquest.guild.domain.events.battleEvents;
 
 import habitquest.guild.domain.battle.Penalty;
 
