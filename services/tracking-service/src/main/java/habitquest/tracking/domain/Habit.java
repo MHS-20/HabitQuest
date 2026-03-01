@@ -13,10 +13,11 @@ public class Habit implements Aggregate<String> {
   private String description;
   private Recurrence recurrence;
   private LocalDate lastAttendedDate;
-  private String avatarId;
-  private Optional<String> associatedQuestId;
+  private final String avatarId;
+  private final Optional<String> associatedQuestId;
 
-  public Habit(String id, String avatarId) {
+  public Habit(
+      String id, String avatarId, String title, String description, Recurrence recurrence) {
     this.id = id;
     this.avatarId = avatarId;
     this.associatedQuestId = Optional.empty();
@@ -44,6 +45,14 @@ public class Habit implements Aggregate<String> {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getAvatarId() {
+    return avatarId;
+  }
+
+  public Optional<String> getAssociatedQuestId() {
+    return associatedQuestId;
   }
 
   @Override
