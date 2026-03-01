@@ -1,5 +1,5 @@
 package habitquest.avatar.domain.events;
 
-import habitquest.avatar.domain.avatar.Health;
+import habitquest.avatar.domain.avatar.AvatarHealth;
 
-public record HealthRestored(Health health) implements AvatarEvent {}
+public record HealthRestored(AvatarHealth health) implements AvatarEvent {}

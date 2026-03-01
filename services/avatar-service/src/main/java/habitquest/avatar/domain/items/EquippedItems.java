@@ -16,12 +16,12 @@ public class EquippedItems implements Aggregate<String> {
     this.id = id;
   }
 
-  public void equipItem(Item item) {
+  public void equip(Item item) {
     Objects.requireNonNull(item);
     items.add(item);
   }
 
-  public void unequipItem(Item item) {
+  public void unequip(Item item) {
     Objects.requireNonNull(item);
     if (!items.remove(item)) {
       throw new IllegalArgumentException("Item not found in inventory");
