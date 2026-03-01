@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Requirements - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Requirements";
+        var mkdocs_page_input_path = "specifications/requirements.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Requirements</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quality_attributes/">Quality Attributes</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ubiquitous_language/">Ubiquitous Language</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../user_stories/">User Stories</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Requirements</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="identity-access">Identity &amp; Access</h1>
+<ul>
+<li>The system must allow registration via email/password and OAuth providers.  </li>
+<li>The system must allow authentication via token.  </li>
+<li>The system must allow user profile management (username, avatar).  </li>
+<li>The system must allow viewing of the character’s general statistics.  </li>
+</ul>
+<h1 id="habit-management">Habit Management</h1>
+<ul>
+<li>The user can create a habit by specifying title, description, difficulty, and frequency.  </li>
+<li>The user can define daily, weekly, or custom frequencies.  </li>
+<li>The user can associate one or more tags with a habit.  </li>
+<li>The user can configure optional penalties for non-completion.  </li>
+<li>The user can edit or delete a habit.  </li>
+<li>The user can mark a habit as completed.  </li>
+</ul>
+<h1 id="gamification">Gamification</h1>
+<ul>
+<li>The system must automatically detect non-completion at the deadline.  </li>
+<li>Completion or non-completion must generate domain events.  </li>
+<li>The system must award experience points (XP) upon habit completion.  </li>
+<li>Experience points must be calculated based on difficulty.  </li>
+<li>The system must handle level progression when XP thresholds are reached.  </li>
+<li>Level progression must increase the character’s statistics.  </li>
+<li>The system must manage statistics such as strength, constitution, intelligence, mana, and maximum health.  </li>
+<li>The system must reduce health points (HP) in case of a missed habit.  </li>
+<li>The system must maintain the character’s current state (level, XP, HP, mana, statistics).  </li>
+<li>The system must prevent HP or mana from dropping below zero.  </li>
+<li>The system must support permanent bonuses derived from equipment.  </li>
+</ul>
+<h1 id="notification">Notification</h1>
+<ul>
+<li>The user can create reminders associated with habits.  </li>
+<li>The user can configure reminder time and frequency.  </li>
+<li>The system must send push or email notifications.  </li>
+<li>The system must allow modification or deletion of reminders.  </li>
+<li>The system must guarantee reliable scheduled execution of reminders.  </li>
+</ul>
+<h1 id="shop-inventory">Shop &amp; Inventory</h1>
+<ul>
+<li>The system must provide a catalog of purchasable items.  </li>
+<li>Items must include consumables (HP healing, mana restoration) and equipment.  </li>
+<li>The user can purchase items using in-game currency.  </li>
+<li>The user can sell owned items in exchange for currency.  </li>
+<li>The user can view their inventory.  </li>
+<li>The user can equip or remove items.  </li>
+<li>The user can consume items.  </li>
+<li>Equipped items must modify the character’s statistics.  </li>
+</ul>
+<h1 id="guild">Guild</h1>
+<ul>
+<li>A user can create a guild.  </li>
+<li>A user can request to join a guild.  </li>
+<li>A user can be invited to a guild.  </li>
+<li>The system must support guild roles (leader, officer, member).  </li>
+<li>The system must allow member management (promotion, removal).  </li>
+</ul>
+<h1 id="messaging">Messaging</h1>
+<ul>
+<li>Guild members can send messages in the guild chat.  </li>
+<li>The system must provide real-time message updates.  </li>
+<li>The system must maintain message history.  </li>
+<li>The system must ensure that only guild members can access the chat.  </li>
+<li>The system must handle notifications for new messages.  </li>
+</ul>
+<h1 id="quest">Quest</h1>
+<ul>
+<li>A user can create public quests by defining title, description, duration, and associated habits.  </li>
+<li>A user can join public quests.  </li>
+<li>Quest habits must be replicated into the user’s personal plan.  </li>
+<li>The system must track individual progress within the quest.  </li>
+<li>The system must assign rewards upon quest completion.  </li>
+<li>The system must allow the creation of private guild quests.  </li>
+<li>The system must prevent joining expired quests.  </li>
+</ul>
+<h1 id="combat">Combat</h1>
+<ul>
+<li>A guild can initiate a boss fight.  </li>
+<li>Members can perform attacks periodically.  </li>
+<li>Members can use spells that consume mana.  </li>
+<li>The system must calculate damage based on statistics and equipment.  </li>
+<li>The system must update the boss’s state in real time.  </li>
+<li>The system must distribute rewards upon victory.  </li>
+<li>The system must apply penalties in case of defeat.  </li>
+<li>The system must prevent actions when HP or mana are insufficient.  </li>
+<li>The system must ensure consistency in concurrent combat action handling.  </li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../.." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../quality_attributes/" class="btn btn-neutral float-right" title="Quality Attributes">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../.." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../quality_attributes/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

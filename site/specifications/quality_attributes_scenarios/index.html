@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Quality Attribute Scenarios - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quality Attribute Scenarios";
+        var mkdocs_page_input_path = "specifications/quality_attributes_scenarios.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../requirements/">Requirements</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quality_attributes/">Quality Attributes</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Quality Attribute Scenarios</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#edge-service-availability">Edge Service – Availability</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tracking-service-performance">Tracking Service – Performance</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#notification-service-reliability">Notification Service – Reliability</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-service-consistency">Avatar Service – Consistency</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-service-correctness">Avatar Service – Correctness</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#marketplace-service-transactional-integrity">Marketplace Service – Transactional Integrity</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-service-scalability">Guild Service – Scalability</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-service-reliability">Guild Service – Reliability</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-service-real-time">Guild Service – Real-time</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#quest-service-responsiveness">Quest Service – Responsiveness</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ubiquitous_language/">Ubiquitous Language</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../user_stories/">User Stories</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Quality Attribute Scenarios</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quality-attribute-scenarios-for-habit-rpg-microservices">Quality Attribute Scenarios for Habit RPG Microservices</h1>
+<h2 id="edge-service-availability">Edge Service – Availability</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> A login request arrives.<br />
+- <strong>Source:</strong> Authenticated mobile or web client.<br />
+- <strong>Environment:</strong> Normal operation, regular load.<br />
+- <strong>Artifact:</strong> Edge Service API.<br />
+- <strong>Response:</strong> Edge service must authenticate user and return a JWT.<br />
+- <strong>Response Measure:</strong> ≤ 300 ms for 95% of authentication requests.</p>
+<hr />
+<h2 id="tracking-service-performance">Tracking Service – Performance</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> A user requests the list of active habits.<br />
+- <strong>Source:</strong> Authenticated web or mobile user.<br />
+- <strong>Environment:</strong> Under typical usage load.<br />
+- <strong>Artifact:</strong> Tracking Service.<br />
+- <strong>Response:</strong> Tracking service returns all active habits with correct metadata.<br />
+- <strong>Response Measure:</strong> ≤ 500 ms for 95% of requests.</p>
+<hr />
+<h2 id="notification-service-reliability">Notification Service – Reliability</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> A scheduled reminder is due to be sent.<br />
+- <strong>Source:</strong> Internal scheduler.<br />
+- <strong>Environment:</strong> During normal system load.<br />
+- <strong>Artifact:</strong> Notification Service.<br />
+- <strong>Response:</strong> Notification Service issues the notification.<br />
+- <strong>Response Measure:</strong> ≥ 99% of reminders delivered within 5 seconds after scheduled time.</p>
+<hr />
+<h2 id="avatar-service-consistency">Avatar Service – Consistency</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> HabitCompleted event arrives via event bus.<br />
+- <strong>Source:</strong> Habit Service.<br />
+- <strong>Environment:</strong> Normal event processing conditions.<br />
+- <strong>Artifact:</strong> Avatar Service.<br />
+- <strong>Response:</strong> Avatar increments user XP and updates level if threshold hit.<br />
+- <strong>Response Measure:</strong> XP updated within 1 second of event receipt.</p>
+<hr />
+<h2 id="avatar-service-correctness">Avatar Service – Correctness</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> ItemPurchased event is received.<br />
+- <strong>Source:</strong> Shop Service via event bus.<br />
+- <strong>Environment:</strong> Normal asynchronous processing.<br />
+- <strong>Artifact:</strong> Inventory Service.<br />
+- <strong>Response:</strong> Inventory adds the purchased item to user inventory.<br />
+- <strong>Response Measure:</strong> Inventory update reflected in queries within 1 second.</p>
+<hr />
+<h2 id="marketplace-service-transactional-integrity">Marketplace Service – Transactional Integrity</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> User submits an item purchase.<br />
+- <strong>Source:</strong> Authenticated client.<br />
+- <strong>Environment:</strong> Normal operating conditions.<br />
+- <strong>Artifact:</strong> Marketplace Service.<br />
+- <strong>Response:</strong> Marketplace service debits currency and issues ItemPurchased event.<br />
+- <strong>Response Measure:</strong> Entire operation must complete successfully or fail atomically; no partial updates.</p>
+<hr />
+<h2 id="guild-service-scalability">Guild Service – Scalability</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> 50 users concurrently request to join a guild.<br />
+- <strong>Source:</strong> Multiple authenticated users.<br />
+- <strong>Environment:</strong> Elevated but expected load.<br />
+- <strong>Artifact:</strong> Guild Service API.<br />
+- <strong>Response:</strong> Guild service processes all join requests without failures.<br />
+- <strong>Response Measure:</strong> ≥ 95% of requests handled within 1 second.</p>
+<hr />
+<h2 id="guild-service-reliability">Guild Service – Reliability</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> Guild combat action (attack or spell) arrives.<br />
+- <strong>Source:</strong> Member of an active guild.<br />
+- <strong>Environment:</strong> Combat session in progress.<br />
+- <strong>Artifact:</strong> Combat Service.<br />
+- <strong>Response:</strong> Combat service calculates damage and updates boss and player state.<br />
+- <strong>Response Measure:</strong> Response delivered in ≤ 300 ms.</p>
+<hr />
+<h2 id="guild-service-real-time">Guild Service – Real-time</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> Guild member sends a chat message.<br />
+- <strong>Source:</strong> Client via WebSocket.<br />
+- <strong>Environment:</strong> Chat session active.<br />
+- <strong>Artifact:</strong> Messaging Service.<br />
+- <strong>Response:</strong> Message is broadcast to all members in the guild chat.<br />
+- <strong>Response Measure:</strong> Delivery latency ≤ 200 ms.</p>
+<h2 id="quest-service-responsiveness">Quest Service – Responsiveness</h2>
+<p><strong>Scenario:</strong><br />
+- <strong>Stimulus:</strong> User requests quest details.<br />
+- <strong>Source:</strong> Authenticated client.<br />
+- <strong>Environment:</strong> Normal load.<br />
+- <strong>Artifact:</strong> Quest Service API.<br />
+- <strong>Response:</strong> Quest service returns the quest data including associated habits and progress status.<br />
+- <strong>Response Measure:</strong> ≤ 600 ms for 95% of requests.</p>
+<hr />
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quality_attributes/" class="btn btn-neutral float-left" title="Quality Attributes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../ubiquitous_language/" class="btn btn-neutral float-right" title="Ubiquitous Language">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../quality_attributes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../ubiquitous_language/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

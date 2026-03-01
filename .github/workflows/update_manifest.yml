@@ -25,9 +25,16 @@ jobs:
           sed -i 's/ref=[\w+]/${{ env.APP_VERSION }}/' kustomization.yml
 
       # the commit automatically triggers deployment through ArgoCD
-      - name: Commit updated manifests
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update ${{ env.APP_NAME }} to version ${{ env.APP_VERSION }}"
-          branch: main
+#      - name: Commit updated manifests
+#        uses: stefanzweifel/git-auto-commit-action@v5
+#        with:
+#          commit_message: "Update ${{ env.APP_NAME }} to version ${{ env.APP_VERSION }}"
+#          branch: main
       
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Update ${{ env.APP_NAME }} to version ${{ env.APP_VERSION }}"
+          branch: chore/auto-updates
+          title: "chore: Automated image tag updates"
+          body: "Automated image tag update."
+          base: main

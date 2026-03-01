@@ -10,6 +10,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-kafka")
     implementation("org.springframework.boot:spring-boot-starter-session-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.data:spring-data-jpa")
 
     // --- Runtime ---
     runtimeOnly("org.postgresql:postgresql")
