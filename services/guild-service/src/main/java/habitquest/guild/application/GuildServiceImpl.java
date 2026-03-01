@@ -1,6 +1,6 @@
 package habitquest.guild.application;
 
-import habitquest.guild.domain.events.*;
+import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
