@@ -20,4 +20,28 @@ public class AvatarStats implements Aggregate<String> {
   public String getId() {
     return this.id;
   }
+
+  public Strength getStrength() {
+    return strength;
+  }
+
+  public Defense getDefense() {
+    return defense;
+  }
+
+  public Intelligence getIntelligence() {
+    return intelligence;
+  }
+
+  public void incrementStrength() {
+    this.strength.increment();
+  }
+
+  public void incrementDefense() {
+    this.defense.increment();
+  }
+
+  public void incrementIntelligence() {
+    this.intelligence.increment();
+  }
 }

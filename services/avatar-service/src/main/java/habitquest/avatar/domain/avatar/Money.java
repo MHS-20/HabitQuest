@@ -15,6 +15,10 @@ public record Money(Integer amount) implements ValueObject {
     return new Money(this.amount + other.amount);
   }
 
+  public boolean isEnough(Money other) {
+    return this.amount >= other.amount;
+  }
+
   public Money subtract(Money other) {
     if (this.amount < other.amount) {
       throw new IllegalArgumentException("Cannot subtract more money than available");

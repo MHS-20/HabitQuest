@@ -1,5 +1,5 @@
 package habitquest.avatar.domain.events;
 
-import habitquest.avatar.domain.avatar.Mana;
+import habitquest.avatar.domain.avatar.AvatarMana;
 
-public record ManaRestored(Mana mana) implements AvatarEvent {}
+public record ManaRestored(AvatarMana mana) implements AvatarEvent {}

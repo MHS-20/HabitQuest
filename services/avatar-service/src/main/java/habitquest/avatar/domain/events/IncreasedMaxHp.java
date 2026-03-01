@@ -1,5 +1,5 @@
 package habitquest.avatar.domain.events;
 
-import habitquest.avatar.domain.avatar.Health;
+import habitquest.avatar.domain.avatar.AvatarHealth;
 
-public record IncreasedMaxHp(Health health) implements AvatarEvent {}
+public record IncreasedMaxHp(AvatarHealth health) implements AvatarEvent {}
