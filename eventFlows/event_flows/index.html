@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Use Cases - HabitQuest</title>
+    <title>Event Flows - HabitQuest</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Use Cases";
-        var mkdocs_page_input_path = "useCases/use_cases.md";
+        var mkdocs_page_name = "Event Flows";
+        var mkdocs_page_input_path = "eventFlows/event_flows.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -63,36 +63,28 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../specifications/user_stories/">User Stories</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">Use Cases</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#identity-and-access-service">Identity and Access Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#habit-management-service">Habit Management Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#gamification-service">Gamification Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#notification-service">Notification Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#shop-and-inventory-service">Shop and Inventory Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#guild-service">Guild Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#messaging-service">Messaging Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#quest-service">Quest Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#combat-service">Combat Service</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
                 </li>
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventFlows/event_flows/">Event Flows</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Event Flows</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#tracking-service">Tracking Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#quest-service">Quest Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-service">Avatar Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-service">Guild Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#marketplace-service">Marketplace Service</a>
+    </li>
+    </ul>
                 </li>
               </ul>
       </div>
@@ -109,7 +101,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Use Cases</li>
+      <li class="breadcrumb-item active">Event Flows</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -118,31 +110,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="use-cases-for-habit-rpg-microservices">Use cases for Habit RPG Microservices</h1>
-<h2 id="identity-and-access-service">Identity and Access Service</h2>
-<p><img alt="Identity and Access Service Use Case" src="../01_identity-access.drawio.png" /></p>
-<h2 id="habit-management-service">Habit Management Service</h2>
-<p><img alt="Habit Management Service Use Case" src="../02_habit_management.drawio.png" /></p>
-<h2 id="gamification-service">Gamification Service</h2>
-<p><img alt="Gamification Service Use Case" src="../03_gamification.drawio.png" /></p>
-<h2 id="notification-service">Notification Service</h2>
-<p><img alt="Notification Service Use Case" src="../04_notification.drawio.png" /></p>
-<h2 id="shop-and-inventory-service">Shop and Inventory Service</h2>
-<p><img alt="Shop and Inventory Service Use Case" src="../05_shop_inventory.drawio.png" /></p>
-<h2 id="guild-service">Guild Service</h2>
-<p><img alt="Guild Service Use Case" src="../06_guild.drawio.png" /></p>
-<h2 id="messaging-service">Messaging Service</h2>
-<p><img alt="Messaging Service Use Case" src="../07_messaging.drawio.png" /></p>
+                <h1 id="event-flows">Event Flows</h1>
+<h2 id="tracking-service">Tracking Service</h2>
+<p><img alt="Tracking Service Event Flow" src="../01_tracking-service.drawio.png" /></p>
 <h2 id="quest-service">Quest Service</h2>
-<p><img alt="Quest Service Use Case" src="../08_quest.drawio.png" /></p>
-<h2 id="combat-service">Combat Service</h2>
-<p><img alt="Combat Service Use Case" src="../09_combat.drawio.png" /></p>
+<p><img alt="Quest Service Event Flow" src="../02_quest-service.drawio.png" /></p>
+<h2 id="avatar-service">Avatar Service</h2>
+<p><img alt="Avatar Service Event Flow" src="../03_avatar-service.drawio.png" /></p>
+<h2 id="guild-service">Guild Service</h2>
+<p><img alt="Guild Service Event Flow" src="../04_guild-service.drawio.png" /></p>
+<h2 id="marketplace-service">Marketplace Service</h2>
+<p><img alt="Marketplace Service Event Flow" src="../05_marketplace-service.drawio.png" /></p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../specifications/user_stories/" class="btn btn-neutral float-left" title="User Stories"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../eventStorming/event_storming/" class="btn btn-neutral float-right" title="Event Storming">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../eventStorming/event_storming/" class="btn btn-neutral float-left" title="Event Storming"><span class="icon icon-circle-arrow-left"></span> Previous</a>
     </div>
 
   <hr/>
@@ -165,10 +148,8 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../specifications/user_stories/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../eventStorming/event_storming/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="../../eventStorming/event_storming/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
