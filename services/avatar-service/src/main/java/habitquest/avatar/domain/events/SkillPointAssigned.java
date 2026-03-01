@@ -1,5 +1,5 @@
 package habitquest.avatar.domain.events;
 
-import habitquest.avatar.domain.stats.AvatarStats;
+import habitquest.avatar.domain.stats.AvatarStat;
 
-public record SkillPointAssigned(AvatarStats stats) implements AvatarEvent {}
+public record SkillPointAssigned(AvatarStat stat) implements AvatarEvent {}
