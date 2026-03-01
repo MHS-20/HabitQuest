@@ -1,15 +1,9 @@
 package habitquest.guild.domain.battle.stats;
 
 import common.ddd.Aggregate;
-import java.util.Objects;
 
-public class Stats implements Aggregate<String> {
-
-  private String id;
-
-  public Stats(String id) {
-    this.id = Objects.requireNonNull(id);
-  }
+public record Stats(String id, Health health, Strength strength, Defense defense)
+    implements Aggregate<String> {
 
   @Override
   public String getId() {
