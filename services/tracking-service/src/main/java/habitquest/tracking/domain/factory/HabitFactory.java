@@ -6,15 +6,17 @@ import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import java.time.DayOfWeek;
+import java.util.Optional;
 
 public class HabitFactory implements Factory {
-  public static Habit createDailyHabit() {
+  public static Habit createDailyHabit(String avatarId, String title, String description) {
     return new Habit(
         new UUIDGenerator().nextId(),
-        "Daily Habit",
-        "This is a daily habit",
-        "DAILY",
-        new DailyRecurrence());
+        avatarId,
+        title,
+        description,
+        new DailyRecurrence(),
+        Optional.empty());
   }
 
   public static Habit createWeeklyHabit(DayOfWeek dayOfWeek) {
@@ -23,7 +25,8 @@ public class HabitFactory implements Factory {
         "Weekly Habit",
         "This is a weekly habit",
         "WEEKLY",
-        new WeeklyRecurrence(dayOfWeek));
+        new WeeklyRecurrence(dayOfWeek),
+        Optional.empty());
   }
 
   public static Habit createMonthlyHabit(Integer dayOfMonth) {
@@ -32,6 +35,7 @@ public class HabitFactory implements Factory {
         "Daily Habit",
         "This is a daily habit",
         "DAILY",
-        new MonthlyRecurrence(dayOfMonth));
+        new MonthlyRecurrence(dayOfMonth),
+        Optional.empty());
   }
 }
