@@ -1,10 +1,11 @@
 package habitquest.guild.domain.factory;
 
+import common.ddd.Factory;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 
-public class GuildFactory {
+public class GuildFactory implements Factory {
   private final IdGenerator idGenerator;
 
   public GuildFactory(IdGenerator idGenerator) {

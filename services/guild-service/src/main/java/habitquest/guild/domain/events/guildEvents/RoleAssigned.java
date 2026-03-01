@@ -1,4 +1,4 @@
-package habitquest.guild.domain.events;
+package habitquest.guild.domain.events.guildEvents;
 
 import habitquest.guild.domain.guild.GuildRole;
 
