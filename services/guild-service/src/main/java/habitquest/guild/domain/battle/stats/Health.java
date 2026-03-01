@@ -1,8 +1,7 @@
 package habitquest.guild.domain.battle.stats;
 
-public record Strength(BaseStat stat) implements Stat {
-
-  public Strength(Integer value) {
+public record Health(BaseStat stat) implements Stat {
+  public Health(Integer value) {
     this(new BaseStat(value));
   }
 
