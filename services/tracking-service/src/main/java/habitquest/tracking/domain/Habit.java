@@ -17,10 +17,15 @@ public class Habit implements Aggregate<String> {
   private final Optional<String> associatedQuestId;
 
   public Habit(
-      String id, String avatarId, String title, String description, Recurrence recurrence) {
+      String id,
+      String avatarId,
+      String title,
+      String description,
+      Recurrence recurrence,
+      Optional<String> associatedQuestId) {
     this.id = id;
     this.avatarId = avatarId;
-    this.associatedQuestId = Optional.empty();
+    this.associatedQuestId = associatedQuestId;
   }
 
   public void attendHabit(LocalDate date) {
