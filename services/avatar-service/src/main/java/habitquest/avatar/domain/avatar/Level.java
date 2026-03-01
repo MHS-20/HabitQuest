@@ -3,7 +3,9 @@ package habitquest.avatar.domain.avatar;
 import common.ddd.ValueObject;
 import java.util.Objects;
 
-public record Level(Integer levelNumber, Experience experienceRequired) implements ValueObject {
+public record Level(
+    Integer levelNumber, Experience currentExperience, Experience experienceRequired)
+    implements ValueObject {
   private static final int MIN_LEVEL = 1;
 
   public Level {
@@ -13,11 +15,21 @@ public record Level(Integer levelNumber, Experience experienceRequired) implemen
     }
   }
 
-  public boolean canLevelUp(Experience currentExperience) {
-    return currentExperience.isAtLeast(experienceRequired);
+  public Level gainExperience(Experience gainedExperience) {
+    if (gainedExperience.amount() < 0) {
+      throw new IllegalArgumentException("Gained experience cannot be negative");
+    }
+
+    if (this.currentExperience.add(gainedExperience).isAtLeast(experienceRequired)) {
+      return new Level(
+          levelNumber + 1, new Experience(0), experienceRequired.add(experienceRequired));
+    } else {
+      return new Level(
+          this.levelNumber, this.currentExperience.add(gainedExperience), experienceRequired);
+    }
   }
 
-  public Level levelUp(Experience nextLevelRequirement) {
-    return new Level(levelNumber + 1, nextLevelRequirement);
+  public Level resetExperience() {
+    return new Level(this.levelNumber, new Experience(0), this.experienceRequired);
   }
 }

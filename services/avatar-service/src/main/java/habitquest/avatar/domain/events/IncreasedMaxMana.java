@@ -1,5 +1,5 @@
 package habitquest.avatar.domain.events;
 
-import habitquest.avatar.domain.avatar.Mana;
+import habitquest.avatar.domain.avatar.AvatarMana;
 
-public record IncreasedMaxMana(Mana mana) implements AvatarEvent {}
+public record IncreasedMaxMana(AvatarMana mana) implements AvatarEvent {}
