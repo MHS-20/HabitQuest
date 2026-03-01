@@ -5,8 +5,8 @@ import habitquest.marketplace.domain.events.MarketplaceObserver;
 
 public class MarketplaceObserverImpl implements MarketplaceObserver {
 
-    @Override
-    public void notifyMarketplaceEvent(MarketplaceEvent event) {
-        // TODO Auto-generated method stub
-    }
+  @Override
+  public void notifyMarketplaceEvent(MarketplaceEvent event) {
+    // TODO Auto-generated method stub
+  }
 }

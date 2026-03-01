@@ -5,8 +5,8 @@ import habitquest.tracking.domain.events.HabitObserver;
 
 public class HabitObserverImpl implements HabitObserver {
 
-    @Override
-    public void notifyHabitEvent(HabitEvent event) {
-        // TODO Auto-generated method stub
-    }
+  @Override
+  public void notifyHabitEvent(HabitEvent event) {
+    // TODO Auto-generated method stub
+  }
 }

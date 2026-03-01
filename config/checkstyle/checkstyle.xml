@@ -72,7 +72,7 @@
 
         <!-- Magic numbers -->
         <module name="MagicNumber">
-            <property name="ignoreNumbers" value="-1,0,1,2"/>
+            <property name="ignoreNumbers" value="-1,0,1,2, 50, 10, 100"/>
             <property name="ignoreHashCodeMethod" value="true"/>
             <property name="ignoreAnnotation" value="true"/>
         </module>

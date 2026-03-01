@@ -48,8 +48,6 @@ public interface AvatarService {
 
   void updateExperience(String avatarId, Experience experience) throws AvatarNotFoundExpection;
 
-  void updateLevel(String avatarId, Level level) throws AvatarNotFoundExpection;
-
   void updateHealth(String avatarId, Health health) throws AvatarNotFoundExpection;
 
   void updateMana(String avatarId, Mana mana) throws AvatarNotFoundExpection;

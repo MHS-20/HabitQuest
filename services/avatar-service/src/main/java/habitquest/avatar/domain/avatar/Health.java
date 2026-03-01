@@ -13,18 +13,12 @@ public record Health(Integer current, Integer max) implements ValueObject {
     }
   }
 
-  public Health heal(Integer amount) {
-    if (amount < 0) {
-      throw new IllegalArgumentException("Cannot heal negative amount");
-    }
-    return new Health(Math.min(current + amount, max), max);
+  public Health heal(Health other) {
+    return new Health(Math.min(current + other.current, max), max);
   }
 
-  public Health damage(Integer amount) {
-    if (amount < 0) {
-      throw new IllegalArgumentException("Cannot damage negative amount");
-    }
-    return new Health(Math.max(current - amount, 0), max);
+  public Health damage(Health other) {
+    return new Health(Math.max(current - other.current, 0), max);
   }
 
   public boolean isDead() {
