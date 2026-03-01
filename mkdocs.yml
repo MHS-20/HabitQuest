@@ -8,4 +8,5 @@ nav:
   - User Stories: specifications/user_stories.md
   - Use Cases: useCases/use_cases.md
   - Event Storming: eventStorming/event_storming.md
+  - Event Flows: eventFlows/event_flows.md
 theme: readthedocs
