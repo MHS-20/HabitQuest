@@ -7,9 +7,7 @@ import habitquest.guild.domain.events.GuildObserver;
 
 public class GuildObserverImpl implements GuildObserver, BattleObserver {
   @Override
-  public void notifyGuildEvent(GuildEvent event) {
-    // TODO Auto-generated method stub
-  }
+  public void notifyGuildEvent(GuildEvent event) {}
 
   @Override
   public void notifyBattleEvent(BattleEvent event) {
