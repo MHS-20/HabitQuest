@@ -1,7 +1,6 @@
 package habitquest.marketplace.domain.items;
 
 import common.ddd.ValueObject;
-import habitquest.marketplace.domain.Level;
 import habitquest.marketplace.domain.Money;
 
 public interface Item extends ValueObject {

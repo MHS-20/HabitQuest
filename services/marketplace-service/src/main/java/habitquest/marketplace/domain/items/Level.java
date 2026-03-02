@@ -1,4 +1,4 @@
-package habitquest.marketplace.domain;
+package habitquest.marketplace.domain.items;
 
 import common.ddd.ValueObject;
 
