@@ -3,6 +3,7 @@ package habitquest.marketplace.domain;
 import common.ddd.Aggregate;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
+import java.util.Optional;
 
 public interface Marketplace extends Aggregate<String> {
   List<Item> getItems();
@@ -16,4 +17,10 @@ public interface Marketplace extends Aggregate<String> {
   List<HealthPotion> getHealthPotions();
 
   List<ManaPotion> getManaPotions();
+
+  Optional<Item> getItemByName(String itemName);
+
+  Money buyItem(String itemName);
+
+  Money sellItem(String itemName);
 }
