@@ -1,5 +1,4 @@
 package habitquest.marketplace.domain.events;
 
-import habitquest.marketplace.domain.items.Item;
-
-public record ItemBought(Item item) implements MarketplaceEvent {}
+public record ItemBought(String marketplaceId, String itemName, String avatarId)
+    implements MarketplaceEvent {}

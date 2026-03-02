@@ -1,6 +1,5 @@
 package habitquest.marketplace.domain.items;
 
-import habitquest.marketplace.domain.Level;
 import habitquest.marketplace.domain.Money;
 
 public record Weapon(BaseItem baseItem, Integer attackPower) implements Item {
