@@ -11,25 +11,19 @@ public interface MarketplaceService {
 
   List<Item> getItems(String marketplaceId);
 
-  void updateItems(String marketplaceId, List<Item> items);
-
   List<Armor> getArmors(String marketplaceId);
-
-  void addArmors(String marketplaceId, List<Armor> armors);
 
   List<Weapon> getWeapons(String marketplaceId);
 
-  void addWeapons(String marketplaceId, List<Weapon> weapons);
-
   List<Potion> getPotions(String marketplaceId);
-
-  void addPotions(String marketplaceId, List<Potion> potions);
 
   List<HealthPotion> getHealthPotions(String marketplaceId);
 
-  void addHealthPotions(String marketplaceId, List<HealthPotion> healthPotions);
-
   List<ManaPotion> getManaPotions(String marketplaceId);
 
-  void addManaPotions(String marketplaceId, List<ManaPotion> manaPotions);
+  Item getItemByName(String marketplaceId, String itemName);
+
+  void buyItem(String marketplaceId, String itemName, String avatarId);
+
+  void sellItem(String marketplaceId, String itemName, String avatarId);
 }

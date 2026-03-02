@@ -1,6 +1,5 @@
 package habitquest.marketplace.domain.items;
 
-import habitquest.marketplace.domain.Level;
 import habitquest.marketplace.domain.Money;
 
 public record HealthPotion(BaseItem baseItem, Integer healingPower) implements Item, Potion {
