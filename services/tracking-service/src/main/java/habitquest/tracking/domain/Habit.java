@@ -60,8 +60,32 @@ public class Habit implements Aggregate<String> {
     return associatedQuestId;
   }
 
+  public Recurrence getRecurrence() {
+    return this.recurrence;
+  }
+
+  public LocalDate getLastAttendedDate() {
+    return lastAttendedDate;
+  }
+
   @Override
   public String getId() {
     return this.id;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setTags(List<Tag> tags) {
+    this.tags = tags;
+  }
+
+  public void setRecurrence(Recurrence recurrence) {
+    this.recurrence = recurrence;
   }
 }
