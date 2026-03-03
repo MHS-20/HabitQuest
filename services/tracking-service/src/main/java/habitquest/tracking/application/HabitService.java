@@ -35,7 +35,7 @@ public interface HabitService {
 
   Habit updateTags(String habitId, List<Tag> tags) throws HabitNotFoundException;
 
-  Habit updateRecurrence(String habitId, Recurrence recurrency) throws HabitNotFoundException;
+  Habit updateRecurrence(String habitId, Recurrence recurrence) throws HabitNotFoundException;
 
   Habit attendHabit(String habitId, LocalDate date) throws HabitNotFoundException;
   // endregion
