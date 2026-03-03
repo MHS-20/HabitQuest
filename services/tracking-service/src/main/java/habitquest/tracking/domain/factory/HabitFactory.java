@@ -19,22 +19,24 @@ public class HabitFactory implements Factory {
         Optional.empty());
   }
 
-  public static Habit createWeeklyHabit(DayOfWeek dayOfWeek) {
+  public static Habit createWeeklyHabit(
+      String avatarId, String title, String description, DayOfWeek dayOfWeek) {
     return new Habit(
         new UUIDGenerator().nextId(),
-        "Weekly Habit",
-        "This is a weekly habit",
-        "WEEKLY",
+        avatarId,
+        title,
+        description,
         new WeeklyRecurrence(dayOfWeek),
         Optional.empty());
   }
 
-  public static Habit createMonthlyHabit(Integer dayOfMonth) {
+  public static Habit createMonthlyHabit(
+      String avatarId, String title, String description, Integer dayOfMonth) {
     return new Habit(
         new UUIDGenerator().nextId(),
-        "Daily Habit",
-        "This is a daily habit",
-        "DAILY",
+        avatarId,
+        title,
+        description,
         new MonthlyRecurrence(dayOfMonth),
         Optional.empty());
   }
