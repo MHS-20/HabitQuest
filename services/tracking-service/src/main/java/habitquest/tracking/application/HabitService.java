@@ -11,9 +11,9 @@ import java.util.List;
 public interface HabitService {
   Habit createHabit(Habit habit);
 
-  Habit getHabitById(String id) throws HabitNotFoundException;
+  Habit getHabitById(String habitId) throws HabitNotFoundException;
 
-  void deleteHabitById(String id) throws HabitNotFoundException;
+  void deleteHabitById(String habitId) throws HabitNotFoundException;
 
   // region getters
   String getTitle(String habitId) throws HabitNotFoundException;

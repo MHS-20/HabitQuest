@@ -2,6 +2,8 @@ package habitquest.tracking.application;
 
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
+import habitquest.tracking.domain.events.HabitAttended;
+import habitquest.tracking.domain.events.HabitDeleted;
 import habitquest.tracking.domain.events.HabitObserver;
 import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
@@ -23,16 +25,19 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit createHabit(Habit habit) {
-    return null;
+    return habitRepository.save(habit);
   }
 
   @Override
-  public Habit getHabitById(String id) throws HabitNotFoundException {
-    return null;
+  public Habit getHabitById(String habitId) throws HabitNotFoundException {
+    return habitRepository.findById(habitId);
   }
 
   @Override
-  public void deleteHabitById(String id) throws HabitNotFoundException {}
+  public void deleteHabitById(String habitId) throws HabitNotFoundException {
+    habitRepository.deleteById(habitId);
+    habitObserver.notifyHabitEvent(new HabitDeleted(habitId));
+  }
 
   @Override
   public String getTitle(String habitId) throws HabitNotFoundException {
@@ -97,6 +102,7 @@ public class HabitServiceImpl implements HabitService {
     Habit habit = habitRepository.findById(habitId);
     habit.attendHabit(date);
     habitRepository.save(habit);
+    habitObserver.notifyHabitEvent(new HabitAttended(habit));
     return habit;
   }
 }
