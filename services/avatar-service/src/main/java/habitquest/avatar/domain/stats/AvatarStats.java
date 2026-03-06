@@ -34,14 +34,14 @@ public class AvatarStats implements Aggregate<String> {
   }
 
   public void incrementStrength() {
-    this.strength.increment();
+    this.strength = this.strength.increment();
   }
 
   public void incrementDefense() {
-    this.defense.increment();
+    this.defense = this.defense.increment();
   }
 
   public void incrementIntelligence() {
-    this.intelligence.increment();
+    this.intelligence = this.intelligence.increment();
   }
 }

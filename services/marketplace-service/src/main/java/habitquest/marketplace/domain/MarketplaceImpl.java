@@ -78,13 +78,13 @@ public class MarketplaceImpl implements Marketplace {
   }
 
   @Override
-  public Optional<Item> getItemByName(String itemName) {
+  public Optional<Item> getItem(String itemName) {
     return items.stream().filter(item -> item.name().equals(itemName)).findFirst();
   }
 
   @Override
   public Money buyItem(String itemName) {
-    Optional<Item> itemOpt = getItemByName(itemName);
+    Optional<Item> itemOpt = getItem(itemName);
     if (itemOpt.isEmpty()) {
       throw new IllegalArgumentException("Item not found: " + itemName);
     }
@@ -94,7 +94,7 @@ public class MarketplaceImpl implements Marketplace {
 
   @Override
   public Money sellItem(String itemName) {
-    Optional<Item> itemOpt = getItemByName(itemName);
+    Optional<Item> itemOpt = getItem(itemName);
     if (itemOpt.isEmpty()) {
       throw new IllegalArgumentException("Item not found: " + itemName);
     }
