@@ -18,7 +18,7 @@ public interface Marketplace extends Aggregate<String> {
 
   List<ManaPotion> getManaPotions();
 
-  Optional<Item> getItemByName(String itemName);
+  Optional<Item> getItem(String itemName);
 
   Money buyItem(String itemName);
 

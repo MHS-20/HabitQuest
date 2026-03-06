@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface AvatarRepository extends Repository {
   Avatar save(Avatar avatar);
 
-  Optional<Avatar> findById(String id) throws AvatarNotFoundExpection;
+  Optional<Avatar> findById(String id);
 
-  void deleteById(String id) throws AvatarNotFoundExpection;
+  void deleteById(String id);
 }
