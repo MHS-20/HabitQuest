@@ -13,22 +13,10 @@ public class AvatarObserverImpl implements AvatarObserver {
   @Override
   public void notifyAvaterEvent(AvatarEvent event) {
     switch (event) {
-      case LevelUpped l -> handleLevelUpped(l);
-      case Dead d -> handleDead(d);
-      case SkillPointAssigned s -> handleSkillPointAssigned(s);
+      case LevelUpped e -> avatarNotifier.notifyLevelUpped(e);
+      case Dead e -> avatarNotifier.notifyDead(e);
+      case SkillPointAssigned e -> avatarNotifier.notifySkillPointAssigned(e);
       default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass());
     }
-  }
-
-  private void handleLevelUpped(LevelUpped event) {
-    avatarNotifier.notifyLevelUpped(event);
-  }
-
-  private void handleDead(Dead event) {
-    avatarNotifier.notifyDead(event);
-  }
-
-  private void handleSkillPointAssigned(SkillPointAssigned event) {
-    avatarNotifier.notifySkillPointAssigned(event);
   }
 }

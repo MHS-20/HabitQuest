@@ -11,23 +11,23 @@ import java.util.Optional;
 public interface GuildService {
   String createGuild(String name, String creatorAvatarId, String creatorNickname);
 
-  Optional<Guild> getGuild(String guildId) throws GuildNotFoundException;
+  Guild getGuild(String guildId) throws GuildNotFoundException;
 
   void updateGuild(String guildId, Guild request) throws GuildNotFoundException;
 
   void deleteGuild(String guildId) throws GuildNotFoundException;
 
-  List<GuildMember> getMembers(String guildId);
+  List<GuildMember> getMembers(String guildId) throws GuildNotFoundException;
 
-  void leaveGuild(String guildId, String memberId);
+  void leaveGuild(String guildId, String memberId) throws GuildNotFoundException;
 
-  void addMember(String guildId, GuildMember member);
+  void addMember(String guildId, GuildMember member) throws GuildNotFoundException;
 
-  void removeMember(String guildId, String memberId);
+  void removeMember(String guildId, String memberId) throws GuildNotFoundException;
 
-  void promoteMember(String guildId, String memberId, GuildRole newRole);
+  void promoteMember(String guildId, String memberId, GuildRole newRole) throws GuildNotFoundException;
 
-  Integer getGlobalRank(String guildId);
+  Integer getGlobalRank(String guildId) throws GuildNotFoundException;
 
   List<Guild> getGuildLeaderboard();
 }

@@ -123,28 +123,28 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void removeItem(String avatarId, Item item) {
+  public void removeItem(String avatarId, Item item) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.removeItemFromInventory(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void equipItem(String avatarId, Item item) {
+  public void equipItem(String avatarId, Item item) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.equipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void unequipItem(String avatarId, Item item) {
+  public void unequipItem(String avatarId, Item item) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.unequipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void applyDamage(String avatarId, Integer amount) {
+  public void applyDamage(String avatarId, Integer amount) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.takeDamage(amount);
     if (avatar.getLevel().currentExperience().amount() == 0) {
@@ -154,28 +154,28 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void healAvatar(String avatarId, Integer amount) {
+  public void healAvatar(String avatarId, Integer amount) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.heal(amount);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void spendMana(String avatarId, Integer amount) {
+  public void spendMana(String avatarId, Integer amount) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.spendMana(amount);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void restoreMana(String avatarId, Integer amount) {
+  public void restoreMana(String avatarId, Integer amount) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     avatar.restoreMana(amount);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void grantExperience(String avatarId, Integer amount) {
+  public void grantExperience(String avatarId, Integer amount) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
     Level levelBefore = avatar.getLevel();
     avatar.gainExperience(amount);

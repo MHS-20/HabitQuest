@@ -11,11 +11,10 @@ import java.util.Optional;
 public interface BattleRepository extends Repository {
   Battle save(Battle battle);
 
-  Optional<Battle> findById(String id) throws BattleNotFoundException;
+  Optional<Battle> findById(String id);
 
-  void deleteById(String id) throws BattleNotFoundException;
+  void deleteById(String id);
 
-  List<Battle> findByGuildId(String guildId);
-
+  Optional<Battle> findByGuildId(String guildId);
   List<Battle> findByStatus(BattleStatus status);
 }

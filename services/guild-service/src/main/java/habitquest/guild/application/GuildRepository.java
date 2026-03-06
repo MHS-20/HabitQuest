@@ -12,7 +12,7 @@ public interface GuildRepository extends Repository {
 
   Optional<Guild> findById(String id);
 
-  void deleteById(String id) throws GuildNotFoundException;
+  void deleteById(String id);
 
   List<Guild> findAllSortedByRank();
 }
