@@ -13,37 +13,37 @@ public interface BattleService {
   // --- Battle lifecycle ---
   String createBattle(String guildId, BossEnemy boss, Integer numOfTurns);
 
-  Battle getBattleById(String battleId);
+  Battle getBattleById(String battleId) throws BattleNotFoundException;
 
   void deleteBattle(String battleId);
 
   // --- Query ---
-  List<Battle> getBattlesByGuild(String guildId);
+  Battle getBattleByGuild(String guildId) throws BattleNotFoundException;
 
-  boolean hasBattleInProgress(String guildId);
+  boolean hasBattleInProgress(String guildId) throws BattleNotFoundException;
 
   // --- Boss info ---
-  String getGuildId(String battleId);
+  String getGuildId(String battleId) throws BattleNotFoundException;
 
-  BossEnemy getBoss(String battleId);
+  BossEnemy getBoss(String battleId) throws BattleNotFoundException;
 
-  BossStatus getBossRemainingHealth(String battleId);
+  BossStatus getBossRemainingHealth(String battleId) throws BattleNotFoundException;
 
   // --- Turn management ---
-  Integer getCurrentTurn(String battleId);
+  Integer getCurrentTurn(String battleId) throws BattleNotFoundException;
 
-  Integer getNumOfTurns(String battleId);
+  Integer getNumOfTurns(String battleId) throws BattleNotFoundException;
 
-  void nextTurn(String battleId);
+  void nextTurn(String battleId) throws BattleNotFoundException;
 
-  void increaseNumOfTurn(String battleId);
+  void increaseNumOfTurn(String battleId) throws BattleNotFoundException;
 
   // --- Combat ---
-  void dealDamage(String battleId, Integer damage);
+  void dealDamage(String battleId, Integer damage) throws BattleNotFoundException;
 
-  BattleStatus getBattleStatus(String battleId);
+  BattleStatus getBattleStatus(String battleId) throws BattleNotFoundException;
 
-  boolean isBattleOver(String battleId);
+  boolean isBattleOver(String battleId) throws BattleNotFoundException;
 
-  boolean isBattleWon(String battleId);
+  boolean isBattleWon(String battleId) throws BattleNotFoundException;
 }

@@ -23,58 +23,51 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   // -------------------------------------------------
-  // Private utility
-  // -------------------------------------------------
-
-  private Marketplace loadMarketplace(String marketplaceId) {
-    return marketplaceRepository
-        .findById(marketplaceId)
-        .orElseThrow(() -> new MarketplaceNotFoundException(marketplaceId));
-  }
-
-  // -------------------------------------------------
   // Queries
   // -------------------------------------------------
 
   @Override
   public Marketplace getMarketplace(String marketplaceId) {
-    return loadMarketplace(marketplaceId);
+    return marketplaceRepository
+        .findById(marketplaceId)
+        .orElseThrow(() -> new MarketplaceNotFoundException(marketplaceId));
   }
 
   @Override
-  public List<Item> getItems(String marketplaceId) {
-    return loadMarketplace(marketplaceId).getItems();
+  public List<Item> getItems(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getItems();
   }
 
   @Override
-  public List<Armor> getArmors(String marketplaceId) {
-    return loadMarketplace(marketplaceId).getArmors();
+  public List<Armor> getArmors(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getArmors();
   }
 
   @Override
-  public List<Weapon> getWeapons(String marketplaceId) {
-    return loadMarketplace(marketplaceId).getWeapons();
+  public List<Weapon> getWeapons(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getWeapons();
   }
 
   @Override
-  public List<Potion> getPotions(String marketplaceId) {
-    return loadMarketplace(marketplaceId).getPotions();
+  public List<Potion> getPotions(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getPotions();
   }
 
   @Override
-  public List<HealthPotion> getHealthPotions(String marketplaceId) {
-    return loadMarketplace(marketplaceId).getHealthPotions();
+  public List<HealthPotion> getHealthPotions(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getHealthPotions();
   }
 
   @Override
-  public List<ManaPotion> getManaPotions(String marketplaceId) {
-    return loadMarketplace(marketplaceId).getManaPotions();
+  public List<ManaPotion> getManaPotions(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getManaPotions();
   }
 
   @Override
-  public Item getItemByName(String marketplaceId, String itemName) {
-    return loadMarketplace(marketplaceId)
-        .getItemByName(itemName)
+  public Item getItemByName(String marketplaceId, String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException {
+    return getMarketplace(marketplaceId)
+        .getItem(itemName)
         .orElseThrow(() -> new ItemNotFoundException(marketplaceId, itemName));
   }
 
@@ -83,16 +76,18 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   // -------------------------------------------------
 
   @Override
-  public void buyItem(String marketplaceId, String itemName, String avatarId) {
-    Marketplace marketplace = loadMarketplace(marketplaceId);
+  public void buyItem(String marketplaceId, String itemName, String avatarId)
+      throws MarketplaceNotFoundException {
+    Marketplace marketplace = getMarketplace(marketplaceId);
     marketplace.buyItem(itemName);
     marketplaceRepository.save(marketplace);
     marketplaceObserver.notifyMarketplaceEvent(new ItemBought(marketplaceId, itemName, avatarId));
   }
 
   @Override
-  public void sellItem(String marketplaceId, String itemName, String avatarId) {
-    Marketplace marketplace = loadMarketplace(marketplaceId);
+  public void sellItem(String marketplaceId, String itemName, String avatarId)
+      throws MarketplaceNotFoundException {
+    Marketplace marketplace = getMarketplace(marketplaceId);
     marketplace.sellItem(itemName);
     marketplaceRepository.save(marketplace);
     marketplaceObserver.notifyMarketplaceEvent(new ItemSold(marketplaceId, itemName, avatarId));
