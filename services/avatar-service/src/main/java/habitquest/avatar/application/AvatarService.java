@@ -61,7 +61,7 @@ public interface AvatarService {
 
   void restoreMana(String avatarId, Integer amount) throws AvatarNotFoundExpection;
 
-  // --- Progressione ---
+  // region Progression
   void grantExperience(String avatarId, Integer amount) throws AvatarNotFoundExpection;
 
   void increaseStrength(String avatarId) throws AvatarNotFoundExpection;
@@ -69,4 +69,5 @@ public interface AvatarService {
   void increaseDefense(String avatarId) throws AvatarNotFoundExpection;
 
   void increaseIntelligence(String avatarId) throws AvatarNotFoundExpection;
+  // endregion
 }
