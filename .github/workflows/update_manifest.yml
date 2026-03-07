@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
+      pull-requests: write
     env:
       APP_IMAGE: ${{ github.event.client_payload.app_image }}
       APP_NAME: ${{ github.event.client_payload.app_name }}
