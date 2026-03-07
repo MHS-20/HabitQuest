@@ -5,6 +5,7 @@ import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
 import habitquest.quest.domain.events.QuestCreated;
 import habitquest.quest.domain.events.QuestObserver;
+import habitquest.quest.domain.factory.QuestFactory;
 import java.time.Duration;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class QuestServiceImpl implements QuestService {
 
   @Override
   public Quest createQuest(String name) {
-    Quest quest = new Quest(name);
+    Quest quest = QuestFactory.createQuest(name);
     questRepository.save(quest);
     questObserver.notifyQuestEvent(new QuestCreated(quest));
     return quest;
