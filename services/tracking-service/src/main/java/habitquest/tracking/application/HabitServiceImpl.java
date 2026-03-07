@@ -30,7 +30,7 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit getHabitById(String habitId) throws HabitNotFoundException {
-    return habitRepository.findById(habitId);
+    return habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
   }
 
   @Override
@@ -41,32 +41,48 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public String getTitle(String habitId) throws HabitNotFoundException {
-    return habitRepository.findById(habitId).getTitle();
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId))
+        .getTitle();
   }
 
   @Override
   public String getDescription(String habitId) throws HabitNotFoundException {
-    return habitRepository.findById(habitId).getDescription();
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId))
+        .getDescription();
   }
 
   @Override
   public List<Tag> getTags(String habitId) throws HabitNotFoundException {
-    return habitRepository.findById(habitId).getTags();
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId))
+        .getTags();
   }
 
   @Override
   public Recurrence getRecurrence(String habitId) throws HabitNotFoundException {
-    return habitRepository.findById(habitId).getRecurrence();
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId))
+        .getRecurrence();
   }
 
   @Override
   public LocalDate getLastAttendedDate(String habitId) throws HabitNotFoundException {
-    return habitRepository.findById(habitId).getLastAttendedDate();
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId))
+        .getLastAttendedDate();
   }
 
   @Override
   public Habit updateTitle(String habitId, String title) throws HabitNotFoundException {
-    Habit habit = habitRepository.findById(habitId);
+    Habit habit =
+        habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setTitle(title);
     habitRepository.save(habit);
     return habit;
@@ -74,7 +90,8 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit updateDescription(String habitId, String description) throws HabitNotFoundException {
-    Habit habit = habitRepository.findById(habitId);
+    Habit habit =
+        habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setDescription(description);
     habitRepository.save(habit);
     return habit;
@@ -82,7 +99,8 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit updateTags(String habitId, List<Tag> tags) throws HabitNotFoundException {
-    Habit habit = habitRepository.findById(habitId);
+    Habit habit =
+        habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setTags(tags);
     habitRepository.save(habit);
     return habit;
@@ -91,7 +109,8 @@ public class HabitServiceImpl implements HabitService {
   @Override
   public Habit updateRecurrence(String habitId, Recurrence recurrence)
       throws HabitNotFoundException {
-    Habit habit = habitRepository.findById(habitId);
+    Habit habit =
+        habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setRecurrence(recurrence);
     habitRepository.save(habit);
     return habit;
@@ -99,7 +118,8 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit attendHabit(String habitId, LocalDate date) throws HabitNotFoundException {
-    Habit habit = habitRepository.findById(habitId);
+    Habit habit =
+        habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.attendHabit(date);
     habitRepository.save(habit);
     habitObserver.notifyHabitEvent(new HabitAttended(habit));
