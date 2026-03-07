@@ -18,6 +18,12 @@ public class Quest implements Aggregate<String> {
     this.habits = new ArrayList<>();
   }
 
+  public Quest(String id, String name) {
+    this.id = id;
+    this.name = name;
+    this.habits = new ArrayList<>();
+  }
+
   public String getName() {
     return name;
   }
