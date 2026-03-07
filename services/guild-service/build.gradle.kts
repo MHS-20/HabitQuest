@@ -31,5 +31,5 @@ dependencies {
     testImplementation("com.github.dasniko:testcontainers-keycloak:${testKeycloakVersion}")
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.testcontainers:testcontainers-r2dbc")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.2.1")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 }
