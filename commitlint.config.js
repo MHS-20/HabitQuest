@@ -5,6 +5,8 @@ module.exports = {
     (commit) => commit.includes('dependabot')
   ],
   rules: {
-    'body-max-line-length': [0, 'always', 300],
+    'body-max-line-length': [0, 'always', 1000],
+    'footer-max-line-length': [0, 'always', 1000],
+    'header-max-length': [0, 'always', 1000],
   },
 };
