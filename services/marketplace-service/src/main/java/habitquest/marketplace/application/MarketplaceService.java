@@ -7,29 +7,26 @@ import java.util.List;
 
 @InBoundPort
 public interface MarketplaceService {
-  Marketplace getMarketplace(String marketplaceId);
+  Marketplace getMarketplace(String marketplaceId) throws MarketplaceNotFoundException;
 
-  List<Item> getItems(String marketplaceId);
+  List<Item> getItems(String marketplaceId) throws MarketplaceNotFoundException;
 
-  void updateItems(String marketplaceId, List<Item> items);
+  List<Armor> getArmors(String marketplaceId) throws MarketplaceNotFoundException;
 
-  List<Armor> getArmors(String marketplaceId);
+  List<Weapon> getWeapons(String marketplaceId) throws MarketplaceNotFoundException;
 
-  void addArmors(String marketplaceId, List<Armor> armors);
+  List<Potion> getPotions(String marketplaceId) throws MarketplaceNotFoundException;
 
-  List<Weapon> getWeapons(String marketplaceId);
+  List<HealthPotion> getHealthPotions(String marketplaceId) throws MarketplaceNotFoundException;
 
-  void addWeapons(String marketplaceId, List<Weapon> weapons);
+  List<ManaPotion> getManaPotions(String marketplaceId) throws MarketplaceNotFoundException;
 
-  List<Potion> getPotions(String marketplaceId);
+  Item getItemByName(String marketplaceId, String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException;
 
-  void addPotions(String marketplaceId, List<Potion> potions);
+  void buyItem(String marketplaceId, String itemName, String avatarId)
+      throws MarketplaceNotFoundException;
 
-  List<HealthPotion> getHealthPotions(String marketplaceId);
-
-  void addHealthPotions(String marketplaceId, List<HealthPotion> healthPotions);
-
-  List<ManaPotion> getManaPotions(String marketplaceId);
-
-  void addManaPotions(String marketplaceId, List<ManaPotion> manaPotions);
+  void sellItem(String marketplaceId, String itemName, String avatarId)
+      throws MarketplaceNotFoundException;
 }

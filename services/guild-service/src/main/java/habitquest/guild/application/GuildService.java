@@ -5,10 +5,11 @@ import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import java.util.List;
+import java.util.Optional;
 
 @InBoundPort
 public interface GuildService {
-  String createGuild(String name);
+  String createGuild(String name, String creatorAvatarId, String creatorNickname);
 
   Guild getGuild(String guildId) throws GuildNotFoundException;
 
@@ -16,13 +17,17 @@ public interface GuildService {
 
   void deleteGuild(String guildId) throws GuildNotFoundException;
 
-  List<GuildMember> getMembers(String guildId);
+  List<GuildMember> getMembers(String guildId) throws GuildNotFoundException;
 
-  Integer getGlobalRank(String guildId);
+  void leaveGuild(String guildId, String memberId) throws GuildNotFoundException;
 
-  void addMembers(String guildId, List<GuildMember> members);
+  void addMember(String guildId, GuildMember member) throws GuildNotFoundException;
 
-  void removeMembers(String guildId, List<String> memberIds);
+  void removeMember(String guildId, String memberId) throws GuildNotFoundException;
 
-  void promoteMember(String guildId, String memberId, GuildRole newRole);
+  void promoteMember(String guildId, String memberId, GuildRole newRole) throws GuildNotFoundException;
+
+  Integer getGlobalRank(String guildId) throws GuildNotFoundException;
+
+  List<Guild> getGuildLeaderboard();
 }

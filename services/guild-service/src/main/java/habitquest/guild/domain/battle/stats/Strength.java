@@ -7,11 +7,6 @@ public record Strength(BaseStat stat) implements Stat {
   }
 
   @Override
-  public Strength increment() {
-    return new Strength(stat.increment());
-  }
-
-  @Override
   public Integer value() {
     return stat.value();
   }
