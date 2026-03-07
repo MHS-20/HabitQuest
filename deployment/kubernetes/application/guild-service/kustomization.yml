@@ -17,8 +17,8 @@ configMapGenerator:
 
 images:
 - name: guild-service
-  newName: ghcr.io/MHS-20/guild-service
-  newTag: 302d9b022193793b486db08f9ef1492946dbdef9
+  newName: ghcr.io/ghcr.io/mhs-20/habitquest/guild-service/guild-service
+  newTag: guild-v1.1.0
 
 replicas:
 - count: 2
