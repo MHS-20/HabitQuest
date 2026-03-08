@@ -14,7 +14,8 @@ import org.testcontainers.utility.DockerImageName;
 class MarketplaceServiceApplicationTests {
 
   @Container
-  static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
+  private static KafkaContainer kafka =
+      new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -22,6 +23,10 @@ class MarketplaceServiceApplicationTests {
   }
 
   @MockitoBean private MarketplaceRepository marketplaceRepository;
+
+  public KafkaContainer getKafka() {
+    return kafka;
+  }
 
   @Test
   void contextLoads() {}

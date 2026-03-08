@@ -108,8 +108,10 @@ subprojects {
 tasks.register("checkAll") {
     val appProjects = subprojects.filter { it.path != ":services" }
     dependsOn(appProjects.map { "${it.path}:checkstyleMain" })
+    dependsOn(appProjects.map { "${it.path}:checkstyleTest" })
     dependsOn(appProjects.map { "${it.path}:pmdMain" })
-     dependsOn(appProjects.map { "${it.path}:spotlessApply" })
+    dependsOn(appProjects.map { "${it.path}:pmdTest" })
+    dependsOn(appProjects.map { "${it.path}:spotlessApply" })
     // dependsOn(appProjects.map { "${it.path}:spotbugsMain" })
     dependsOn(appProjects.map { "${it.path}:test" })
 }
