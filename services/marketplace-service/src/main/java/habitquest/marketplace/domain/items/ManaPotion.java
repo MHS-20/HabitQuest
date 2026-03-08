@@ -2,7 +2,7 @@ package habitquest.marketplace.domain.items;
 
 import habitquest.marketplace.domain.Money;
 
-public record ManaPotion(BaseItem baseItem, Integer restoringPower) implements Item {
+public record ManaPotion(BaseItem baseItem, Integer restoringPower) implements Item, Potion {
   public ManaPotion(
       String name, String description, Integer restoringPower, Money price, Level requiredLevel) {
     this(new BaseItem(name, description, price, requiredLevel), restoringPower);
