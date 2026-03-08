@@ -1,6 +1,7 @@
 package habitquest.guild.domain.guild;
 
 import common.ddd.Aggregate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Guild implements Aggregate<String> {
@@ -12,6 +13,7 @@ public class Guild implements Aggregate<String> {
   public Guild(String id, String name, GuildMember leader) {
     this.id = id;
     this.name = name;
+    this.members = new ArrayList<>();
     this.members.add(leader);
     this.globalRank = 0;
   }
