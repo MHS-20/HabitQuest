@@ -1,7 +1,9 @@
 package habitquest.guild.application;
 
 import habitquest.guild.domain.events.battleEvents.*;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BattleObserverImpl implements BattleObserver {
 
   private final BattleNotifier battleNotifier;
