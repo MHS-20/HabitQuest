@@ -16,6 +16,11 @@ class GuildTest {
   private static final String GUILD_ID = "guild-1";
   private static final String GUILD_NAME = "Guild of Heroes";
   private static final String LEADER_ID = "avatar-1";
+  private static final String MEMBER_ID = "avatar-2";
+  private static final String MEMBER_ID_2 = "avatar-3";
+  private static final String MEMBER_NICK = "Nick2";
+  private static final String MEMBER_NICK_2 = "Nick3";
+  private static final String UNKNOWN_MEMBER_ID = "non-existent-id";
   private static final GuildRole LEADER_ROLE = new GuildRole("Leader");
   private static final GuildRole MEMBER_ROLE = new GuildRole("Member");
   private static final GuildRole OFFICER_ROLE = new GuildRole("Officer");
@@ -60,19 +65,19 @@ class GuildTest {
     @Test
     @DisplayName("should add a new member to the guild")
     void shouldAddNewMember() {
-      GuildMember newMember = new GuildMember("avatar-2", "NewGuy", MEMBER_ROLE);
+      GuildMember newMember = new GuildMember(MEMBER_ID, "NewGuy", MEMBER_ROLE);
 
       guild.addMember(newMember);
 
       assertThat(guild.getMembers()).hasSize(2);
-      assertThat(guild.getMembers()).extracting(GuildMember::getId).contains("avatar-2");
+      assertThat(guild.getMembers()).extracting(GuildMember::getId).contains(MEMBER_ID);
     }
 
     @Test
     @DisplayName("should allow adding multiple members")
     void shouldAddMultipleMembers() {
-      guild.addMember(new GuildMember("avatar-2", "Nick2", MEMBER_ROLE));
-      guild.addMember(new GuildMember("avatar-3", "Nick3", MEMBER_ROLE));
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+      guild.addMember(new GuildMember(MEMBER_ID_2, MEMBER_NICK_2, MEMBER_ROLE));
 
       assertThat(guild.getMembers()).hasSize(3);
     }
@@ -85,30 +90,32 @@ class GuildTest {
     @Test
     @DisplayName("should remove an existing member by id")
     void shouldRemoveExistingMember() {
-      GuildMember member = new GuildMember("avatar-2", "Nick2", MEMBER_ROLE);
+      GuildMember member = new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE);
       guild.addMember(member);
 
-      guild.removeMember("avatar-2");
+      guild.removeMember(MEMBER_ID);
 
-      assertThat(guild.getMembers()).extracting(GuildMember::getId).doesNotContain("avatar-2");
+      assertThat(guild.getMembers()).extracting(GuildMember::getId).doesNotContain(MEMBER_ID);
     }
 
     @Test
     @DisplayName("should not affect other members when removing one")
     void shouldNotAffectOtherMembers() {
-      guild.addMember(new GuildMember("avatar-2", "Nick2", MEMBER_ROLE));
-      guild.addMember(new GuildMember("avatar-3", "Nick3", MEMBER_ROLE));
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+      guild.addMember(new GuildMember(MEMBER_ID_2, MEMBER_NICK_2, MEMBER_ROLE));
 
-      guild.removeMember("avatar-2");
+      guild.removeMember(MEMBER_ID);
 
       assertThat(guild.getMembers()).hasSize(2);
-      assertThat(guild.getMembers()).extracting(GuildMember::getId).contains(LEADER_ID, "avatar-3");
+      assertThat(guild.getMembers())
+          .extracting(GuildMember::getId)
+          .contains(LEADER_ID, MEMBER_ID_2);
     }
 
     @Test
     @DisplayName("should do nothing when member id does not exist")
     void shouldDoNothingForUnknownMemberId() {
-      guild.removeMember("non-existent-id");
+      guild.removeMember(UNKNOWN_MEMBER_ID);
 
       assertThat(guild.getMembers()).hasSize(1);
     }
@@ -143,14 +150,14 @@ class GuildTest {
     @Test
     @DisplayName("should change the role of the target member")
     void shouldChangeRoleOfTargetMember() {
-      GuildMember member = new GuildMember("avatar-2", "Nick2", MEMBER_ROLE);
+      GuildMember member = new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE);
       guild.addMember(member);
 
-      guild.promoteMember("avatar-2", OFFICER_ROLE);
+      guild.promoteMember(MEMBER_ID, OFFICER_ROLE);
 
       GuildMember promoted =
           guild.getMembers().stream()
-              .filter(m -> m.getId().equals("avatar-2"))
+              .filter(m -> m.getId().equals(MEMBER_ID))
               .findFirst()
               .orElseThrow();
       assertThat(promoted.getRole()).isEqualTo(OFFICER_ROLE);
@@ -159,9 +166,9 @@ class GuildTest {
     @Test
     @DisplayName("should not change roles of other members")
     void shouldNotAffectOtherMembersRoles() {
-      guild.addMember(new GuildMember("avatar-2", "Nick2", MEMBER_ROLE));
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
 
-      guild.promoteMember("avatar-2", OFFICER_ROLE);
+      guild.promoteMember(MEMBER_ID, OFFICER_ROLE);
 
       assertThat(leader.getRole()).isEqualTo(LEADER_ROLE);
     }
@@ -169,7 +176,7 @@ class GuildTest {
     @Test
     @DisplayName("should do nothing when member id does not exist")
     void shouldDoNothingForUnknownMemberId() {
-      guild.promoteMember("non-existent-id", OFFICER_ROLE);
+      guild.promoteMember(UNKNOWN_MEMBER_ID, OFFICER_ROLE);
 
       assertThat(guild.getMembers()).extracting(m -> m.getRole()).containsOnly(LEADER_ROLE);
     }

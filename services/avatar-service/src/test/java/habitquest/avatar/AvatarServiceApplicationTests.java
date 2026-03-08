@@ -14,11 +14,16 @@ import org.testcontainers.utility.DockerImageName;
 class AvatarServiceApplicationTests {
 
   @Container
-  static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
+  private static KafkaContainer kafka =
+      new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.cloud.stream.kafka.binder.brokers", kafka::getBootstrapServers);
+  }
+
+  public KafkaContainer getKafka() {
+    return kafka;
   }
 
   @MockitoBean private AvatarRepository avatarRepository;
