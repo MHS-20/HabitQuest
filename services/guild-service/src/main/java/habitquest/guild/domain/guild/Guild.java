@@ -5,11 +5,13 @@ import java.util.List;
 
 public class Guild implements Aggregate<String> {
   private final String id;
+  private String name;
   private List<GuildMember> members;
   private Integer globalRank;
 
-  public Guild(String id, GuildMember leader) {
+  public Guild(String id, String name, GuildMember leader) {
     this.id = id;
+    this.name = name;
     this.members.add(leader);
     this.globalRank = 0;
   }

@@ -9,7 +9,9 @@ import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
+import org.springframework.stereotype.Service;
 
+@Service
 public class BattleServiceImpl implements BattleService {
   private final BattleRepository battleRepository;
   private final BattleObserver battleObserver;
@@ -29,7 +31,7 @@ public class BattleServiceImpl implements BattleService {
   public String createBattle(String guildId, BossEnemy boss, Integer numOfTurns) {
     Battle battle = battleFactory.create(guildId, boss, numOfTurns);
     battleRepository.save(battle);
-    battleObserver.notifyBattleEvent(new BattleStarted(battle.getId()));
+    battleObserver.notifyBattleEvent(new BattleStarted(battle.getId(), battle.getGuildId()));
     return battle.getId();
   }
 
@@ -108,10 +110,12 @@ public class BattleServiceImpl implements BattleService {
     if (battle.getBattleStatus() == BattleStatus.WON) {
       var boss = this.getBoss(battleId);
       battleObserver.notifyBattleEvent(
-          new BattleWon(battleId, boss.experienceReward(), boss.moneyReward()));
+          new BattleWon(
+              battleId, battle.getGuildId(), boss.experienceReward(), boss.moneyReward()));
     } else {
       var boss = this.getBoss(battleId);
-      battleObserver.notifyBattleEvent(new BattleLost(battleId, boss.penalty()));
+      battleObserver.notifyBattleEvent(
+          new BattleLost(battleId, battle.getGuildId(), boss.penalty()));
     }
   }
 

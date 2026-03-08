@@ -1,7 +1,9 @@
 package habitquest.guild.application;
 
 import habitquest.guild.domain.events.guildEvents.*;
+import org.springframework.stereotype.Component;
 
+@Component
 public class GuildObserverImpl implements GuildObserver {
 
   private final GuildNotifier guildNotifier;
