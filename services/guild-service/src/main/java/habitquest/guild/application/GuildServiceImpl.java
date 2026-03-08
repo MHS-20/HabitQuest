@@ -6,7 +6,9 @@ import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class GuildServiceImpl implements GuildService {
   private final GuildFactory guildFactory;
   private final GuildRepository guildRepository;
@@ -24,7 +26,7 @@ public class GuildServiceImpl implements GuildService {
       throws GuildNotFoundException {
     var guild = guildFactory.create(name, creatorAvatarId, creatorNickname);
     guildRepository.save(guild);
-    guildObserver.notifyGuildEvent(new GuildCreated(guild.getId()));
+    guildObserver.notifyGuildEvent(new GuildCreated(guild.getId(), name));
     return guild.getId();
   }
 

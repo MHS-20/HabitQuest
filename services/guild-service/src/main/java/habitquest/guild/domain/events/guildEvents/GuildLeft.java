@@ -1,3 +1,3 @@
 package habitquest.guild.domain.events.guildEvents;
 
-public record GuildLeft(String guildId, String member) implements GuildEvent {}
+public record GuildLeft(String guildId, String memberId) implements GuildEvent {}
