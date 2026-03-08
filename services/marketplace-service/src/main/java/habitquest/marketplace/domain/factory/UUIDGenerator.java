@@ -1,7 +1,9 @@
 package habitquest.marketplace.domain.factory;
 
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UUIDGenerator implements IdGenerator {
   @Override
   public String nextId() {

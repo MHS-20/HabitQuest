@@ -4,7 +4,9 @@ import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
 import habitquest.marketplace.domain.events.MarketplaceEvent;
 import habitquest.marketplace.domain.events.MarketplaceObserver;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MarketplaceObserverImpl implements MarketplaceObserver {
 
   private final MarketplaceNotifier marketplaceNotifier;

@@ -7,7 +7,9 @@ import habitquest.marketplace.domain.events.MarketplaceObserver;
 import habitquest.marketplace.domain.factory.MarketplaceFactory;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MarketplaceServiceImpl implements MarketplaceService {
   private final MarketplaceRepository marketplaceRepository;
   private final MarketplaceObserver marketplaceObserver;

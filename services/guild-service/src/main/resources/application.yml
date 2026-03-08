@@ -10,6 +10,7 @@ spring:
     name: guild-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
+
   r2dbc:
     username: user
     password: password
@@ -18,12 +19,13 @@ spring:
       max-create-connection-time: 2s
       initial-size: 5
       max-size: 10
-#  flyway:
-#    user: ${spring.r2dbc.username}
-#    password: ${spring.r2dbc.password}
-#    url: jdbc:postgresql://localhost:5432/habitquestdb_guild
+  #  flyway:
+  #    user: ${spring.r2dbc.username}
+  #    password: ${spring.r2dbc.password}
+  #    url: jdbc:postgresql://localhost:5432/habitquestdb_guild
   config:
     import: ""
+
   cloud:
     config:
       enabled: false
@@ -38,12 +40,56 @@ spring:
         multiplier: 1.1
     function:
       definition: guild
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: user
-    password: password
-    connection-timeout: 5s
+
+    stream:
+      bindings:
+        guild-created-out-0:
+          destination: guild.created
+          content-type: application/json
+
+        guild-deleted-out-0:
+          destination: guild.deleted
+          content-type: application/json
+
+        guild-joined-out-0:
+          destination: guild.joined
+          content-type: application/json
+
+        guild-left-out-0:
+          destination: guild.left
+          content-type: application/json
+
+        guild-removed-out-0:
+          destination: guild.member-removed
+          content-type: application/json
+
+        guild-role-assigned-out-0:
+          destination: guild.role-assigned
+          content-type: application/json
+
+        guild-battle-started-out-0:
+          destination: guild.battle-started
+          content-type: application/json
+
+        guild-battle-won-out-0:
+          destination: guild.battle-won
+          content-type: application/json
+
+        guild-battle-lost-out-0:
+          destination: guild.battle-lost
+          content-type: application/json
+
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.StringSerializer
+            acks: all
+            retries: 3
+            enable.idempotence: true
+
   security:
     oauth2:
       resourceserver:
@@ -79,5 +125,5 @@ management:
     tags:
       application: ${spring.application.name}
 
-polar:
-  catalog-service-uri: "http://localhost:9001"
+avatar:
+  service-uri: "http://localhost:8080"
