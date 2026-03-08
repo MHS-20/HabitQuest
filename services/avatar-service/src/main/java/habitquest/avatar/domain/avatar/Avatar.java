@@ -120,14 +120,16 @@ public class Avatar implements Aggregate<String> {
     }
   }
 
-  public void takeDamage(Integer amount) {
+  public boolean takeDamage(Integer amount) {
     this.health = this.health.damage(new Health(amount));
-    if (this.health.isDead()) {
+    boolean died = this.health.isDead();
+    if (died) {
       this.mana = this.mana.resetMana();
       this.health = this.health.resetHealth();
       this.level = this.level.resetExperience();
       this.money = this.money.subtract(new Money(100));
     }
+    return died;
   }
 
   public void heal(Integer amount) {
