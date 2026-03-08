@@ -5,7 +5,6 @@ import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
-import java.util.List;
 
 @InBoundPort
 public interface BattleService {

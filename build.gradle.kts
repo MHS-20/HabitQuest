@@ -4,7 +4,7 @@ import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.jvm.tasks.Jar
 
 plugins {
-    id("org.springframework.boot") version "4.0.3" apply false
+    id("org.springframework.boot") version "3.5.0" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     id("com.diffplug.spotless") version "8.3.0" apply false
     // id("com.github.spotbugs") version "6.4.8" apply false
@@ -17,8 +17,9 @@ group = "habitquest"
 version = "0.0.1-SNAPSHOT"
 
 val otelVersion = "2.23.0"
-val springCloudVersion = "2025.0.0"
-val testcontainersVersion = "2.0.3"
+val springCloudVersion = "2024.0.1"
+val testcontainersVersion = "1.20.6"
+val testcontainersKafkaVersion = "1.20.6"
 val testKeycloakVersion by extra("4.1.1")
 
 allprojects {
@@ -48,6 +49,7 @@ subprojects {
     configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
         imports {
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
+            mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
         }
     }
 
@@ -61,7 +63,9 @@ subprojects {
         runtimeOnly("io.github.resilience4j:resilience4j-micrometer")
 
         testImplementation("org.springframework.boot:spring-boot-starter-test")
-        testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+        testImplementation("org.springframework.boot:spring-boot-testcontainers")
+        testImplementation("org.testcontainers:junit-jupiter")
+        testImplementation("org.testcontainers:kafka:$testcontainersKafkaVersion")
     }
 
     tasks.withType<Test> {

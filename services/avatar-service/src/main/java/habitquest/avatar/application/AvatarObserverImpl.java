@@ -1,7 +1,9 @@
 package habitquest.avatar.application;
 
 import habitquest.avatar.domain.events.*;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AvatarObserverImpl implements AvatarObserver {
 
   private final AvatarNotifier avatarNotifier;
