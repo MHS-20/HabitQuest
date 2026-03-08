@@ -6,7 +6,6 @@ import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import java.util.List;
-import java.util.Optional;
 
 public class GuildServiceImpl implements GuildService {
   private final GuildFactory guildFactory;
@@ -21,7 +20,8 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public String createGuild(String name, String creatorAvatarId, String creatorNickname) throws GuildNotFoundException {
+  public String createGuild(String name, String creatorAvatarId, String creatorNickname)
+      throws GuildNotFoundException {
     var guild = guildFactory.create(name, creatorAvatarId, creatorNickname);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new GuildCreated(guild.getId()));
@@ -86,7 +86,8 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public void promoteMember(String guildId, String memberId, GuildRole newRole) throws GuildNotFoundException {
+  public void promoteMember(String guildId, String memberId, GuildRole newRole)
+      throws GuildNotFoundException {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
     guild.promoteMember(memberId, newRole);

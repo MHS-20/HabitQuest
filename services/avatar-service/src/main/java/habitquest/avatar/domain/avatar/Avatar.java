@@ -160,7 +160,7 @@ public class Avatar implements Aggregate<String> {
     if (amount <= 0) {
       throw new IllegalArgumentException("Amount must be positive");
     }
-    if (this.money.isEnough(new Money(amount))) {
+    if (!this.money.isEnough(new Money(amount))) {
       throw new IllegalStateException("Not enough money");
     }
     this.money = this.money.subtract(new Money(amount));

@@ -54,7 +54,8 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public List<HealthPotion> getHealthPotions(String marketplaceId) throws MarketplaceNotFoundException {
+  public List<HealthPotion> getHealthPotions(String marketplaceId)
+      throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getHealthPotions();
   }
 

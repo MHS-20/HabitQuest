@@ -1,6 +1,7 @@
 package habitquest.avatar.domain.items;
 
 import common.ddd.Aggregate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,12 +9,13 @@ public class EquippedItems implements Aggregate<String> {
   private final String id;
   private List<Item> items;
 
-  public List<Item> getItems() {
-    return items;
-  }
-
   public EquippedItems(String id) {
     this.id = id;
+    this.items = new ArrayList<>();
+  }
+
+  public List<Item> getItems() {
+    return items;
   }
 
   public void equip(Item item) {

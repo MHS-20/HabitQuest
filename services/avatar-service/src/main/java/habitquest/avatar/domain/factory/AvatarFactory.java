@@ -5,7 +5,9 @@ import habitquest.avatar.domain.spells.Blizzard;
 import habitquest.avatar.domain.spells.FireBall;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.spells.Thunder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AvatarFactory {
   private final IdGenerator idGenerator;
 

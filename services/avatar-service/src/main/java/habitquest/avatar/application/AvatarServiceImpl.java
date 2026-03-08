@@ -8,8 +8,10 @@ import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.stats.AvatarStats;
+import org.springframework.stereotype.Service;
 
 @Adapter
+@Service
 public class AvatarServiceImpl implements AvatarService {
 
   private final AvatarFactory avatarFactory;

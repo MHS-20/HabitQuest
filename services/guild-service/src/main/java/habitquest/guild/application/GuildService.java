@@ -5,7 +5,6 @@ import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import java.util.List;
-import java.util.Optional;
 
 @InBoundPort
 public interface GuildService {
@@ -25,7 +24,8 @@ public interface GuildService {
 
   void removeMember(String guildId, String memberId) throws GuildNotFoundException;
 
-  void promoteMember(String guildId, String memberId, GuildRole newRole) throws GuildNotFoundException;
+  void promoteMember(String guildId, String memberId, GuildRole newRole)
+      throws GuildNotFoundException;
 
   Integer getGlobalRank(String guildId) throws GuildNotFoundException;
 
