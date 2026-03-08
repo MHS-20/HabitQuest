@@ -9,7 +9,6 @@ import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
-import java.util.List;
 
 public class BattleServiceImpl implements BattleService {
   private final BattleRepository battleRepository;
@@ -46,11 +45,12 @@ public class BattleServiceImpl implements BattleService {
         .orElseThrow(() -> new BattleNotFoundException(battleId));
   }
 
-
   // --- Query ---
   @Override
   public Battle getBattleByGuild(String guildId) throws BattleNotFoundException {
-    return battleRepository.findByGuildId(guildId).orElseThrow(() -> new BattleNotFoundException("No battle found for guildId: " + guildId));
+    return battleRepository
+        .findByGuildId(guildId)
+        .orElseThrow(() -> new BattleNotFoundException("No battle found for guildId: " + guildId));
   }
 
   @Override

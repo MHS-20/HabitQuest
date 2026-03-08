@@ -1,3 +1,36 @@
 spring:
   application:
     name: avatar-service
+
+  cloud:
+    stream:
+      bindings:
+        avatar-level-upped-out-0:
+          destination: avatar.level-upped
+          content-type: application/json
+
+        avatar-dead-out-0:
+          destination: avatar.dead
+          content-type: application/json
+
+        avatar-skill-point-out-0:
+          destination: avatar.skill-point-assigned
+          content-type: application/json
+
+      kafka:
+        binder:
+          brokers: localhost:9092          # override in production via env var
+          auto-create-topics: true
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.StringSerializer
+            acks: all
+            retries: 3
+            enable.idempotence: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    habitquest.avatar: DEBUG

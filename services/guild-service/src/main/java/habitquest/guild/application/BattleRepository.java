@@ -16,5 +16,6 @@ public interface BattleRepository extends Repository {
   void deleteById(String id);
 
   Optional<Battle> findByGuildId(String guildId);
+
   List<Battle> findByStatus(BattleStatus status);
 }

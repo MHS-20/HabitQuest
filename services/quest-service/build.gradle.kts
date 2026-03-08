@@ -10,7 +10,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-web")
 
     // --- Utilities ---
     implementation("org.springframework.retry:spring-retry")
@@ -27,7 +27,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("com.squareup.okhttp3:mockwebserver")
     testImplementation("com.github.dasniko:testcontainers-keycloak:${rootProject.extra["testKeycloakVersion"]}")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 }
