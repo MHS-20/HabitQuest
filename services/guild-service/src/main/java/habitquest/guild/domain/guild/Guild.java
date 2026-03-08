@@ -22,6 +22,10 @@ public class Guild implements Aggregate<String> {
     return this.id;
   }
 
+  public String getName() {
+    return this.name;
+  }
+
   public List<GuildMember> getMembers() {
     return this.members;
   }

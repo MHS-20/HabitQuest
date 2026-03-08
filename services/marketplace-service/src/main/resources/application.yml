@@ -18,10 +18,10 @@ spring:
       max-create-connection-time: 2s
       initial-size: 5
       max-size: 10
-#  flyway:
-#    user: ${spring.r2dbc.username}
-#    password: ${spring.r2dbc.password}
-#    url: jdbc:postgresql://localhost:5432/habitquestdb_marketplace
+  #  flyway:
+  #    user: ${spring.r2dbc.username}
+  #    password: ${spring.r2dbc.password}
+  #    url: jdbc:postgresql://localhost:5432/habitquestdb_marketplace
   config:
     import: ""
   cloud:
@@ -36,8 +36,26 @@ spring:
         initial-interval: 1000
         max-interval: 2000
         multiplier: 1.1
-    # function:
-    #   definition: marketplace
+    stream:
+      bindings:
+        marketplace-item-bought-out-0:
+          destination: marketplace.item-bought
+          content-type: application/json
+
+        marketplace-item-sold-out-0:
+          destination: marketplace.item-sold
+          content-type: application/json
+
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.StringSerializer
+            acks: all
+            retries: 3
+            enable.idempotence: true
   rabbitmq:
     host: localhost
     port: 5672
@@ -81,3 +99,6 @@ management:
 
 polar:
   catalog-service-uri: "http://localhost:9001"
+
+avatar:
+  service-uri: "http://localhost:8080"
