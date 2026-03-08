@@ -148,8 +148,8 @@ public class AvatarServiceImpl implements AvatarService {
   @Override
   public void applyDamage(String avatarId, Integer amount) throws AvatarNotFoundExpection {
     Avatar avatar = getAvatarById(avatarId);
-    avatar.takeDamage(amount);
-    if (avatar.getLevel().currentExperience().amount() == 0) {
+    boolean died = avatar.takeDamage(amount);
+    if (died) {
       avatarObserver.notifyAvaterEvent(new Dead(avatarId));
     }
     avatarRepository.save(avatar);
