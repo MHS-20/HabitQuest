@@ -2,7 +2,9 @@ package habitquest.marketplace.domain.factory;
 
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.MarketplaceImpl;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MarketplaceFactory {
   private final IdGenerator idGenerator;
 
