@@ -15,7 +15,8 @@ import org.testcontainers.utility.DockerImageName;
 class GuildServiceApplicationTests {
 
   @Container
-  static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
+  private static KafkaContainer kafka =
+      new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -25,6 +26,10 @@ class GuildServiceApplicationTests {
   @MockitoBean private GuildRepository guildRepository;
 
   @MockitoBean private BattleRepository battleRepository;
+
+  public KafkaContainer getKafka() {
+    return kafka;
+  }
 
   @Test
   void contextLoads() {}

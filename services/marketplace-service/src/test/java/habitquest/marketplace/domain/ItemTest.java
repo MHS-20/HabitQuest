@@ -13,6 +13,7 @@ class ItemTest {
   private static final Money ZERO_GOLD = new Money(0);
   private static final Level LEVEL_1 = new Level(1);
   private static final Level LEVEL_5 = new Level(5);
+  private static final String DESC = "desc";
 
   // ── Level ────────────────────────────────────────────────────────────────────
 
@@ -37,7 +38,7 @@ class ItemTest {
 
   @Test
   void baseItemShouldRejectBlankName() {
-    assertThatThrownBy(() -> new BaseItem("  ", "desc", TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new BaseItem("  ", DESC, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("name");
   }
@@ -51,20 +52,20 @@ class ItemTest {
 
   @Test
   void baseItemShouldRejectNullName() {
-    assertThatThrownBy(() -> new BaseItem(null, "desc", TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new BaseItem(null, DESC, TEN_GOLD, LEVEL_1))
         .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void baseItemCanBuyWhenPlayerLevelMeetsRequirement() {
-    BaseItem item = new BaseItem("Item", "desc", TEN_GOLD, LEVEL_5);
+    BaseItem item = new BaseItem("Item", DESC, TEN_GOLD, LEVEL_5);
     assertThat(item.canBuy(LEVEL_5)).isTrue();
     assertThat(item.canBuy(new Level(10))).isTrue();
   }
 
   @Test
   void baseItemCannotBuyWhenPlayerLevelIsTooLow() {
-    BaseItem item = new BaseItem("Item", "desc", TEN_GOLD, LEVEL_5);
+    BaseItem item = new BaseItem("Item", DESC, TEN_GOLD, LEVEL_5);
     assertThat(item.canBuy(LEVEL_1)).isFalse();
     assertThat(item.canBuy(new Level(4))).isFalse();
   }
@@ -84,7 +85,7 @@ class ItemTest {
 
   @Test
   void weaponShouldRejectNegativeAttackPower() {
-    assertThatThrownBy(() -> new Weapon("Sword", "desc", -1, TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new Weapon("Sword", DESC, -1, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Attack power");
   }
@@ -108,7 +109,7 @@ class ItemTest {
 
   @Test
   void armorShouldRejectNegativeDefensePower() {
-    assertThatThrownBy(() -> new Armor("Shield", "desc", -5, TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new Armor("Shield", DESC, -5, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Defense power");
   }
@@ -127,14 +128,14 @@ class ItemTest {
 
   @Test
   void healthPotionShouldRejectNegativeHealingPower() {
-    assertThatThrownBy(() -> new HealthPotion("Potion", "desc", -10, TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new HealthPotion("Potion", DESC, -10, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Healing power");
   }
 
   @Test
   void healthPotionShouldImplementPotionInterface() {
-    HealthPotion potion = new HealthPotion("HP Potion", "desc", 10, TEN_GOLD, LEVEL_1);
+    HealthPotion potion = new HealthPotion("HP Potion", DESC, 10, TEN_GOLD, LEVEL_1);
     assertThat(potion).isInstanceOf(Potion.class);
   }
 
@@ -151,14 +152,14 @@ class ItemTest {
 
   @Test
   void manaPotionShouldRejectNegativeRestoringPower() {
-    assertThatThrownBy(() -> new ManaPotion("Potion", "desc", -1, TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new ManaPotion("Potion", DESC, -1, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Mana power");
   }
 
   @Test
   void manaPotionShouldImplementPotionInterface() {
-    ManaPotion potion = new ManaPotion("MP Potion", "desc", 10, TEN_GOLD, LEVEL_1);
+    ManaPotion potion = new ManaPotion("MP Potion", DESC, 10, TEN_GOLD, LEVEL_1);
     assertThat(potion).isInstanceOf(Potion.class);
   }
 }

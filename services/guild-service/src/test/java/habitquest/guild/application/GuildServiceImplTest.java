@@ -29,8 +29,13 @@ class GuildServiceImplTest {
   private static final String GUILD_NAME = "MyGuild";
   private static final String AVATAR_ID = "avatar-1";
   private static final String NICK = "Hero";
+  private static final String MEMBER_AVATAR_ID = "avatar-2";
+  private static final String MEMBER_NICK = "Newbie";
+  private static final String MEMBER_ROLE_NAME = "Member";
   private static final GuildRole LEADER_ROLE = new GuildRole("Leader");
   private static final GuildRole OFFICER_ROLE = new GuildRole("Officer");
+  private static final String THROWS_WHEN_NOT_FOUND =
+      "should throw GuildNotFoundException when guild does not exist";
 
   @Mock private GuildFactory guildFactory;
   @Mock private GuildRepository guildRepository;
@@ -59,7 +64,7 @@ class GuildServiceImplTest {
     void shouldCreateAndSave() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      guildService.createGuild("MyGuild", AVATAR_ID, NICK);
+      guildService.createGuild(GUILD_NAME, AVATAR_ID, NICK);
 
       verify(guildRepository).save(guild);
     }
@@ -69,7 +74,7 @@ class GuildServiceImplTest {
     void shouldReturnGuildId() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      String result = guildService.createGuild("MyGuild", AVATAR_ID, NICK);
+      String result = guildService.createGuild(GUILD_NAME, AVATAR_ID, NICK);
 
       assertThat(result).isEqualTo(GUILD_ID);
     }
@@ -79,7 +84,7 @@ class GuildServiceImplTest {
     void shouldPublishGuildCreatedEvent() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      guildService.createGuild("MyGuild", AVATAR_ID, NICK);
+      guildService.createGuild(GUILD_NAME, AVATAR_ID, NICK);
 
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
@@ -106,7 +111,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -136,7 +141,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -166,7 +171,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -193,7 +198,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -212,7 +217,8 @@ class GuildServiceImplTest {
     @Test
     @DisplayName("should add member, save and publish GuildJoined event")
     void shouldAddMemberAndPublishEvent() throws GuildNotFoundException {
-      GuildMember newMember = new GuildMember("avatar-2", "Newbie", new GuildRole("Member"));
+      GuildMember newMember =
+          new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME));
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
       guildService.addMember(GUILD_ID, newMember);
@@ -221,13 +227,14 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(GuildJoined.class);
-      assertThat(((GuildJoined) captor.getValue()).memberId()).isEqualTo("avatar-2");
+      assertThat(((GuildJoined) captor.getValue()).memberId()).isEqualTo(MEMBER_AVATAR_ID);
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
-      GuildMember newMember = new GuildMember("avatar-2", "Newbie", new GuildRole("Member"));
+      GuildMember newMember =
+          new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME));
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> guildService.addMember(GUILD_ID, newMember))
@@ -256,7 +263,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -286,7 +293,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -318,7 +325,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
@@ -346,7 +353,7 @@ class GuildServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw GuildNotFoundException when guild does not exist")
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
