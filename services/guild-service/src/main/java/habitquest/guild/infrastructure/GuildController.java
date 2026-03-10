@@ -182,11 +182,12 @@ public class GuildController {
   // HATEOAS helpers
 
   private Link selfLink(String id) {
-    try {
-      return linkTo(methodOn(GuildController.class).getGuild(id)).withSelfRel();
-    } catch (GuildNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    return Link.of("/api/v1/guilds/" + id).withSelfRel();
+    //    try {
+    //      return linkTo(methodOn(GuildController.class).getGuild(id)).withSelfRel();
+    //    } catch (GuildNotFoundException e) {
+    //      throw new RuntimeException(e);
+    //    }
   }
 
   // Request / Response records

@@ -18,8 +18,8 @@ version = "0.0.1-SNAPSHOT"
 
 val otelVersion = "2.23.0"
 val springCloudVersion = "2024.0.1"
-val testcontainersVersion = "1.20.6"
-val testcontainersKafkaVersion = "1.20.6"
+val testcontainersVersion = "1.21.3"
+val testcontainersKafkaVersion = "1.21.3"
 val testKeycloakVersion by extra("4.1.1")
 
 allprojects {
@@ -48,8 +48,9 @@ subprojects {
 
     configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
         imports {
+            //mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
-            mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
+            mavenBom("io.micrometer:micrometer-bom:1.5.5")
         }
     }
 
@@ -65,7 +66,7 @@ subprojects {
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.springframework.boot:spring-boot-testcontainers")
         testImplementation("org.testcontainers:junit-jupiter")
-        testImplementation("org.testcontainers:kafka:$testcontainersKafkaVersion")
+        testImplementation("org.testcontainers:kafka")
     }
 
     tasks.withType<Test> {

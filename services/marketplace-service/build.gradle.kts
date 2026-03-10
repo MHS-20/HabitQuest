@@ -35,4 +35,5 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:r2dbc")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+    testImplementation("org.wiremock:wiremock-standalone")
 }

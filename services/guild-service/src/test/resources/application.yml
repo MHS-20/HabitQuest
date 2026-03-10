@@ -4,3 +4,5 @@ spring:
       kafka:
         binder:
           brokers: "localhost:9092"
+habitquest:
+  avatar-service-uri: "http://localhost:9999"
