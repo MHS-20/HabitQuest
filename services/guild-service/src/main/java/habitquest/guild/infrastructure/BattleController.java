@@ -289,11 +289,12 @@ public class BattleController {
   // ─── HATEOAS helpers ────────────────────────────────────────────────────────
 
   private Link selfLink(String id) {
-    try {
-      return linkTo(methodOn(BattleController.class).getBattle(id)).withSelfRel();
-    } catch (BattleNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    return Link.of("/api/v1/battles/" + id).withSelfRel();
+    //    try {
+    //      return linkTo(methodOn(BattleController.class).getBattle(id)).withSelfRel();
+    //    } catch (BattleNotFoundException e) {
+    //      throw new RuntimeException(e);
+    //    }
   }
 
   // ─── Boss factory helper ─────────────────────────────────────────────────────

@@ -19,11 +19,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // --- Test ---
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
-    testImplementation("org.testcontainers:kafka")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 
     testRuntimeOnly("com.h2database:h2")
