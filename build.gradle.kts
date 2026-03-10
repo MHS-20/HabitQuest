@@ -112,7 +112,7 @@ tasks.register("checkAll") {
     dependsOn(appProjects.map { "${it.path}:checkstyleTest" })
     dependsOn(appProjects.map { "${it.path}:pmdMain" })
     dependsOn(appProjects.map { "${it.path}:pmdTest" })
-    dependsOn(appProjects.map { "${it.path}:spotlessApply" })
+    dependsOn(appProjects.map { "${it.path}:spotlessCheck" })
     // dependsOn(appProjects.map { "${it.path}:spotbugsMain" })
     dependsOn(appProjects.map { "${it.path}:test" })
 }
