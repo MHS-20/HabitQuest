@@ -38,6 +38,27 @@ spring:
         multiplier: 1.1
     function:
       definition: tracking
+    stream:
+      bindings:
+        habit-deleted-out-0:
+          destination: habit.deleted
+          content-type: application/json
+        habit-attended-out-0:
+          destination: habit.attended
+          content-type: application/json
+        habit-not-attended-out-0:
+          destination: habit.not-attended
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+            acks: all
+            retries: 3
+            enable.idempotence: true
   rabbitmq:
     host: localhost
     port: 5672

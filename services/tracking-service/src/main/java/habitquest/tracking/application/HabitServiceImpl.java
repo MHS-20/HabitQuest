@@ -1,5 +1,6 @@
 package habitquest.tracking.application;
 
+import common.hexagonal.Adapter;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
@@ -9,7 +10,10 @@ import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Adapter
+@Service
 public class HabitServiceImpl implements HabitService {
 
   private final HabitRepository habitRepository;

@@ -7,7 +7,9 @@ import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import java.time.DayOfWeek;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HabitFactory implements Factory {
   public static Habit createDailyHabit(String avatarId, String title, String description) {
     return new Habit(
