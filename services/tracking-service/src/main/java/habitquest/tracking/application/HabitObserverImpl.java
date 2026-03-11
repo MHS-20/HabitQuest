@@ -1,7 +1,9 @@
 package habitquest.tracking.application;
 
 import habitquest.tracking.domain.events.*;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HabitObserverImpl implements HabitObserver {
 
   private final HabitNotifier habitNotifier;
