@@ -1,43 +1,43 @@
-//package habitquest.avatar.infrastructure;
+// package habitquest.avatar.infrastructure;
 //
-//import static org.assertj.core.api.Assertions.assertThat;
+// import static org.assertj.core.api.Assertions.assertThat;
 //
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import habitquest.avatar.application.AvatarRepository;
-//import habitquest.avatar.domain.avatar.Experience;
-//import habitquest.avatar.domain.avatar.Level;
-//import habitquest.avatar.domain.events.Dead;
-//import habitquest.avatar.domain.events.LevelUpped;
-//import habitquest.avatar.domain.events.SkillPointAssigned;
-//import habitquest.avatar.domain.stats.Defense;
-//import habitquest.avatar.domain.stats.Intelligence;
-//import habitquest.avatar.domain.stats.Strength;
-//import java.time.Duration;
-//import java.util.Collections;
-//import java.util.Map;
-//import org.apache.kafka.clients.consumer.ConsumerConfig;
-//import org.apache.kafka.clients.consumer.ConsumerRecord;
-//import org.apache.kafka.clients.consumer.KafkaConsumer;
-//import org.apache.kafka.common.serialization.StringDeserializer;
-//import org.junit.jupiter.api.AfterEach;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Nested;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.test.context.DynamicPropertyRegistry;
-//import org.springframework.test.context.DynamicPropertySource;
-//import org.springframework.test.context.bean.override.mockito.MockitoBean;
-//import org.testcontainers.junit.jupiter.Container;
-//import org.testcontainers.junit.jupiter.Testcontainers;
-//import org.testcontainers.kafka.KafkaContainer;
-//import org.testcontainers.utility.DockerImageName;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import habitquest.avatar.application.AvatarRepository;
+// import habitquest.avatar.domain.avatar.Experience;
+// import habitquest.avatar.domain.avatar.Level;
+// import habitquest.avatar.domain.events.Dead;
+// import habitquest.avatar.domain.events.LevelUpped;
+// import habitquest.avatar.domain.events.SkillPointAssigned;
+// import habitquest.avatar.domain.stats.Defense;
+// import habitquest.avatar.domain.stats.Intelligence;
+// import habitquest.avatar.domain.stats.Strength;
+// import java.time.Duration;
+// import java.util.Collections;
+// import java.util.Map;
+// import org.apache.kafka.clients.consumer.ConsumerConfig;
+// import org.apache.kafka.clients.consumer.ConsumerRecord;
+// import org.apache.kafka.clients.consumer.KafkaConsumer;
+// import org.apache.kafka.common.serialization.StringDeserializer;
+// import org.junit.jupiter.api.AfterEach;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Nested;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.context.SpringBootTest;
+// import org.springframework.test.context.DynamicPropertyRegistry;
+// import org.springframework.test.context.DynamicPropertySource;
+// import org.springframework.test.context.bean.override.mockito.MockitoBean;
+// import org.testcontainers.junit.jupiter.Container;
+// import org.testcontainers.junit.jupiter.Testcontainers;
+// import org.testcontainers.kafka.KafkaContainer;
+// import org.testcontainers.utility.DockerImageName;
 //
-//@SpringBootTest
-//@Testcontainers
-//@DisplayName("AvatarNotifierImpl")
-//public class AvatarNotifierImplIT {
+// @SpringBootTest
+// @Testcontainers
+// @DisplayName("AvatarNotifierImpl")
+// public class AvatarNotifierImplIT {
 //
 //  @Container
 //  static final KafkaContainer KAFKA =
@@ -209,4 +209,4 @@
 //      assertThat(node.get("newValue").asInt()).isEqualTo(20);
 //    }
 //  }
-//}
+// }
