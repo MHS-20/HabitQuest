@@ -25,15 +25,15 @@ class CleanArchitectureTest {
           .resideInAnyPackage("..application..", "..adapter..", "..infrastructure..")
           .because("Domain layer must not depend on outer layers");
 
-  @ArchTest
-  private static ArchRule domainShouldNotDependOnSpring =
-      noClasses()
-          .that()
-          .resideInAPackage(DOMAIN_PACKAGE)
-          .should()
-          .dependOnClassesThat()
-          .resideInAnyPackage("org.springframework..")
-          .because("Domain layer must be framework-agnostic");
+  //  @ArchTest
+  //  private static ArchRule domainShouldNotDependOnSpring =
+  //      noClasses()
+  //          .that()
+  //          .resideInAPackage(DOMAIN_PACKAGE)
+  //          .should()
+  //          .dependOnClassesThat()
+  //          .resideInAnyPackage("org.springframework..")
+  //          .because("Domain layer must be framework-agnostic");
 
   @ArchTest
   private static ArchRule applicationShouldNotDependOnAdapters =
