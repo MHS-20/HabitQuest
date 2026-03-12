@@ -7,12 +7,12 @@ import java.util.List;
 
 public class Quest implements Aggregate<String> {
 
-  private String id;
+  private final String id;
   private String name;
-  private List<Habit> habits;
+  private final List<Habit> habits;
   private Duration duration;
   private Reward reward;
-
+  
   public Quest(String id) {
     this.id = id;
     this.habits = new ArrayList<>();
