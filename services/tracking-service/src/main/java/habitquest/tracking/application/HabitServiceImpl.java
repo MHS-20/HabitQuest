@@ -5,10 +5,11 @@ import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;
+import habitquest.tracking.domain.events.HabitNotAttended;
 import habitquest.tracking.domain.events.HabitObserver;
 import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -76,7 +77,7 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
-  public LocalDate getLastAttendedDate(String habitId) throws HabitNotFoundException {
+  public LocalDateTime getLastAttendedDate(String habitId) throws HabitNotFoundException {
     return habitRepository
         .findById(habitId)
         .orElseThrow(() -> new HabitNotFoundException(habitId))
@@ -121,12 +122,29 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
-  public Habit attendHabit(String habitId, LocalDate date) throws HabitNotFoundException {
+  public Habit attendHabit(String habitId, LocalDateTime date) throws HabitNotFoundException {
     Habit habit =
         habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.attendHabit(date);
     habitRepository.save(habit);
     habitObserver.notifyHabitEvent(new HabitAttended(habit));
     return habit;
+  }
+
+  @Override
+  public void detectOverdueHabits() {
+    LocalDateTime now = LocalDateTime.now();
+    List<Habit> habits = habitRepository.findAll();
+    for (Habit habit : habits) {
+      LocalDateTime lastAttendedDate = habit.getLastAttendedDate();
+      if (lastAttendedDate == null) {
+        habitObserver.notifyHabitEvent(new HabitNotAttended(habit));
+        continue;
+      }
+      LocalDateTime nextExpected = habit.getRecurrence().nextAfter(lastAttendedDate);
+      if (nextExpected.isBefore(now)) {
+        habitObserver.notifyHabitEvent(new HabitNotAttended(habit));
+      }
+    }
   }
 }

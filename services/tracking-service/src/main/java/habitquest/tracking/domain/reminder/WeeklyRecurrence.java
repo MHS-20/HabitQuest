@@ -1,7 +1,7 @@
 package habitquest.tracking.domain.reminder;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public record WeeklyRecurrence(DayOfWeek dayOfWeek) implements Recurrence {
@@ -10,8 +10,8 @@ public record WeeklyRecurrence(DayOfWeek dayOfWeek) implements Recurrence {
   }
 
   @Override
-  public LocalDate nextAfter(LocalDate current) {
-    LocalDate next = current.plusWeeks(1);
+  public LocalDateTime nextAfter(LocalDateTime current) {
+    LocalDateTime next = current.plusWeeks(1);
     return next.with(dayOfWeek);
   }
 }

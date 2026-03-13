@@ -4,7 +4,7 @@ import common.hexagonal.InBoundPort;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.reminder.Recurrence;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @InBoundPort
@@ -24,7 +24,7 @@ public interface HabitService {
 
   Recurrence getRecurrence(String habitId) throws HabitNotFoundException;
 
-  LocalDate getLastAttendedDate(String habitId) throws HabitNotFoundException;
+  LocalDateTime getLastAttendedDate(String habitId) throws HabitNotFoundException;
 
   // endregion
 
@@ -37,7 +37,9 @@ public interface HabitService {
 
   Habit updateRecurrence(String habitId, Recurrence recurrence) throws HabitNotFoundException;
 
-  Habit attendHabit(String habitId, LocalDate date) throws HabitNotFoundException;
+  Habit attendHabit(String habitId, LocalDateTime date) throws HabitNotFoundException;
+
+  void detectOverdueHabits();
   // endregion
 
 }
