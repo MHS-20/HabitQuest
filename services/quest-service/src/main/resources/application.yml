@@ -38,6 +38,33 @@ spring:
         multiplier: 1.1
     function:
       definition: quest
+    stream:
+      bindings:
+        quest-created-out-0:
+          destination: quest.created
+          content-type: application/json
+        quest-completed-out-0:
+          destination: quest.completed
+          content-type: application/json
+        quest-not-completed-out-0:
+          destination: quest.not-completed
+          content-type: application/json
+        quest-joined-out-0:
+          destination: quest.joined
+          content-type: application/json
+        quest-left-out-0:
+          destination: quest.left
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+            acks: all
+            retries: 3
+            enable.idempotence: true
   rabbitmq:
     host: localhost
     port: 5672
