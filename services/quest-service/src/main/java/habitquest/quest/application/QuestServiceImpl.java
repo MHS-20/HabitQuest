@@ -1,5 +1,6 @@
 package habitquest.quest.application;
 
+import common.hexagonal.Adapter;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
@@ -8,7 +9,10 @@ import habitquest.quest.domain.events.QuestObserver;
 import habitquest.quest.domain.factory.QuestFactory;
 import java.time.Duration;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Adapter
+@Service
 public class QuestServiceImpl implements QuestService {
 
   private final QuestRepository questRepository;
