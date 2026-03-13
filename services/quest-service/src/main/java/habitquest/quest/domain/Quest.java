@@ -12,7 +12,7 @@ public class Quest implements Aggregate<String> {
   private final List<Habit> habits;
   private Duration duration;
   private Reward reward;
-  
+
   public Quest(String id) {
     this.id = id;
     this.habits = new ArrayList<>();
