@@ -13,7 +13,7 @@ import habitquest.tracking.domain.reminder.Recurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import java.net.URI;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.hateoas.EntityModel;
@@ -138,7 +138,7 @@ public class HabitController {
   public ResponseEntity<EntityModel<LastAttendedDateResponse>> getLastAttendedDate(
       @PathVariable String id) throws HabitNotFoundException {
 
-    LocalDate date = habitService.getLastAttendedDate(id);
+    LocalDateTime date = habitService.getLastAttendedDate(id);
     EntityModel<LastAttendedDateResponse> model =
         EntityModel.of(
             new LastAttendedDateResponse(date),
@@ -263,7 +263,7 @@ public class HabitController {
     }
   }
 
-  public record AttendRequest(LocalDate date) {}
+  public record AttendRequest(LocalDateTime date) {}
 
   public record HabitCreatedResponse(String id) {}
 
@@ -273,7 +273,7 @@ public class HabitController {
 
   public record TagsResponse(List<Tag> tags) {}
 
-  public record LastAttendedDateResponse(LocalDate date) {}
+  public record LastAttendedDateResponse(LocalDateTime date) {}
 
   public record ErrorResponse(String message) {}
 }

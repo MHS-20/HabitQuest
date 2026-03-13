@@ -5,6 +5,7 @@ import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitRepository;
 import habitquest.tracking.domain.Habit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -32,5 +33,10 @@ public class InMemoryHabitRepository implements HabitRepository {
       throw new HabitNotFoundException(id);
     }
     store.remove(id);
+  }
+
+  @Override
+  public List<Habit> findAll() {
+    return List.copyOf(store.values());
   }
 }

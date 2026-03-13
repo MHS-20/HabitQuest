@@ -2,7 +2,7 @@ package habitquest.tracking.domain;
 
 import common.ddd.Aggregate;
 import habitquest.tracking.domain.reminder.Recurrence;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +12,7 @@ public class Habit implements Aggregate<String> {
   private String title;
   private String description;
   private Recurrence recurrence;
-  private LocalDate lastAttendedDate;
+  private LocalDateTime lastAttendedDate;
   private final String avatarId;
   private final Optional<String> associatedQuestId;
 
@@ -28,15 +28,15 @@ public class Habit implements Aggregate<String> {
     this.associatedQuestId = associatedQuestId;
   }
 
-  public void attendHabit(LocalDate date) {
+  public void attendHabit(LocalDateTime date) {
     this.lastAttendedDate = date;
   }
 
-  public LocalDate nextRecurrence() {
+  public LocalDateTime nextRecurrence() {
     return this.recurrence.nextAfter(this.lastAttendedDate);
   }
 
-  public LocalDate nextRecurrence(LocalDate date) {
+  public LocalDateTime nextRecurrence(LocalDateTime date) {
     return this.recurrence.nextAfter(date);
   }
 
@@ -64,7 +64,7 @@ public class Habit implements Aggregate<String> {
     return this.recurrence;
   }
 
-  public LocalDate getLastAttendedDate() {
+  public LocalDateTime getLastAttendedDate() {
     return lastAttendedDate;
   }
 

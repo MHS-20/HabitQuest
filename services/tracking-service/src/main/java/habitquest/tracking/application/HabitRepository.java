@@ -3,6 +3,7 @@ package habitquest.tracking.application;
 import common.ddd.Repository;
 import common.hexagonal.OutBoundPort;
 import habitquest.tracking.domain.Habit;
+import java.util.List;
 import java.util.Optional;
 
 @OutBoundPort
@@ -12,4 +13,6 @@ public interface HabitRepository extends Repository {
   Optional<Habit> findById(String id);
 
   void deleteById(String id);
+
+  List<Habit> findAll();
 }
