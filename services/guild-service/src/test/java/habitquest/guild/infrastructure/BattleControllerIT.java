@@ -55,11 +55,10 @@ public class BattleControllerIT {
   }
 
   private GuildMember stubMember() {
-    return new GuildMember(AVATAR_ID, "Hero", new GuildRole("MEMBER"));
+    return new GuildMember(AVATAR_ID, "Hero", GuildRole.MEMBER);
   }
 
   // ── POST /api/v1/battles ──────────────────────────────────────────────────────
-
   @Nested
   @DisplayName("POST /api/v1/battles")
   class CreateBattle {
@@ -156,26 +155,27 @@ public class BattleControllerIT {
   @DisplayName("DELETE /api/v1/battles/{id}")
   class DeleteBattle {
 
+    // java
     @Test
     @DisplayName("returns 204 on successful deletion")
     void shouldReturn204() throws Exception {
       doNothing().when(battleService).deleteBattle(BATTLE_ID);
+      when(battleService.getGuildId(BATTLE_ID)).thenReturn(GUILD_ID);
       when(guildService.isLeader(eq(GUILD_ID), anyString())).thenReturn(true);
 
       mockMvc
           .perform(
               delete("/api/v1/battles/{id}", BATTLE_ID)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      "{\"guildId\":\"guild-1\", \"battleId\":\"battle-1\", \"requesterId\":\"leader-1\"}"))
+                  .content("{\"guildId\":\"guild-1\", \"requesterId\":\"leader-1\"}"))
           .andExpect(status().isNoContent());
 
+      verify(guildService).isLeader(eq(GUILD_ID), eq("leader-1"));
       verify(battleService).deleteBattle(BATTLE_ID);
     }
   }
 
   // ── GET /api/v1/battles/guild/{guildId} ───────────────────────────────────────
-
   @Nested
   @DisplayName("GET /api/v1/battles/guild/{guildId}")
   class GetBattleByGuild {

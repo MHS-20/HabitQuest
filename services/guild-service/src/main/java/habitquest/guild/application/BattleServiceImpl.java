@@ -99,14 +99,14 @@ public class BattleServiceImpl implements BattleService {
   @Override
   public void increaseNumOfTurn(String battleId) throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
-    battle.setNumOfTurns(battle.getNumOfTurns() + 1);
+    battle.increaseNumOfTurns();
     battleRepository.save(battle);
   }
 
   @Override
   public void decreaseNumOfTurn(String battleId) throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
-    battle.setNumOfTurns(battle.getNumOfTurns() - 1);
+    battle.decreaseNumOfTurns();
     battleRepository.save(battle);
   }
 
@@ -116,12 +116,15 @@ public class BattleServiceImpl implements BattleService {
     Battle battle = getBattleById(battleId);
     battle.dealDamage(damage);
     battleRepository.save(battle);
+
     if (battle.getBattleStatus() == BattleStatus.WON) {
       var boss = this.getBoss(battleId);
       battleObserver.notifyBattleEvent(
           new BattleWon(
               battleId, battle.getGuildId(), boss.experienceReward(), boss.moneyReward()));
-    } else {
+    }
+
+    if (battle.getBattleStatus() == BattleStatus.LOST) {
       var boss = this.getBoss(battleId);
       battleObserver.notifyBattleEvent(
           new BattleLost(battleId, battle.getGuildId(), boss.penalty()));

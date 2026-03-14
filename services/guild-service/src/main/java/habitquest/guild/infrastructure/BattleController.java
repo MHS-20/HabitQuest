@@ -89,12 +89,13 @@ public class BattleController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteBattle(@RequestBody DeleteBattleRequest request) {
+  public ResponseEntity<Void> deleteBattle(
+      @PathVariable String id, @RequestBody DeleteBattleRequest request) {
     if (!guildService.isLeader(request.guildId(), request.requesterId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-    battleService.deleteBattle(request.battleId);
+    battleService.deleteBattle(id);
     return ResponseEntity.noContent().build();
   }
 
@@ -329,7 +330,7 @@ public class BattleController {
 
   public record CreateBattleRequest(String guildId, String bossType, String requesterId) {}
 
-  public record DeleteBattleRequest(String guildId, String battleId, String requesterId) {}
+  public record DeleteBattleRequest(String guildId, String requesterId) {}
 
   public record DamageRequest(Integer damage, String attackerAvatarId) {}
 
