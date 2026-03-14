@@ -50,7 +50,7 @@ subprojects {
         imports {
             //mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
-            mavenBom("io.micrometer:micrometer-bom:1.5.5")
+            mavenBom("io.micrometer:micrometer-bom:1.16.4")
         }
     }
 
