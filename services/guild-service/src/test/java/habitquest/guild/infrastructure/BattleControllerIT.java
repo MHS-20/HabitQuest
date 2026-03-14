@@ -394,37 +394,6 @@ public class BattleControllerIT {
     }
   }
 
-  // ── POST /api/v1/battles/{id}/turns/increase ─────────────────────────────────
-
-  @Nested
-  @DisplayName("POST /api/v1/battles/{id}/turns/increase")
-  class IncreaseNumOfTurns {
-
-    @Test
-    @DisplayName("returns 204 and increases total turns")
-    void shouldReturn204AndIncrease() throws Exception {
-      doNothing().when(battleService).increaseNumOfTurn(BATTLE_ID);
-
-      mockMvc
-          .perform(post("/api/v1/battles/{id}/turns/increase", BATTLE_ID))
-          .andExpect(status().isNoContent());
-
-      verify(battleService).increaseNumOfTurn(BATTLE_ID);
-    }
-
-    @Test
-    @DisplayName("returns 404 when battle does not exist")
-    void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new BattleNotFoundException(UNKNOWN_ID))
-          .when(battleService)
-          .increaseNumOfTurn(UNKNOWN_ID);
-
-      mockMvc
-          .perform(post("/api/v1/battles/{id}/turns/increase", UNKNOWN_ID))
-          .andExpect(status().isNotFound());
-    }
-  }
-
   // ── POST /api/v1/battles/{id}/damage ─────────────────────────────────────────
 
   @Nested

@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import habitquest.avatar.application.AvatarNotFoundExpection;
+import habitquest.avatar.application.AvatarNotFoundException;
 import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
@@ -97,7 +97,7 @@ public class AvatarControllerIT {
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       when(avatarService.getAvatarById(UNKNOWN_ID))
-          .thenThrow(new AvatarNotFoundExpection(UNKNOWN_ID));
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
 
       mockMvc.perform(get("/api/v1/avatars/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
     }
@@ -122,7 +122,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new AvatarNotFoundExpection(UNKNOWN_ID)).when(avatarService).deleteAvatar(UNKNOWN_ID);
+      doThrow(new AvatarNotFoundException(UNKNOWN_ID)).when(avatarService).deleteAvatar(UNKNOWN_ID);
 
       mockMvc.perform(delete("/api/v1/avatars/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
     }
@@ -274,7 +274,9 @@ public class AvatarControllerIT {
       mockMvc
           .perform(get("/api/v1/avatars/{id}/level", AVATAR_ID))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.levelNumber").value(3));
+          .andExpect(jsonPath("$.levelNumber").value(3))
+          .andExpect(jsonPath("$.currentExperience").value(50))
+          .andExpect(jsonPath("$.experienceRequired").value(200));
     }
   }
 
@@ -293,8 +295,8 @@ public class AvatarControllerIT {
       mockMvc
           .perform(get("/api/v1/avatars/{id}/health", AVATAR_ID))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.current.value").value(75))
-          .andExpect(jsonPath("$.max.value").value(100));
+          .andExpect(jsonPath("$.current").value(75))
+          .andExpect(jsonPath("$.max").value(100));
     }
   }
 
@@ -357,8 +359,8 @@ public class AvatarControllerIT {
       mockMvc
           .perform(get("/api/v1/avatars/{id}/mana", AVATAR_ID))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.amount.value").value(30))
-          .andExpect(jsonPath("$.max.value").value(50));
+          .andExpect(jsonPath("$.amount").value(30))
+          .andExpect(jsonPath("$.max").value(50));
     }
   }
 
@@ -397,6 +399,28 @@ public class AvatarControllerIT {
     }
   }
 
+  // ── POST /api/v1/avatars/{id}/mana/restore ───────────────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/avatars/{id}/mana/restore")
+  class RestoreMana {
+
+    @Test
+    @DisplayName("returns 204 and delegates restore amount")
+    void shouldRestoreMana() throws Exception {
+      doNothing().when(avatarService).restoreMana(AVATAR_ID, 15);
+
+      mockMvc
+          .perform(
+              post("/api/v1/avatars/{id}/mana/restore", AVATAR_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 15}"))
+          .andExpect(status().isNoContent());
+
+      verify(avatarService).restoreMana(AVATAR_ID, 15);
+    }
+  }
+
   // ── POST /api/v1/avatars/{id}/experience/grant ───────────────────────────────
 
   @Nested
@@ -419,6 +443,35 @@ public class AvatarControllerIT {
     }
   }
 
+  // ── GET /api/v1/avatars/{id}/experience ──────────────────────────────────────
+
+  @Nested
+  @DisplayName("GET /api/v1/avatars/{id}/experience")
+  class GetExperience {
+
+    @Test
+    @DisplayName("returns 200 with experience amount")
+    void shouldReturnExperience() throws Exception {
+      when(avatarService.getExperience(AVATAR_ID)).thenReturn(new Experience(350));
+
+      mockMvc
+          .perform(get("/api/v1/avatars/{id}/experience", AVATAR_ID))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.amount").value(350));
+    }
+
+    @Test
+    @DisplayName("returns 404 when avatar does not exist")
+    void shouldReturn404WhenNotFound() throws Exception {
+      when(avatarService.getExperience(UNKNOWN_ID))
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
+
+      mockMvc
+          .perform(get("/api/v1/avatars/{id}/experience", UNKNOWN_ID))
+          .andExpect(status().isNotFound());
+    }
+  }
+
   // ── POST /api/v1/avatars/{id}/inventory/items ────────────────────────────────
 
   @Nested
@@ -436,8 +489,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                  {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
-                  """))
+                                  {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
+                                  """))
           .andExpect(status().isNoContent());
 
       verify(avatarService).addToInventory(eq(AVATAR_ID), any(Weapon.class));
@@ -452,8 +505,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                  {"type":"UNKNOWN","name":"???","description":"???","power":0}
-                  """))
+                                  {"type":"UNKNOWN","name":"???","description":"???","power":0}
+                                  """))
           .andExpect(status().isBadRequest());
     }
   }
@@ -475,8 +528,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                  {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
-                  """))
+                                  {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
+                                  """))
           .andExpect(status().isNoContent());
     }
   }
@@ -495,6 +548,104 @@ public class AvatarControllerIT {
       when(avatarService.getInventory(AVATAR_ID)).thenReturn(inventory);
 
       mockMvc.perform(get("/api/v1/avatars/{id}/inventory", AVATAR_ID)).andExpect(status().isOk());
+    }
+  }
+
+  // ── GET /api/v1/avatars/{id}/equipped-items ──────────────────────────────────
+
+  @Nested
+  @DisplayName("GET /api/v1/avatars/{id}/equipped-items")
+  class GetEquippedItems {
+
+    @Test
+    @DisplayName("returns 200 with equipped items list")
+    void shouldReturnEquippedItems() throws Exception {
+      EquippedItems equippedItems = new EquippedItems("equip-1");
+      when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems);
+
+      mockMvc
+          .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_ID))
+          .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("returns 404 when avatar does not exist")
+    void shouldReturn404WhenNotFound() throws Exception {
+      when(avatarService.getEquippedItems(UNKNOWN_ID))
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
+
+      mockMvc
+          .perform(get("/api/v1/avatars/{id}/equipped-items", UNKNOWN_ID))
+          .andExpect(status().isNotFound());
+    }
+  }
+
+  // ── POST /api/v1/avatars/{id}/inventory/items/equip ──────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/avatars/{id}/inventory/items/equip")
+  class EquipItem {
+
+    @Test
+    @DisplayName("returns 204 and delegates to service")
+    void shouldEquipItem() throws Exception {
+      doNothing().when(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
+
+      mockMvc
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items/equip", AVATAR_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                                  {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
+                                  """))
+          .andExpect(status().isNoContent());
+
+      verify(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
+    }
+
+    @Test
+    @DisplayName("returns 400 when item is not in inventory")
+    void shouldReturn400WhenItemNotInInventory() throws Exception {
+      doThrow(new IllegalStateException("Item not in inventory"))
+          .when(avatarService)
+          .equipItem(eq(AVATAR_ID), any(Item.class));
+
+      mockMvc
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items/equip", AVATAR_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                                  {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
+                                  """))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Item not in inventory"));
+    }
+  }
+
+  // ── POST /api/v1/avatars/{id}/inventory/items/unequip ────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/avatars/{id}/inventory/items/unequip")
+  class UnequipItem {
+
+    @Test
+    @DisplayName("returns 204 and delegates to service")
+    void shouldUnequipItem() throws Exception {
+      doNothing().when(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
+
+      mockMvc
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items/unequip", AVATAR_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                                  {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
+                                  """))
+          .andExpect(status().isNoContent());
+
+      verify(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
     }
   }
 
@@ -519,12 +670,74 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 404 when avatar not found")
     void shouldReturn404WhenAvatarMissing() throws Exception {
-      doThrow(new AvatarNotFoundExpection(UNKNOWN_ID))
+      doThrow(new AvatarNotFoundException(UNKNOWN_ID))
           .when(avatarService)
           .increaseStrength(UNKNOWN_ID);
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/strength", UNKNOWN_ID))
+          .andExpect(status().isNotFound());
+    }
+  }
+
+  // ── POST /api/v1/avatars/{id}/stats/defense ──────────────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/avatars/{id}/stats/defense")
+  class IncreaseDefense {
+
+    @Test
+    @DisplayName("returns 204 and delegates to service")
+    void shouldIncreaseDefense() throws Exception {
+      doNothing().when(avatarService).increaseDefense(AVATAR_ID);
+
+      mockMvc
+          .perform(post("/api/v1/avatars/{id}/stats/defense", AVATAR_ID))
+          .andExpect(status().isNoContent());
+
+      verify(avatarService).increaseDefense(AVATAR_ID);
+    }
+
+    @Test
+    @DisplayName("returns 404 when avatar not found")
+    void shouldReturn404WhenAvatarMissing() throws Exception {
+      doThrow(new AvatarNotFoundException(UNKNOWN_ID))
+          .when(avatarService)
+          .increaseDefense(UNKNOWN_ID);
+
+      mockMvc
+          .perform(post("/api/v1/avatars/{id}/stats/defense", UNKNOWN_ID))
+          .andExpect(status().isNotFound());
+    }
+  }
+
+  // ── POST /api/v1/avatars/{id}/stats/intelligence ─────────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/avatars/{id}/stats/intelligence")
+  class IncreaseIntelligence {
+
+    @Test
+    @DisplayName("returns 204 and delegates to service")
+    void shouldIncreaseIntelligence() throws Exception {
+      doNothing().when(avatarService).increaseIntelligence(AVATAR_ID);
+
+      mockMvc
+          .perform(post("/api/v1/avatars/{id}/stats/intelligence", AVATAR_ID))
+          .andExpect(status().isNoContent());
+
+      verify(avatarService).increaseIntelligence(AVATAR_ID);
+    }
+
+    @Test
+    @DisplayName("returns 404 when avatar not found")
+    void shouldReturn404WhenAvatarMissing() throws Exception {
+      doThrow(new AvatarNotFoundException(UNKNOWN_ID))
+          .when(avatarService)
+          .increaseIntelligence(UNKNOWN_ID);
+
+      mockMvc
+          .perform(post("/api/v1/avatars/{id}/stats/intelligence", UNKNOWN_ID))
           .andExpect(status().isNotFound());
     }
   }
@@ -541,7 +754,23 @@ public class AvatarControllerIT {
       AvatarStats stats = new AvatarStats("stats-1", 10, 8, 12);
       when(avatarService.getAvatarStats(AVATAR_ID)).thenReturn(stats);
 
-      mockMvc.perform(get("/api/v1/avatars/{id}/stats", AVATAR_ID)).andExpect(status().isOk());
+      mockMvc
+          .perform(get("/api/v1/avatars/{id}/stats", AVATAR_ID))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.strength").value(10))
+          .andExpect(jsonPath("$.defense").value(8))
+          .andExpect(jsonPath("$.intelligence").value(12));
+    }
+
+    @Test
+    @DisplayName("returns 404 when avatar does not exist")
+    void shouldReturn404WhenNotFound() throws Exception {
+      when(avatarService.getAvatarStats(UNKNOWN_ID))
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
+
+      mockMvc
+          .perform(get("/api/v1/avatars/{id}/stats", UNKNOWN_ID))
+          .andExpect(status().isNotFound());
     }
   }
 }
