@@ -30,6 +30,12 @@ public class Guild implements Aggregate<String> {
     return this.members;
   }
 
+  public boolean isLeader(String memberId) {
+    return members.stream()
+        .filter(member -> member.getId().equals(memberId))
+        .anyMatch(member -> member.getRole().roleName().equals("LEADER"));
+  }
+
   public Integer getGlobalRank() {
     return this.globalRank;
   }

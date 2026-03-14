@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;
 import habitquest.guild.domain.guild.Guild;
@@ -40,6 +41,10 @@ class GuildServiceImplTest {
   @Mock private GuildFactory guildFactory;
   @Mock private GuildRepository guildRepository;
   @Mock private GuildObserver guildObserver;
+
+  @Mock
+  private BattleService
+      battleService; // was missing — caused NPE in addMember/leaveGuild/removeMember
 
   @InjectMocks private GuildServiceImpl guildService;
 
@@ -220,6 +225,8 @@ class GuildServiceImplTest {
       GuildMember newMember =
           new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME));
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      // Simulate no ongoing battle so the turn-increase branch is skipped cleanly.
+      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 
       guildService.addMember(GUILD_ID, newMember);
 
@@ -252,7 +259,10 @@ class GuildServiceImplTest {
     @Test
     @DisplayName("should remove member, save and publish GuildLeft event")
     void shouldRemoveMemberAndPublishEvent() throws GuildNotFoundException {
+      guild.addMember(
+          new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME)));
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 
       guildService.leaveGuild(GUILD_ID, AVATAR_ID);
 
@@ -260,6 +270,28 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(GuildLeft.class);
+    }
+
+    @Test
+    @DisplayName(
+        "should publish GuildLeft and GuildDeleted and delete guild and battle when last member leaves")
+    void shouldCleanUpWhenLastMemberLeaves() throws GuildNotFoundException {
+      Battle ongoingBattle = mock(Battle.class);
+      when(ongoingBattle.getId()).thenReturn("battle-1");
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
+
+      guildService.leaveGuild(GUILD_ID, AVATAR_ID);
+
+      verify(guildRepository).deleteById(GUILD_ID);
+      verify(battleService).deleteBattle("battle-1");
+
+      ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
+      verify(guildObserver, times(2)).notifyGuildEvent(captor.capture());
+      assertThat(captor.getAllValues())
+          .satisfiesExactly(
+              first -> assertThat(first).isInstanceOf(GuildLeft.class),
+              second -> assertThat(second).isInstanceOf(GuildDeleted.class));
     }
 
     @Test
@@ -283,6 +315,8 @@ class GuildServiceImplTest {
     @DisplayName("should remove member, save and publish RemovedFromGuild event")
     void shouldRemoveMemberAndPublishEvent() throws GuildNotFoundException {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      // Simulate no ongoing battle so the turn-decrease branch is skipped cleanly.
+      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 
       guildService.removeMember(GUILD_ID, AVATAR_ID);
 
