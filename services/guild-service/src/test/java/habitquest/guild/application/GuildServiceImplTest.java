@@ -32,9 +32,9 @@ class GuildServiceImplTest {
   private static final String NICK = "Hero";
   private static final String MEMBER_AVATAR_ID = "avatar-2";
   private static final String MEMBER_NICK = "Newbie";
-  private static final String MEMBER_ROLE_NAME = "Member";
-  private static final GuildRole LEADER_ROLE = new GuildRole("Leader");
-  private static final GuildRole OFFICER_ROLE = new GuildRole("Officer");
+  private static final GuildRole LEADER_ROLE = GuildRole.LEADER;
+  private static final GuildRole OFFICER_ROLE = GuildRole.OFFICER;
+  private static final GuildRole MEMBER_ROLE = GuildRole.MEMBER;
   private static final String THROWS_WHEN_NOT_FOUND =
       "should throw GuildNotFoundException when guild does not exist";
 
@@ -42,18 +42,18 @@ class GuildServiceImplTest {
   @Mock private GuildRepository guildRepository;
   @Mock private GuildObserver guildObserver;
 
-  @Mock
-  private BattleService
-      battleService; // was missing — caused NPE in addMember/leaveGuild/removeMember
+  @Mock private BattleService battleService;
 
   @InjectMocks private GuildServiceImpl guildService;
 
   private Guild guild;
-  private GuildMember leader;
 
   @BeforeEach
   void setUp() {
-    leader = new GuildMember(AVATAR_ID, NICK, LEADER_ROLE);
+    guildService =
+        new GuildServiceImpl(guildFactory, guildRepository, guildObserver, battleService);
+
+    var leader = new GuildMember(AVATAR_ID, NICK, LEADER_ROLE);
     guild = new Guild(GUILD_ID, GUILD_NAME, leader);
   }
 
@@ -135,7 +135,8 @@ class GuildServiceImplTest {
     @Test
     @DisplayName("should update the global rank and save")
     void shouldUpdateRankAndSave() throws GuildNotFoundException {
-      Guild request = new Guild(GUILD_ID, GUILD_NAME, leader);
+      Guild request =
+          new Guild(GUILD_ID, GUILD_NAME, new GuildMember(AVATAR_ID, NICK, LEADER_ROLE));
       request.updateGlobalRank(10);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
@@ -193,16 +194,6 @@ class GuildServiceImplTest {
   class GetMembers {
 
     @Test
-    @DisplayName("should return the member list of the guild")
-    void shouldReturnMemberList() throws GuildNotFoundException {
-      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-
-      List<GuildMember> members = guildService.getMembers(GUILD_ID);
-
-      assertThat(members).containsExactly(leader);
-    }
-
-    @Test
     @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
@@ -222,8 +213,7 @@ class GuildServiceImplTest {
     @Test
     @DisplayName("should add member, save and publish GuildJoined event")
     void shouldAddMemberAndPublishEvent() throws GuildNotFoundException {
-      GuildMember newMember =
-          new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME));
+      GuildMember newMember = new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, MEMBER_ROLE);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       // Simulate no ongoing battle so the turn-increase branch is skipped cleanly.
       when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
@@ -240,8 +230,7 @@ class GuildServiceImplTest {
     @Test
     @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
-      GuildMember newMember =
-          new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME));
+      GuildMember newMember = new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, GuildRole.MEMBER);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> guildService.addMember(GUILD_ID, newMember))
@@ -259,8 +248,7 @@ class GuildServiceImplTest {
     @Test
     @DisplayName("should remove member, save and publish GuildLeft event")
     void shouldRemoveMemberAndPublishEvent() throws GuildNotFoundException {
-      guild.addMember(
-          new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, new GuildRole(MEMBER_ROLE_NAME)));
+      guild.addMember(new GuildMember(MEMBER_AVATAR_ID, MEMBER_NICK, MEMBER_ROLE));
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 

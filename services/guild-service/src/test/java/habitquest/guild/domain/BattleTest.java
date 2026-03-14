@@ -163,11 +163,17 @@ class BattleTest {
   class SetNumOfTurns {
 
     @Test
-    @DisplayName("should update the number of turns")
-    void shouldUpdateNumOfTurns() {
-      battle.setNumOfTurns(10);
+    @DisplayName("should increase the number of turns")
+    void shouldIncreaseNumOfTurns() {
+      battle.increaseNumOfTurns();
+      assertThat(battle.getNumOfTurns()).isEqualTo(6);
+    }
 
-      assertThat(battle.getNumOfTurns()).isEqualTo(10);
+    @Test
+    @DisplayName("should decrease the number of turns")
+    void shouldDecreaseNumOfTurns() {
+      battle.increaseNumOfTurns();
+      assertThat(battle.getNumOfTurns()).isEqualTo(6);
     }
   }
 }

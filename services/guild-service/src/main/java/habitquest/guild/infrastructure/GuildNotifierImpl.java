@@ -106,7 +106,7 @@ public class GuildNotifierImpl implements GuildNotifier {
   public void notifyRoleAssigned(RoleAssigned event) {
     RoleAssignedMessage message =
         new RoleAssignedMessage(
-            event.guildId(), event.memberId(), event.newRole().roleName(), Instant.now());
+            event.guildId(), event.memberId(), event.newRole().name(), Instant.now());
 
     LOG.info(
         "Publishing RoleAssigned event: guildId={}, memberId={}, role={}",
