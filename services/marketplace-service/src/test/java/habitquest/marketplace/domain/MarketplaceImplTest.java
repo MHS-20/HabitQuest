@@ -45,13 +45,7 @@ class MarketplaceImplTest {
 
     marketplace =
         new MarketplaceImpl(
-            MARKETPLACE_ID,
-            new ArrayList<>(List.of(sword, shield, hpPotion, mpPotion)),
-            new ArrayList<>(List.of(shield)),
-            new ArrayList<>(List.of(sword)),
-            new ArrayList<>(List.of(hpPotion, mpPotion)),
-            new ArrayList<>(List.of(hpPotion)),
-            new ArrayList<>(List.of(mpPotion)));
+            MARKETPLACE_ID, new ArrayList<>(List.of(sword, shield, hpPotion, mpPotion)));
   }
 
   // ── Identity ─────────────────────────────────────────────────────────────────
@@ -66,12 +60,7 @@ class MarketplaceImplTest {
   @Test
   void emptyMarketplaceShouldHaveNoItems() {
     MarketplaceImpl empty = new MarketplaceImpl("empty");
-    assertThat(empty.getItems()).isEmpty();
-    assertThat(empty.getArmors()).isEmpty();
-    assertThat(empty.getWeapons()).isEmpty();
-    assertThat(empty.getPotions()).isEmpty();
-    assertThat(empty.getHealthPotions()).isEmpty();
-    assertThat(empty.getManaPotions()).isEmpty();
+    assertThat(empty.getItems(ItemType.ALL)).isEmpty();
   }
 
   // ── Queries ──────────────────────────────────────────────────────────────────
@@ -81,38 +70,38 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnAllItems() {
-      assertThat(marketplace.getItems())
+      assertThat(marketplace.getItems(ItemType.ALL))
           .containsExactlyInAnyOrder(sword, shield, hpPotion, mpPotion);
     }
 
     @Test
     void shouldReturnArmors() {
-      assertThat(marketplace.getArmors()).containsExactly(shield);
+      assertThat(marketplace.getItems(ItemType.ARMOR)).containsExactly(shield);
     }
 
     @Test
     void shouldReturnWeapons() {
-      assertThat(marketplace.getWeapons()).containsExactly(sword);
+      assertThat(marketplace.getItems(ItemType.WEAPON)).containsExactly(sword);
     }
 
     @Test
     void shouldReturnAllPotions() {
-      assertThat(marketplace.getPotions()).containsExactlyInAnyOrder(hpPotion, mpPotion);
+      assertThat(marketplace.getItems(ItemType.POTION))
+          .containsExactlyInAnyOrder(hpPotion, mpPotion);
     }
 
     @Test
     void shouldReturnHealthPotions() {
-      assertThat(marketplace.getHealthPotions()).containsExactly(hpPotion);
+      assertThat(marketplace.getItems(ItemType.HEALTH_POTION)).containsExactly(hpPotion);
     }
 
     @Test
     void shouldReturnManaPotions() {
-      assertThat(marketplace.getManaPotions()).containsExactly(mpPotion);
+      assertThat(marketplace.getItems(ItemType.MANA_POTION)).containsExactly(mpPotion);
     }
   }
 
   // ── getItem ──────────────────────────────────────────────────────────────────
-
   @Nested
   class GetItem {
 
@@ -130,7 +119,6 @@ class MarketplaceImplTest {
   }
 
   // ── buyItem ──────────────────────────────────────────────────────────────────
-
   @Nested
   class BuyItem {
 
@@ -156,7 +144,6 @@ class MarketplaceImplTest {
   }
 
   // ── sellItem ─────────────────────────────────────────────────────────────────
-
   @Nested
   class SellItem {
 

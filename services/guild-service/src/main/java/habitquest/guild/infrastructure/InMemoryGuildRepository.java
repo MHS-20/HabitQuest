@@ -4,12 +4,13 @@ import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildRepository;
 import habitquest.guild.domain.guild.Guild;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
 @Adapter
 public class InMemoryGuildRepository implements GuildRepository {
-  private final Map<String, Guild> store = new HashMap<>();
+  private final Map<String, Guild> store = new ConcurrentHashMap<>();
 
   @Override
   public Guild save(Guild guild) {

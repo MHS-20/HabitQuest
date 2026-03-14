@@ -6,17 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Marketplace extends Aggregate<String> {
-  List<Item> getItems();
-
-  List<Armor> getArmors();
-
-  List<Weapon> getWeapons();
-
-  List<Potion> getPotions();
-
-  List<HealthPotion> getHealthPotions();
-
-  List<ManaPotion> getManaPotions();
+  List<Item> getItems(ItemType type);
 
   Optional<Item> getItem(String itemName);
 

@@ -2,7 +2,7 @@ package habitquest.marketplace.infrastructure;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import habitquest.marketplace.application.AvatarNotFoundExpection;
+import habitquest.marketplace.application.AvatarNotFoundException;
 import habitquest.marketplace.application.ItemNotFoundException;
 import habitquest.marketplace.application.MarketplaceNotFoundException;
 import habitquest.marketplace.application.MarketplaceService;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/marketplaces")
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class MarketplaceController {
-
   private static final Logger LOG = LoggerFactory.getLogger(MarketplaceController.class);
 
   private final MarketplaceService marketplaceService;
@@ -34,30 +33,16 @@ public class MarketplaceController {
   }
 
   // ─── Marketplace ────────────────────────────────────────────────────────────
-
-  /** Returns a marketplace by ID with navigational links to its sub-resources. */
   @GetMapping("/{marketplaceId}")
-  public ResponseEntity<EntityModel<Marketplace>> getMarketplace(@PathVariable String marketplaceId)
-      throws MarketplaceNotFoundException {
-
+  public ResponseEntity<EntityModel<Marketplace>> getMarketplace(
+      @PathVariable String marketplaceId) {
     Marketplace marketplace = marketplaceService.getMarketplace(marketplaceId);
-
     EntityModel<Marketplace> model =
         EntityModel.of(
             marketplace,
             selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId)).withRel("items"),
-            linkTo(methodOn(MarketplaceController.class).getArmors(marketplaceId))
-                .withRel("armors"),
-            linkTo(methodOn(MarketplaceController.class).getWeapons(marketplaceId))
-                .withRel("weapons"),
-            linkTo(methodOn(MarketplaceController.class).getPotions(marketplaceId))
-                .withRel("potions"),
-            linkTo(methodOn(MarketplaceController.class).getHealthPotions(marketplaceId))
-                .withRel("healthPotions"),
-            linkTo(methodOn(MarketplaceController.class).getManaPotions(marketplaceId))
-                .withRel("manaPotions"));
-
+            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
+                .withRel("items"));
     return ResponseEntity.ok(model);
   }
 
@@ -66,19 +51,18 @@ public class MarketplaceController {
   /** Returns all items available in the marketplace. */
   @GetMapping("/{marketplaceId}/items")
   public ResponseEntity<CollectionModel<EntityModel<Item>>> getItems(
-      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
+      @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemType type)
+      throws MarketplaceNotFoundException {
     List<EntityModel<Item>> items =
-        marketplaceService.getItems(marketplaceId).stream()
+        marketplaceService.getItems(marketplaceId, type).stream()
             .map(item -> itemModel(marketplaceId, item))
             .toList();
-
     CollectionModel<EntityModel<Item>> model =
         CollectionModel.of(
             items,
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId)).withSelfRel(),
+            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, type))
+                .withSelfRel(),
             selfMarketplaceLink(marketplaceId));
-
     return ResponseEntity.ok(model);
   }
 
@@ -92,116 +76,7 @@ public class MarketplaceController {
     return ResponseEntity.ok(itemModel(marketplaceId, item));
   }
 
-  /** Returns all armors in the marketplace. */
-  @GetMapping("/{marketplaceId}/items/armors")
-  public ResponseEntity<CollectionModel<EntityModel<Item>>> getArmors(
-      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
-    List<EntityModel<Item>> armors =
-        marketplaceService.getArmors(marketplaceId).stream()
-            .map(item -> itemModel(marketplaceId, item))
-            .toList();
-
-    CollectionModel<EntityModel<Item>> model =
-        CollectionModel.of(
-            armors,
-            linkTo(methodOn(MarketplaceController.class).getArmors(marketplaceId)).withSelfRel(),
-            selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId)).withRel("items"));
-
-    return ResponseEntity.ok(model);
-  }
-
-  /** Returns all weapons in the marketplace. */
-  @GetMapping("/{marketplaceId}/items/weapons")
-  public ResponseEntity<CollectionModel<EntityModel<Item>>> getWeapons(
-      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
-    List<EntityModel<Item>> weapons =
-        marketplaceService.getWeapons(marketplaceId).stream()
-            .map(item -> itemModel(marketplaceId, item))
-            .toList();
-
-    CollectionModel<EntityModel<Item>> model =
-        CollectionModel.of(
-            weapons,
-            linkTo(methodOn(MarketplaceController.class).getWeapons(marketplaceId)).withSelfRel(),
-            selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId)).withRel("items"));
-
-    return ResponseEntity.ok(model);
-  }
-
-  /** Returns all potions (health + mana) in the marketplace. */
-  @GetMapping("/{marketplaceId}/items/potions")
-  public ResponseEntity<CollectionModel<EntityModel<Item>>> getPotions(
-      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
-    List<EntityModel<Item>> potions =
-        marketplaceService.getPotions(marketplaceId).stream()
-            .map(item -> itemModel(marketplaceId, item))
-            .toList();
-
-    CollectionModel<EntityModel<Item>> model =
-        CollectionModel.of(
-            potions,
-            linkTo(methodOn(MarketplaceController.class).getPotions(marketplaceId)).withSelfRel(),
-            selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getHealthPotions(marketplaceId))
-                .withRel("healthPotions"),
-            linkTo(methodOn(MarketplaceController.class).getManaPotions(marketplaceId))
-                .withRel("manaPotions"),
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId)).withRel("items"));
-
-    return ResponseEntity.ok(model);
-  }
-
-  /** Returns all health potions in the marketplace. */
-  @GetMapping("/{marketplaceId}/items/potions/health")
-  public ResponseEntity<CollectionModel<EntityModel<Item>>> getHealthPotions(
-      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
-    List<EntityModel<Item>> potions =
-        marketplaceService.getHealthPotions(marketplaceId).stream()
-            .map(item -> itemModel(marketplaceId, item))
-            .toList();
-
-    CollectionModel<EntityModel<Item>> model =
-        CollectionModel.of(
-            potions,
-            linkTo(methodOn(MarketplaceController.class).getHealthPotions(marketplaceId))
-                .withSelfRel(),
-            selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getPotions(marketplaceId))
-                .withRel("potions"));
-
-    return ResponseEntity.ok(model);
-  }
-
-  /** Returns all mana potions in the marketplace. */
-  @GetMapping("/{marketplaceId}/items/potions/mana")
-  public ResponseEntity<CollectionModel<EntityModel<Item>>> getManaPotions(
-      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
-    List<EntityModel<Item>> potions =
-        marketplaceService.getManaPotions(marketplaceId).stream()
-            .map(item -> itemModel(marketplaceId, item))
-            .toList();
-
-    CollectionModel<EntityModel<Item>> model =
-        CollectionModel.of(
-            potions,
-            linkTo(methodOn(MarketplaceController.class).getManaPotions(marketplaceId))
-                .withSelfRel(),
-            selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getPotions(marketplaceId))
-                .withRel("potions"));
-
-    return ResponseEntity.ok(model);
-  }
-
   // ─── Commands ───────────────────────────────────────────────────────────────
-
   @PostMapping("/{marketplaceId}/items/{itemName}/buy")
   public ResponseEntity<Void> buyItem(
       @PathVariable String marketplaceId,
@@ -251,13 +126,12 @@ public class MarketplaceController {
   }
 
   // ─── Exception handling ──────────────────────────────────────────────────────
-
   @ExceptionHandler(MarketplaceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleMarketplaceNotFound(MarketplaceNotFoundException ex) {
     return ResponseEntity.notFound().build();
   }
 
-  @ExceptionHandler({ItemNotFoundException.class, AvatarNotFoundExpection.class})
+  @ExceptionHandler({ItemNotFoundException.class, AvatarNotFoundException.class})
   public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
     return ResponseEntity.notFound().build();
   }
@@ -269,41 +143,27 @@ public class MarketplaceController {
     return ResponseEntity.status(502).body(new ErrorResponse(ex.getMessage()));
   }
 
-  @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-  public ResponseEntity<ErrorResponse> handleDomainError(RuntimeException ex) {
-    return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
-  }
-
   // ─── HATEOAS helpers ────────────────────────────────────────────────────────
-
   private Link selfMarketplaceLink(String marketplaceId) {
-    try {
-      return linkTo(methodOn(MarketplaceController.class).getMarketplace(marketplaceId))
-          .withSelfRel();
-    } catch (MarketplaceNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    return linkTo(methodOn(MarketplaceController.class).getMarketplace(marketplaceId))
+        .withSelfRel();
   }
 
   private EntityModel<Item> itemModel(String marketplaceId, Item item) {
-    try {
-      return EntityModel.of(
-          item,
-          linkTo(methodOn(MarketplaceController.class).getItem(marketplaceId, item.name()))
-              .withSelfRel(),
-          selfMarketplaceLink(marketplaceId),
-          linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId)).withRel("items"),
-          linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name(), null))
-              .withRel("buy"),
-          linkTo(methodOn(MarketplaceController.class).sellItem(marketplaceId, item.name(), null))
-              .withRel("sell"));
-    } catch (MarketplaceNotFoundException | ItemNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    return EntityModel.of(
+        item,
+        linkTo(methodOn(MarketplaceController.class).getItem(marketplaceId, item.name()))
+            .withSelfRel(),
+        selfMarketplaceLink(marketplaceId),
+        linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
+            .withRel("items"),
+        linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name(), null))
+            .withRel("buy"),
+        linkTo(methodOn(MarketplaceController.class).sellItem(marketplaceId, item.name(), null))
+            .withRel("sell"));
   }
 
   // ─── Request / Response records ─────────────────────────────────────────────
-
   public record AvatarRequest(String avatarId) {}
 
   public record ErrorResponse(String message) {}
