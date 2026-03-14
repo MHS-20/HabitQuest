@@ -22,9 +22,10 @@ public interface GuildService {
 
   void addMember(String guildId, GuildMember member) throws GuildNotFoundException;
 
-  void removeMember(String guildId, String memberId) throws GuildNotFoundException;
+  void removeMember(String guildId, String requestorId, String memberId)
+      throws GuildNotFoundException;
 
-  void promoteMember(String guildId, String memberId, GuildRole newRole)
+  void promoteMember(String guildId, String requestorId, String memberId, GuildRole newRole)
       throws GuildNotFoundException;
 
   Integer getGlobalRank(String guildId) throws GuildNotFoundException;
