@@ -36,34 +36,9 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public List<Item> getItems(String marketplaceId) throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getItems();
-  }
-
-  @Override
-  public List<Armor> getArmors(String marketplaceId) throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getArmors();
-  }
-
-  @Override
-  public List<Weapon> getWeapons(String marketplaceId) throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getWeapons();
-  }
-
-  @Override
-  public List<Potion> getPotions(String marketplaceId) throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getPotions();
-  }
-
-  @Override
-  public List<HealthPotion> getHealthPotions(String marketplaceId)
+  public List<Item> getItems(String marketplaceId, ItemType type)
       throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getHealthPotions();
-  }
-
-  @Override
-  public List<ManaPotion> getManaPotions(String marketplaceId) throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getManaPotions();
+    return getMarketplace(marketplaceId).getItems(type);
   }
 
   @Override

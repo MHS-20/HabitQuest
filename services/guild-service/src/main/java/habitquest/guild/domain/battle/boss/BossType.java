@@ -1,5 +1,6 @@
 package habitquest.guild.domain.battle.boss;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import habitquest.guild.domain.battle.Experience;
 import habitquest.guild.domain.battle.Money;
 import habitquest.guild.domain.battle.Penalty;
@@ -7,6 +8,8 @@ import habitquest.guild.domain.battle.stats.Defense;
 import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.battle.stats.Stats;
 import habitquest.guild.domain.battle.stats.Strength;
+
+import java.util.Locale;
 
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.NonSerializableClass"})
 public enum BossType implements BossEnemy {
@@ -50,5 +53,10 @@ public enum BossType implements BossEnemy {
   @Override
   public Experience experienceReward() {
     return experienceReward;
+  }
+
+  @JsonCreator
+  public static BossType fromString(String value) {
+    return valueOf(value.toUpperCase(Locale.getDefault()));
   }
 }

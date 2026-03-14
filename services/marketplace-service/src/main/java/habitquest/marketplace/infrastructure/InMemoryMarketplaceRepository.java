@@ -3,16 +3,16 @@ package habitquest.marketplace.infrastructure;
 import common.hexagonal.Adapter;
 import habitquest.marketplace.application.MarketplaceRepository;
 import habitquest.marketplace.domain.Marketplace;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
 @Adapter
 public class InMemoryMarketplaceRepository implements MarketplaceRepository {
 
-  private final Map<String, Marketplace> store = new HashMap<>();
+  private final Map<String, Marketplace> store = new ConcurrentHashMap<>();
 
   @Override
   public void save(Marketplace marketplace) {

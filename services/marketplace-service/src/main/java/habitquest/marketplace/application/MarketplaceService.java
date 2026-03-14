@@ -9,17 +9,7 @@ import java.util.List;
 public interface MarketplaceService {
   Marketplace getMarketplace(String marketplaceId) throws MarketplaceNotFoundException;
 
-  List<Item> getItems(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<Armor> getArmors(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<Weapon> getWeapons(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<Potion> getPotions(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<HealthPotion> getHealthPotions(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<ManaPotion> getManaPotions(String marketplaceId) throws MarketplaceNotFoundException;
+  List<Item> getItems(String marketplaceId, ItemType type) throws MarketplaceNotFoundException;
 
   Item getItemByName(String marketplaceId, String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException;

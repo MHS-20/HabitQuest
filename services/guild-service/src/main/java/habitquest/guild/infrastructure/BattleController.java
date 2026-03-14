@@ -99,7 +99,6 @@ public class BattleController {
   }
 
   // ─── Query ──────────────────────────────────────────────────────────────────
-
   @GetMapping("/guild/{guildId}")
   public ResponseEntity<EntityModel<BattleResponse>> getBattleByGuild(@PathVariable String guildId)
       throws BattleNotFoundException {

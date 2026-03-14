@@ -4,17 +4,17 @@ import common.hexagonal.Adapter;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
 @Adapter
 public class InMemoryBattleRepository implements BattleRepository {
 
-  private final Map<String, Battle> store = new HashMap<>();
+  private final Map<String, Battle> store = new ConcurrentHashMap<>();
 
   @Override
   public Battle save(Battle battle) {
