@@ -42,14 +42,15 @@ public class GuildControllerIT {
   private static final String MEMBER_ID = "avatar-2";
   private static final String UNKNOWN_ID = "ghost-99";
 
+  private static final String MEMBER_NICKNAME = "Percival";
+
   private Guild stubGuild() {
-    GuildMember leader =
-        new GuildMember(CREATOR_AVATAR_ID, CREATOR_NICKNAME, new GuildRole("LEADER"));
+    GuildMember leader = new GuildMember(CREATOR_AVATAR_ID, CREATOR_NICKNAME, GuildRole.LEADER);
     return new Guild(GUILD_ID, GUILD_NAME, leader);
   }
 
   private GuildMember stubMember() {
-    return new GuildMember(MEMBER_ID, "Percival", new GuildRole("MEMBER"));
+    return new GuildMember(MEMBER_ID, MEMBER_NICKNAME, GuildRole.MEMBER);
   }
 
   // ── POST /api/v1/guilds ───────────────────────────────────────────────────────

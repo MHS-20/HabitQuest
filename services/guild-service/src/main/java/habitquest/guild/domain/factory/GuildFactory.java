@@ -18,6 +18,6 @@ public class GuildFactory implements Factory {
     return new Guild(
         idGenerator.nextId(),
         name,
-        new GuildMember(creatorAvatarId, creatorNickname, new GuildRole("Leader")));
+        new GuildMember(creatorAvatarId, creatorNickname, GuildRole.LEADER));
   }
 }

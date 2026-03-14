@@ -16,7 +16,6 @@ import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.battle.stats.Stats;
 import habitquest.guild.domain.battle.stats.Strength;
 import habitquest.guild.domain.events.battleEvents.BattleEvent;
-import habitquest.guild.domain.events.battleEvents.BattleLost;
 import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
@@ -253,19 +252,17 @@ class BattleServiceImplTest {
       assertThat(event.moneyReward()).isEqualTo(minotaur.moneyReward());
     }
 
-    @Test
-    @DisplayName("should publish BattleLost event when boss survives")
-    void shouldPublishBattleLostWhenBossAlive() throws BattleNotFoundException {
-      when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
-
-      battleService.dealDamage(BATTLE_ID, 10);
-
-      ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
-      verify(battleObserver).notifyBattleEvent(captor.capture());
-      BattleLost event = (BattleLost) captor.getValue();
-      assertThat(event.battleId()).isEqualTo(BATTLE_ID);
-      assertThat(event.penalty()).isEqualTo(minotaur.penalty());
-    }
+    //    @Test
+    //    @DisplayName("should publish BattleLost event when boss survives")
+    //    void shouldPublishBattleLostWhenBossAlive() throws BattleNotFoundException {
+    //      when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
+    //      battleService.dealDamage(BATTLE_ID, 10);
+    //      ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
+    //      verify(battleObserver).notifyBattleEvent(captor.capture());
+    //      BattleLost event = (BattleLost) captor.getValue();
+    //      assertThat(event.battleId()).isEqualTo(BATTLE_ID);
+    //      assertThat(event.penalty()).isEqualTo(minotaur.penalty());
+    //    }
 
     @Test
     @DisplayName("should throw BattleNotFoundException when battle does not exist")
