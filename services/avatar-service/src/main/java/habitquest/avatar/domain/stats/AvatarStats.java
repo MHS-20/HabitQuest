@@ -1,8 +1,8 @@
 package habitquest.avatar.domain.stats;
 
-import common.ddd.Aggregate;
+import common.ddd.Entity;
 
-public class AvatarStats implements Aggregate<String> {
+public class AvatarStats implements Entity<String> {
 
   private String id;
   private Strength strength;

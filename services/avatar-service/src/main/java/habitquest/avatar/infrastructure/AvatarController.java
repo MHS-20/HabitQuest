@@ -2,13 +2,14 @@ package habitquest.avatar.infrastructure;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import habitquest.avatar.application.AvatarNotFoundExpection;
+import habitquest.avatar.application.AvatarNotFoundException;
 import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
+import habitquest.avatar.infrastructure.dto.*;
 import java.net.URI;
-import java.util.Locale;
+import java.util.List;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,6 @@ public class AvatarController {
   }
 
   // ─── Avatar CRUD ────────────────────────────────────────────────────────────
-
   @PostMapping
   public ResponseEntity<EntityModel<AvatarCreatedResponse>> createAvatar(
       @RequestBody CreateAvatarRequest request) {
@@ -45,14 +45,16 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<EntityModel<Avatar>> getAvatar(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<AvatarResponse>> getAvatar(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     Avatar avatar = avatarService.getAvatarById(id);
 
-    EntityModel<Avatar> model =
+    AvatarResponse dto = AvatarMapper.toResponse(avatar);
+
+    EntityModel<AvatarResponse> model =
         EntityModel.of(
-            avatar,
+            dto,
             selfLink(id),
             linkTo(methodOn(AvatarController.class).getInventory(id)).withRel("inventory"),
             linkTo(methodOn(AvatarController.class).getEquippedItems(id)).withRel("equippedItems"),
@@ -66,16 +68,8 @@ public class AvatarController {
     return ResponseEntity.ok(model);
   }
 
-  @PutMapping("/{id}")
-  public ResponseEntity<Void> updateAvatar(
-      @PathVariable String id, @RequestBody Avatar updatedAvatar) throws AvatarNotFoundExpection {
-
-    avatarService.updateAvatar(id, updatedAvatar);
-    return ResponseEntity.noContent().build();
-  }
-
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteAvatar(@PathVariable String id) throws AvatarNotFoundExpection {
+  public ResponseEntity<Void> deleteAvatar(@PathVariable String id) throws AvatarNotFoundException {
 
     avatarService.deleteAvatar(id);
     return ResponseEntity.noContent().build();
@@ -84,7 +78,7 @@ public class AvatarController {
   @PatchMapping("/{id}/name")
   public ResponseEntity<Void> updateName(
       @PathVariable String id, @RequestBody UpdateNameRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     avatarService.updateName(id, request.name());
     return ResponseEntity.noContent().build();
@@ -94,7 +88,7 @@ public class AvatarController {
 
   @GetMapping("/{id}/name")
   public ResponseEntity<EntityModel<NameResponse>> getName(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     String name = avatarService.getName(id);
     EntityModel<NameResponse> model =
@@ -104,13 +98,14 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/money")
-  public ResponseEntity<EntityModel<Money>> getMoney(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<MoneyResponse>> getMoney(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     Money money = avatarService.getMoney(id);
-    EntityModel<Money> model =
+    MoneyResponse dto = AvatarMapper.toResponse(money);
+    EntityModel<MoneyResponse> model =
         EntityModel.of(
-            money,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).earnMoney(id, null)).withRel("earn"),
@@ -120,13 +115,14 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/inventory")
-  public ResponseEntity<EntityModel<Inventory>> getInventory(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<InventoryResponse>> getInventory(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     Inventory inventory = avatarService.getInventory(id);
-    EntityModel<Inventory> model =
+    InventoryResponse dto = AvatarMapper.toResponse(inventory);
+    EntityModel<InventoryResponse> model =
         EntityModel.of(
-            inventory,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).addItem(id, null)).withRel("addItem"),
@@ -137,13 +133,14 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/equipped-items")
-  public ResponseEntity<EntityModel<EquippedItems>> getEquippedItems(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<EquippedItemsResponse>> getEquippedItems(
+      @PathVariable String id) throws AvatarNotFoundException {
 
     EquippedItems equippedItems = avatarService.getEquippedItems(id);
-    EntityModel<EquippedItems> model =
+    EquippedItemsResponse dto = AvatarMapper.toResponse(equippedItems);
+    EntityModel<EquippedItemsResponse> model =
         EntityModel.of(
-            equippedItems,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).getInventory(id)).withRel("inventory"));
@@ -152,13 +149,14 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/experience")
-  public ResponseEntity<EntityModel<Experience>> getExperience(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<ExperienceResponse>> getExperience(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     Experience experience = avatarService.getExperience(id);
-    EntityModel<Experience> model =
+    ExperienceResponse dto = AvatarMapper.toResponse(experience);
+    EntityModel<ExperienceResponse> model =
         EntityModel.of(
-            experience,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).getLevel(id)).withRel("level"),
@@ -168,23 +166,25 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/level")
-  public ResponseEntity<EntityModel<Level>> getLevel(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<LevelResponse>> getLevel(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     Level level = avatarService.getLevel(id);
-    EntityModel<Level> model = EntityModel.of(level, selfLink(id), avatarLink(id));
+    LevelResponse dto = AvatarMapper.toResponse(level);
+    EntityModel<LevelResponse> model = EntityModel.of(dto, selfLink(id), avatarLink(id));
 
     return ResponseEntity.ok(model);
   }
 
   @GetMapping("/{id}/health")
-  public ResponseEntity<EntityModel<AvatarHealth>> getHealth(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<HealthResponse>> getHealth(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     AvatarHealth health = avatarService.getHealth(id);
-    EntityModel<AvatarHealth> model =
+    HealthResponse dto = AvatarMapper.toResponse(health);
+    EntityModel<HealthResponse> model =
         EntityModel.of(
-            health,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).healAvatar(id, null)).withRel("heal"),
@@ -194,13 +194,14 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/mana")
-  public ResponseEntity<EntityModel<AvatarMana>> getMana(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<ManaResponse>> getMana(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     AvatarMana mana = avatarService.getMana(id);
-    EntityModel<AvatarMana> model =
+    ManaResponse dto = AvatarMapper.toResponse(mana);
+    EntityModel<ManaResponse> model =
         EntityModel.of(
-            mana,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).restoreMana(id, null)).withRel("restore"),
@@ -210,13 +211,14 @@ public class AvatarController {
   }
 
   @GetMapping("/{id}/stats")
-  public ResponseEntity<EntityModel<AvatarStats>> getStats(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+  public ResponseEntity<EntityModel<StatsResponse>> getStats(@PathVariable String id)
+      throws AvatarNotFoundException {
 
     AvatarStats stats = avatarService.getAvatarStats(id);
-    EntityModel<AvatarStats> model =
+    StatsResponse dto = AvatarMapper.toResponse(stats);
+    EntityModel<StatsResponse> model =
         EntityModel.of(
-            stats,
+            dto,
             selfLink(id),
             avatarLink(id),
             linkTo(methodOn(AvatarController.class).increaseStrength(id))
@@ -232,7 +234,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/money/earn")
   public ResponseEntity<Void> earnMoney(@PathVariable String id, @RequestBody AmountRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     avatarService.earnMoney(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -240,7 +242,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/money/spend")
   public ResponseEntity<Void> spendMoney(
-      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundExpection {
+      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
 
     avatarService.spendMoney(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -250,33 +252,33 @@ public class AvatarController {
 
   @PostMapping("/{id}/inventory/items")
   public ResponseEntity<Void> addItem(@PathVariable String id, @RequestBody ItemRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
-    avatarService.addToInventory(id, request.toItem());
+    avatarService.addToInventory(id, ItemMapper.toDomain(request));
     return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}/inventory/items")
   public ResponseEntity<Void> removeItem(@PathVariable String id, @RequestBody ItemRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
-    avatarService.removeItem(id, request.toItem());
+    avatarService.removeItem(id, ItemMapper.toDomain(request));
     return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{id}/inventory/items/equip")
   public ResponseEntity<Void> equipItem(@PathVariable String id, @RequestBody ItemRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
-    avatarService.equipItem(id, request.toItem());
+    avatarService.equipItem(id, ItemMapper.toDomain(request));
     return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{id}/inventory/items/unequip")
   public ResponseEntity<Void> unequipItem(@PathVariable String id, @RequestBody ItemRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
-    avatarService.unequipItem(id, request.toItem());
+    avatarService.unequipItem(id, ItemMapper.toDomain(request));
     return ResponseEntity.noContent().build();
   }
 
@@ -284,7 +286,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/health/damage")
   public ResponseEntity<Void> applyDamage(
-      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundExpection {
+      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
 
     avatarService.applyDamage(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -292,7 +294,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/health/heal")
   public ResponseEntity<Void> healAvatar(
-      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundExpection {
+      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
 
     avatarService.healAvatar(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -300,7 +302,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/mana/spend")
   public ResponseEntity<Void> spendMana(@PathVariable String id, @RequestBody AmountRequest request)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     avatarService.spendMana(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -308,7 +310,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/mana/restore")
   public ResponseEntity<Void> restoreMana(
-      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundExpection {
+      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
 
     avatarService.restoreMana(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -318,7 +320,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/experience/grant")
   public ResponseEntity<Void> grantExperience(
-      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundExpection {
+      @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
 
     avatarService.grantExperience(id, request.amount());
     return ResponseEntity.noContent().build();
@@ -326,7 +328,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/stats/strength")
   public ResponseEntity<Void> increaseStrength(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     avatarService.increaseStrength(id);
     return ResponseEntity.noContent().build();
@@ -334,7 +336,7 @@ public class AvatarController {
 
   @PostMapping("/{id}/stats/defense")
   public ResponseEntity<Void> increaseDefense(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     avatarService.increaseDefense(id);
     return ResponseEntity.noContent().build();
@@ -342,16 +344,15 @@ public class AvatarController {
 
   @PostMapping("/{id}/stats/intelligence")
   public ResponseEntity<Void> increaseIntelligence(@PathVariable String id)
-      throws AvatarNotFoundExpection {
+      throws AvatarNotFoundException {
 
     avatarService.increaseIntelligence(id);
     return ResponseEntity.noContent().build();
   }
 
   // ─── Exception handling ──────────────────────────────────────────────────────
-
-  @ExceptionHandler(AvatarNotFoundExpection.class)
-  public ResponseEntity<ErrorResponse> handleAvatarNotFound(AvatarNotFoundExpection ex) {
+  @ExceptionHandler(AvatarNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleAvatarNotFound(AvatarNotFoundException ex) {
     return ResponseEntity.notFound().build();
   }
 
@@ -360,25 +361,18 @@ public class AvatarController {
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
   }
 
-  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
-
+  // ─── HATEOAS helpers ───────────────────────────────────────────────────────
   private Link selfLink(String id) {
     try {
       return linkTo(methodOn(AvatarController.class).getAvatar(id)).withSelfRel();
-    } catch (AvatarNotFoundExpection e) {
+    } catch (AvatarNotFoundException e) {
       throw new RuntimeException(e);
     }
   }
 
   private Link avatarLink(String id) {
-    try {
-      return linkTo(methodOn(AvatarController.class).getAvatar(id)).withRel("avatar");
-    } catch (AvatarNotFoundExpection e) {
-      throw new RuntimeException(e);
-    }
+    return linkTo(methodOn(AvatarController.class).getAvatar(id)).withRel("avatar");
   }
-
-  // ─── Request / Response records ─────────────────────────────────────────────
 
   public record CreateAvatarRequest(String name) {}
 
@@ -390,18 +384,26 @@ public class AvatarController {
 
   public record NameResponse(String name) {}
 
-  public record ErrorResponse(String message) {}
+  public record ItemResponse(String type, String name, String description, Integer power) {}
 
-  public record ItemRequest(String type, String name, String description, Integer power) {
-    public Item toItem() {
-      int p = power != null ? power : 0;
-      return switch (type.toUpperCase(Locale.getDefault())) {
-        case "WEAPON" -> new Weapon(name, description, p);
-        case "ARMOR" -> new Armor(name, description, p);
-        case "HEALTH_POTION" -> new HealthPotion(name, description, p);
-        case "MANA_POTION" -> new ManaPotion(name, description, p);
-        default -> throw new IllegalArgumentException("Unknown item type: " + type);
-      };
-    }
-  }
+  public record ItemRequest(String type, String name, String description, Integer power) {}
+
+  public record ExperienceResponse(Integer amount) {}
+
+  public record EquippedItemsResponse(String id, List<ItemResponse> items) {}
+
+  public record InventoryResponse(String id, List<ItemResponse> items) {}
+
+  public record StatsResponse(Integer strength, Integer defense, Integer intelligence) {}
+
+  public record MoneyResponse(Integer amount) {}
+
+  public record ManaResponse(Integer amount, Integer max) {}
+
+  public record HealthResponse(Integer current, Integer max) {}
+
+  public record LevelResponse(
+      Integer levelNumber, Integer currentExperience, Integer experienceRequired) {}
+
+  public record ErrorResponse(String message) {}
 }

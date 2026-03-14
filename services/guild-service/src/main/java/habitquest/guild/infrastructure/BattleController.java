@@ -141,7 +141,6 @@ public class BattleController {
   @GetMapping("/{id}/boss")
   public ResponseEntity<EntityModel<BossResponse>> getBoss(@PathVariable String id)
       throws BattleNotFoundException {
-
     EntityModel<BossResponse> model =
         EntityModel.of(
             BossResponse.from(battleService.getBoss(id)),
@@ -155,9 +154,7 @@ public class BattleController {
   @GetMapping("/{id}/boss/health")
   public ResponseEntity<EntityModel<BossHealthResponse>> getBossHealth(@PathVariable String id)
       throws BattleNotFoundException {
-
     int remaining = battleService.getBossRemainingHealth(id).remainingHealth().value();
-
     EntityModel<BossHealthResponse> model =
         EntityModel.of(
             new BossHealthResponse(remaining),
@@ -169,7 +166,6 @@ public class BattleController {
   }
 
   // ─── Turn management ────────────────────────────────────────────────────────
-
   @GetMapping("/{id}/turns/current")
   public ResponseEntity<EntityModel<TurnResponse>> getCurrentTurn(@PathVariable String id)
       throws BattleNotFoundException {
@@ -195,17 +191,9 @@ public class BattleController {
             new TurnResponse(numOfTurns),
             linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withSelfRel(),
             selfLink(id),
-            linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"),
-            linkTo(methodOn(BattleController.class).increaseNumOfTurns(id)).withRel("increase"));
+            linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"));
 
     return ResponseEntity.ok(model);
-  }
-
-  @PostMapping("/{id}/turns/increase")
-  public ResponseEntity<Void> increaseNumOfTurns(@PathVariable String id)
-      throws BattleNotFoundException {
-    battleService.increaseNumOfTurn(id);
-    return ResponseEntity.noContent().build();
   }
 
   // ─── Combat ─────────────────────────────────────────────────────────────────

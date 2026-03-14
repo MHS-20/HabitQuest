@@ -8,7 +8,6 @@ import habitquest.guild.domain.battle.stats.Defense;
 import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.battle.stats.Stats;
 import habitquest.guild.domain.battle.stats.Strength;
-
 import java.util.Locale;
 
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.NonSerializableClass"})

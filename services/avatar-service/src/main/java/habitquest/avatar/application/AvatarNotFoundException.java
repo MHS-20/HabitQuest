@@ -1,9 +1,9 @@
 package habitquest.avatar.application;
 
-public class AvatarNotFoundExpection extends RuntimeException {
+public class AvatarNotFoundException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
-  public AvatarNotFoundExpection(String message) {
+  public AvatarNotFoundException(String message) {
     super(message);
   }
 }

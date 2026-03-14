@@ -13,7 +13,7 @@ public class AvatarObserverImpl implements AvatarObserver {
   }
 
   @Override
-  public void notifyAvaterEvent(AvatarEvent event) {
+  public void notifyAvatarEvent(AvatarEvent event) {
     switch (event) {
       case LevelUpped e -> avatarNotifier.notifyLevelUpped(e);
       case Dead e -> avatarNotifier.notifyDead(e);
