@@ -9,6 +9,7 @@ import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,15 +50,16 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Query ---
   @Override
-  public Battle getBattleByGuild(String guildId) throws BattleNotFoundException {
-    return battleRepository
-        .findByGuildId(guildId)
-        .orElseThrow(() -> new BattleNotFoundException("No battle found for guildId: " + guildId));
+  public Optional<Battle> getBattleByGuild(String guildId) {
+    return battleRepository.findByGuildId(guildId);
   }
 
   @Override
   public boolean hasBattleInProgress(String guildId) throws BattleNotFoundException {
-    return getBattleByGuild(guildId).getBattleStatus() == BattleStatus.ONGOING;
+    return getBattleByGuild(guildId)
+            .orElseThrow(() -> new BattleNotFoundException("No battle found for guild: " + guildId))
+            .getBattleStatus()
+        == BattleStatus.ONGOING;
   }
 
   // --- Boss info ---
@@ -98,6 +100,13 @@ public class BattleServiceImpl implements BattleService {
   public void increaseNumOfTurn(String battleId) throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     battle.setNumOfTurns(battle.getNumOfTurns() + 1);
+    battleRepository.save(battle);
+  }
+
+  @Override
+  public void decreaseNumOfTurn(String battleId) throws BattleNotFoundException {
+    Battle battle = getBattleById(battleId);
+    battle.setNumOfTurns(battle.getNumOfTurns() - 1);
     battleRepository.save(battle);
   }
 

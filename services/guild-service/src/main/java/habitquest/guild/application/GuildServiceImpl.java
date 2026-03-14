@@ -13,12 +13,17 @@ public class GuildServiceImpl implements GuildService {
   private final GuildFactory guildFactory;
   private final GuildRepository guildRepository;
   private final GuildObserver guildObserver;
+  private final BattleService battleService;
 
   public GuildServiceImpl(
-      GuildFactory guildFactory, GuildRepository guildRepository, GuildObserver guildObserver) {
+      GuildFactory guildFactory,
+      GuildRepository guildRepository,
+      GuildObserver guildObserver,
+      BattleService battleService) {
     this.guildFactory = guildFactory;
     this.guildRepository = guildRepository;
     this.guildObserver = guildObserver;
+    this.battleService = battleService;
   }
 
   @Override
@@ -51,6 +56,13 @@ public class GuildServiceImpl implements GuildService {
     guildObserver.notifyGuildEvent(new GuildDeleted(guild.getId()));
   }
 
+  @Override
+  public boolean isLeader(String guildId, String memberId) throws GuildNotFoundException {
+    Guild guild =
+        guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
+    return guild.isLeader(memberId);
+  }
+
   // --- Membership management ---
   @Override
   public List<GuildMember> getMembers(String guildId) throws GuildNotFoundException {
@@ -67,6 +79,9 @@ public class GuildServiceImpl implements GuildService {
     guild.addMember(member);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new GuildJoined(guild.getId(), member.getId()));
+    battleService
+        .getBattleByGuild(guildId)
+        .ifPresent(battle -> battleService.increaseNumOfTurn(battle.getId()));
   }
 
   @Override
@@ -76,6 +91,17 @@ public class GuildServiceImpl implements GuildService {
     guild.removeMember(memberId);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new GuildLeft(guild.getId(), memberId));
+    battleService
+        .getBattleByGuild(guildId)
+        .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId()));
+
+    if (guild.getMembers().isEmpty()) {
+      guildRepository.deleteById(guildId);
+      guildObserver.notifyGuildEvent(new GuildDeleted(guild.getId()));
+      battleService
+          .getBattleByGuild(guildId)
+          .ifPresent(battle -> battleService.deleteBattle(battle.getId()));
+    }
   }
 
   @Override
@@ -85,6 +111,9 @@ public class GuildServiceImpl implements GuildService {
     guild.removeMember(memberId);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new RemovedFromGuild(guild.getId(), memberId));
+    battleService
+        .getBattleByGuild(guildId)
+        .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId()));
   }
 
   @Override

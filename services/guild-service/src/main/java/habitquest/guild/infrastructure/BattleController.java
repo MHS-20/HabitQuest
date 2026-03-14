@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,13 +40,19 @@ public class BattleController {
   }
 
   // ─── Battle lifecycle ────────────────────────────────────────────────────────
-
   @PostMapping
   public ResponseEntity<EntityModel<BattleCreatedResponse>> createBattle(
       @RequestBody CreateBattleRequest request) {
 
-    BossEnemy boss = resolveBoss(request.bossType());
-    String id = battleService.createBattle(request.guildId(), boss, request.numOfTurns());
+    if (!guildService.isLeader(request.guildId(), request.requesterId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    // BossEnemy boss = Minotaur.INSTANCE;
+    BossEnemy boss = resolveBoss(request.bossType);
+    String id =
+        battleService.createBattle(
+            request.guildId(), boss, guildService.getMembers(request.guildId()).size());
     BattleCreatedResponse body = new BattleCreatedResponse(id);
 
     EntityModel<BattleCreatedResponse> model =
@@ -76,16 +83,18 @@ public class BattleController {
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"),
             linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withRel("numOfTurns"),
             linkTo(methodOn(BattleController.class).dealDamage(id, null)).withRel("dealDamage"),
-            linkTo(methodOn(BattleController.class).nextTurn(id)).withRel("nextTurn"),
-            linkTo(methodOn(BattleController.class).deleteBattle(id)).withRel("delete"));
+            linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"));
 
     return ResponseEntity.ok(model);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteBattle(@PathVariable String id) {
+  public ResponseEntity<Void> deleteBattle(@RequestBody DeleteBattleRequest request) {
+    if (!guildService.isLeader(request.guildId(), request.requesterId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
 
-    battleService.deleteBattle(id);
+    battleService.deleteBattle(request.battleId);
     return ResponseEntity.noContent().build();
   }
 
@@ -95,7 +104,11 @@ public class BattleController {
   public ResponseEntity<EntityModel<Battle>> getBattleByGuild(@PathVariable String guildId)
       throws BattleNotFoundException {
 
-    Battle battle = battleService.getBattleByGuild(guildId);
+    Battle battle =
+        battleService
+            .getBattleByGuild(guildId)
+            .orElseThrow(
+                () -> new BattleNotFoundException("No battle found for guild: " + guildId));
     String id = battle.getId();
 
     EntityModel<Battle> model =
@@ -163,7 +176,6 @@ public class BattleController {
   @GetMapping("/{id}/turns/current")
   public ResponseEntity<EntityModel<TurnResponse>> getCurrentTurn(@PathVariable String id)
       throws BattleNotFoundException {
-
     Integer currentTurn = battleService.getCurrentTurn(id);
 
     EntityModel<TurnResponse> model =
@@ -171,8 +183,7 @@ public class BattleController {
             new TurnResponse(currentTurn),
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withSelfRel(),
             selfLink(id),
-            linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withRel("numOfTurns"),
-            linkTo(methodOn(BattleController.class).nextTurn(id)).withRel("nextTurn"));
+            linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withRel("numOfTurns"));
 
     return ResponseEntity.ok(model);
   }
@@ -180,7 +191,6 @@ public class BattleController {
   @GetMapping("/{id}/turns/total")
   public ResponseEntity<EntityModel<TurnResponse>> getNumOfTurns(@PathVariable String id)
       throws BattleNotFoundException {
-
     Integer numOfTurns = battleService.getNumOfTurns(id);
 
     EntityModel<TurnResponse> model =
@@ -194,32 +204,40 @@ public class BattleController {
     return ResponseEntity.ok(model);
   }
 
-  @PostMapping("/{id}/turns/next")
-  public ResponseEntity<Void> nextTurn(@PathVariable String id) throws BattleNotFoundException {
-
-    battleService.nextTurn(id);
-    return ResponseEntity.noContent().build();
-  }
+  //  @PostMapping("/{id}/turns/next")
+  //  public ResponseEntity<Void> nextTurn(@PathVariable String id) throws BattleNotFoundException {
+  //    battleService.nextTurn(id);
+  //    return ResponseEntity.noContent().build();
+  //  }
 
   @PostMapping("/{id}/turns/increase")
   public ResponseEntity<Void> increaseNumOfTurns(@PathVariable String id)
       throws BattleNotFoundException {
-
     battleService.increaseNumOfTurn(id);
     return ResponseEntity.noContent().build();
   }
 
   // ─── Combat ─────────────────────────────────────────────────────────────────
-
   @PostMapping("/{id}/damage")
   public ResponseEntity<Void> dealDamage(
       @PathVariable String id, @RequestBody DamageRequest request)
       throws BattleNotFoundException, GuildNotFoundException {
     BossEnemy boss = battleService.getBoss(id);
     String guildId = battleService.getGuildId(id);
+
+    if (request.attackerAvatarId() == null) {
+      return ResponseEntity.badRequest().body(null);
+    }
+
+    List<GuildMember> members = guildService.getMembers(guildId);
+    int currentTurn = battleService.getCurrentTurn(id);
+    String expectedMemberId = members.get(currentTurn).getId();
+    if (!expectedMemberId.equals(request.attackerAvatarId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     battleService.dealDamage(id, request.damage());
     BattleStatus newStatus = battleService.getBattleStatus(id);
-    List<GuildMember> members = guildService.getMembers(guildId);
 
     switch (newStatus) {
       case WON -> {
@@ -247,6 +265,7 @@ public class BattleController {
       default -> throw new IllegalStateException("Unexpected battle status: " + newStatus);
     }
 
+    battleService.nextTurn(id);
     return ResponseEntity.noContent().build();
   }
 
@@ -308,7 +327,9 @@ public class BattleController {
 
   // ─── Request / Response records ─────────────────────────────────────────────
 
-  public record CreateBattleRequest(String guildId, String bossType, Integer numOfTurns) {}
+  public record CreateBattleRequest(String guildId, String bossType, String requesterId) {}
+
+  public record DeleteBattleRequest(String guildId, String battleId, String requesterId) {}
 
   public record DamageRequest(Integer damage, String attackerAvatarId) {}
 

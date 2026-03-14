@@ -111,10 +111,13 @@ public class GuildController {
   }
 
   @DeleteMapping("/{id}/members/{memberId}")
-  public ResponseEntity<Void> removeMember(@PathVariable String id, @PathVariable String memberId)
+  public ResponseEntity<Void> removeMember(
+      @PathVariable String id, @RequestBody RemoveMemberRequest request)
       throws GuildNotFoundException {
-
-    guildService.removeMember(id, memberId);
+    if (!guildService.isLeader(id, request.requestorId())) {
+      return ResponseEntity.status(403).build();
+    }
+    guildService.removeMember(id, request.memberId);
     return ResponseEntity.noContent().build();
   }
 
@@ -132,7 +135,9 @@ public class GuildController {
       @PathVariable String memberId,
       @RequestBody PromoteMemberRequest request)
       throws GuildNotFoundException {
-
+    if (!guildService.isLeader(id, request.requestorId())) {
+      return ResponseEntity.status(403).build();
+    }
     guildService.promoteMember(id, memberId, new GuildRole(request.roleName()));
     return ResponseEntity.noContent().build();
   }
@@ -157,18 +162,14 @@ public class GuildController {
 
   @GetMapping("/leaderboard")
   public ResponseEntity<CollectionModel<Guild>> getLeaderboard() {
-
     List<Guild> leaderboard = guildService.getGuildLeaderboard();
-
     CollectionModel<Guild> model =
         CollectionModel.of(
             leaderboard, linkTo(methodOn(GuildController.class).getLeaderboard()).withSelfRel());
-
     return ResponseEntity.ok(model);
   }
 
   // Exception handling
-
   @ExceptionHandler(GuildNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleGuildNotFound(GuildNotFoundException ex) {
     return ResponseEntity.notFound().build();
@@ -191,12 +192,13 @@ public class GuildController {
   }
 
   // Request / Response records
-
   public record CreateGuildRequest(String name, String creatorAvatarId, String creatorNickname) {}
+
+  public record RemoveMemberRequest(String memberId, String requestorId) {}
 
   public record AddMemberRequest(String avatarId, String nickname, String roleName) {}
 
-  public record PromoteMemberRequest(String roleName) {}
+  public record PromoteMemberRequest(String roleName, String requestorId) {}
 
   public record GuildCreatedResponse(String id) {}
 

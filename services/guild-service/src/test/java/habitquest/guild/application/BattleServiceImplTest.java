@@ -149,21 +149,20 @@ class BattleServiceImplTest {
 
     @Test
     @DisplayName("should return the battle for the given guild")
-    void shouldReturnBattleForGuild() throws BattleNotFoundException {
+    void shouldReturnBattleForGuild() {
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.of(battle));
 
-      Battle result = battleService.getBattleByGuild(GUILD_ID);
+      Optional<Battle> result = battleService.getBattleByGuild(GUILD_ID);
 
-      assertThat(result).isSameAs(battle);
+      assertThat(result).contains(battle);
     }
 
     @Test
-    @DisplayName("should throw BattleNotFoundException when no battle exists for the guild")
-    void shouldThrowWhenNotFound() {
+    @DisplayName("should return empty Optional when no battle exists for the guild")
+    void shouldReturnEmptyWhenNotFound() {
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> battleService.getBattleByGuild(GUILD_ID))
-          .isInstanceOf(BattleNotFoundException.class);
+      assertThat(battleService.getBattleByGuild(GUILD_ID)).isEmpty();
     }
   }
 

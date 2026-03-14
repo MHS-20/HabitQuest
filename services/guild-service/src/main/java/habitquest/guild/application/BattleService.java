@@ -5,6 +5,7 @@ import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
+import java.util.Optional;
 
 @InBoundPort
 public interface BattleService {
@@ -17,7 +18,7 @@ public interface BattleService {
   void deleteBattle(String battleId);
 
   // --- Query ---
-  Battle getBattleByGuild(String guildId) throws BattleNotFoundException;
+  Optional<Battle> getBattleByGuild(String guildId) throws BattleNotFoundException;
 
   boolean hasBattleInProgress(String guildId) throws BattleNotFoundException;
 
@@ -36,6 +37,8 @@ public interface BattleService {
   void nextTurn(String battleId) throws BattleNotFoundException;
 
   void increaseNumOfTurn(String battleId) throws BattleNotFoundException;
+
+  void decreaseNumOfTurn(String battleId) throws BattleNotFoundException;
 
   // --- Combat ---
   void dealDamage(String battleId, Integer damage) throws BattleNotFoundException;

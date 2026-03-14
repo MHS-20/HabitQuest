@@ -18,6 +18,8 @@ public interface GuildService {
 
   List<GuildMember> getMembers(String guildId) throws GuildNotFoundException;
 
+  boolean isLeader(String guildId, String memberId) throws GuildNotFoundException;
+
   void leaveGuild(String guildId, String memberId) throws GuildNotFoundException;
 
   void addMember(String guildId, GuildMember member) throws GuildNotFoundException;
