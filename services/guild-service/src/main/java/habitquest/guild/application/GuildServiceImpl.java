@@ -40,14 +40,6 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public void updateGuild(String guildId, Guild request) throws GuildNotFoundException {
-    Guild guild =
-        guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
-    guild.updateGlobalRank(request.getGlobalRank());
-    guildRepository.save(guild);
-  }
-
-  @Override
   public void deleteGuild(String guildId) throws GuildNotFoundException {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));

@@ -12,8 +12,6 @@ public interface GuildService {
 
   Guild getGuild(String guildId) throws GuildNotFoundException;
 
-  void updateGuild(String guildId, Guild request) throws GuildNotFoundException;
-
   void deleteGuild(String guildId) throws GuildNotFoundException;
 
   List<GuildMember> getMembers(String guildId) throws GuildNotFoundException;
