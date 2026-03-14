@@ -6,9 +6,11 @@ import habitquest.marketplace.application.AvatarNotFoundException;
 import habitquest.marketplace.application.ItemNotFoundException;
 import habitquest.marketplace.application.MarketplaceNotFoundException;
 import habitquest.marketplace.application.MarketplaceService;
-import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.infrastructure.dto.ItemMapper;
+import habitquest.marketplace.infrastructure.dto.ItemResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +36,14 @@ public class MarketplaceController {
 
   // ─── Marketplace ────────────────────────────────────────────────────────────
   @GetMapping("/{marketplaceId}")
-  public ResponseEntity<EntityModel<Marketplace>> getMarketplace(
+  public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplace(
       @PathVariable String marketplaceId) {
-    Marketplace marketplace = marketplaceService.getMarketplace(marketplaceId);
-    EntityModel<Marketplace> model =
+
+    MarketplaceResponse dto =
+        MarketplaceResponse.from(marketplaceService.getMarketplace(marketplaceId));
+    EntityModel<MarketplaceResponse> model =
         EntityModel.of(
-            marketplace,
+            dto,
             selfMarketplaceLink(marketplaceId),
             linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
                 .withRel("items"));
@@ -50,14 +54,15 @@ public class MarketplaceController {
 
   /** Returns all items available in the marketplace. */
   @GetMapping("/{marketplaceId}/items")
-  public ResponseEntity<CollectionModel<EntityModel<Item>>> getItems(
+  public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getItems(
       @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemType type)
       throws MarketplaceNotFoundException {
-    List<EntityModel<Item>> items =
+
+    List<EntityModel<ItemResponse>> items =
         marketplaceService.getItems(marketplaceId, type).stream()
             .map(item -> itemModel(marketplaceId, item))
             .toList();
-    CollectionModel<EntityModel<Item>> model =
+    CollectionModel<EntityModel<ItemResponse>> model =
         CollectionModel.of(
             items,
             linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, type))
@@ -68,7 +73,7 @@ public class MarketplaceController {
 
   /** Returns a single item by name. */
   @GetMapping("/{marketplaceId}/items/{itemName}")
-  public ResponseEntity<EntityModel<Item>> getItem(
+  public ResponseEntity<EntityModel<ItemResponse>> getItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
 
@@ -149,9 +154,10 @@ public class MarketplaceController {
         .withSelfRel();
   }
 
-  private EntityModel<Item> itemModel(String marketplaceId, Item item) {
+  private EntityModel<ItemResponse> itemModel(String marketplaceId, Item item) {
+    ItemResponse dto = ItemMapper.toResponse(item);
     return EntityModel.of(
-        item,
+        dto,
         linkTo(methodOn(MarketplaceController.class).getItem(marketplaceId, item.name()))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
