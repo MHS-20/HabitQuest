@@ -1,11 +1,12 @@
 package habitquest.avatar.domain.items;
 
-import common.ddd.Aggregate;
+import common.ddd.Entity;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class Inventory implements Aggregate<String> {
+public class Inventory implements Entity<String> {
   private final String id;
   private List<Item> items;
 
@@ -15,7 +16,7 @@ public class Inventory implements Aggregate<String> {
   }
 
   public List<Item> getItems() {
-    return items;
+    return Collections.unmodifiableList(items);
   }
 
   public void addItem(Item item) {
