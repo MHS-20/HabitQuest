@@ -5,9 +5,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
-import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
+import habitquest.guild.infrastructure.dto.GuildMemberResponse;
+import habitquest.guild.infrastructure.dto.GuildResponse;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -50,14 +51,14 @@ public class GuildController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<EntityModel<Guild>> getGuild(@PathVariable String id)
+  public ResponseEntity<EntityModel<GuildResponse>> getGuild(@PathVariable String id)
       throws GuildNotFoundException {
 
-    Guild guild = guildService.getGuild(id);
+    GuildResponse body = GuildResponse.from(guildService.getGuild(id));
 
-    EntityModel<Guild> model =
+    EntityModel<GuildResponse> model =
         EntityModel.of(
-            guild,
+            body,
             selfLink(id),
             linkTo(methodOn(GuildController.class).getMembers(id)).withRel("members"),
             linkTo(methodOn(GuildController.class).getGlobalRank(id)).withRel("rank"),
@@ -65,14 +66,6 @@ public class GuildController {
             linkTo(methodOn(GuildController.class).deleteGuild(id)).withRel("delete"));
 
     return ResponseEntity.ok(model);
-  }
-
-  @PutMapping("/{id}")
-  public ResponseEntity<Void> updateGuild(@PathVariable String id, @RequestBody Guild updatedGuild)
-      throws GuildNotFoundException {
-
-    guildService.updateGuild(id, updatedGuild);
-    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}")
@@ -85,12 +78,13 @@ public class GuildController {
   // Members
 
   @GetMapping("/{id}/members")
-  public ResponseEntity<CollectionModel<GuildMember>> getMembers(@PathVariable String id)
+  public ResponseEntity<CollectionModel<GuildMemberResponse>> getMembers(@PathVariable String id)
       throws GuildNotFoundException {
 
-    List<GuildMember> members = guildService.getMembers(id);
+    List<GuildMemberResponse> members =
+        guildService.getMembers(id).stream().map(GuildMemberResponse::from).toList();
 
-    CollectionModel<GuildMember> model =
+    CollectionModel<GuildMemberResponse> model =
         CollectionModel.of(
             members,
             linkTo(methodOn(GuildController.class).getMembers(id)).withSelfRel(),
@@ -119,12 +113,14 @@ public class GuildController {
 
   @DeleteMapping("/{id}/members/{memberId}")
   public ResponseEntity<Void> removeMember(
-      @PathVariable String id, @RequestBody RemoveMemberRequest request)
+      @PathVariable String id,
+      @PathVariable String memberId,
+      @RequestBody RemoveMemberRequest request)
       throws GuildNotFoundException {
     if (!guildService.isLeader(id, request.requestorId())) {
       return ResponseEntity.status(403).build();
     }
-    guildService.removeMember(id, request.memberId);
+    guildService.removeMember(id, memberId);
     return ResponseEntity.noContent().build();
   }
 
@@ -177,9 +173,10 @@ public class GuildController {
   }
 
   @GetMapping("/leaderboard")
-  public ResponseEntity<CollectionModel<Guild>> getLeaderboard() {
-    List<Guild> leaderboard = guildService.getGuildLeaderboard();
-    CollectionModel<Guild> model =
+  public ResponseEntity<CollectionModel<GuildResponse>> getLeaderboard() {
+    List<GuildResponse> leaderboard =
+        guildService.getGuildLeaderboard().stream().map(GuildResponse::from).toList();
+    CollectionModel<GuildResponse> model =
         CollectionModel.of(
             leaderboard, linkTo(methodOn(GuildController.class).getLeaderboard()).withSelfRel());
     return ResponseEntity.ok(model);
@@ -200,17 +197,12 @@ public class GuildController {
 
   private Link selfLink(String id) {
     return Link.of("/api/v1/guilds/" + id).withSelfRel();
-    //    try {
-    //      return linkTo(methodOn(GuildController.class).getGuild(id)).withSelfRel();
-    //    } catch (GuildNotFoundException e) {
-    //      throw new RuntimeException(e);
-    //    }
   }
 
   // Request / Response records
   public record CreateGuildRequest(String name, String creatorAvatarId, String creatorNickname) {}
 
-  public record RemoveMemberRequest(String memberId, String requestorId) {}
+  public record RemoveMemberRequest(String requestorId) {}
 
   public record AddMemberRequest(String avatarId, String nickname, String roleName) {}
 

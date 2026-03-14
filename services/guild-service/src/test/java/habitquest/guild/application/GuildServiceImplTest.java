@@ -126,37 +126,6 @@ class GuildServiceImplTest {
   }
 
   // -------------------------------------------------------------------------
-  // updateGuild
-  // -------------------------------------------------------------------------
-  @Nested
-  @DisplayName("updateGuild")
-  class UpdateGuild {
-
-    @Test
-    @DisplayName("should update the global rank and save")
-    void shouldUpdateRankAndSave() throws GuildNotFoundException {
-      Guild request =
-          new Guild(GUILD_ID, GUILD_NAME, new GuildMember(AVATAR_ID, NICK, LEADER_ROLE));
-      request.updateGlobalRank(10);
-      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-
-      guildService.updateGuild(GUILD_ID, request);
-
-      assertThat(guild.getGlobalRank()).isEqualTo(10);
-      verify(guildRepository).save(guild);
-    }
-
-    @Test
-    @DisplayName(THROWS_WHEN_NOT_FOUND)
-    void shouldThrowWhenNotFound() {
-      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
-
-      assertThatThrownBy(() -> guildService.updateGuild(GUILD_ID, guild))
-          .isInstanceOf(GuildNotFoundException.class);
-    }
-  }
-
-  // -------------------------------------------------------------------------
   // deleteGuild
   // -------------------------------------------------------------------------
   @Nested
