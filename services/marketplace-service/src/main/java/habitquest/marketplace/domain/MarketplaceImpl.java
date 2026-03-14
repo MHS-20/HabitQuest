@@ -8,38 +8,14 @@ import java.util.Optional;
 public class MarketplaceImpl implements Marketplace {
   private final String id;
   private List<Item> items;
-  private List<Armor> armors;
-  private List<Weapon> weapons;
-  private List<Potion> potions;
-  private List<HealthPotion> healthPotions;
-  private List<ManaPotion> manaPotions;
 
   public MarketplaceImpl(String id) {
-    this(
-        id,
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>());
+    this(id, new ArrayList<>());
   }
 
-  public MarketplaceImpl(
-      String id,
-      List<Item> items,
-      List<Armor> armors,
-      List<Weapon> weapons,
-      List<Potion> potions,
-      List<HealthPotion> healthPotions,
-      List<ManaPotion> manaPotions) {
+  public MarketplaceImpl(String id, List<Item> items) {
     this.id = id;
     this.items = items;
-    this.armors = armors;
-    this.weapons = weapons;
-    this.potions = potions;
-    this.healthPotions = healthPotions;
-    this.manaPotions = manaPotions;
   }
 
   @Override
@@ -48,33 +24,8 @@ public class MarketplaceImpl implements Marketplace {
   }
 
   @Override
-  public List<Weapon> getWeapons() {
-    return weapons;
-  }
-
-  @Override
-  public List<Item> getItems() {
-    return items;
-  }
-
-  @Override
-  public List<Armor> getArmors() {
-    return armors;
-  }
-
-  @Override
-  public List<HealthPotion> getHealthPotions() {
-    return healthPotions;
-  }
-
-  @Override
-  public List<ManaPotion> getManaPotions() {
-    return manaPotions;
-  }
-
-  @Override
-  public List<Potion> getPotions() {
-    return potions;
+  public List<Item> getItems(ItemType type) {
+    return items.stream().filter(type.filter()).toList();
   }
 
   @Override
