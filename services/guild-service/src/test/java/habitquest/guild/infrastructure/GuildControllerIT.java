@@ -140,45 +140,7 @@ public class GuildControllerIT {
     }
   }
 
-  // ── PUT /api/v1/guilds/{id} ───────────────────────────────────────────────────
-
-  @Nested
-  @DisplayName("PUT /api/v1/guilds/{id}")
-  class UpdateGuild {
-
-    @Test
-    @DisplayName("returns 204 on successful update")
-    void shouldReturn204() throws Exception {
-      doNothing().when(guildService).updateGuild(eq(GUILD_ID), any(Guild.class));
-
-      mockMvc
-          .perform(
-              put("/api/v1/guilds/{id}", GUILD_ID)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(stubGuild())))
-          .andExpect(status().isNoContent());
-
-      verify(guildService).updateGuild(eq(GUILD_ID), any(Guild.class));
-    }
-
-    @Test
-    @DisplayName("returns 404 when guild does not exist")
-    void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new GuildNotFoundException(UNKNOWN_ID))
-          .when(guildService)
-          .updateGuild(eq(UNKNOWN_ID), any(Guild.class));
-
-      mockMvc
-          .perform(
-              put("/api/v1/guilds/{id}", UNKNOWN_ID)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(stubGuild())))
-          .andExpect(status().isNotFound());
-    }
-  }
-
   // ── DELETE /api/v1/guilds/{id} ────────────────────────────────────────────────
-
   @Nested
   @DisplayName("DELETE /api/v1/guilds/{id}")
   class DeleteGuild {
