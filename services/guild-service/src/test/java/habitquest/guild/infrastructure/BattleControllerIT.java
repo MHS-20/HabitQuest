@@ -8,12 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import habitquest.guild.application.BattleNotFoundException;
 import habitquest.guild.application.BattleService;
+import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
-import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
-import habitquest.guild.domain.battle.boss.Minotaur;
+import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
@@ -47,11 +47,11 @@ public class BattleControllerIT {
   private static final String BATTLE_ID = "battle-1";
   private static final String GUILD_ID = "guild-1";
   private static final String AVATAR_ID = "avatar-1";
+  private static final String LEADER_ID = "leader-1";
   private static final String UNKNOWN_ID = "ghost-99";
 
   private Battle stubBattle() {
-    return new Battle(
-        BATTLE_ID, GUILD_ID, Minotaur.INSTANCE, 10, 0, new BossStatus(new Health(1000)));
+    return new Battle(BATTLE_ID, GUILD_ID, BossType.MINOTAUR, 10);
   }
 
   private GuildMember stubMember() {
@@ -59,6 +59,7 @@ public class BattleControllerIT {
   }
 
   // ── POST /api/v1/battles ──────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("POST /api/v1/battles")
   class CreateBattle {
@@ -66,11 +67,9 @@ public class BattleControllerIT {
     @Test
     @DisplayName("returns 201 with the new battle id")
     void shouldReturn201WithId() throws Exception {
-      when(guildService.isLeader(eq(GUILD_ID), anyString())).thenReturn(true);
-      // Controller calls guildService.getMembers() to derive the turn count,
-      // so we need to stub it here.
+      when(guildService.isLeader(GUILD_ID, LEADER_ID)).thenReturn(true);
       when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
-      when(battleService.createBattle(eq(GUILD_ID), any(BossEnemy.class), anyInt()))
+      when(battleService.createBattle(eq(GUILD_ID), eq(BossType.MINOTAUR), eq(1)))
           .thenReturn(BATTLE_ID);
 
       mockMvc
@@ -79,8 +78,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"guildId":"guild-1","bossType":"MINOTAUR", "requesterId":"leader-1"}
-                                      """))
+                      {"guildId":"guild-1","bossType":"MINOTAUR","requesterId":"leader-1"}
+                      """))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.id").value(BATTLE_ID));
     }
@@ -89,10 +88,8 @@ public class BattleControllerIT {
     @DisplayName("delegates guild, boss and turn count (derived from member count) to the service")
     void shouldDelegateToService() throws Exception {
       when(guildService.isLeader(anyString(), anyString())).thenReturn(true);
-      // The controller passes getMembers().size() as the turn count, so stub
-      // getMembers and verify that createBattle receives that exact size.
       when(guildService.getMembers(anyString())).thenReturn(List.of(stubMember(), stubMember()));
-      when(battleService.createBattle(anyString(), any(BossEnemy.class), anyInt()))
+      when(battleService.createBattle(anyString(), any(BossType.class), anyInt()))
           .thenReturn(BATTLE_ID);
 
       mockMvc
@@ -101,27 +98,64 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"guildId":"guild-1","bossType":"MINOTAUR","requesterId":"leader-1"}
-                                      """))
+                      {"guildId":"guild-1","bossType":"MINOTAUR","requesterId":"leader-1"}
+                      """))
           .andExpect(status().isCreated());
 
-      // getMembers returns 2 members, so turn count must be 2.
-      verify(battleService).createBattle(eq("guild-1"), any(BossEnemy.class), eq(2));
+      verify(battleService).createBattle(eq("guild-1"), eq(BossType.MINOTAUR), eq(2));
     }
 
     @Test
     @DisplayName("returns 400 for an unknown boss type")
     void shouldReturn400ForUnknownBossType() throws Exception {
-      when(guildService.isLeader(anyString(), anyString())).thenReturn(true);
       mockMvc
           .perform(
               post("/api/v1/battles")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"guildId":"guild-1","bossType":"DRAGON", "requesterId":"leader-1"}
-                                      """))
+                      {"guildId":"guild-1","bossType":"DRAGON","requesterId":"leader-1"}
+                      """))
           .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(battleService);
+    }
+
+    @Test
+    @DisplayName("returns 403 when requestor is not the guild leader")
+    void shouldReturn403WhenNotLeader() throws Exception {
+      when(guildService.isLeader(GUILD_ID, "not-a-leader")).thenReturn(false);
+
+      mockMvc
+          .perform(
+              post("/api/v1/battles")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"guildId":"guild-1","bossType":"MINOTAUR","requesterId":"not-a-leader"}
+                      """))
+          .andExpect(status().isForbidden());
+
+      verifyNoInteractions(battleService);
+    }
+
+    @Test
+    @DisplayName("returns 404 when guild does not exist")
+    void shouldReturn404WhenGuildNotFound() throws Exception {
+      when(guildService.isLeader(UNKNOWN_ID, LEADER_ID))
+          .thenThrow(new GuildNotFoundException(UNKNOWN_ID));
+
+      mockMvc
+          .perform(
+              post("/api/v1/battles")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"guildId":"ghost-99","bossType":"MINOTAUR","requesterId":"leader-1"}
+                      """))
+          .andExpect(status().isNotFound());
+
+      verifyNoInteractions(battleService);
     }
   }
 
@@ -155,23 +189,60 @@ public class BattleControllerIT {
   @DisplayName("DELETE /api/v1/battles/{id}")
   class DeleteBattle {
 
-    // java
     @Test
-    @DisplayName("returns 204 on successful deletion")
+    @DisplayName("returns 204 when leader deletes a battle")
     void shouldReturn204() throws Exception {
+      when(guildService.isLeader(GUILD_ID, LEADER_ID)).thenReturn(true);
       doNothing().when(battleService).deleteBattle(BATTLE_ID);
+      mockMvc
+          .perform(
+              delete("/api/v1/battles/{id}", BATTLE_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"guildId":"guild-1","requesterId":"leader-1"}
+                      """))
+          .andExpect(status().isNoContent());
+      verify(battleService).deleteBattle(BATTLE_ID);
+    }
+
+    @Test
+    @DisplayName("returns 403 when requestor is not the guild leader")
+    void shouldReturn403WhenNotLeader() throws Exception {
       when(battleService.getGuildId(BATTLE_ID)).thenReturn(GUILD_ID);
-      when(guildService.isLeader(eq(GUILD_ID), anyString())).thenReturn(true);
+      when(guildService.getGuild(GUILD_ID))
+          .thenReturn(
+              new habitquest.guild.domain.guild.Guild(
+                  GUILD_ID, "Knights", new GuildMember(LEADER_ID, "Leader", GuildRole.LEADER)));
 
       mockMvc
           .perform(
               delete("/api/v1/battles/{id}", BATTLE_ID)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"guildId\":\"guild-1\", \"requesterId\":\"leader-1\"}"))
-          .andExpect(status().isNoContent());
+                  .content(
+                      """
+                      {"guildId":"guild-1","requesterId":"not-a-leader"}
+                      """))
+          .andExpect(status().isForbidden());
 
-      verify(guildService).isLeader(eq(GUILD_ID), eq("leader-1"));
-      verify(battleService).deleteBattle(BATTLE_ID);
+      verify(battleService, never()).deleteBattle(any());
+    }
+
+    @Test
+    @DisplayName("returns 204 when battle does not exist")
+    void shouldReturn404WhenNotFound() throws Exception {
+      when(guildService.isLeader(GUILD_ID, LEADER_ID)).thenReturn(true);
+      when(battleService.getGuildId(UNKNOWN_ID)).thenThrow(new BattleNotFoundException(UNKNOWN_ID));
+
+      mockMvc
+          .perform(
+              delete("/api/v1/battles/{id}", UNKNOWN_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"guildId":"guild-1","requesterId":"leader-1"}
+                      """))
+          .andExpect(status().isNoContent());
     }
   }
 
@@ -238,9 +309,12 @@ public class BattleControllerIT {
     @Test
     @DisplayName("returns 200 with boss data")
     void shouldReturn200() throws Exception {
-      when(battleService.getBoss(BATTLE_ID)).thenReturn(Minotaur.INSTANCE);
+      when(battleService.getBoss(BATTLE_ID)).thenReturn(BossType.MINOTAUR);
 
-      mockMvc.perform(get("/api/v1/battles/{id}/boss", BATTLE_ID)).andExpect(status().isOk());
+      mockMvc
+          .perform(get("/api/v1/battles/{id}/boss", BATTLE_ID))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.name").value("MINOTAUR"));
     }
 
     @Test
@@ -261,14 +335,15 @@ public class BattleControllerIT {
   class GetBossHealth {
 
     @Test
-    @DisplayName("returns 200 with boss status")
+    @DisplayName("returns 200 with remaining health value")
     void shouldReturn200() throws Exception {
       when(battleService.getBossRemainingHealth(BATTLE_ID))
           .thenReturn(new BossStatus(new Health(800)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/boss/health", BATTLE_ID))
-          .andExpect(status().isOk());
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.remainingHealth").value(800));
     }
 
     @Test
@@ -319,15 +394,15 @@ public class BattleControllerIT {
     }
   }
 
-  // ── POST /api/v1/battles/{id}/turns/next ─────────────────────────────────────
+  // ── POST /api/v1/battles/{id}/turns/increase ─────────────────────────────────
 
   @Nested
-  @DisplayName("POST /api/v1/battles/{id}/turns/next")
-  class NextTurn {
+  @DisplayName("POST /api/v1/battles/{id}/turns/increase")
+  class IncreaseNumOfTurns {
 
     @Test
-    @DisplayName("returns 204 and advances the turn")
-    void shouldReturn204AndAdvanceTurn() throws Exception {
+    @DisplayName("returns 204 and increases total turns")
+    void shouldReturn204AndIncrease() throws Exception {
       doNothing().when(battleService).increaseNumOfTurn(BATTLE_ID);
 
       mockMvc
@@ -350,25 +425,6 @@ public class BattleControllerIT {
     }
   }
 
-  // ── POST /api/v1/battles/{id}/turns/increase ─────────────────────────────────
-
-  @Nested
-  @DisplayName("POST /api/v1/battles/{id}/turns/increase")
-  class IncreaseNumOfTurns {
-
-    @Test
-    @DisplayName("returns 204 and increases total turns")
-    void shouldReturn204AndIncrease() throws Exception {
-      doNothing().when(battleService).increaseNumOfTurn(BATTLE_ID);
-
-      mockMvc
-          .perform(post("/api/v1/battles/{id}/turns/increase", BATTLE_ID))
-          .andExpect(status().isNoContent());
-
-      verify(battleService).increaseNumOfTurn(BATTLE_ID);
-    }
-  }
-
   // ── POST /api/v1/battles/{id}/damage ─────────────────────────────────────────
 
   @Nested
@@ -378,10 +434,10 @@ public class BattleControllerIT {
     @Test
     @DisplayName("grants XP and money to all members when battle is WON")
     void shouldGrantRewardsOnWin() throws Exception {
-      when(battleService.getBoss(BATTLE_ID)).thenReturn(Minotaur.INSTANCE);
+      when(battleService.getBoss(BATTLE_ID)).thenReturn(BossType.MINOTAUR);
       when(battleService.getGuildId(BATTLE_ID)).thenReturn(GUILD_ID);
-      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getCurrentTurn(BATTLE_ID)).thenReturn(0);
+      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getBattleStatus(BATTLE_ID)).thenReturn(BattleStatus.WON);
 
       mockMvc
@@ -390,21 +446,22 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":500,"attackerAvatarId":"avatar-1"}
-                                      """))
+                      {"damage":500,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarClient).grantExperience(eq(AVATAR_ID), anyInt());
       verify(avatarClient).earnMoney(eq(AVATAR_ID), anyInt());
+      verifyNoMoreInteractions(avatarClient);
     }
 
     @Test
     @DisplayName("applies penalty to all members when battle is LOST")
     void shouldApplyPenaltyOnLoss() throws Exception {
-      when(battleService.getBoss(BATTLE_ID)).thenReturn(Minotaur.INSTANCE);
+      when(battleService.getBoss(BATTLE_ID)).thenReturn(BossType.MINOTAUR);
       when(battleService.getGuildId(BATTLE_ID)).thenReturn(GUILD_ID);
-      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getCurrentTurn(BATTLE_ID)).thenReturn(0);
+      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getBattleStatus(BATTLE_ID)).thenReturn(BattleStatus.LOST);
 
       mockMvc
@@ -413,8 +470,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":0,"attackerAvatarId":"avatar-1"}
-                                      """))
+                      {"damage":0,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarClient).applyPenalty(eq(AVATAR_ID), anyInt());
@@ -424,10 +481,10 @@ public class BattleControllerIT {
     @Test
     @DisplayName("applies damage to the attacker when battle is ONGOING")
     void shouldApplyDamageToAttackerWhenOngoing() throws Exception {
-      when(battleService.getBoss(BATTLE_ID)).thenReturn(Minotaur.INSTANCE);
+      when(battleService.getBoss(BATTLE_ID)).thenReturn(BossType.MINOTAUR);
       when(battleService.getGuildId(BATTLE_ID)).thenReturn(GUILD_ID);
-      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getCurrentTurn(BATTLE_ID)).thenReturn(0);
+      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getBattleStatus(BATTLE_ID)).thenReturn(BattleStatus.ONGOING);
 
       mockMvc
@@ -436,21 +493,21 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":30,"attackerAvatarId":"avatar-1"}
-                                      """))
+                      {"damage":30,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarClient).applyDamage(AVATAR_ID, 30);
+      verifyNoMoreInteractions(avatarClient);
     }
 
     @Test
-    @DisplayName("returns 400 when no attacker is provided")
-    void shouldReturn400WhenNoAttackerProvided() throws Exception {
-      when(battleService.getBoss(BATTLE_ID)).thenReturn(Minotaur.INSTANCE);
+    @DisplayName("returns 403 when it is not the attacker's turn")
+    void shouldReturn403WhenWrongAttacker() throws Exception {
+      when(battleService.getBoss(BATTLE_ID)).thenReturn(BossType.MINOTAUR);
       when(battleService.getGuildId(BATTLE_ID)).thenReturn(GUILD_ID);
-      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
       when(battleService.getCurrentTurn(BATTLE_ID)).thenReturn(0);
-      when(battleService.getBattleStatus(BATTLE_ID)).thenReturn(BattleStatus.ONGOING);
+      when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(stubMember()));
 
       mockMvc
           .perform(
@@ -458,10 +515,27 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":30,"attackerAvatarId":null}
-                                      """))
+                      {"damage":30,"attackerAvatarId":"wrong-avatar"}
+                      """))
+          .andExpect(status().isForbidden());
+
+      verifyNoInteractions(avatarClient);
+    }
+
+    @Test
+    @DisplayName("returns 400 when attackerAvatarId is null")
+    void shouldReturn400WhenNoAttackerProvided() throws Exception {
+      mockMvc
+          .perform(
+              post("/api/v1/battles/{id}/damage", BATTLE_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"damage":30,"attackerAvatarId":null}
+                      """))
           .andExpect(status().isBadRequest());
 
+      verifyNoInteractions(battleService);
       verifyNoInteractions(avatarClient);
     }
 
@@ -476,8 +550,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":10,"attackerAvatarId":"avatar-1"}
-                                      """))
+                      {"damage":10,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNotFound());
     }
   }

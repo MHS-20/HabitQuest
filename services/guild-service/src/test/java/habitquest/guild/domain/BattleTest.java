@@ -4,15 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
-import habitquest.guild.domain.battle.Experience;
-import habitquest.guild.domain.battle.Money;
-import habitquest.guild.domain.battle.Penalty;
-import habitquest.guild.domain.battle.boss.BossStatus;
-import habitquest.guild.domain.battle.boss.Minotaur;
-import habitquest.guild.domain.battle.stats.Defense;
-import habitquest.guild.domain.battle.stats.Health;
-import habitquest.guild.domain.battle.stats.Stats;
-import habitquest.guild.domain.battle.stats.Strength;
+import habitquest.guild.domain.battle.boss.BossType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,26 +15,14 @@ class BattleTest {
 
   private static final String BATTLE_ID = "battle-1";
   private static final String GUILD_ID = "guild-1";
-  private static final int BOSS_MAX_HEALTH = 100;
+  private static final int BOSS_MAX_HEALTH = BossType.MINOTAUR.stats().health().value();
   private static final int NUM_OF_TURNS = 5;
 
-  private Minotaur minotaur;
   private Battle battle;
 
   @BeforeEach
   void setUp() {
-    Stats stats =
-        new Stats("stats-1", new Health(BOSS_MAX_HEALTH), new Strength(30), new Defense(10));
-    minotaur =
-        new Minotaur("Minotaur", stats, new Money(500), new Penalty(50), new Experience(200));
-    battle =
-        new Battle(
-            BATTLE_ID,
-            GUILD_ID,
-            minotaur,
-            NUM_OF_TURNS,
-            0,
-            new BossStatus(new Health(BOSS_MAX_HEALTH)));
+    battle = new Battle(BATTLE_ID, GUILD_ID, BossType.MINOTAUR, NUM_OF_TURNS);
   }
 
   @Nested
@@ -89,7 +69,6 @@ class BattleTest {
     @DisplayName("should advance the turn counter")
     void shouldAdvanceTurnCounter() {
       battle.nextTurn();
-
       assertThat(battle.getCurrentTurn()).isEqualTo(1);
     }
 
@@ -99,7 +78,6 @@ class BattleTest {
       for (int i = 0; i < NUM_OF_TURNS; i++) {
         battle.nextTurn();
       }
-
       assertThat(battle.getCurrentTurn()).isEqualTo(0);
     }
   }
@@ -112,7 +90,6 @@ class BattleTest {
     @DisplayName("should reduce boss health by the damage amount")
     void shouldReduceBossHealth() {
       battle.dealDamage(30);
-
       assertThat(battle.getBossRemainingHealth().remainingHealth().value()).isEqualTo(70);
     }
 
@@ -120,7 +97,6 @@ class BattleTest {
     @DisplayName("should keep status ONGOING when boss still has health")
     void shouldKeepOngoingWhenBossAlive() {
       battle.dealDamage(50);
-
       assertThat(battle.getBattleStatus()).isEqualTo(BattleStatus.ONGOING);
     }
 
@@ -128,7 +104,6 @@ class BattleTest {
     @DisplayName("should set status to WON when damage reduces health to zero")
     void shouldSetWonWhenHealthReachesZero() {
       battle.dealDamage(BOSS_MAX_HEALTH);
-
       assertThat(battle.getBattleStatus()).isEqualTo(BattleStatus.WON);
     }
 
@@ -136,7 +111,6 @@ class BattleTest {
     @DisplayName("should set status to WON when damage exceeds remaining health")
     void shouldSetWonWhenDamageExceedsHealth() {
       battle.dealDamage(BOSS_MAX_HEALTH + 50);
-
       assertThat(battle.getBattleStatus()).isEqualTo(BattleStatus.WON);
     }
 
@@ -144,7 +118,6 @@ class BattleTest {
     @DisplayName("should set boss health to zero when battle is won")
     void shouldSetHealthToZeroOnWin() {
       battle.dealDamage(BOSS_MAX_HEALTH);
-
       assertThat(battle.getBossRemainingHealth().remainingHealth().value()).isEqualTo(0);
     }
 
@@ -153,7 +126,6 @@ class BattleTest {
     void shouldAccumulateDamage() {
       battle.dealDamage(30);
       battle.dealDamage(30);
-
       assertThat(battle.getBossRemainingHealth().remainingHealth().value()).isEqualTo(40);
     }
   }
