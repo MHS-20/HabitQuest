@@ -50,7 +50,7 @@ public class BattleController {
       return ResponseEntity.badRequest().build();
     }
 
-    if (!guildService.isLeader(request.guildId(), request.requesterId)) {
+    if (!guildService.isLeader(request.guildId(), request.requesterId())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
