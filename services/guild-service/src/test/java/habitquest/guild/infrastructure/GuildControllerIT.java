@@ -11,6 +11,7 @@ import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
+import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,9 +41,8 @@ public class GuildControllerIT {
   private static final String CREATOR_AVATAR_ID = "avatar-1";
   private static final String CREATOR_NICKNAME = "Lancelot";
   private static final String MEMBER_ID = "avatar-2";
-  private static final String UNKNOWN_ID = "ghost-99";
-
   private static final String MEMBER_NICKNAME = "Percival";
+  private static final String UNKNOWN_ID = "ghost-99";
 
   private Guild stubGuild() {
     GuildMember leader = new GuildMember(CREATOR_AVATAR_ID, CREATOR_NICKNAME, GuildRole.LEADER);
@@ -71,8 +71,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"name":"Knights","creatorAvatarId":"avatar-1","creatorNickname":"Lancelot"}
-                                      """))
+                      {"name":"Knights","creatorAvatarId":"avatar-1","creatorNickname":"Lancelot"}
+                      """))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.id").value(GUILD_ID));
     }
@@ -88,8 +88,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"name":"Knights","creatorAvatarId":"avatar-1","creatorNickname":"Lancelot"}
-                                      """))
+                      {"name":"Knights","creatorAvatarId":"avatar-1","creatorNickname":"Lancelot"}
+                      """))
           .andExpect(status().isCreated());
 
       verify(guildService).createGuild("Knights", "avatar-1", "Lancelot");
@@ -107,8 +107,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"name":"","creatorAvatarId":"avatar-1","creatorNickname":"Lancelot"}
-                                      """))
+                      {"name":"","creatorAvatarId":"avatar-1","creatorNickname":"Lancelot"}
+                      """))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Guild name cannot be blank"));
     }
@@ -141,6 +141,7 @@ public class GuildControllerIT {
   }
 
   // ── DELETE /api/v1/guilds/{id} ────────────────────────────────────────────────
+
   @Nested
   @DisplayName("DELETE /api/v1/guilds/{id}")
   class DeleteGuild {
@@ -206,11 +207,27 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"avatarId":"avatar-2","nickname":"Percival","roleName":"MEMBER"}
-                                      """))
+                      {"avatarId":"avatar-2","nickname":"Percival","roleName":"MEMBER"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(guildService).addMember(eq(GUILD_ID), any(GuildMember.class));
+    }
+
+    @Test
+    @DisplayName("returns 400 when roleName is not a valid GuildRole")
+    void shouldReturn400OnInvalidRole() throws Exception {
+      mockMvc
+          .perform(
+              post("/api/v1/guilds/{id}/members", GUILD_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"avatarId":"avatar-2","nickname":"Percival","roleName":"WIZARD"}
+                      """))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(guildService);
     }
 
     @Test
@@ -226,8 +243,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"avatarId":"avatar-2","nickname":"Percival","roleName":"MEMBER"}
-                                      """))
+                      {"avatarId":"avatar-2","nickname":"Percival","roleName":"MEMBER"}
+                      """))
           .andExpect(status().isNotFound());
     }
   }
@@ -239,11 +256,9 @@ public class GuildControllerIT {
   class RemoveMember {
 
     @Test
-    @DisplayName("returns 204 on successful removal")
+    @DisplayName("returns 204 when leader removes a member")
     void shouldReturn204() throws Exception {
-      // Controller checks isLeader before removing — stub it to allow the operation.
-      when(guildService.isLeader(eq(GUILD_ID), eq(CREATOR_AVATAR_ID))).thenReturn(true);
-      doNothing().when(guildService).removeMember(GUILD_ID, MEMBER_ID);
+      doNothing().when(guildService).removeMember(GUILD_ID, CREATOR_AVATAR_ID, MEMBER_ID);
 
       mockMvc
           .perform(
@@ -251,17 +266,19 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"memberId":"avatar-2","requestorId":"avatar-1"}
-                                      """))
+                      {"requestorId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
-      verify(guildService).removeMember(GUILD_ID, MEMBER_ID);
+      verify(guildService).removeMember(GUILD_ID, CREATOR_AVATAR_ID, MEMBER_ID);
     }
 
     @Test
     @DisplayName("returns 403 when requestor is not the guild leader")
     void shouldReturn403WhenNotLeader() throws Exception {
-      when(guildService.isLeader(eq(GUILD_ID), anyString())).thenReturn(false);
+      doThrow(new UnauthorizedGuildOperationException("not-a-leader", "removeMember"))
+          .when(guildService)
+          .removeMember(GUILD_ID, "not-a-leader", MEMBER_ID);
 
       mockMvc
           .perform(
@@ -269,16 +286,17 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"memberId":"avatar-2","requestorId":"not-a-leader"}
-                                      """))
+                      {"requestorId":"not-a-leader"}
+                      """))
           .andExpect(status().isForbidden());
     }
 
     @Test
     @DisplayName("returns 404 when guild does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(guildService.isLeader(eq(UNKNOWN_ID), anyString()))
-          .thenThrow(new GuildNotFoundException(UNKNOWN_ID));
+      doThrow(new GuildNotFoundException(UNKNOWN_ID))
+          .when(guildService)
+          .removeMember(eq(UNKNOWN_ID), anyString(), eq(MEMBER_ID));
 
       mockMvc
           .perform(
@@ -286,8 +304,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"memberId":"avatar-2","requestorId":"avatar-1"}
-                                      """))
+                      {"requestorId":"avatar-1"}
+                      """))
           .andExpect(status().isNotFound());
     }
   }
@@ -311,7 +329,7 @@ public class GuildControllerIT {
     }
 
     @Test
-    @DisplayName("returns 400 when member is the last owner")
+    @DisplayName("returns 400 when domain rejects the operation")
     void shouldReturn400WhenDomainRejects() throws Exception {
       doThrow(new IllegalStateException("Last owner cannot leave"))
           .when(guildService)
@@ -331,13 +349,11 @@ public class GuildControllerIT {
   class PromoteMember {
 
     @Test
-    @DisplayName("returns 204 and delegates new role to service")
+    @DisplayName("returns 204 when leader promotes a member")
     void shouldReturn204AndDelegate() throws Exception {
-      // Controller checks isLeader before promoting — stub it to allow the operation.
-      when(guildService.isLeader(eq(GUILD_ID), eq(CREATOR_AVATAR_ID))).thenReturn(true);
       doNothing()
           .when(guildService)
-          .promoteMember(eq(GUILD_ID), eq(MEMBER_ID), any(GuildRole.class));
+          .promoteMember(GUILD_ID, CREATOR_AVATAR_ID, MEMBER_ID, GuildRole.OFFICER);
 
       mockMvc
           .perform(
@@ -345,17 +361,19 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"roleName":"OFFICER","requestorId":"avatar-1"}
-                                      """))
+                      {"roleName":"OFFICER","requestorId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
-      verify(guildService).promoteMember(eq(GUILD_ID), eq(MEMBER_ID), any(GuildRole.class));
+      verify(guildService).promoteMember(GUILD_ID, CREATOR_AVATAR_ID, MEMBER_ID, GuildRole.OFFICER);
     }
 
     @Test
     @DisplayName("returns 403 when requestor is not the guild leader")
     void shouldReturn403WhenNotLeader() throws Exception {
-      when(guildService.isLeader(eq(GUILD_ID), anyString())).thenReturn(false);
+      doThrow(new UnauthorizedGuildOperationException("not-a-leader", "promoteMember"))
+          .when(guildService)
+          .promoteMember(GUILD_ID, "not-a-leader", MEMBER_ID, GuildRole.OFFICER);
 
       mockMvc
           .perform(
@@ -363,9 +381,25 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"roleName":"OFFICER","requestorId":"not-a-leader"}
-                                      """))
+                      {"roleName":"OFFICER","requestorId":"not-a-leader"}
+                      """))
           .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("returns 400 when roleName is not a valid GuildRole")
+    void shouldReturn400OnInvalidRole() throws Exception {
+      mockMvc
+          .perform(
+              patch("/api/v1/guilds/{id}/members/{memberId}/role", GUILD_ID, MEMBER_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"roleName":"WIZARD","requestorId":"avatar-1"}
+                      """))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(guildService);
     }
 
     @Test
@@ -373,10 +407,7 @@ public class GuildControllerIT {
     void shouldReturn404WhenNotFound() throws Exception {
       doThrow(new GuildNotFoundException(UNKNOWN_ID))
           .when(guildService)
-          .promoteMember(eq(UNKNOWN_ID), anyString(), any(GuildRole.class));
-
-      // isLeader is called first; stub it to pass so the service call is reached.
-      when(guildService.isLeader(eq(UNKNOWN_ID), anyString())).thenReturn(true);
+          .promoteMember(eq(UNKNOWN_ID), anyString(), eq(MEMBER_ID), any(GuildRole.class));
 
       mockMvc
           .perform(
@@ -384,8 +415,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"roleName":"OFFICER","requestorId":"avatar-1"}
-                                      """))
+                      {"roleName":"OFFICER","requestorId":"avatar-1"}
+                      """))
           .andExpect(status().isNotFound());
     }
   }

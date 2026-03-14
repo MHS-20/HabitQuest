@@ -7,6 +7,7 @@ import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
+import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import habitquest.guild.infrastructure.dto.GuildMemberResponse;
 import habitquest.guild.infrastructure.dto.GuildResponse;
 import java.net.URI;
@@ -117,11 +118,13 @@ public class GuildController {
       @PathVariable String memberId,
       @RequestBody RemoveMemberRequest request)
       throws GuildNotFoundException {
-    if (!guildService.isLeader(id, request.requestorId())) {
+
+    try {
+      guildService.removeMember(id, request.requestorId(), memberId);
+      return ResponseEntity.noContent().build();
+    } catch (UnauthorizedGuildOperationException e) {
       return ResponseEntity.status(403).build();
     }
-    guildService.removeMember(id, memberId);
-    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{id}/members/{memberId}/leave")
@@ -146,12 +149,12 @@ public class GuildController {
       return ResponseEntity.badRequest().build();
     }
 
-    if (!guildService.isLeader(id, request.requestorId())) {
+    try {
+      guildService.promoteMember(id, request.requestorId(), memberId, newRole);
+      return ResponseEntity.noContent().build();
+    } catch (UnauthorizedGuildOperationException e) {
       return ResponseEntity.status(403).build();
     }
-
-    guildService.promoteMember(id, memberId, newRole);
-    return ResponseEntity.noContent().build();
   }
 
   // Ranking & Leaderboard
