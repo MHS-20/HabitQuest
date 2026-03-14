@@ -13,6 +13,7 @@ public class Battle implements Aggregate<String> {
   private Integer currentTurn;
   private BossStatus bossRemainingHealth;
   private BattleStatus battleStatus;
+  private static final int MIN_NUM_OF_TURNS = 1;
 
   public Battle(
       String battleId,
@@ -50,8 +51,14 @@ public class Battle implements Aggregate<String> {
     return numOfTurns;
   }
 
-  public void setNumOfTurns(Integer numOfTurns) {
-    this.numOfTurns = numOfTurns;
+  public void increaseNumOfTurns() {
+    numOfTurns++;
+  }
+
+  public void decreaseNumOfTurns() {
+    if (numOfTurns > MIN_NUM_OF_TURNS) {
+      numOfTurns--;
+    }
   }
 
   public BossStatus getBossRemainingHealth() {

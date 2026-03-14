@@ -2,6 +2,7 @@ package habitquest.guild.domain.guild;
 
 import common.ddd.Aggregate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Guild implements Aggregate<String> {
@@ -27,13 +28,13 @@ public class Guild implements Aggregate<String> {
   }
 
   public List<GuildMember> getMembers() {
-    return this.members;
+    return Collections.unmodifiableList(this.members);
   }
 
   public boolean isLeader(String memberId) {
     return members.stream()
         .filter(member -> member.getId().equals(memberId))
-        .anyMatch(member -> member.getRole().roleName().equals("LEADER"));
+        .anyMatch(member -> member.getRole() == GuildRole.LEADER);
   }
 
   public Integer getGlobalRank() {

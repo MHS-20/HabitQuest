@@ -21,9 +21,9 @@ class GuildTest {
   private static final String MEMBER_NICK = "Nick2";
   private static final String MEMBER_NICK_2 = "Nick3";
   private static final String UNKNOWN_MEMBER_ID = "non-existent-id";
-  private static final GuildRole LEADER_ROLE = new GuildRole("Leader");
-  private static final GuildRole MEMBER_ROLE = new GuildRole("Member");
-  private static final GuildRole OFFICER_ROLE = new GuildRole("Officer");
+  private static final GuildRole LEADER_ROLE = GuildRole.LEADER;
+  private static final GuildRole MEMBER_ROLE = GuildRole.MEMBER;
+  private static final GuildRole OFFICER_ROLE = GuildRole.OFFICER;
 
   private GuildMember leader;
   private Guild guild;

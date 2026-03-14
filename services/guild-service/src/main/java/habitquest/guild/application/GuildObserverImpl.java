@@ -8,7 +8,7 @@ public class GuildObserverImpl implements GuildObserver {
 
   private final GuildNotifier guildNotifier;
 
-  public GuildObserverImpl(GuildNotifier guildNotifier, BattleService battleService) {
+  public GuildObserverImpl(GuildNotifier guildNotifier) {
     this.guildNotifier = guildNotifier;
   }
 

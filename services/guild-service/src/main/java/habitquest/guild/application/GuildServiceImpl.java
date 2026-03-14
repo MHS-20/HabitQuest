@@ -27,8 +27,7 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public String createGuild(String name, String creatorAvatarId, String creatorNickname)
-      throws GuildNotFoundException {
+  public String createGuild(String name, String creatorAvatarId, String creatorNickname) {
     var guild = guildFactory.create(name, creatorAvatarId, creatorNickname);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new GuildCreated(guild.getId(), name));
@@ -89,18 +88,21 @@ public class GuildServiceImpl implements GuildService {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
     guild.removeMember(memberId);
-    guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new GuildLeft(guild.getId(), memberId));
+
     battleService
         .getBattleByGuild(guildId)
         .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId()));
 
     if (guild.getMembers().isEmpty()) {
-      guildRepository.deleteById(guildId);
-      guildObserver.notifyGuildEvent(new GuildDeleted(guild.getId()));
       battleService
           .getBattleByGuild(guildId)
           .ifPresent(battle -> battleService.deleteBattle(battle.getId()));
+
+      guildRepository.deleteById(guildId);
+      guildObserver.notifyGuildEvent(new GuildDeleted(guild.getId()));
+    } else {
+      guildRepository.save(guild);
     }
   }
 

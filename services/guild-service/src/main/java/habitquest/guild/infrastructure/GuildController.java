@@ -10,6 +10,7 @@ import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -104,8 +105,14 @@ public class GuildController {
       @PathVariable String id, @RequestBody AddMemberRequest request)
       throws GuildNotFoundException {
 
-    GuildMember member =
-        new GuildMember(request.avatarId(), request.nickname(), new GuildRole(request.roleName()));
+    GuildRole role;
+    try {
+      role = GuildRole.valueOf(request.roleName().toUpperCase(Locale.getDefault()));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(null);
+    }
+
+    GuildMember member = new GuildMember(request.avatarId(), request.nickname(), role);
     guildService.addMember(id, member);
     return ResponseEntity.noContent().build();
   }
@@ -135,10 +142,19 @@ public class GuildController {
       @PathVariable String memberId,
       @RequestBody PromoteMemberRequest request)
       throws GuildNotFoundException {
+
+    GuildRole newRole;
+    try {
+      newRole = GuildRole.valueOf(request.roleName().toUpperCase(Locale.getDefault()));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().build();
+    }
+
     if (!guildService.isLeader(id, request.requestorId())) {
       return ResponseEntity.status(403).build();
     }
-    guildService.promoteMember(id, memberId, new GuildRole(request.roleName()));
+
+    guildService.promoteMember(id, memberId, newRole);
     return ResponseEntity.noContent().build();
   }
 
