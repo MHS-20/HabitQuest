@@ -3,15 +3,15 @@ package habitquest.avatar.infrastructure;
 import common.hexagonal.Adapter;
 import habitquest.avatar.application.AvatarRepository;
 import habitquest.avatar.domain.avatar.Avatar;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
 @Adapter
 public class InMemoryAvatarRepository implements AvatarRepository {
-  private final Map<String, Avatar> store = new HashMap<>();
+  private final Map<String, Avatar> store = new ConcurrentHashMap<>();
 
   @Override
   public Avatar save(Avatar avatar) {
