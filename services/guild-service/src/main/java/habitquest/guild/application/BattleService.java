@@ -5,13 +5,14 @@ import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
+import habitquest.guild.domain.battle.boss.BossType;
 import java.util.Optional;
 
 @InBoundPort
 public interface BattleService {
 
   // --- Battle lifecycle ---
-  String createBattle(String guildId, BossEnemy boss, Integer numOfTurns);
+  String createBattle(String guildId, BossType bossType, Integer numOfTurns);
 
   Battle getBattleById(String battleId) throws BattleNotFoundException;
 

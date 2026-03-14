@@ -15,24 +15,22 @@ public class Battle implements Aggregate<String> {
   private BattleStatus battleStatus;
   private static final int MIN_NUM_OF_TURNS = 1;
 
-  public Battle(
-      String battleId,
-      String guildId,
-      BossEnemy boss,
-      Integer numOfTurns,
-      Integer currentTurn,
-      BossStatus bossRemainingHealth) {
+  public Battle(String battleId, String guildId, BossEnemy boss, Integer numOfTurns) {
     this.battleId = battleId;
     this.guildId = guildId;
     this.boss = boss;
     this.numOfTurns = numOfTurns;
-    this.currentTurn = currentTurn;
-    this.bossRemainingHealth = bossRemainingHealth;
+    this.currentTurn = 0;
+    this.bossRemainingHealth = new BossStatus(boss.stats().health());
     this.battleStatus = BattleStatus.ONGOING;
   }
 
   public String getGuildId() {
     return guildId;
+  }
+
+  public String getId() {
+    return this.battleId;
   }
 
   public BossEnemy getBoss() {
@@ -77,9 +75,5 @@ public class Battle implements Aggregate<String> {
 
   public BattleStatus getBattleStatus() {
     return battleStatus;
-  }
-
-  public String getId() {
-    return this.battleId;
   }
 }

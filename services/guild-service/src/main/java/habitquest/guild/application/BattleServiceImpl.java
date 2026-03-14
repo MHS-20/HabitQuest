@@ -4,6 +4,7 @@ import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
+import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.events.battleEvents.BattleLost;
 import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
@@ -29,8 +30,8 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Battle lifecycle ---
   @Override
-  public String createBattle(String guildId, BossEnemy boss, Integer numOfTurns) {
-    Battle battle = battleFactory.create(guildId, boss, numOfTurns);
+  public String createBattle(String guildId, BossType bossType, Integer numOfTurns) {
+    Battle battle = battleFactory.create(guildId, bossType, numOfTurns);
     battleRepository.save(battle);
     battleObserver.notifyBattleEvent(new BattleStarted(battle.getId(), battle.getGuildId()));
     return battle.getId();

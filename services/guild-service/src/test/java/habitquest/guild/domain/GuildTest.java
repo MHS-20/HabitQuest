@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
+import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +35,8 @@ class GuildTest {
     guild = new Guild(GUILD_ID, GUILD_NAME, leader);
   }
 
+  // ── Creation ─────────────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("creation")
   class Creation {
@@ -58,6 +61,8 @@ class GuildTest {
     }
   }
 
+  // ── addMember ─────────────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("addMember")
   class AddMember {
@@ -65,9 +70,7 @@ class GuildTest {
     @Test
     @DisplayName("should add a new member to the guild")
     void shouldAddNewMember() {
-      GuildMember newMember = new GuildMember(MEMBER_ID, "NewGuy", MEMBER_ROLE);
-
-      guild.addMember(newMember);
+      guild.addMember(new GuildMember(MEMBER_ID, "NewGuy", MEMBER_ROLE));
 
       assertThat(guild.getMembers()).hasSize(2);
       assertThat(guild.getMembers()).extracting(GuildMember::getId).contains(MEMBER_ID);
@@ -83,17 +86,18 @@ class GuildTest {
     }
   }
 
+  // ── removeMember (no auth) ────────────────────────────────────────────────────
+
   @Nested
-  @DisplayName("removeMember")
-  class RemoveMember {
+  @DisplayName("leaveGuild(memberId)")
+  class RemoveMemberNoAuth {
 
     @Test
     @DisplayName("should remove an existing member by id")
     void shouldRemoveExistingMember() {
-      GuildMember member = new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE);
-      guild.addMember(member);
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
 
-      guild.removeMember(MEMBER_ID);
+      guild.leaveGuild(MEMBER_ID);
 
       assertThat(guild.getMembers()).extracting(GuildMember::getId).doesNotContain(MEMBER_ID);
     }
@@ -104,7 +108,7 @@ class GuildTest {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
       guild.addMember(new GuildMember(MEMBER_ID_2, MEMBER_NICK_2, MEMBER_ROLE));
 
-      guild.removeMember(MEMBER_ID);
+      guild.leaveGuild(MEMBER_ID);
 
       assertThat(guild.getMembers()).hasSize(2);
       assertThat(guild.getMembers())
@@ -115,11 +119,51 @@ class GuildTest {
     @Test
     @DisplayName("should do nothing when member id does not exist")
     void shouldDoNothingForUnknownMemberId() {
-      guild.removeMember(UNKNOWN_MEMBER_ID);
+      guild.leaveGuild(UNKNOWN_MEMBER_ID);
 
       assertThat(guild.getMembers()).hasSize(1);
     }
   }
+
+  // ── removeMember (with auth) ──────────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("removeMember(requestorId, memberId)")
+  class RemoveMemberWithAuth {
+
+    @Test
+    @DisplayName("should remove the member when requestor is leader")
+    void shouldRemoveMemberWhenLeader() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+
+      guild.removeMember(LEADER_ID, MEMBER_ID);
+
+      assertThat(guild.getMembers()).extracting(GuildMember::getId).doesNotContain(MEMBER_ID);
+    }
+
+    @Test
+    @DisplayName("should throw when requestor is not a leader")
+    void shouldThrowWhenRequestorIsNotLeader() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+
+      assertThatThrownBy(() -> guild.removeMember(MEMBER_ID, MEMBER_ID_2))
+          .isInstanceOf(UnauthorizedGuildOperationException.class);
+    }
+
+    @Test
+    @DisplayName("should not modify the guild when requestor is not a leader")
+    void shouldNotModifyGuildWhenUnauthorized() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+      int sizeBefore = guild.getMembers().size();
+
+      assertThatThrownBy(() -> guild.removeMember(MEMBER_ID, MEMBER_ID_2))
+          .isInstanceOf(UnauthorizedGuildOperationException.class);
+
+      assertThat(guild.getMembers()).hasSize(sizeBefore);
+    }
+  }
+
+  // ── updateGlobalRank ─────────────────────────────────────────────────────────
 
   @Nested
   @DisplayName("updateGlobalRank")
@@ -143,17 +187,17 @@ class GuildTest {
     }
   }
 
+  // ── promoteMember (with auth) ─────────────────────────────────────────────────
   @Nested
-  @DisplayName("promoteMember")
-  class PromoteMember {
+  @DisplayName("promoteMember(requestorId, memberId, newRole)")
+  class PromoteMemberWithAuth {
 
     @Test
-    @DisplayName("should change the role of the target member")
-    void shouldChangeRoleOfTargetMember() {
-      GuildMember member = new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE);
-      guild.addMember(member);
+    @DisplayName("should promote the member when requestor is leader")
+    void shouldPromoteMemberWhenLeader() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
 
-      guild.promoteMember(MEMBER_ID, OFFICER_ROLE);
+      guild.promoteMember(LEADER_ID, MEMBER_ID, OFFICER_ROLE);
 
       GuildMember promoted =
           guild.getMembers().stream()
@@ -164,21 +208,25 @@ class GuildTest {
     }
 
     @Test
-    @DisplayName("should not change roles of other members")
-    void shouldNotAffectOtherMembersRoles() {
+    @DisplayName("should throw when requestor is not a leader")
+    void shouldThrowWhenRequestorIsNotLeader() {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
 
-      guild.promoteMember(MEMBER_ID, OFFICER_ROLE);
-
-      assertThat(leader.getRole()).isEqualTo(LEADER_ROLE);
+      assertThatThrownBy(() -> guild.promoteMember(MEMBER_ID, MEMBER_ID_2, OFFICER_ROLE))
+          .isInstanceOf(UnauthorizedGuildOperationException.class);
     }
 
     @Test
-    @DisplayName("should do nothing when member id does not exist")
-    void shouldDoNothingForUnknownMemberId() {
-      guild.promoteMember(UNKNOWN_MEMBER_ID, OFFICER_ROLE);
+    @DisplayName("should not change any role when requestor is not a leader")
+    void shouldNotChangeRolesWhenUnauthorized() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
 
-      assertThat(guild.getMembers()).extracting(m -> m.getRole()).containsOnly(LEADER_ROLE);
+      assertThatThrownBy(() -> guild.promoteMember(MEMBER_ID, MEMBER_ID_2, OFFICER_ROLE))
+          .isInstanceOf(UnauthorizedGuildOperationException.class);
+
+      assertThat(guild.getMembers())
+          .extracting(GuildMember::getRole)
+          .containsExactlyInAnyOrder(LEADER_ROLE, MEMBER_ROLE);
     }
   }
 }

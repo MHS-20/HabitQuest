@@ -79,7 +79,7 @@ public class GuildServiceImpl implements GuildService {
   public void leaveGuild(String guildId, String memberId) throws GuildNotFoundException {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
-    guild.removeMember(memberId);
+    guild.leaveGuild(memberId);
     guildObserver.notifyGuildEvent(new GuildLeft(guild.getId(), memberId));
 
     battleService
@@ -99,10 +99,11 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public void removeMember(String guildId, String memberId) throws GuildNotFoundException {
+  public void removeMember(String guildId, String requestorId, String memberId)
+      throws GuildNotFoundException {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
-    guild.removeMember(memberId);
+    guild.removeMember(requestorId, memberId);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new RemovedFromGuild(guild.getId(), memberId));
     battleService
@@ -111,11 +112,11 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public void promoteMember(String guildId, String memberId, GuildRole newRole)
+  public void promoteMember(String guildId, String requestorId, String memberId, GuildRole newRole)
       throws GuildNotFoundException {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
-    guild.promoteMember(memberId, newRole);
+    guild.promoteMember(requestorId, memberId, newRole);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new RoleAssigned(guild.getId(), memberId, newRole));
   }

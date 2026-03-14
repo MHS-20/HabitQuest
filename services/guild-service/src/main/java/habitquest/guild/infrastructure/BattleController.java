@@ -9,7 +9,8 @@ import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.battle.BattleStatus;
 import habitquest.guild.domain.battle.boss.BossEnemy;
-import habitquest.guild.domain.battle.boss.Minotaur;
+import habitquest.guild.domain.battle.boss.BossType;
+import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import habitquest.guild.infrastructure.dto.BattleResponse;
 import habitquest.guild.infrastructure.dto.BossResponse;
 import java.net.URI;
@@ -42,19 +43,24 @@ public class BattleController {
   public ResponseEntity<EntityModel<BattleCreatedResponse>> createBattle(
       @RequestBody CreateBattleRequest request) {
 
+    BossType bossType;
+    try {
+      bossType = BossType.valueOf(request.bossType().toUpperCase(Locale.getDefault()));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().build();
+    }
+
     if (!guildService.isLeader(request.guildId(), request.requesterId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-    BossEnemy boss = resolveBoss(request.bossType);
     String id =
         battleService.createBattle(
-            request.guildId(), boss, guildService.getMembers(request.guildId()).size());
-    BattleCreatedResponse body = new BattleCreatedResponse(id);
+            request.guildId(), bossType, guildService.getMembers(request.guildId()).size());
 
     EntityModel<BattleCreatedResponse> model =
         EntityModel.of(
-            body,
+            new BattleCreatedResponse(id),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBattle(id)).withRel("battle"),
             linkTo(methodOn(BattleController.class).getBoss(id)).withRel("boss"),
@@ -68,11 +74,9 @@ public class BattleController {
   public ResponseEntity<EntityModel<BattleResponse>> getBattle(@PathVariable String id)
       throws BattleNotFoundException {
 
-    BattleResponse body = BattleResponse.from(battleService.getBattleById(id));
-
     EntityModel<BattleResponse> model =
         EntityModel.of(
-            body,
+            BattleResponse.from(battleService.getBattleById(id)),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBoss(id)).withRel("boss"),
             linkTo(methodOn(BattleController.class).getBossHealth(id)).withRel("bossHealth"),
@@ -90,7 +94,6 @@ public class BattleController {
     if (!guildService.isLeader(request.guildId(), request.requesterId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-
     battleService.deleteBattle(id);
     return ResponseEntity.noContent().build();
   }
@@ -107,11 +110,10 @@ public class BattleController {
             .orElseThrow(
                 () -> new BattleNotFoundException("No battle found for guild: " + guildId));
     String id = battle.getId();
-    BattleResponse body = BattleResponse.from(battle);
 
     EntityModel<BattleResponse> model =
         EntityModel.of(
-            body,
+            BattleResponse.from(battle),
             linkTo(methodOn(BattleController.class).getBattleByGuild(guildId)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBattleStatus(id)).withRel("status"),
@@ -141,11 +143,9 @@ public class BattleController {
   public ResponseEntity<EntityModel<BossResponse>> getBoss(@PathVariable String id)
       throws BattleNotFoundException {
 
-    BossResponse body = BossResponse.from(battleService.getBoss(id));
-
     EntityModel<BossResponse> model =
         EntityModel.of(
-            body,
+            BossResponse.from(battleService.getBoss(id)),
             linkTo(methodOn(BattleController.class).getBoss(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBossHealth(id)).withRel("bossHealth"));
@@ -276,7 +276,6 @@ public class BattleController {
   }
 
   // ─── Exception handling ──────────────────────────────────────────────────────
-
   @ExceptionHandler(BattleNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleBattleNotFound(BattleNotFoundException ex) {
     return ResponseEntity.notFound().build();
@@ -292,23 +291,17 @@ public class BattleController {
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
   }
 
-  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
+  @ExceptionHandler(UnauthorizedGuildOperationException.class)
+  public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedGuildOperationException ex) {
+    return ResponseEntity.status(403).body(new ErrorResponse(ex.getMessage()));
+  }
 
+  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
   private Link selfLink(String id) {
     return Link.of("/api/v1/battles/" + id).withSelfRel();
   }
 
-  // ─── Boss factory helper ─────────────────────────────────────────────────────
-
-  private BossEnemy resolveBoss(String bossType) {
-    return switch (bossType.toUpperCase(Locale.getDefault())) {
-      case "MINOTAUR" -> Minotaur.INSTANCE;
-      default -> throw new IllegalArgumentException("Unknown boss type: " + bossType);
-    };
-  }
-
   // ─── Request / Response records ─────────────────────────────────────────────
-
   public record CreateBattleRequest(String guildId, String bossType, String requesterId) {}
 
   public record DeleteBattleRequest(String guildId, String requesterId) {}

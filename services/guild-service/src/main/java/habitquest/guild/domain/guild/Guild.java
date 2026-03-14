@@ -28,7 +28,7 @@ public class Guild implements Aggregate<String> {
   }
 
   public List<GuildMember> getMembers() {
-    return Collections.unmodifiableList(this.members);
+    return Collections.unmodifiableList(members);
   }
 
   public boolean isLeader(String memberId) {
@@ -45,20 +45,39 @@ public class Guild implements Aggregate<String> {
     this.members.add(member);
   }
 
-  public void removeMember(String memberId) {
+  public void leaveGuild(String memberId) {
     this.members.removeIf(member -> member.getId().equals(memberId));
+  }
+
+  private void removeMember(String memberId) {
+    this.members.removeIf(member -> member.getId().equals(memberId));
+  }
+
+  public void removeMember(String requestorId, String targetMemberId) {
+    requireLeader(requestorId, "removeMember");
+    removeMember(targetMemberId);
   }
 
   public void updateGlobalRank(Integer newRank) {
     this.globalRank = newRank;
   }
 
-  public void promoteMember(String memberId, GuildRole newRole) {
-    for (GuildMember member : members) {
-      if (member.getId().equals(memberId)) {
-        member.promoteTo(newRole);
-        break;
-      }
+  private void promoteMember(String memberId, GuildRole newRole) {
+    members.stream()
+        .filter(m -> m.getId().equals(memberId))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Member not found: " + memberId))
+        .promoteTo(newRole);
+  }
+
+  public void promoteMember(String requestorId, String targetMemberId, GuildRole newRole) {
+    requireLeader(requestorId, "promoteMember");
+    promoteMember(targetMemberId, newRole);
+  }
+
+  private void requireLeader(String requestorId, String operation) {
+    if (!isLeader(requestorId)) {
+      throw new UnauthorizedGuildOperationException(requestorId, operation);
     }
   }
 }

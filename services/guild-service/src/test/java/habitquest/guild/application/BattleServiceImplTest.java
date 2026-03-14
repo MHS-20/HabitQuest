@@ -6,11 +6,7 @@ import static org.mockito.Mockito.*;
 
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleStatus;
-import habitquest.guild.domain.battle.Experience;
-import habitquest.guild.domain.battle.Money;
-import habitquest.guild.domain.battle.Penalty;
-import habitquest.guild.domain.battle.boss.BossStatus;
-import habitquest.guild.domain.battle.boss.Minotaur;
+import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.battle.stats.Defense;
 import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.battle.stats.Stats;
@@ -46,22 +42,14 @@ class BattleServiceImplTest {
 
   @InjectMocks private BattleServiceImpl battleService;
 
-  private Minotaur minotaur;
+  private BossType minotaur;
   private Battle battle;
 
   @BeforeEach
   void setUp() {
     Stats stats = new Stats("stats-1", new Health(BOSS_HEALTH), new Strength(30), new Defense(10));
-    minotaur =
-        new Minotaur("Minotaur", stats, new Money(500), new Penalty(50), new Experience(200));
-    battle =
-        new Battle(
-            BATTLE_ID,
-            GUILD_ID,
-            minotaur,
-            NUM_OF_TURNS,
-            0,
-            new BossStatus(new Health(BOSS_HEALTH)));
+    minotaur = BossType.MINOTAUR;
+    battle = new Battle(BATTLE_ID, GUILD_ID, minotaur, NUM_OF_TURNS);
   }
 
   // -------------------------------------------------------------------------
