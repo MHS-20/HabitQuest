@@ -19,6 +19,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 
 @RestController
 @RequestMapping("/api/v1/marketplaces")
@@ -82,38 +83,106 @@ public class MarketplaceController {
   }
 
   // ─── Commands ───────────────────────────────────────────────────────────────
+  // java
   @PostMapping("/{marketplaceId}/items/{itemName}/buy")
   public ResponseEntity<Void> buyItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException {
+      throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
     String avatarId = marketplaceService.getAvatarId(marketplaceId);
-
-    LOG.info("Avatar {} buying item '{}' from marketplace {}", avatarId, itemName, marketplaceId);
+    LOG.info(
+        "Starting buy saga: avatar {} buying item '{}' from marketplace {}",
+        avatarId,
+        itemName,
+        marketplaceId);
 
     Item item = marketplaceService.getItemByName(marketplaceId, itemName);
     Money price = item.price();
 
-    avatarClient.spendMoney(avatarId, price);
-    avatarClient.addItemToInventory(avatarId, item);
-    marketplaceService.buyItem(marketplaceId, itemName);
-    return ResponseEntity.noContent().build();
+    boolean moneySpent = false;
+    boolean inventoryAdded = false;
+    try {
+      avatarClient.spendMoney(avatarId, price);
+      moneySpent = true;
+
+      avatarClient.addItemToInventory(avatarId, item);
+      inventoryAdded = true;
+
+      marketplaceService.buyItem(marketplaceId, itemName);
+      return ResponseEntity.noContent().build();
+    } catch (RestClientException | AvatarCommunicationException ex) {
+      LOG.error("Buy saga error for avatar {} item {}: {}", avatarId, itemName, ex.getMessage());
+      // compensation for partial remote successes
+      try {
+        if (inventoryAdded) {
+          avatarClient.removeItemFromInventory(avatarId, item);
+        }
+        if (moneySpent) {
+          avatarClient.earnMoney(avatarId, price);
+        }
+      } catch (RestClientException | AvatarCommunicationException compensationEx) {
+        LOG.error(
+            "Buy saga compensation failed for avatar {} item {}: {}",
+            avatarId,
+            itemName,
+            compensationEx.getMessage());
+        throw new AvatarCommunicationException(
+            "Partial failure and compensation failed during buy saga", compensationEx);
+      }
+      throw new AvatarCommunicationException(
+          "Avatar operation failed during buy saga, compensation performed", ex);
+    }
   }
 
   @PostMapping("/{marketplaceId}/items/{itemName}/sell")
   public ResponseEntity<Void> sellItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException {
+      throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
     String avatarId = marketplaceService.getAvatarId(marketplaceId);
 
-    LOG.info("Avatar {} selling item '{}' to marketplace {}", avatarId, itemName, marketplaceId);
+    LOG.info(
+        "Starting sell saga: avatar {} selling item '{}' to marketplace {}",
+        avatarId,
+        itemName,
+        marketplaceId);
 
     Item item = marketplaceService.getSoldItem(marketplaceId, itemName);
     Money price = item.price();
-    avatarClient.removeItemFromInventory(avatarId, item);
-    avatarClient.earnMoney(avatarId, price);
-    marketplaceService.sellItem(marketplaceId, itemName);
 
-    return ResponseEntity.noContent().build();
+    boolean removedFromInventory = false;
+    boolean earnedMoney = false;
+    try {
+      // remote steps
+      avatarClient.removeItemFromInventory(avatarId, item);
+      removedFromInventory = true;
+
+      avatarClient.earnMoney(avatarId, price);
+      earnedMoney = true;
+
+      // finalize local state
+      marketplaceService.sellItem(marketplaceId, itemName);
+      return ResponseEntity.noContent().build();
+    } catch (RestClientException | AvatarCommunicationException ex) {
+      LOG.error("Sell saga error for avatar {} item {}: {}", avatarId, itemName, ex.getMessage());
+      // compensation for partial remote successes
+      try {
+        if (earnedMoney) {
+          avatarClient.spendMoney(avatarId, price); // take money back
+        }
+        if (removedFromInventory) {
+          avatarClient.addItemToInventory(avatarId, item); // put item back
+        }
+      } catch (RestClientException | AvatarCommunicationException compensationEx) {
+        LOG.error(
+            "Sell saga compensation failed for avatar {} item {}: {}",
+            avatarId,
+            itemName,
+            compensationEx.getMessage());
+        throw new AvatarCommunicationException(
+            "Partial failure and compensation failed during sell saga", compensationEx);
+      }
+      throw new AvatarCommunicationException(
+          "Avatar operation failed during sell saga, compensation performed", ex);
+    }
   }
 
   // ─── Exception handling ──────────────────────────────────────────────────────
