@@ -1,12 +1,12 @@
 package habitquest.guild.infrastructure.dto;
 
 import habitquest.guild.domain.battle.Battle;
-import habitquest.guild.domain.battle.BattleStatus;
+import habitquest.guild.domain.battle.BattleOutcome;
 
 public record BattleResponse(
     String id,
     String guildId,
-    BattleStatus status,
+    BattleOutcome status,
     int currentTurn,
     int numOfTurns,
     BossResponse boss,

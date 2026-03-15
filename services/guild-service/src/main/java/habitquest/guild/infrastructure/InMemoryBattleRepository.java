@@ -3,7 +3,7 @@ package habitquest.guild.infrastructure;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.domain.battle.Battle;
-import habitquest.guild.domain.battle.BattleStatus;
+import habitquest.guild.domain.battle.BattleOutcome;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +38,7 @@ public class InMemoryBattleRepository implements BattleRepository {
   }
 
   @Override
-  public List<Battle> findByStatus(BattleStatus status) {
-    return store.values().stream().filter(b -> b.getBattleStatus() == status).toList();
+  public List<Battle> findByStatus(BattleOutcome status) {
+    return store.values().stream().filter(b -> b.getBattleStatus().equals(status)).toList();
   }
 }
