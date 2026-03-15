@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 class MarketplaceImplTest {
 
   private static final String MARKETPLACE_ID = "mp-1";
+  private static final String AVATAR_ID = "avatar-1";
   private static final String SWORD_NAME = "Iron Sword";
   private static final String SHIELD_NAME = "Iron Shield";
   private static final String HP_POTION_NAME = "HP Potion";
@@ -45,7 +46,7 @@ class MarketplaceImplTest {
 
     marketplace =
         new MarketplaceImpl(
-            MARKETPLACE_ID, new ArrayList<>(List.of(sword, shield, hpPotion, mpPotion)));
+            MARKETPLACE_ID, AVATAR_ID, new ArrayList<>(List.of(sword, shield, hpPotion, mpPotion)));
   }
 
   // ── Identity ─────────────────────────────────────────────────────────────────
@@ -59,7 +60,7 @@ class MarketplaceImplTest {
 
   @Test
   void emptyMarketplaceShouldHaveNoItems() {
-    MarketplaceImpl empty = new MarketplaceImpl("empty");
+    MarketplaceImpl empty = new MarketplaceImpl("empty", AVATAR_ID);
     assertThat(empty.getItems(ItemType.ALL)).isEmpty();
   }
 
@@ -149,12 +150,17 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnItemPriceOnSell() {
+      marketplace.buyItem(SWORD_NAME); // prima compro
       Money price = marketplace.sellItem(SWORD_NAME);
       assertThat(price).isEqualTo(SWORD_PRICE);
     }
 
     @Test
     void shouldReturnCorrectPriceForEachItemType() {
+      marketplace.buyItem(SHIELD_NAME);
+      marketplace.buyItem(HP_POTION_NAME);
+      marketplace.buyItem(MP_POTION_NAME);
+
       assertThat(marketplace.sellItem(SHIELD_NAME)).isEqualTo(SHIELD_PRICE);
       assertThat(marketplace.sellItem(HP_POTION_NAME)).isEqualTo(HP_PRICE);
       assertThat(marketplace.sellItem(MP_POTION_NAME)).isEqualTo(MP_PRICE);

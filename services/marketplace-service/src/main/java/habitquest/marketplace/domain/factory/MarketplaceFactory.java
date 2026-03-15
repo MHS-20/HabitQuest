@@ -13,7 +13,7 @@ public class MarketplaceFactory implements Factory {
     this.idGenerator = idGenerator;
   }
 
-  public Marketplace create() {
-    return new MarketplaceImpl(idGenerator.nextId());
+  public Marketplace create(String avatarId) {
+    return new MarketplaceImpl(idGenerator.nextId(), avatarId);
   }
 }

@@ -10,7 +10,13 @@ public interface Marketplace extends Aggregate<String> {
 
   Optional<Item> getItem(String itemName);
 
+  List<Item> getSoldItems();
+
+  Optional<Item> getSoldItem(String itemName);
+
   Money buyItem(String itemName);
 
   Money sellItem(String itemName);
+
+  String getAvatarId();
 }
