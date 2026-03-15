@@ -9,6 +9,7 @@ import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.items.Weapon;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -67,7 +68,7 @@ class AvatarServiceImplTest {
     }
   }
 
-  // ─── getAvatarById ───────────────────────────────────────────────────────────
+  // ─── getAvatar ───────────────────────────────────────────────────────────
 
   @Nested
   @DisplayName("getAvatarById")
@@ -467,5 +468,16 @@ class AvatarServiceImplTest {
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
       assertThat(service.getAvatarStats(AVATAR_ID)).isSameAs(avatar.getAvatarStats());
     }
+  }
+
+  @Test
+  @DisplayName("searchAvatars delegates to repository with the given criteria")
+  void searchAvatars() {
+    Avatar avatar = stubAvatar();
+    AvatarSearchRequest criteria = new AvatarSearchRequest("Hero", 1, 10);
+    when(avatarRepository.search(criteria)).thenReturn(List.of(avatar));
+
+    assertThat(service.searchAvatars(criteria)).containsExactly(avatar);
+    verify(avatarRepository).search(criteria);
   }
 }

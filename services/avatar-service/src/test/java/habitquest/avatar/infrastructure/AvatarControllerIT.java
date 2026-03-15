@@ -11,6 +11,7 @@ import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -100,6 +101,82 @@ public class AvatarControllerIT {
           .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
 
       mockMvc.perform(get("/api/v1/avatars/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
+    }
+
+    // ── GET /api/v1/avatars/search ────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("GET /api/v1/avatars/search")
+    class SearchAvatars {
+
+      @Test
+      @DisplayName("returns 200 with matching avatars")
+      void shouldReturn200WithResults() throws Exception {
+        when(avatarService.searchAvatars(any())).thenReturn(List.of(stubAvatar()));
+
+        mockMvc
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                    {"name":"Hero","minLevel":null,"maxLevel":null}
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.avatarResponseList[0].name").value(AVATAR_NAME));
+      }
+
+      @Test
+      @DisplayName("returns 200 with empty list when no avatars match")
+      void shouldReturn200WithEmptyList() throws Exception {
+        when(avatarService.searchAvatars(any())).thenReturn(List.of());
+
+        mockMvc
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                    {"name":"unknown","minLevel":null,"maxLevel":null}
+                    """))
+            .andExpect(status().isOk());
+      }
+
+      @Test
+      @DisplayName("delegates search criteria to the service")
+      void shouldDelegateCriteriaToService() throws Exception {
+        when(avatarService.searchAvatars(any())).thenReturn(List.of());
+
+        mockMvc
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                    {"name":"Hero","minLevel":1,"maxLevel":10}
+                    """))
+            .andExpect(status().isOk());
+
+        verify(avatarService).searchAvatars(any());
+      }
+
+      @Test
+      @DisplayName("returns 400 when domain rejects the search criteria")
+      void shouldReturn400OnInvalidCriteria() throws Exception {
+        when(avatarService.searchAvatars(any()))
+            .thenThrow(new IllegalArgumentException("minLevel cannot be greater than maxLevel"));
+
+        mockMvc
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                    {"name":null,"minLevel":10,"maxLevel":1}
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("minLevel cannot be greater than maxLevel"));
+      }
     }
   }
 
