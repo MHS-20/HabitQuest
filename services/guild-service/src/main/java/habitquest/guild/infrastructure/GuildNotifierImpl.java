@@ -2,12 +2,7 @@ package habitquest.guild.infrastructure;
 
 import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildNotifier;
-import habitquest.guild.domain.events.guildEvents.GuildCreated;
-import habitquest.guild.domain.events.guildEvents.GuildDeleted;
-import habitquest.guild.domain.events.guildEvents.GuildJoined;
-import habitquest.guild.domain.events.guildEvents.GuildLeft;
-import habitquest.guild.domain.events.guildEvents.RemovedFromGuild;
-import habitquest.guild.domain.events.guildEvents.RoleAssigned;
+import habitquest.guild.domain.events.guildEvents.*;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +21,7 @@ public class GuildNotifierImpl implements GuildNotifier {
   static final String GUILD_LEFT_BINDING = "guild-left-out-0";
   static final String REMOVED_FROM_GUILD_BINDING = "guild-removed-out-0";
   static final String ROLE_ASSIGNED_BINDING = "guild-role-assigned-out-0";
+  static final String INVITE_SENT_BINDING = "guild-invite-sent-out-0";
 
   private final StreamBridge streamBridge;
 
@@ -56,6 +52,17 @@ public class GuildNotifierImpl implements GuildNotifier {
       LOG.error("Failed to publish GuildDeleted event for guildId {}", message.guildId());
     }
   }
+
+  @Override
+  public void notifyInviteSent(InviteSent event) {
+    var message =
+        new InviteSentMessage(
+            event.guildId(), event.targetAvatarId(), event.inviteId(), Instant.now());
+    streamBridge.send(INVITE_SENT_BINDING, message);
+  }
+
+  public record InviteSentMessage(
+      String guildId, String targetAvatarId, String inviteId, Instant occurredOn) {}
 
   @Override
   public void notifyGuildJoined(GuildJoined event) {

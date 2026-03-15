@@ -6,6 +6,7 @@ import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.stats.AvatarStats;
+import java.util.List;
 
 @InBoundPort
 public interface AvatarService {
@@ -18,6 +19,8 @@ public interface AvatarService {
   void deleteAvatar(String id) throws AvatarNotFoundException;
 
   void updateName(String avatarId, String name) throws AvatarNotFoundException;
+
+  List<Avatar> searchAvatars(AvatarSearchRequest criteria);
 
   // --- Query ---
   String getName(String avatarId) throws AvatarNotFoundException;

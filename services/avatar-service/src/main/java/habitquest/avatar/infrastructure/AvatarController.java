@@ -3,6 +3,7 @@ package habitquest.avatar.infrastructure;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import habitquest.avatar.application.AvatarNotFoundException;
+import habitquest.avatar.application.AvatarSearchRequest;
 import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
@@ -10,6 +11,7 @@ import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.dto.*;
 import java.net.URI;
 import java.util.List;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +67,31 @@ public class AvatarController {
             linkTo(methodOn(AvatarController.class).getMoney(id)).withRel("money"),
             linkTo(methodOn(AvatarController.class).deleteAvatar(id)).withRel("delete"));
 
+    return ResponseEntity.ok(model);
+  }
+
+  // GET /api/v1/avatars/search
+  @GetMapping("/search")
+  public ResponseEntity<CollectionModel<EntityModel<AvatarResponse>>> searchAvatars(
+      @RequestBody AvatarSearchRequest query) {
+    List<Avatar> avatars = avatarService.searchAvatars(query);
+    List<EntityModel<AvatarResponse>> avatarModels =
+        avatars.stream()
+            .map(
+                avatar -> {
+                  AvatarResponse dto = AvatarMapper.toResponse(avatar);
+                  return EntityModel.of(
+                      dto,
+                      selfLink(avatar.getId()),
+                      linkTo(methodOn(AvatarController.class).getAvatar(avatar.getId()))
+                          .withRel("avatar"));
+                })
+            .toList();
+
+    CollectionModel<EntityModel<AvatarResponse>> model =
+        CollectionModel.of(
+            avatarModels,
+            linkTo(methodOn(AvatarController.class).searchAvatars(query)).withSelfRel());
     return ResponseEntity.ok(model);
   }
 

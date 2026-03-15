@@ -10,6 +10,8 @@ public interface GuildNotifier {
 
   void notifyGuildDeleted(GuildDeleted e);
 
+  void notifyInviteSent(InviteSent e);
+
   void notifyGuildJoined(GuildJoined e);
 
   void notifyGuildLeft(GuildLeft e);

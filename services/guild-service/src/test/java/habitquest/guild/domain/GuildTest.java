@@ -2,10 +2,8 @@ package habitquest.guild.domain;
 
 import static org.assertj.core.api.Assertions.*;
 
-import habitquest.guild.domain.guild.Guild;
-import habitquest.guild.domain.guild.GuildMember;
-import habitquest.guild.domain.guild.GuildRole;
-import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
+import habitquest.guild.domain.guild.*;
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -62,7 +60,6 @@ class GuildTest {
   }
 
   // ── addMember ─────────────────────────────────────────────────────────────────
-
   @Nested
   @DisplayName("addMember")
   class AddMember {
@@ -86,7 +83,139 @@ class GuildTest {
     }
   }
 
-  // ── removeMember (no auth) ────────────────────────────────────────────────────
+  // ── sendInvite ────────────────────────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("sendInvite(invite)")
+  class SendInvite {
+
+    private static final String INVITE_ID = "invite-1";
+
+    @Test
+    @DisplayName("should add the invite to pending invites")
+    void shouldAddInviteToPending() {
+      guild.sendInvite(
+          LEADER_ID, new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+
+      assertThat(guild.getPendingInvites()).extracting(Invite::inviteId).containsExactly(INVITE_ID);
+    }
+
+    @Test
+    @DisplayName("should throw when avatar is already a member")
+    void shouldThrowWhenAlreadyMember() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+      assertThatThrownBy(
+              () ->
+                  guild.sendInvite(
+                      LEADER_ID,
+                      new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400))))
+          .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    @DisplayName("should not modify pending invites when avatar is already a member")
+    void shouldNotAddInviteWhenAlreadyMember() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+
+      assertThatThrownBy(
+              () ->
+                  guild.sendInvite(
+                      LEADER_ID,
+                      new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400))))
+          .isInstanceOf(IllegalStateException.class);
+
+      assertThat(guild.getPendingInvites()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should allow multiple pending invites for different avatars")
+    void shouldAllowMultiplePendingInvites() {
+      guild.sendInvite(
+          LEADER_ID, new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+      guild.sendInvite(
+          LEADER_ID,
+          new Invite("invite-2", GUILD_ID, MEMBER_ID_2, Instant.now().plusSeconds(86400)));
+      assertThat(guild.getPendingInvites()).hasSize(2);
+    }
+  }
+
+  // ── acceptInvite ──────────────────────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("acceptInvite(inviteId, avatarId, nickname)")
+  class AcceptInvite {
+
+    private static final String INVITE_ID = "invite-1";
+
+    @BeforeEach
+    void seedInvite() {
+      guild.sendInvite(
+          LEADER_ID, new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+    }
+
+    @Test
+    @DisplayName("should add the avatar as a member with MEMBER role")
+    void shouldAddAvatarAsMember() {
+      guild.acceptInvite(INVITE_ID, MEMBER_ID, MEMBER_NICK);
+
+      assertThat(guild.getMembers()).extracting(GuildMember::getId).contains(MEMBER_ID);
+    }
+
+    @Test
+    @DisplayName("should assign MEMBER role to the new member")
+    void shouldAssignMemberRole() {
+      guild.acceptInvite(INVITE_ID, MEMBER_ID, MEMBER_NICK);
+
+      GuildMember joined =
+          guild.getMembers().stream()
+              .filter(m -> m.getId().equals(MEMBER_ID))
+              .findFirst()
+              .orElseThrow();
+      assertThat(joined.getRole()).isEqualTo(MEMBER_ROLE);
+    }
+
+    @Test
+    @DisplayName("should remove the invite from pending after acceptance")
+    void shouldRemoveInviteFromPending() {
+      guild.acceptInvite(INVITE_ID, MEMBER_ID, MEMBER_NICK);
+
+      assertThat(guild.getPendingInvites()).extracting(Invite::inviteId).doesNotContain(INVITE_ID);
+    }
+
+    @Test
+    @DisplayName("should throw when invite id does not exist")
+    void shouldThrowWhenInviteNotFound() {
+      assertThatThrownBy(() -> guild.acceptInvite("ghost-invite", MEMBER_ID, MEMBER_NICK))
+          .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("should throw when invite belongs to a different avatar")
+    void shouldThrowWhenInviteNotOwnedByAvatar() {
+      assertThatThrownBy(() -> guild.acceptInvite(INVITE_ID, MEMBER_ID_2, MEMBER_NICK_2))
+          .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("should not add member when invite ownership check fails")
+    void shouldNotAddMemberWhenOwnershipFails() {
+      assertThatThrownBy(() -> guild.acceptInvite(INVITE_ID, MEMBER_ID_2, MEMBER_NICK_2))
+          .isInstanceOf(IllegalArgumentException.class);
+
+      assertThat(guild.getMembers()).extracting(GuildMember::getId).doesNotContain(MEMBER_ID_2);
+    }
+
+    @Test
+    @DisplayName("should not remove invite when acceptance fails")
+    void shouldNotRemoveInviteWhenFails() {
+      assertThatThrownBy(() -> guild.acceptInvite(INVITE_ID, MEMBER_ID_2, MEMBER_NICK_2))
+          .isInstanceOf(IllegalArgumentException.class);
+
+      assertThat(guild.getPendingInvites()).extracting(Invite::inviteId).containsExactly(INVITE_ID);
+    }
+  }
+
+  // ── Leave guild ────────────────────────────────────────────────────
 
   @Nested
   @DisplayName("leaveGuild(memberId)")
@@ -96,9 +225,7 @@ class GuildTest {
     @DisplayName("should remove an existing member by id")
     void shouldRemoveExistingMember() {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
-
       guild.leaveGuild(MEMBER_ID);
-
       assertThat(guild.getMembers()).extracting(GuildMember::getId).doesNotContain(MEMBER_ID);
     }
 
@@ -107,9 +234,7 @@ class GuildTest {
     void shouldNotAffectOtherMembers() {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
       guild.addMember(new GuildMember(MEMBER_ID_2, MEMBER_NICK_2, MEMBER_ROLE));
-
       guild.leaveGuild(MEMBER_ID);
-
       assertThat(guild.getMembers()).hasSize(2);
       assertThat(guild.getMembers())
           .extracting(GuildMember::getId)
@@ -120,7 +245,6 @@ class GuildTest {
     @DisplayName("should do nothing when member id does not exist")
     void shouldDoNothingForUnknownMemberId() {
       guild.leaveGuild(UNKNOWN_MEMBER_ID);
-
       assertThat(guild.getMembers()).hasSize(1);
     }
   }
@@ -211,7 +335,6 @@ class GuildTest {
     @DisplayName("should throw when requestor is not a leader")
     void shouldThrowWhenRequestorIsNotLeader() {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
-
       assertThatThrownBy(() -> guild.promoteMember(MEMBER_ID, MEMBER_ID_2, OFFICER_ROLE))
           .isInstanceOf(UnauthorizedGuildOperationException.class);
     }
@@ -220,10 +343,8 @@ class GuildTest {
     @DisplayName("should not change any role when requestor is not a leader")
     void shouldNotChangeRolesWhenUnauthorized() {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
-
       assertThatThrownBy(() -> guild.promoteMember(MEMBER_ID, MEMBER_ID_2, OFFICER_ROLE))
           .isInstanceOf(UnauthorizedGuildOperationException.class);
-
       assertThat(guild.getMembers())
           .extracting(GuildMember::getRole)
           .containsExactlyInAnyOrder(LEADER_ROLE, MEMBER_ROLE);
