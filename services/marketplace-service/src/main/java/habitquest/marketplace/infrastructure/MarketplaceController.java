@@ -84,48 +84,34 @@ public class MarketplaceController {
   // ─── Commands ───────────────────────────────────────────────────────────────
   @PostMapping("/{marketplaceId}/items/{itemName}/buy")
   public ResponseEntity<Void> buyItem(
-      @PathVariable String marketplaceId,
-      @PathVariable String itemName,
-      @RequestBody AvatarRequest request)
+      @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
+    String avatarId = marketplaceService.getAvatarId(marketplaceId);
 
-    LOG.info(
-        "Avatar {} buying item '{}' from marketplace {}",
-        request.avatarId(),
-        itemName,
-        marketplaceId);
+    LOG.info("Avatar {} buying item '{}' from marketplace {}", avatarId, itemName, marketplaceId);
 
     Item item = marketplaceService.getItemByName(marketplaceId, itemName);
     Money price = item.price();
 
-    avatarClient.spendMoney(request.avatarId(), price);
-    avatarClient.addItemToInventory(request.avatarId(), item);
-
-    marketplaceService.buyItem(marketplaceId, itemName, request.avatarId());
-
+    avatarClient.spendMoney(avatarId, price);
+    avatarClient.addItemToInventory(avatarId, item);
+    marketplaceService.buyItem(marketplaceId, itemName);
     return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{marketplaceId}/items/{itemName}/sell")
   public ResponseEntity<Void> sellItem(
-      @PathVariable String marketplaceId,
-      @PathVariable String itemName,
-      @RequestBody AvatarRequest request)
+      @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
+    String avatarId = marketplaceService.getAvatarId(marketplaceId);
 
-    LOG.info(
-        "Avatar {} selling item '{}' to marketplace {}",
-        request.avatarId(),
-        itemName,
-        marketplaceId);
+    LOG.info("Avatar {} selling item '{}' to marketplace {}", avatarId, itemName, marketplaceId);
 
-    Item item = marketplaceService.getItemByName(marketplaceId, itemName);
+    Item item = marketplaceService.getSoldItem(marketplaceId, itemName);
     Money price = item.price();
-
-    avatarClient.removeItemFromInventory(request.avatarId(), item);
-    avatarClient.earnMoney(request.avatarId(), price);
-
-    marketplaceService.sellItem(marketplaceId, itemName, request.avatarId());
+    avatarClient.removeItemFromInventory(avatarId, item);
+    avatarClient.earnMoney(avatarId, price);
+    marketplaceService.sellItem(marketplaceId, itemName);
 
     return ResponseEntity.noContent().build();
   }
@@ -163,14 +149,12 @@ public class MarketplaceController {
         selfMarketplaceLink(marketplaceId),
         linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
             .withRel("items"),
-        linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name(), null))
+        linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name()))
             .withRel("buy"),
-        linkTo(methodOn(MarketplaceController.class).sellItem(marketplaceId, item.name(), null))
+        linkTo(methodOn(MarketplaceController.class).sellItem(marketplaceId, item.name()))
             .withRel("sell"));
   }
 
   // ─── Request / Response records ─────────────────────────────────────────────
-  public record AvatarRequest(String avatarId) {}
-
   public record ErrorResponse(String message) {}
 }
