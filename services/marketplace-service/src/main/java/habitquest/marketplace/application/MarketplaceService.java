@@ -11,12 +11,15 @@ public interface MarketplaceService {
 
   List<Item> getItems(String marketplaceId, ItemType type) throws MarketplaceNotFoundException;
 
+  Item getSoldItem(String marketplaceId, String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException;
+
+  String getAvatarId(String marketplaceId) throws MarketplaceNotFoundException;
+
   Item getItemByName(String marketplaceId, String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException;
 
-  void buyItem(String marketplaceId, String itemName, String avatarId)
-      throws MarketplaceNotFoundException;
+  void buyItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException;
 
-  void sellItem(String marketplaceId, String itemName, String avatarId)
-      throws MarketplaceNotFoundException;
+  void sellItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException;
 }
