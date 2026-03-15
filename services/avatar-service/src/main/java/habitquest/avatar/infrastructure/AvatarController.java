@@ -312,11 +312,10 @@ public class AvatarController {
   // ─── Combat ─────────────────────────────────────────────────────────────────
 
   @PostMapping("/{id}/health/damage")
-  public ResponseEntity<Void> applyDamage(
+  public ResponseEntity<DamageResponse> applyDamage(
       @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
-
-    avatarService.applyDamage(id, request.amount());
-    return ResponseEntity.noContent().build();
+    boolean died = avatarService.applyDamage(id, request.amount());
+    return ResponseEntity.ok(new DamageResponse(died));
   }
 
   @PostMapping("/{id}/health/heal")
@@ -428,6 +427,8 @@ public class AvatarController {
   public record ManaResponse(Integer amount, Integer max) {}
 
   public record HealthResponse(Integer current, Integer max) {}
+
+  public record DamageResponse(boolean died) {}
 
   public record LevelResponse(
       Integer levelNumber, Integer currentExperience, Integer experienceRequired) {}
