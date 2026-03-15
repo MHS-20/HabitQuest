@@ -110,7 +110,7 @@ jobs:
   package-scan-publish:
     name: Package, Scan & Publish
     needs:
-      - build
+      - build-aggregate
       - detect-changes
     if: ${{ success() && needs.detect-changes.outputs.services != '[]' }}
     runs-on: ubuntu-22.04
@@ -123,6 +123,7 @@ jobs:
     strategy:
       matrix:
         service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v6
@@ -136,6 +137,13 @@ jobs:
       - name: Set lowercase image name
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker image
         run: |
           docker build \
@@ -143,26 +151,24 @@ jobs:
             --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }} \
             services/${{ matrix.service }}
 
+      - name: Update Grype DB
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          grype db update
+
       - name: Scan Docker image
-        uses: anchore/scan-action@v3
-        id: scan
-        with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }}
-          fail-build: false
-          severity-cutoff: high
+        run: |
+          grype \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }} \
+            --output sarif \
+            --file results.sarif \
+            --fail-on high || true 
 
       - name: Upload vulnerability report
         uses: github/codeql-action/upload-sarif@v4
-        if: success() || failure()
+        if: always() && hashFiles(steps.scan.outputs.sarif) != ''
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
-
-      - name: Log into GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push image (SHA tag)
         run: |
