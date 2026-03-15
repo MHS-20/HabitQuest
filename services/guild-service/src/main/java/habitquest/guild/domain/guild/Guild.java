@@ -10,6 +10,7 @@ public class Guild implements Aggregate<String> {
   private String name;
   private List<GuildMember> members;
   private Integer globalRank;
+  private final List<Invite> pendingInvites;
 
   public Guild(String id, String name, GuildMember leader) {
     this.id = id;
@@ -17,6 +18,7 @@ public class Guild implements Aggregate<String> {
     this.members = new ArrayList<>();
     this.members.add(leader);
     this.globalRank = 0;
+    this.pendingInvites = new ArrayList<>();
   }
 
   public String getId() {
@@ -31,14 +33,37 @@ public class Guild implements Aggregate<String> {
     return Collections.unmodifiableList(members);
   }
 
+  public List<Invite> getPendingInvites() {
+    return Collections.unmodifiableList(pendingInvites);
+  }
+
   public boolean isLeader(String memberId) {
     return members.stream()
         .filter(member -> member.getId().equals(memberId))
         .anyMatch(member -> member.getRole() == GuildRole.LEADER);
   }
 
-  public Integer getGlobalRank() {
-    return this.globalRank;
+  public void sendInvite(String requestorId, Invite invite) {
+    requireLeader(requestorId, "sendInvite");
+    if (invite == null) {
+      throw new IllegalArgumentException("invite must not be null");
+    }
+
+    // check is member is already in the guild
+    if (members.stream().anyMatch(m -> m.getId().equals(invite.avatarId()))) {
+      throw new IllegalStateException("avatar is already a member");
+    }
+    pendingInvites.add(invite);
+  }
+
+  public void acceptInvite(String inviteId, String avatarId, String nickname) {
+    Invite invite =
+        pendingInvites.stream()
+            .filter(i -> i.inviteId().equals(inviteId) && i.avatarId().equals(avatarId))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Invite not found or not yours"));
+    pendingInvites.remove(invite);
+    addMember(new GuildMember(avatarId, nickname, GuildRole.MEMBER));
   }
 
   public void addMember(GuildMember member) {
@@ -58,10 +83,6 @@ public class Guild implements Aggregate<String> {
     removeMember(targetMemberId);
   }
 
-  public void updateGlobalRank(Integer newRank) {
-    this.globalRank = newRank;
-  }
-
   private void promoteMember(String memberId, GuildRole newRole) {
     members.stream()
         .filter(m -> m.getId().equals(memberId))
@@ -79,5 +100,13 @@ public class Guild implements Aggregate<String> {
     if (!isLeader(requestorId)) {
       throw new UnauthorizedGuildOperationException(requestorId, operation);
     }
+  }
+
+  public Integer getGlobalRank() {
+    return this.globalRank;
+  }
+
+  public void updateGlobalRank(Integer newRank) {
+    this.globalRank = newRank;
   }
 }

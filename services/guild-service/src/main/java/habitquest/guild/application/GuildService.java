@@ -18,9 +18,13 @@ public interface GuildService {
 
   boolean isLeader(String guildId, String memberId) throws GuildNotFoundException;
 
-  void leaveGuild(String guildId, String memberId) throws GuildNotFoundException;
+  void sendInvite(String guildId, String requestorId, String targetAvatarId)
+      throws GuildNotFoundException;
 
-  void addMember(String guildId, GuildMember member) throws GuildNotFoundException;
+  void acceptInvite(String guildId, String inviteId, String avatarId, String nickname)
+      throws GuildNotFoundException;
+
+  void leaveGuild(String guildId, String memberId) throws GuildNotFoundException;
 
   void removeMember(String guildId, String requestorId, String memberId)
       throws GuildNotFoundException;

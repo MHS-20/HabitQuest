@@ -7,10 +7,9 @@ import static org.mockito.Mockito.*;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;
-import habitquest.guild.domain.guild.Guild;
-import habitquest.guild.domain.guild.GuildMember;
-import habitquest.guild.domain.guild.GuildRole;
-import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
+import habitquest.guild.domain.factory.InviteFactory;
+import habitquest.guild.domain.guild.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GuildServiceImplTest {
 
+  public static final String BATTLE_1 = "battle-1";
   private static final String GUILD_ID = "guild-1";
   private static final String GUILD_NAME = "MyGuild";
   private static final String LEADER_ID = "avatar-1";
@@ -43,6 +43,7 @@ class GuildServiceImplTest {
   @Mock private GuildRepository guildRepository;
   @Mock private GuildObserver guildObserver;
   @Mock private BattleService battleService;
+  @Mock private InviteFactory inviteFactory;
 
   @InjectMocks private GuildServiceImpl guildService;
 
@@ -51,7 +52,8 @@ class GuildServiceImplTest {
   @BeforeEach
   void setUp() {
     guildService =
-        new GuildServiceImpl(guildFactory, guildRepository, guildObserver, battleService);
+        new GuildServiceImpl(
+            guildFactory, guildRepository, guildObserver, battleService, inviteFactory);
 
     guild = new Guild(GUILD_ID, GUILD_NAME, new GuildMember(LEADER_ID, NICK, LEADER_ROLE));
   }
@@ -167,26 +169,134 @@ class GuildServiceImplTest {
     }
   }
 
-  // ── addMember ─────────────────────────────────────────────────────────────────
+  // ── sendInvite ────────────────────────────────────────────────────────────────
 
   @Nested
-  @DisplayName("addMember")
-  class AddMember {
+  @DisplayName("sendInvite")
+  class SendInvite {
+
+    private static final String INVITE_ID = "invite-1";
 
     @Test
-    @DisplayName("should add member, save and publish GuildJoined event")
-    void shouldAddMemberAndPublishEvent() throws GuildNotFoundException {
-      GuildMember newMember = new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE);
+    @DisplayName("should save guild and publish InviteSent event when leader sends invite")
+    void shouldSaveAndPublishEvent() throws GuildNotFoundException {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
+      when(inviteFactory.create(GUILD_ID, MEMBER_ID))
+          .thenReturn(new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
 
-      guildService.addMember(GUILD_ID, newMember);
+      guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
 
       verify(guildRepository).save(guild);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
-      assertThat(captor.getValue()).isInstanceOf(GuildJoined.class);
-      assertThat(((GuildJoined) captor.getValue()).memberId()).isEqualTo(MEMBER_ID);
+      InviteSent event = (InviteSent) captor.getValue();
+      assertThat(event.guildId()).isEqualTo(GUILD_ID);
+      assertThat(event.targetAvatarId()).isEqualTo(MEMBER_ID);
+      assertThat(event.inviteId()).isEqualTo(INVITE_ID);
+    }
+
+    @Test
+    @DisplayName("should throw UnauthorizedGuildOperationException when requestor is not a leader")
+    void shouldThrowWhenNotLeader() {
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+
+      assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, MEMBER_ID, LEADER_ID))
+          .isInstanceOf(UnauthorizedGuildOperationException.class);
+
+      verify(guildRepository, never()).save(any());
+      verify(guildObserver, never()).notifyGuildEvent(any());
+    }
+
+    @Test
+    @DisplayName("should throw IllegalStateException when avatar is already a member")
+    void shouldThrowWhenAlreadyMember() {
+      guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      when(inviteFactory.create(GUILD_ID, MEMBER_ID))
+          .thenReturn(new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+
+      assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
+          .isInstanceOf(IllegalStateException.class);
+
+      verify(guildRepository, never()).save(any());
+      verify(guildObserver, never()).notifyGuildEvent(any());
+    }
+
+    @Test
+    @DisplayName(THROWS_WHEN_NOT_FOUND)
+    void shouldThrowWhenNotFound() {
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
+      assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
+          .isInstanceOf(GuildNotFoundException.class);
+    }
+  }
+
+  // ── acceptInvite ──────────────────────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("acceptInvite")
+  class AcceptInvite {
+    private static final String INVITE_ID = "invite-1";
+
+    @BeforeEach
+    void seedInvite() {
+      guild.sendInvite(
+          LEADER_ID, new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+    }
+
+    @Test
+    @DisplayName("should add member, save and publish GuildJoined event")
+    void shouldAddMemberAndPublishEvent() throws GuildNotFoundException {
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
+
+      guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
+
+      verify(guildRepository).save(guild);
+      ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
+      verify(guildObserver).notifyGuildEvent(captor.capture());
+      GuildJoined event = (GuildJoined) captor.getValue();
+      assertThat(event.guildId()).isEqualTo(GUILD_ID);
+      assertThat(event.memberId()).isEqualTo(MEMBER_ID);
+    }
+
+    @Test
+    @DisplayName("should increase battle turns when a battle is ongoing")
+    void shouldIncreaseTurnsWhenBattleOngoing() throws GuildNotFoundException {
+      Battle ongoingBattle = mock(Battle.class);
+      when(ongoingBattle.getId()).thenReturn(BATTLE_1);
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
+
+      guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
+
+      verify(battleService).increaseNumOfTurn(BATTLE_1);
+    }
+
+    @Test
+    @DisplayName("should throw IllegalArgumentException when invite does not belong to the avatar")
+    void shouldThrowWhenInviteNotOwnedByAvatar() {
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+
+      assertThatThrownBy(
+              () -> guildService.acceptInvite(GUILD_ID, INVITE_ID, "wrong-avatar", MEMBER_NICK))
+          .isInstanceOf(IllegalArgumentException.class);
+
+      verify(guildRepository, never()).save(any());
+      verify(guildObserver, never()).notifyGuildEvent(any());
+    }
+
+    @Test
+    @DisplayName("should throw IllegalArgumentException when invite id does not exist")
+    void shouldThrowWhenInviteNotFound() {
+      when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
+
+      assertThatThrownBy(
+              () -> guildService.acceptInvite(GUILD_ID, "ghost-invite", MEMBER_ID, MEMBER_NICK))
+          .isInstanceOf(IllegalArgumentException.class);
+
+      verify(guildRepository, never()).save(any());
+      verify(guildObserver, never()).notifyGuildEvent(any());
     }
 
     @Test
@@ -195,15 +305,12 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(
-              () ->
-                  guildService.addMember(
-                      GUILD_ID, new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE)))
+              () -> guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
 
   // ── leaveGuild ────────────────────────────────────────────────────────────────
-
   @Nested
   @DisplayName("leaveGuild")
   class LeaveGuild {
@@ -228,14 +335,14 @@ class GuildServiceImplTest {
         "should publish GuildLeft and GuildDeleted, delete guild and battle when last member leaves")
     void shouldCleanUpWhenLastMemberLeaves() throws GuildNotFoundException {
       Battle ongoingBattle = mock(Battle.class);
-      when(ongoingBattle.getId()).thenReturn("battle-1");
+      when(ongoingBattle.getId()).thenReturn(BATTLE_1);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
 
       guildService.leaveGuild(GUILD_ID, LEADER_ID);
 
       verify(guildRepository).deleteById(GUILD_ID);
-      verify(battleService).deleteBattle("battle-1");
+      verify(battleService).deleteBattle(BATTLE_1);
 
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver, times(2)).notifyGuildEvent(captor.capture());

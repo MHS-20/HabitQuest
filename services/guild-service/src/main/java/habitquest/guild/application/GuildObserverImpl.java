@@ -21,6 +21,7 @@ public class GuildObserverImpl implements GuildObserver {
       case GuildLeft e -> guildNotifier.notifyGuildLeft(e);
       case RemovedFromGuild e -> guildNotifier.notifyRemovedFromGuild(e);
       case RoleAssigned e -> guildNotifier.notifyRoleAssigned(e);
+      case InviteSent e -> guildNotifier.notifyInviteSent(e);
       default ->
           throw new IllegalArgumentException("Unknown event type: " + event.getClass().getName());
     }
