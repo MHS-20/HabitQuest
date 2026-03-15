@@ -89,21 +89,8 @@ public class GuildServiceImpl implements GuildService {
     guildObserver.notifyGuildEvent(new GuildJoined(guildId, avatarId)); // already exists!
     battleService
         .getBattleByGuild(guildId)
-        .ifPresent(b -> battleService.increaseNumOfTurn(b.getId()));
+        .ifPresent(b -> battleService.increaseNumOfTurn(b.getId(), avatarId));
   }
-
-  //  @Override
-  //  public void addMember(String guildId, GuildMember member) throws GuildNotFoundException {
-  //    Guild guild =
-  //        guildRepository.findById(guildId).orElseThrow(() -> new
-  // GuildNotFoundException(guildId));
-  //    guild.addMember(member);
-  //    guildRepository.save(guild);
-  //    guildObserver.notifyGuildEvent(new GuildJoined(guild.getId(), member.getId()));
-  //    battleService
-  //        .getBattleByGuild(guildId)
-  //        .ifPresent(battle -> battleService.increaseNumOfTurn(battle.getId()));
-  //  }
 
   @Override
   public void leaveGuild(String guildId, String memberId) throws GuildNotFoundException {
@@ -114,7 +101,7 @@ public class GuildServiceImpl implements GuildService {
 
     battleService
         .getBattleByGuild(guildId)
-        .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId()));
+        .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId(), memberId));
 
     if (guild.getMembers().isEmpty()) {
       battleService
@@ -138,7 +125,7 @@ public class GuildServiceImpl implements GuildService {
     guildObserver.notifyGuildEvent(new RemovedFromGuild(guild.getId(), memberId));
     battleService
         .getBattleByGuild(guildId)
-        .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId()));
+        .ifPresent(battle -> battleService.decreaseNumOfTurn(battle.getId(), memberId));
   }
 
   @Override
