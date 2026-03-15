@@ -56,7 +56,7 @@ public interface AvatarService {
   void unequipItem(String avatarId, Item item) throws AvatarNotFoundException;
 
   // --- Combat ---
-  void applyDamage(String avatarId, Integer amount) throws AvatarNotFoundException;
+  boolean applyDamage(String avatarId, Integer amount) throws AvatarNotFoundException;
 
   void healAvatar(String avatarId, Integer amount) throws AvatarNotFoundException;
 

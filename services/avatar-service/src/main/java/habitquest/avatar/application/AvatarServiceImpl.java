@@ -144,13 +144,14 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void applyDamage(String avatarId, Integer amount) throws AvatarNotFoundException {
+  public boolean applyDamage(String avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     boolean died = avatar.takeDamage(amount);
     if (died) {
       avatarObserver.notifyAvatarEvent(new Dead(avatarId));
     }
     avatarRepository.save(avatar);
+    return died;
   }
 
   @Override

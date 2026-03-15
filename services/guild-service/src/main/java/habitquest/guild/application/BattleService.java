@@ -2,7 +2,7 @@ package habitquest.guild.application;
 
 import common.hexagonal.InBoundPort;
 import habitquest.guild.domain.battle.Battle;
-import habitquest.guild.domain.battle.BattleStatus;
+import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
 import habitquest.guild.domain.battle.boss.BossType;
@@ -17,6 +17,8 @@ public interface BattleService {
   Battle getBattleById(String battleId) throws BattleNotFoundException;
 
   void deleteBattle(String battleId);
+
+  BattleOutcome markAsFallen(String battleId, String avatarId) throws BattleNotFoundException;
 
   // --- Query ---
   Optional<Battle> getBattleByGuild(String guildId) throws BattleNotFoundException;
@@ -37,14 +39,23 @@ public interface BattleService {
 
   void nextTurn(String battleId) throws BattleNotFoundException;
 
-  void increaseNumOfTurn(String battleId) throws BattleNotFoundException;
+  void increaseNumOfTurn(String battleId, String memberId) throws BattleNotFoundException;
 
-  void decreaseNumOfTurn(String battleId) throws BattleNotFoundException;
+  void decreaseNumOfTurn(String battleId, String memberId) throws BattleNotFoundException;
 
   // --- Combat ---
-  void dealDamage(String battleId, Integer damage) throws BattleNotFoundException;
+  //  BattleOutcome dealDamage(String battleId, String attackerId, int damage, boolean attackerDied)
+  // throws BattleNotFoundException;
 
-  BattleStatus getBattleStatus(String battleId) throws BattleNotFoundException;
+  BattleOutcome dealDamageOnBoss(String battleId, String attackerId, int damage)
+      throws BattleNotFoundException;
+
+  BattleOutcome applyCounterattack(String battleId, String attackerId)
+      throws BattleNotFoundException;
+
+  boolean isAttackerTurn(String battleId, String attackerId) throws BattleNotFoundException;
+
+  BattleOutcome getBattleStatus(String battleId) throws BattleNotFoundException;
 
   boolean isBattleOver(String battleId) throws BattleNotFoundException;
 

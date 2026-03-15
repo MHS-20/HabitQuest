@@ -7,8 +7,7 @@ import habitquest.guild.application.BattleNotFoundException;
 import habitquest.guild.application.BattleService;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
-import habitquest.guild.domain.battle.BattleStatus;
-import habitquest.guild.domain.battle.boss.BossEnemy;
+import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import habitquest.guild.infrastructure.dto.BattleResponse;
@@ -205,41 +204,42 @@ public class BattleController {
     if (request.attackerAvatarId() == null) {
       return ResponseEntity.badRequest().build();
     }
-
-    BossEnemy boss = battleService.getBoss(id);
-    String guildId = battleService.getGuildId(id);
-    int currentTurn = battleService.getCurrentTurn(id);
-    String expectedMemberId = guildService.getMembers(guildId).get(currentTurn).getId();
-    if (!expectedMemberId.equals(request.attackerAvatarId())) {
+    if (!battleService.isAttackerTurn(id, request.attackerAvatarId())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-    battleService.dealDamage(id, request.damage());
-    BattleStatus newStatus = battleService.getBattleStatus(id);
+    // Passo 1: l'attaccante colpisce il boss
+    BattleOutcome outcome =
+        battleService.dealDamageOnBoss(id, request.attackerAvatarId(), request.damage());
 
-    switch (newStatus) {
-      case WON -> {
-        int exp = boss.experienceReward().amount();
-        int money = boss.moneyReward().amount();
-        guildService
-            .getMembers(guildId)
-            .forEach(
-                m -> {
-                  avatarClient.grantExperience(m.getId(), exp);
-                  avatarClient.earnMoney(m.getId(), money);
-                });
+    // Passo 2: se il boss non è morto, il boss contrattacca l'attaccante
+    if (outcome instanceof BattleOutcome.Ongoing) {
+      boolean attackerDied =
+          avatarClient.applyDamage(request.attackerAvatarId(), request.damage()).died();
+      if (attackerDied) {
+        outcome = battleService.applyCounterattack(id, request.attackerAvatarId());
       }
-      case LOST -> {
-        int penalty = boss.penalty().amount();
-        guildService
-            .getMembers(guildId)
-            .forEach(m -> avatarClient.applyPenalty(m.getId(), penalty));
-      }
-      case ONGOING -> avatarClient.applyDamage(request.attackerAvatarId(), request.damage());
-      default -> throw new IllegalStateException("Unknown battle status: " + newStatus);
     }
 
-    battleService.nextTurn(id);
+    // Passo 3: controllo dello stato
+    switch (outcome) {
+      case BattleOutcome.Won(int exp, int money) ->
+          battleService
+              .getBattleById(id)
+              .getMembers()
+              .forEach(
+                  m -> {
+                    avatarClient.grantExperience(m, exp);
+                    avatarClient.earnMoney(m, money);
+                  });
+      case BattleOutcome.Lost(int penalty) ->
+          battleService
+              .getBattleById(id)
+              .getMembers()
+              .forEach(m -> avatarClient.applyPenalty(m, penalty));
+      case BattleOutcome.Ongoing ignored -> battleService.nextTurn(id);
+    }
+
     return ResponseEntity.noContent().build();
   }
 
@@ -247,7 +247,7 @@ public class BattleController {
   public ResponseEntity<EntityModel<BattleStatusResponse>> getBattleStatus(@PathVariable String id)
       throws BattleNotFoundException {
 
-    BattleStatus status = battleService.getBattleStatus(id);
+    BattleOutcome status = battleService.getBattleStatus(id);
     boolean isOver = battleService.isBattleOver(id);
     boolean isWon = battleService.isBattleWon(id);
 
@@ -303,7 +303,7 @@ public class BattleController {
 
   public record InProgressResponse(boolean inProgress) {}
 
-  public record BattleStatusResponse(BattleStatus status, boolean isOver, boolean isWon) {}
+  public record BattleStatusResponse(BattleOutcome status, boolean isOver, boolean isWon) {}
 
   public record ErrorResponse(String message) {}
 }

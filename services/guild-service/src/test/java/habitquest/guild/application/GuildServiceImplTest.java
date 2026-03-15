@@ -267,10 +267,8 @@ class GuildServiceImplTest {
       when(ongoingBattle.getId()).thenReturn(BATTLE_1);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
-
       guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
-
-      verify(battleService).increaseNumOfTurn(BATTLE_1);
+      verify(battleService).increaseNumOfTurn(BATTLE_1, MEMBER_ID);
     }
 
     @Test

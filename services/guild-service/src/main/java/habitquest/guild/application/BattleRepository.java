@@ -3,7 +3,7 @@ package habitquest.guild.application;
 import common.ddd.Repository;
 import common.hexagonal.OutBoundPort;
 import habitquest.guild.domain.battle.Battle;
-import habitquest.guild.domain.battle.BattleStatus;
+import habitquest.guild.domain.battle.BattleOutcome;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,5 +17,5 @@ public interface BattleRepository extends Repository {
 
   Optional<Battle> findByGuildId(String guildId);
 
-  List<Battle> findByStatus(BattleStatus status);
+  List<Battle> findByStatus(BattleOutcome status);
 }

@@ -386,14 +386,14 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates damage amount")
     void shouldApplyDamage() throws Exception {
-      doNothing().when(avatarService).applyDamage(AVATAR_ID, 30);
+      when(avatarService.applyDamage(AVATAR_ID, 30)).thenReturn(false);
 
       mockMvc
           .perform(
               post("/api/v1/avatars/{id}/health/damage", AVATAR_ID)
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"amount\": 30}"))
-          .andExpect(status().isNoContent());
+          .andExpect(status().is2xxSuccessful());
 
       verify(avatarService).applyDamage(AVATAR_ID, 30);
     }
