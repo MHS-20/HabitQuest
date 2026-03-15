@@ -7,6 +7,7 @@ import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.stats.AvatarStats;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,6 +36,11 @@ public class AvatarServiceImpl implements AvatarService {
   @Override
   public Avatar getAvatarById(String id) throws AvatarNotFoundException {
     return avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id));
+  }
+
+  @Override
+  public List<Avatar> searchAvatars(AvatarSearchRequest criteria) {
+    return avatarRepository.search(criteria);
   }
 
   @Override

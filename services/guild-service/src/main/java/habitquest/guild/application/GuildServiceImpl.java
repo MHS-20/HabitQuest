@@ -2,9 +2,11 @@ package habitquest.guild.application;
 
 import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;
+import habitquest.guild.domain.factory.InviteFactory;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
+import habitquest.guild.domain.guild.Invite;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -14,16 +16,19 @@ public class GuildServiceImpl implements GuildService {
   private final GuildRepository guildRepository;
   private final GuildObserver guildObserver;
   private final BattleService battleService;
+  private final InviteFactory inviteFactory;
 
   public GuildServiceImpl(
       GuildFactory guildFactory,
       GuildRepository guildRepository,
       GuildObserver guildObserver,
-      BattleService battleService) {
+      BattleService battleService,
+      InviteFactory inviteFactory) {
     this.guildFactory = guildFactory;
     this.guildRepository = guildRepository;
     this.guildObserver = guildObserver;
     this.battleService = battleService;
+    this.inviteFactory = inviteFactory;
   }
 
   @Override
@@ -64,16 +69,41 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public void addMember(String guildId, GuildMember member) throws GuildNotFoundException {
+  public void sendInvite(String guildId, String requestorId, String targetAvatarId)
+      throws GuildNotFoundException {
     Guild guild =
         guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
-    guild.addMember(member);
+    Invite invite = inviteFactory.create(guildId, targetAvatarId);
+    guild.sendInvite(requestorId, invite);
     guildRepository.save(guild);
-    guildObserver.notifyGuildEvent(new GuildJoined(guild.getId(), member.getId()));
+    guildObserver.notifyGuildEvent(new InviteSent(guildId, targetAvatarId, invite.inviteId()));
+  }
+
+  @Override
+  public void acceptInvite(String guildId, String inviteId, String avatarId, String nickname)
+      throws GuildNotFoundException {
+    Guild guild =
+        guildRepository.findById(guildId).orElseThrow(() -> new GuildNotFoundException(guildId));
+    guild.acceptInvite(inviteId, avatarId, nickname);
+    guildRepository.save(guild);
+    guildObserver.notifyGuildEvent(new GuildJoined(guildId, avatarId)); // already exists!
     battleService
         .getBattleByGuild(guildId)
-        .ifPresent(battle -> battleService.increaseNumOfTurn(battle.getId()));
+        .ifPresent(b -> battleService.increaseNumOfTurn(b.getId()));
   }
+
+  //  @Override
+  //  public void addMember(String guildId, GuildMember member) throws GuildNotFoundException {
+  //    Guild guild =
+  //        guildRepository.findById(guildId).orElseThrow(() -> new
+  // GuildNotFoundException(guildId));
+  //    guild.addMember(member);
+  //    guildRepository.save(guild);
+  //    guildObserver.notifyGuildEvent(new GuildJoined(guild.getId(), member.getId()));
+  //    battleService
+  //        .getBattleByGuild(guildId)
+  //        .ifPresent(battle -> battleService.increaseNumOfTurn(battle.getId()));
+  //  }
 
   @Override
   public void leaveGuild(String guildId, String memberId) throws GuildNotFoundException {

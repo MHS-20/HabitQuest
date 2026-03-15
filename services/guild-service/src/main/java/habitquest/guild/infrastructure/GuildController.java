@@ -5,7 +5,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
-import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import habitquest.guild.infrastructure.dto.GuildMemberResponse;
@@ -54,9 +53,7 @@ public class GuildController {
   @GetMapping("/{id}")
   public ResponseEntity<EntityModel<GuildResponse>> getGuild(@PathVariable String id)
       throws GuildNotFoundException {
-
     GuildResponse body = GuildResponse.from(guildService.getGuild(id));
-
     EntityModel<GuildResponse> model =
         EntityModel.of(
             body,
@@ -65,7 +62,6 @@ public class GuildController {
             linkTo(methodOn(GuildController.class).getGlobalRank(id)).withRel("rank"),
             linkTo(methodOn(GuildController.class).getLeaderboard()).withRel("leaderboard"),
             linkTo(methodOn(GuildController.class).deleteGuild(id)).withRel("delete"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -77,40 +73,55 @@ public class GuildController {
   }
 
   // Members
-
   @GetMapping("/{id}/members")
   public ResponseEntity<CollectionModel<GuildMemberResponse>> getMembers(@PathVariable String id)
       throws GuildNotFoundException {
-
     List<GuildMemberResponse> members =
         guildService.getMembers(id).stream().map(GuildMemberResponse::from).toList();
-
     CollectionModel<GuildMemberResponse> model =
         CollectionModel.of(
             members,
             linkTo(methodOn(GuildController.class).getMembers(id)).withSelfRel(),
-            selfLink(id),
-            linkTo(methodOn(GuildController.class).addMember(id, null)).withRel("addMember"));
-
+            selfLink(id));
     return ResponseEntity.ok(model);
   }
 
-  @PostMapping("/{id}/members")
-  public ResponseEntity<Void> addMember(
-      @PathVariable String id, @RequestBody AddMemberRequest request)
+  @PostMapping("/{id}/invites")
+  public ResponseEntity<Void> sendInvite(
+      @PathVariable String id, @RequestBody SendInviteRequest request)
       throws GuildNotFoundException {
-
-    GuildRole role;
     try {
-      role = GuildRole.valueOf(request.roleName().toUpperCase(Locale.getDefault()));
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null);
+      guildService.sendInvite(id, request.requestorId(), request.targetAvatarId());
+      return ResponseEntity.noContent().build();
+    } catch (UnauthorizedGuildOperationException e) {
+      return ResponseEntity.status(403).build();
     }
+  }
 
-    GuildMember member = new GuildMember(request.avatarId(), request.nickname(), role);
-    guildService.addMember(id, member);
+  @PostMapping("/{id}/invites/{inviteId}/accept")
+  public ResponseEntity<Void> acceptInvite(
+      @PathVariable String id,
+      @PathVariable String inviteId,
+      @RequestBody AcceptInviteRequest request)
+      throws GuildNotFoundException {
+    guildService.acceptInvite(id, inviteId, request.avatarId(), request.nickname());
     return ResponseEntity.noContent().build();
   }
+
+  //  @PostMapping("/{id}/members")
+  //  public ResponseEntity<Void> addMember(
+  //      @PathVariable String id, @RequestBody AddMemberRequest request)
+  //      throws GuildNotFoundException {
+  //    GuildRole role;
+  //    try {
+  //      role = GuildRole.valueOf(request.roleName().toUpperCase(Locale.getDefault()));
+  //    } catch (IllegalArgumentException e) {
+  //      return ResponseEntity.badRequest().body(null);
+  //    }
+  //    GuildMember member = new GuildMember(request.avatarId(), request.nickname(), role);
+  //    guildService.addMember(id, member);
+  //    return ResponseEntity.noContent().build();
+  //  }
 
   @DeleteMapping("/{id}/members/{memberId}")
   public ResponseEntity<Void> removeMember(
@@ -118,7 +129,6 @@ public class GuildController {
       @PathVariable String memberId,
       @RequestBody RemoveMemberRequest request)
       throws GuildNotFoundException {
-
     try {
       guildService.removeMember(id, request.requestorId(), memberId);
       return ResponseEntity.noContent().build();
@@ -130,7 +140,6 @@ public class GuildController {
   @PostMapping("/{id}/members/{memberId}/leave")
   public ResponseEntity<Void> leaveGuild(@PathVariable String id, @PathVariable String memberId)
       throws GuildNotFoundException {
-
     guildService.leaveGuild(id, memberId);
     return ResponseEntity.noContent().build();
   }
@@ -141,7 +150,6 @@ public class GuildController {
       @PathVariable String memberId,
       @RequestBody PromoteMemberRequest request)
       throws GuildNotFoundException {
-
     GuildRole newRole;
     try {
       newRole = GuildRole.valueOf(request.roleName().toUpperCase(Locale.getDefault()));
@@ -161,17 +169,14 @@ public class GuildController {
   @GetMapping("/{id}/rank")
   public ResponseEntity<EntityModel<RankResponse>> getGlobalRank(@PathVariable String id)
       throws GuildNotFoundException {
-
     Integer rank = guildService.getGlobalRank(id);
     RankResponse body = new RankResponse(rank);
-
     EntityModel<RankResponse> model =
         EntityModel.of(
             body,
             linkTo(methodOn(GuildController.class).getGlobalRank(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(GuildController.class).getLeaderboard()).withRel("leaderboard"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -196,8 +201,12 @@ public class GuildController {
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
   }
 
-  // HATEOAS helpers
+  @ExceptionHandler(UnauthorizedGuildOperationException.class)
+  public ResponseEntity<Void> handleUnauthorized(UnauthorizedGuildOperationException ex) {
+    return ResponseEntity.status(403).build();
+  }
 
+  // HATEOAS helpers
   private Link selfLink(String id) {
     return Link.of("/api/v1/guilds/" + id).withSelfRel();
   }
@@ -206,6 +215,10 @@ public class GuildController {
   public record CreateGuildRequest(String name, String creatorAvatarId, String creatorNickname) {}
 
   public record RemoveMemberRequest(String requestorId) {}
+
+  public record SendInviteRequest(String requestorId, String targetAvatarId) {}
+
+  public record AcceptInviteRequest(String avatarId, String nickname) {}
 
   public record AddMemberRequest(String avatarId, String nickname, String roleName) {}
 
