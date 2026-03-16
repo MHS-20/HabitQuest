@@ -15,8 +15,10 @@ plugins {
 }
 
 gitHooks {
+    commitMsg { conventionalCommits() }
     preCommit {
         tasks("checkAll")
     }
+
     createHooks(true)
 }
