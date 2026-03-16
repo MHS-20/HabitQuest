@@ -4,13 +4,20 @@ import common.ddd.Aggregate;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface Marketplace extends Aggregate<String> {
-  List<Item> getItems(ItemType type);
+  List<Item> getCatalogItems();
 
-  Optional<Item> getItem(String itemName);
+  List<Item> getAvailableItemsByType(ItemType type);
+
+  List<Item> getAllAvailableItems();
+
+  Optional<Item> getAvailableItem(String itemName);
 
   List<Item> getSoldItems();
+
+  Set<String> getSoldItemNames();
 
   Optional<Item> getSoldItem(String itemName);
 
