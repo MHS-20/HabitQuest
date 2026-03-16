@@ -51,6 +51,26 @@ public class MarketplaceController {
     return ResponseEntity.ok(model);
   }
 
+  @PostMapping
+  public ResponseEntity<EntityModel<MarketplaceResponse>> createMarketplace(
+      @RequestBody CreateMarketplaceRequest request) throws AvatarCommunicationException {
+    String avatarId = request.avatarId();
+    LOG.info("Creating marketplace for avatar {}", avatarId);
+
+    String marketplaceId = marketplaceService.createMarketplaceForAvatar(avatarId);
+
+    MarketplaceResponse dto =
+        MarketplaceResponse.from(marketplaceService.getMarketplace(marketplaceId));
+    EntityModel<MarketplaceResponse> model =
+        EntityModel.of(
+            dto,
+            selfMarketplaceLink(marketplaceId),
+            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
+                .withRel("items"));
+
+    return ResponseEntity.created(selfMarketplaceLink(marketplaceId).toUri()).body(model);
+  }
+
   // ─── Items ──────────────────────────────────────────────────────────────────
 
   /** Returns all items available in the marketplace. */
@@ -166,10 +186,10 @@ public class MarketplaceController {
       // compensation for partial remote successes
       try {
         if (earnedMoney) {
-          avatarClient.spendMoney(avatarId, price); // take money back
+          avatarClient.spendMoney(avatarId, price);
         }
         if (removedFromInventory) {
-          avatarClient.addItemToInventory(avatarId, item); // put item back
+          avatarClient.addItemToInventory(avatarId, item);
         }
       } catch (RestClientException | AvatarCommunicationException compensationEx) {
         LOG.error(
@@ -226,4 +246,6 @@ public class MarketplaceController {
 
   // ─── Request / Response records ─────────────────────────────────────────────
   public record ErrorResponse(String message) {}
+
+  public record CreateMarketplaceRequest(String avatarId) {}
 }
