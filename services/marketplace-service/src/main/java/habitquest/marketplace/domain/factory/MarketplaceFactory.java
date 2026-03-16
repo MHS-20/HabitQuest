@@ -1,6 +1,7 @@
 package habitquest.marketplace.domain.factory;
 
 import common.ddd.Factory;
+import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.MarketplaceImpl;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,6 @@ public class MarketplaceFactory implements Factory {
   }
 
   public Marketplace create(String avatarId) {
-    return new MarketplaceImpl(idGenerator.nextId(), avatarId, new java.util.ArrayList<>());
+    return new MarketplaceImpl(idGenerator.nextId(), avatarId, new ItemCatalog());
   }
 }
