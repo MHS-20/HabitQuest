@@ -102,6 +102,69 @@ public class MarketplaceControllerIT {
     }
   }
 
+  // ── POST /api/v1/marketplaces ───────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/marketplaces")
+  class CreateMarketplace {
+
+    @Test
+    @DisplayName("returns 201 when marketplace is successfully created")
+    void shouldReturn201WhenMarketplaceCreated() throws Exception {
+
+      when(marketplaceService.createMarketplaceForAvatar(AVATAR_ID)).thenReturn(MARKETPLACE_ID);
+
+      when(marketplaceService.getMarketplace(MARKETPLACE_ID)).thenReturn(stubMarketplace());
+
+      String requestBody =
+          objectMapper.writeValueAsString(
+              new MarketplaceController.CreateMarketplaceRequest(AVATAR_ID));
+
+      mockMvc
+          .perform(
+              post("/api/v1/marketplaces").contentType("application/json").content(requestBody))
+          .andExpect(status().isCreated());
+
+      verify(marketplaceService).createMarketplaceForAvatar(AVATAR_ID);
+    }
+
+    @Test
+    @DisplayName("returns 404 when avatar does not exist")
+    void shouldReturn404WhenAvatarNotFound() throws Exception {
+
+      when(marketplaceService.createMarketplaceForAvatar(AVATAR_ID))
+          .thenThrow(new AvatarNotFoundException(AVATAR_ID));
+
+      String requestBody =
+          objectMapper.writeValueAsString(
+              new MarketplaceController.CreateMarketplaceRequest(AVATAR_ID));
+
+      mockMvc
+          .perform(
+              post("/api/v1/marketplaces").contentType("application/json").content(requestBody))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("returns 502 when avatar service is unreachable")
+    void shouldReturn502WhenAvatarServiceFails() throws Exception {
+
+      when(marketplaceService.createMarketplaceForAvatar(AVATAR_ID))
+          .thenThrow(
+              new AvatarCommunicationException(
+                  "Avatar service unavailable", new RestClientException("timeout")));
+
+      String requestBody =
+          objectMapper.writeValueAsString(
+              new MarketplaceController.CreateMarketplaceRequest(AVATAR_ID));
+
+      mockMvc
+          .perform(
+              post("/api/v1/marketplaces").contentType("application/json").content(requestBody))
+          .andExpect(status().isBadGateway());
+    }
+  }
+
   // ── GET /api/v1/marketplaces/{marketplaceId}/items ───────────────────────────
 
   @Nested

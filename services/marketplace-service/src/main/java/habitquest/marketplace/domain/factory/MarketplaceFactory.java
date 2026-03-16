@@ -14,6 +14,6 @@ public class MarketplaceFactory implements Factory {
   }
 
   public Marketplace create(String avatarId) {
-    return new MarketplaceImpl(idGenerator.nextId(), avatarId);
+    return new MarketplaceImpl(idGenerator.nextId(), avatarId, new java.util.ArrayList<>());
   }
 }
