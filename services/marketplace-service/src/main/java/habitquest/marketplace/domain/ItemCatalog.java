@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ItemCatalog {
 
-    private final Map<String, Item> items =
-            Map.of(
-                    "Iron Sword",
-                    new Weapon("Iron Sword", "A basic sword", 10, new Money(50), new Level(1)),
-                    "Iron Shield",
-                    new Armor("Iron Shield", "A basic shield", 5, new Money(30), new Level(1)),
-                    "HP Potion",
-                    new HealthPotion("HP Potion", "Restores HP", 50, new Money(10), new Level(1)),
-                    "MP Potion",
-                    new ManaPotion("MP Potion", "Restores MP", 30, new Money(12), new Level(1)));
+  private final Map<String, Item> items =
+      Map.of(
+          "Iron Sword",
+          new Weapon("Iron Sword", "A basic sword", 10, new Money(50), new Level(1)),
+          "Iron Shield",
+          new Armor("Iron Shield", "A basic shield", 5, new Money(30), new Level(1)),
+          "HP Potion",
+          new HealthPotion("HP Potion", "Restores HP", 50, new Money(10), new Level(1)),
+          "MP Potion",
+          new ManaPotion("MP Potion", "Restores MP", 30, new Money(12), new Level(1)));
 
   public Optional<Item> getItem(String name) {
     return Optional.ofNullable(items.get(name));
