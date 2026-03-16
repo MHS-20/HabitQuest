@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.*;
 public class AvatarController {
 
   private final AvatarService avatarService;
+  private final MarketplaceClient marketplaceClient;
 
-  public AvatarController(AvatarService avatarService) {
+  public AvatarController(AvatarService avatarService, MarketplaceClient marketplaceClient) {
     this.avatarService = avatarService;
+    this.marketplaceClient = marketplaceClient;
   }
 
   // ─── Avatar CRUD ────────────────────────────────────────────────────────────
@@ -33,6 +35,7 @@ public class AvatarController {
       @RequestBody CreateAvatarRequest request) {
 
     String id = avatarService.createAvatar(request.name());
+    marketplaceClient.createMarketplace(id);
     AvatarCreatedResponse body = new AvatarCreatedResponse(id);
 
     EntityModel<AvatarCreatedResponse> model =
@@ -384,6 +387,11 @@ public class AvatarController {
 
   @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
   public ResponseEntity<ErrorResponse> handleDomainError(RuntimeException ex) {
+    return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+  }
+
+  @ExceptionHandler({MarketplaceCommunicationException.class})
+  public ResponseEntity<ErrorResponse> handleMarketplaceError(RuntimeException ex) {
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
   }
 

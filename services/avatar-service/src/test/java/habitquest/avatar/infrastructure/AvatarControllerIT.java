@@ -29,6 +29,7 @@ public class AvatarControllerIT {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
 
+  @MockitoBean private MarketplaceClient marketplaceClient;
   @MockitoBean private AvatarService avatarService;
 
   // ── Fixtures ─────────────────────────────────────────────────────────────────

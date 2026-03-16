@@ -35,6 +35,13 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
+  public String createMarketplaceForAvatar(String avatarId) {
+    Marketplace marketplace = marketplaceFactory.create(avatarId);
+    marketplaceRepository.save(marketplace);
+    return marketplace.getId();
+  }
+
+  @Override
   public String getAvatarId(String marketplaceId) throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getAvatarId();
   }

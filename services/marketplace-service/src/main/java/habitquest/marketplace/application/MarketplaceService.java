@@ -9,6 +9,8 @@ import java.util.List;
 public interface MarketplaceService {
   Marketplace getMarketplace(String marketplaceId) throws MarketplaceNotFoundException;
 
+  String createMarketplaceForAvatar(String avatarId);
+
   List<Item> getItems(String marketplaceId, ItemType type) throws MarketplaceNotFoundException;
 
   Item getSoldItem(String marketplaceId, String itemName)
