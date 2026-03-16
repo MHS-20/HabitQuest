@@ -3,9 +3,9 @@ package habitquest.marketplace.infrastructure;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import habitquest.marketplace.application.AvatarNotFoundException;
-import habitquest.marketplace.application.ItemNotFoundException;
 import habitquest.marketplace.application.MarketplaceNotFoundException;
 import habitquest.marketplace.application.MarketplaceService;
+import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.*;
 import habitquest.marketplace.infrastructure.dto.ItemMapper;
@@ -36,6 +36,7 @@ public class MarketplaceController {
   }
 
   // ─── Marketplace ────────────────────────────────────────────────────────────
+
   @GetMapping("/{marketplaceId}")
   public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplace(
       @PathVariable String marketplaceId) {
@@ -46,8 +47,12 @@ public class MarketplaceController {
         EntityModel.of(
             dto,
             selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
-                .withRel("items"));
+            linkTo(
+                    methodOn(MarketplaceController.class)
+                        .getAvailableItems(marketplaceId, ItemType.ALL))
+                .withRel("items"),
+            linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
+                .withRel("sold-items"));
     return ResponseEntity.ok(model);
   }
 
@@ -65,45 +70,81 @@ public class MarketplaceController {
         EntityModel.of(
             dto,
             selfMarketplaceLink(marketplaceId),
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
-                .withRel("items"));
+            linkTo(
+                    methodOn(MarketplaceController.class)
+                        .getAvailableItems(marketplaceId, ItemType.ALL))
+                .withRel("items"),
+            linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
+                .withRel("sold-items"));
 
     return ResponseEntity.created(selfMarketplaceLink(marketplaceId).toUri()).body(model);
   }
 
-  // ─── Items ──────────────────────────────────────────────────────────────────
+  // ─── Available Items ────────────────────────────────────────────────────────
 
-  /** Returns all items available in the marketplace. */
+  /** Returns all available items, optionally filtered by type. */
   @GetMapping("/{marketplaceId}/items")
-  public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getItems(
+  public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getAvailableItems(
       @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemType type)
       throws MarketplaceNotFoundException {
 
-    List<EntityModel<ItemResponse>> items =
-        marketplaceService.getItems(marketplaceId, type).stream()
-            .map(item -> itemModel(marketplaceId, item))
-            .toList();
+    List<Item> items =
+        type == ItemType.ALL
+            ? marketplaceService.getAllAvailableItems(marketplaceId)
+            : marketplaceService.getAvailableItemsByType(marketplaceId, type);
+
+    List<EntityModel<ItemResponse>> itemModels =
+        items.stream().map(item -> availableItemModel(marketplaceId, item)).toList();
+
     CollectionModel<EntityModel<ItemResponse>> model =
         CollectionModel.of(
-            items,
-            linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, type))
+            itemModels,
+            linkTo(methodOn(MarketplaceController.class).getAvailableItems(marketplaceId, type))
                 .withSelfRel(),
             selfMarketplaceLink(marketplaceId));
     return ResponseEntity.ok(model);
   }
 
-  /** Returns a single item by name. */
+  /** Returns a single available item by name. */
   @GetMapping("/{marketplaceId}/items/{itemName}")
-  public ResponseEntity<EntityModel<ItemResponse>> getItem(
+  public ResponseEntity<EntityModel<ItemResponse>> getAvailableItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
+    Item item = marketplaceService.getAvailableItem(marketplaceId, itemName);
+    return ResponseEntity.ok(availableItemModel(marketplaceId, item));
+  }
 
-    Item item = marketplaceService.getItemByName(marketplaceId, itemName);
-    return ResponseEntity.ok(itemModel(marketplaceId, item));
+  // ─── Sold Items ─────────────────────────────────────────────────────────────
+
+  /** Returns all sold items. */
+  @GetMapping("/{marketplaceId}/sold-items")
+  public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getSoldItems(
+      @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
+
+    List<EntityModel<ItemResponse>> itemModels =
+        marketplaceService.getSoldItems(marketplaceId).stream()
+            .map(item -> soldItemModel(marketplaceId, item))
+            .toList();
+
+    CollectionModel<EntityModel<ItemResponse>> model =
+        CollectionModel.of(
+            itemModels,
+            linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId)).withSelfRel(),
+            selfMarketplaceLink(marketplaceId));
+    return ResponseEntity.ok(model);
+  }
+
+  /** Returns a single sold item by name. */
+  @GetMapping("/{marketplaceId}/sold-items/{itemName}")
+  public ResponseEntity<EntityModel<ItemResponse>> getSoldItem(
+      @PathVariable String marketplaceId, @PathVariable String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException {
+    Item item = marketplaceService.getSoldItem(marketplaceId, itemName);
+    return ResponseEntity.ok(soldItemModel(marketplaceId, item));
   }
 
   // ─── Commands ───────────────────────────────────────────────────────────────
-  // java
+
   @PostMapping("/{marketplaceId}/items/{itemName}/buy")
   public ResponseEntity<Void> buyItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
@@ -115,7 +156,7 @@ public class MarketplaceController {
         itemName,
         marketplaceId);
 
-    Item item = marketplaceService.getItemByName(marketplaceId, itemName);
+    Item item = marketplaceService.getAvailableItem(marketplaceId, itemName);
     Money price = item.price();
 
     boolean moneySpent = false;
@@ -131,7 +172,6 @@ public class MarketplaceController {
       return ResponseEntity.noContent().build();
     } catch (RestClientException | AvatarCommunicationException ex) {
       LOG.error("Buy saga error for avatar {} item {}: {}", avatarId, itemName, ex.getMessage());
-      // compensation for partial remote successes
       try {
         if (inventoryAdded) {
           avatarClient.removeItemFromInventory(avatarId, item);
@@ -153,12 +193,11 @@ public class MarketplaceController {
     }
   }
 
-  @PostMapping("/{marketplaceId}/items/{itemName}/sell")
+  @PostMapping("/{marketplaceId}/sold-items/{itemName}/sell")
   public ResponseEntity<Void> sellItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
     String avatarId = marketplaceService.getAvatarId(marketplaceId);
-
     LOG.info(
         "Starting sell saga: avatar {} selling item '{}' to marketplace {}",
         avatarId,
@@ -171,19 +210,16 @@ public class MarketplaceController {
     boolean removedFromInventory = false;
     boolean earnedMoney = false;
     try {
-      // remote steps
       avatarClient.removeItemFromInventory(avatarId, item);
       removedFromInventory = true;
 
       avatarClient.earnMoney(avatarId, price);
       earnedMoney = true;
 
-      // finalize local state
       marketplaceService.sellItem(marketplaceId, itemName);
       return ResponseEntity.noContent().build();
     } catch (RestClientException | AvatarCommunicationException ex) {
       LOG.error("Sell saga error for avatar {} item {}: {}", avatarId, itemName, ex.getMessage());
-      // compensation for partial remote successes
       try {
         if (earnedMoney) {
           avatarClient.spendMoney(avatarId, price);
@@ -206,6 +242,7 @@ public class MarketplaceController {
   }
 
   // ─── Exception handling ──────────────────────────────────────────────────────
+
   @ExceptionHandler(MarketplaceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleMarketplaceNotFound(MarketplaceNotFoundException ex) {
     return ResponseEntity.notFound().build();
@@ -224,27 +261,40 @@ public class MarketplaceController {
   }
 
   // ─── HATEOAS helpers ────────────────────────────────────────────────────────
+
   private Link selfMarketplaceLink(String marketplaceId) {
     return linkTo(methodOn(MarketplaceController.class).getMarketplace(marketplaceId))
         .withSelfRel();
   }
 
-  private EntityModel<ItemResponse> itemModel(String marketplaceId, Item item) {
+  private EntityModel<ItemResponse> availableItemModel(String marketplaceId, Item item) {
     ItemResponse dto = ItemMapper.toResponse(item);
     return EntityModel.of(
         dto,
-        linkTo(methodOn(MarketplaceController.class).getItem(marketplaceId, item.name()))
+        linkTo(methodOn(MarketplaceController.class).getAvailableItem(marketplaceId, item.name()))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
-        linkTo(methodOn(MarketplaceController.class).getItems(marketplaceId, ItemType.ALL))
+        linkTo(methodOn(MarketplaceController.class).getAvailableItems(marketplaceId, ItemType.ALL))
             .withRel("items"),
         linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name()))
-            .withRel("buy"),
+            .withRel("buy"));
+  }
+
+  private EntityModel<ItemResponse> soldItemModel(String marketplaceId, Item item) {
+    ItemResponse dto = ItemMapper.toResponse(item);
+    return EntityModel.of(
+        dto,
+        linkTo(methodOn(MarketplaceController.class).getSoldItem(marketplaceId, item.name()))
+            .withSelfRel(),
+        selfMarketplaceLink(marketplaceId),
+        linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
+            .withRel("sold-items"),
         linkTo(methodOn(MarketplaceController.class).sellItem(marketplaceId, item.name()))
             .withRel("sell"));
   }
 
   // ─── Request / Response records ─────────────────────────────────────────────
+
   public record ErrorResponse(String message) {}
 
   public record CreateMarketplaceRequest(String avatarId) {}

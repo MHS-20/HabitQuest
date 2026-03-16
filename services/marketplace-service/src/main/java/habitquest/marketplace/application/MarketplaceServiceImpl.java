@@ -1,5 +1,6 @@
 package habitquest.marketplace.application;
 
+import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
@@ -47,9 +48,27 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public List<Item> getItems(String marketplaceId, ItemType type)
+  public List<Item> getAllAvailableItems(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getAllAvailableItems();
+  }
+
+  @Override
+  public List<Item> getAvailableItemsByType(String marketplaceId, ItemType type)
       throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getItems(type);
+    return getMarketplace(marketplaceId).getAvailableItemsByType(type);
+  }
+
+  @Override
+  public Item getAvailableItem(String marketplaceId, String itemName)
+      throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId)
+        .getAvailableItem(itemName)
+        .orElseThrow(() -> new ItemNotFoundException(itemName));
+  }
+
+  @Override
+  public List<Item> getSoldItems(String marketplaceId) throws MarketplaceNotFoundException {
+    return getMarketplace(marketplaceId).getSoldItems();
   }
 
   @Override
@@ -57,21 +76,12 @@ public class MarketplaceServiceImpl implements MarketplaceService {
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId)
         .getSoldItem(itemName)
-        .orElseThrow(() -> new ItemNotFoundException(marketplaceId, itemName));
-  }
-
-  @Override
-  public Item getItemByName(String marketplaceId, String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException {
-    return getMarketplace(marketplaceId)
-        .getItem(itemName)
-        .orElseThrow(() -> new ItemNotFoundException(marketplaceId, itemName));
+        .orElseThrow(() -> new ItemNotFoundException(itemName));
   }
 
   // -------------------------------------------------
   // Commands
   // -------------------------------------------------
-
   @Override
   public void buyItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException {
     Marketplace marketplace = getMarketplace(marketplaceId);
