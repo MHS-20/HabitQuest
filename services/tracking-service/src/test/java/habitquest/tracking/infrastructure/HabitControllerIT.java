@@ -63,7 +63,8 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 201 with the new habit id")
     void shouldReturn201WithId() throws Exception {
-      when(habitService.createHabit(any(Habit.class))).thenReturn(stubHabit());
+      when(habitService.createDailyHabit(anyString(), anyString(), anyString()))
+          .thenReturn(stubHabit());
 
       mockMvc
           .perform(
@@ -84,9 +85,10 @@ public class HabitControllerIT {
     }
 
     @Test
-    @DisplayName("delegates request payload to the service")
-    void shouldDelegateToService() throws Exception {
-      when(habitService.createHabit(any(Habit.class))).thenReturn(stubHabit());
+    @DisplayName("delegates DAILY payload to createDailyHabit")
+    void shouldDelegateDailyPayloadToService() throws Exception {
+      when(habitService.createDailyHabit(anyString(), anyString(), anyString()))
+          .thenReturn(stubHabit());
 
       mockMvc
           .perform(
@@ -103,10 +105,60 @@ public class HabitControllerIT {
                       """))
           .andExpect(status().isCreated());
 
-      ArgumentCaptor<Habit> captor = ArgumentCaptor.forClass(Habit.class);
-      verify(habitService).createHabit(captor.capture());
-      assertThat(captor.getValue().getAvatarId()).isEqualTo(AVATAR_ID);
-      assertThat(captor.getValue().getId()).isNotBlank();
+      verify(habitService).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
+      verify(habitService, never()).createWeeklyHabit(anyString(), anyString(), anyString(), any());
+      verify(habitService, never())
+          .createMonthlyHabit(anyString(), anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    @DisplayName("delegates WEEKLY payload to createWeeklyHabit")
+    void shouldDelegateWeeklyPayloadToService() throws Exception {
+      when(habitService.createWeeklyHabit(anyString(), anyString(), anyString(), any()))
+          .thenReturn(stubHabit());
+
+      mockMvc
+          .perform(
+              post("/api/v1/habits")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {
+                        "avatarId":"avatar-1",
+                        "title":"Hydrate",
+                        "description":"Drink 2L of water",
+                        "recurrenceType":"WEEKLY",
+                        "dayOfWeek":"MONDAY"
+                      }
+                      """))
+          .andExpect(status().isCreated());
+
+      verify(habitService).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
+    }
+
+    @Test
+    @DisplayName("delegates MONTHLY payload to createMonthlyHabit")
+    void shouldDelegateMonthlyPayloadToService() throws Exception {
+      when(habitService.createMonthlyHabit(anyString(), anyString(), anyString(), anyInt()))
+          .thenReturn(stubHabit());
+
+      mockMvc
+          .perform(
+              post("/api/v1/habits")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {
+                        "avatarId":"avatar-1",
+                        "title":"Hydrate",
+                        "description":"Drink 2L of water",
+                        "recurrenceType":"MONTHLY",
+                        "dayOfMonth":15
+                      }
+                      """))
+          .andExpect(status().isCreated());
+
+      verify(habitService).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
     }
 
     @Test
@@ -128,7 +180,10 @@ public class HabitControllerIT {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Unknown recurrence type: YEARLY"));
 
-      verify(habitService, never()).createHabit(any(Habit.class));
+      verify(habitService, never()).createDailyHabit(anyString(), anyString(), anyString());
+      verify(habitService, never()).createWeeklyHabit(anyString(), anyString(), anyString(), any());
+      verify(habitService, never())
+          .createMonthlyHabit(anyString(), anyString(), anyString(), anyInt());
     }
   }
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class HabitFactory implements Factory {
-  public static Habit createDailyHabit(String avatarId, String title, String description) {
+  public Habit createDailyHabit(String avatarId, String title, String description) {
     return new Habit(
         new UUIDGenerator().nextId(),
         avatarId,
@@ -21,7 +21,7 @@ public class HabitFactory implements Factory {
         Optional.empty());
   }
 
-  public static Habit createWeeklyHabit(
+  public Habit createWeeklyHabit(
       String avatarId, String title, String description, DayOfWeek dayOfWeek) {
     return new Habit(
         new UUIDGenerator().nextId(),
@@ -32,7 +32,7 @@ public class HabitFactory implements Factory {
         Optional.empty());
   }
 
-  public static Habit createMonthlyHabit(
+  public Habit createMonthlyHabit(
       String avatarId, String title, String description, Integer dayOfMonth) {
     return new Habit(
         new UUIDGenerator().nextId(),
