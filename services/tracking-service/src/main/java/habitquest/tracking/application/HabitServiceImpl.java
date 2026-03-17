@@ -9,6 +9,7 @@ import habitquest.tracking.domain.events.HabitNotAttended;
 import habitquest.tracking.domain.events.HabitObserver;
 import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,22 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
-  public Habit createHabit(Habit habit) {
+  public Habit createDailyHabit(String avatarId, String name, String description) {
+    Habit habit = habitFactory.createDailyHabit(avatarId, name, description);
+    return habitRepository.save(habit);
+  }
+
+  @Override
+  public Habit createWeeklyHabit(
+      String avatarId, String title, String description, DayOfWeek dayOfWeek) {
+    Habit habit = habitFactory.createWeeklyHabit(avatarId, title, description, dayOfWeek);
+    return habitRepository.save(habit);
+  }
+
+  @Override
+  public Habit createMonthlyHabit(
+      String avatarId, String title, String description, Integer dayOfMonth) {
+    Habit habit = habitFactory.createMonthlyHabit(avatarId, title, description, dayOfMonth);
     return habitRepository.save(habit);
   }
 

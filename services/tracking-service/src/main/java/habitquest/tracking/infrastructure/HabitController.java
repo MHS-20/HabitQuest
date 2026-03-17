@@ -6,7 +6,6 @@ import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
-import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
@@ -16,6 +15,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +37,21 @@ public class HabitController {
   public ResponseEntity<EntityModel<HabitCreatedResponse>> createHabit(
       @RequestBody CreateHabitRequest request) {
 
-    Habit habit = request.toHabit();
-    Habit created = habitService.createHabit(habit);
+    Habit created =
+        switch (Objects.requireNonNull(request.recurrenceType()).toUpperCase(Locale.ITALIAN)) {
+          case "DAILY" ->
+              habitService.createDailyHabit(
+                  request.avatarId(), request.title(), request.description());
+          case "WEEKLY" ->
+              habitService.createWeeklyHabit(
+                  request.avatarId(), request.title(), request.description(), request.dayOfWeek());
+          case "MONTHLY" ->
+              habitService.createMonthlyHabit(
+                  request.avatarId(), request.title(), request.description(), request.dayOfMonth());
+          default ->
+              throw new IllegalArgumentException(
+                  "Unknown recurrence type: " + request.recurrenceType());
+        };
     HabitCreatedResponse body = new HabitCreatedResponse(created.getId());
 
     EntityModel<HabitCreatedResponse> model =
@@ -234,17 +247,7 @@ public class HabitController {
       String description,
       String recurrenceType,
       DayOfWeek dayOfWeek,
-      Integer dayOfMonth) {
-
-    public Habit toHabit() {
-      return switch (recurrenceType.toUpperCase(Locale.ITALIAN)) {
-        case "DAILY" -> HabitFactory.createDailyHabit(avatarId, title, description);
-        case "WEEKLY" -> HabitFactory.createWeeklyHabit(avatarId, title, description, dayOfWeek);
-        case "MONTHLY" -> HabitFactory.createMonthlyHabit(avatarId, title, description, dayOfMonth);
-        default -> throw new IllegalArgumentException("Unknown recurrence type: " + recurrenceType);
-      };
-    }
-  }
+      Integer dayOfMonth) {}
 
   public record UpdateTitleRequest(String title) {}
 

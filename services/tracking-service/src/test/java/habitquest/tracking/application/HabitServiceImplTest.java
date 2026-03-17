@@ -62,18 +62,49 @@ class HabitServiceImplTest {
   }
 
   @Nested
-  @DisplayName("createHabit")
+  @DisplayName("creation methods")
   class CreateHabit {
 
     @Test
-    @DisplayName("saves and returns the same habit")
-    void creates() {
+    @DisplayName("createDailyHabit delegates to factory, saves, and returns habit")
+    void createsDaily() {
       Habit habit = stubHabit();
+      when(habitFactory.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION)).thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
-      Habit created = service.createHabit(habit);
+      Habit created = service.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
 
       assertThat(created).isSameAs(habit);
+      verify(habitFactory).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
+      verify(habitRepository).save(habit);
+    }
+
+    @Test
+    @DisplayName("createWeeklyHabit delegates to factory, saves, and returns habit")
+    void createsWeekly() {
+      Habit habit = stubHabit();
+      when(habitFactory.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY))
+          .thenReturn(habit);
+      when(habitRepository.save(habit)).thenReturn(habit);
+
+      Habit created = service.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
+
+      assertThat(created).isSameAs(habit);
+      verify(habitFactory).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
+      verify(habitRepository).save(habit);
+    }
+
+    @Test
+    @DisplayName("createMonthlyHabit delegates to factory, saves, and returns habit")
+    void createsMonthly() {
+      Habit habit = stubHabit();
+      when(habitFactory.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15)).thenReturn(habit);
+      when(habitRepository.save(habit)).thenReturn(habit);
+
+      Habit created = service.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
+
+      assertThat(created).isSameAs(habit);
+      verify(habitFactory).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
       verify(habitRepository).save(habit);
     }
   }
