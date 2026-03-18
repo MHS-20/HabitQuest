@@ -3,6 +3,7 @@ plugins {
 }
 
 description = "avatar-service"
+val testArchUnit: String by rootProject.extra
 
 dependencies {
 
@@ -19,8 +20,9 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // --- Test ---
+    testImplementation("org.testcontainers:kafka")
     testImplementation("org.springframework.kafka:spring-kafka-test")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+    testImplementation("com.tngtech.archunit:archunit-junit5:$testArchUnit")
 
     testRuntimeOnly("com.h2database:h2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

@@ -3,6 +3,7 @@ plugins {
 }
 
 description = "marketplace-service"
+val testArchUnit: String by rootProject.extra
 
 dependencies {
 
@@ -29,11 +30,10 @@ dependencies {
     testImplementation("io.r2dbc:r2dbc-h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("io.projectreactor:reactor-test")
-    testImplementation("com.github.dasniko:testcontainers-keycloak:${rootProject.extra["testKeycloakVersion"]}")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:r2dbc")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
-    testImplementation("org.wiremock:wiremock-standalone")
+    testImplementation("org.testcontainers:kafka")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
+    testImplementation("com.tngtech.archunit:archunit-junit5:$testArchUnit")
 }

@@ -15,13 +15,13 @@ public class GuildNotifierImpl implements GuildNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(GuildNotifierImpl.class);
 
-  static final String GUILD_CREATED_BINDING = "guild-created-out-0";
-  static final String GUILD_DELETED_BINDING = "guild-deleted-out-0";
-  static final String GUILD_JOINED_BINDING = "guild-joined-out-0";
-  static final String GUILD_LEFT_BINDING = "guild-left-out-0";
-  static final String REMOVED_FROM_GUILD_BINDING = "guild-removed-out-0";
-  static final String ROLE_ASSIGNED_BINDING = "guild-role-assigned-out-0";
-  static final String INVITE_SENT_BINDING = "guild-invite-sent-out-0";
+  static final String GUILD_CREATED_BINDING = "guild.created";
+  static final String GUILD_DELETED_BINDING = "guild.deleted";
+  static final String GUILD_JOINED_BINDING = "guild.joined";
+  static final String GUILD_LEFT_BINDING = "guild.left";
+  static final String REMOVED_FROM_GUILD_BINDING = "guild.removed";
+  static final String ROLE_ASSIGNED_BINDING = "guild.role-assigned";
+  static final String INVITE_SENT_BINDING = "guild.invite-sent";
 
   private final StreamBridge streamBridge;
 
