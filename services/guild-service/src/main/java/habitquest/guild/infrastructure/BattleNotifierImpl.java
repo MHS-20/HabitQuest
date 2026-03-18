@@ -16,10 +16,9 @@ import org.springframework.stereotype.Component;
 public class BattleNotifierImpl implements BattleNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(BattleNotifierImpl.class);
-
-  static final String BATTLE_STARTED_BINDING = "guild-battle-started-out-0";
-  static final String BATTLE_WON_BINDING = "guild-battle-won-out-0";
-  static final String BATTLE_LOST_BINDING = "guild-battle-lost-out-0";
+  static final String BATTLE_STARTED_BINDING = "guild.battle-started";
+  static final String BATTLE_WON_BINDING = "guild.battle-won";
+  static final String BATTLE_LOST_BINDING = "guild.battle-lost";
 
   private final StreamBridge streamBridge;
 

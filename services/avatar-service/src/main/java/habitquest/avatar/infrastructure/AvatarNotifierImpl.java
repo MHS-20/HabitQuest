@@ -17,9 +17,9 @@ public class AvatarNotifierImpl implements AvatarNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(AvatarNotifierImpl.class);
 
-  static final String LEVEL_UPPED_BINDING = "avatar-level-upped-out-0";
-  static final String DEAD_BINDING = "avatar-dead-out-0";
-  static final String SKILL_POINT_BINDING = "avatar-skill-point-out-0";
+  static final String LEVEL_UPPED_BINDING = "avatar.level-upped";
+  static final String DEAD_BINDING = "avatar.dead";
+  static final String SKILL_POINT_BINDING = "avatar.skill-point-assigned";
 
   private final StreamBridge streamBridge;
 

@@ -16,8 +16,8 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(MarketplaceNotifierImpl.class);
 
-  static final String ITEM_BOUGHT_BINDING = "marketplace-item-bought-out-0";
-  static final String ITEM_SOLD_BINDING = "marketplace-item-sold-out-0";
+  static final String ITEM_BOUGHT_BINDING = "marketplace.item-bought";
+  static final String ITEM_SOLD_BINDING = "marketplace.item-sold";
 
   private final StreamBridge streamBridge;
 
