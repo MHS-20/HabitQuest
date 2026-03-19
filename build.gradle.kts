@@ -33,14 +33,6 @@ allprojects {
 subprojects {
     if (project.name == "services") return@subprojects
 
-//    configurations.all {
-//        resolutionStrategy.force(
-//            "org.testcontainers:testcontainers:2.0.3",
-//            "org.testcontainers:junit-jupiter:2.0.3",
-//            "org.testcontainers:kafka:2.0.3"
-//        )
-//    }
-
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "com.diffplug.spotless")

@@ -1,22 +1,45 @@
 spring:
   cloud:
     gateway:
-      default-filters:
-        - SaveSession
-      routes: []
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: test
-            client-secret: test
-            scope: openid
-            authorization-grant-type: authorization_code
-            redirect-uri: http://localhost/login/oauth2/code/keycloak
-        provider:
-          keycloak:
-            issuer-uri: http://localhost:8080/realms/test
-            authorization-uri: http://localhost:8080/realms/test/protocol/openid-connect/auth
-            token-uri: http://localhost:8080/realms/test/protocol/openid-connect/token
-            jwk-set-uri: http://localhost:8080/realms/test/protocol/openid-connect/certs
+      mvc:
+        routes:
+          - id: avatar-service
+            uri: http://localhost:8081
+            predicates:
+              - Path=/api/v1/avatars/**
+
+          - id: guild-service
+            uri: http://localhost:8082
+            predicates:
+              - Path=/api/v1/guilds/**
+
+          - id: battle-service
+            uri: http://localhost:8082
+            predicates:
+              - Path=/api/v1/battles/**
+
+          - id: quest-service
+            uri: http://localhost:8083
+            predicates:
+              - Path=/api/v1/quests/**
+
+          - id: tracking-service
+            uri: http://localhost:8084
+            predicates:
+              - Path=/api/v1/habits/**
+
+
+app:
+  jwt:
+    secret: test-secret-key-minimum-32-chars!!
+    expiration-seconds: 3600
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+        probes:
+          enabled: true
