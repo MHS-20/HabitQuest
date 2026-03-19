@@ -3,6 +3,7 @@ package habitquest.tracking.application;
 import common.hexagonal.InBoundPort;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.Recurrence;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -30,6 +31,8 @@ public interface HabitService {
   Recurrence getRecurrence(String habitId) throws HabitNotFoundException;
 
   LocalDateTime getLastAttendedDate(String habitId) throws HabitNotFoundException;
+
+  List<HabitHistoryEvent> getHistory(String habitId);
 
   // endregion
 
