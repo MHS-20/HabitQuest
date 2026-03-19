@@ -19,16 +19,19 @@ public class AuthService implements DomainService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final UserFactory userFactory;
+  private final UserNotifier userNotifier;
 
   public AuthService(
       UserRepository userRepository,
       JwtService jwtService,
       PasswordEncoder passwordEncoder,
-      UserFactory userFactory) {
+      UserFactory userFactory,
+      UserNotifier userNotifier) {
     this.userRepository = userRepository;
     this.jwtService = jwtService;
     this.passwordEncoder = passwordEncoder;
     this.userFactory = userFactory;
+    this.userNotifier = userNotifier;
   }
 
   public AuthResponse register(String email, String rawPassword) {
@@ -38,6 +41,7 @@ public class AuthService implements DomainService {
 
     String hash = passwordEncoder.encode(rawPassword);
     User user = userRepository.save(userFactory.create(email, hash));
+    userNotifier.notifyUserRegistered(user);
     return new AuthResponse(jwtService.generateToken(user), user.getId());
   }
 

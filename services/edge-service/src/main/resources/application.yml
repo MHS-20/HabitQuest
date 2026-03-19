@@ -16,6 +16,13 @@ spring:
   config:
     import: ""
   cloud:
+    stream:
+      bindings:
+        userRegistered-out-0:
+          destination: user.registered
+      kafka:
+        binder:
+          brokers: localhost:9092
     config:
       enabled: false
       uri: http://localhost:8888

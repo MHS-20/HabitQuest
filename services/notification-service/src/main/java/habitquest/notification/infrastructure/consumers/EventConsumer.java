@@ -1,4 +1,4 @@
-package habitquest.notification.infrastructure;
+package habitquest.notification.infrastructure.consumers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
