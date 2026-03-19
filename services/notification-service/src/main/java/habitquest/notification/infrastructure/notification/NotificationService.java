@@ -1,4 +1,4 @@
-package habitquest.notification.infrastructure;
+package habitquest.notification.infrastructure.notification;
 
 public interface NotificationService {
   void send(String message);

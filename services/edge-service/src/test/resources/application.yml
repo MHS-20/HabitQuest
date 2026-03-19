@@ -1,5 +1,12 @@
 spring:
   cloud:
+    stream:
+      bindings:
+        userRegistered-out-0:
+          destination: user.registered
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
     gateway:
       mvc:
         routes:
