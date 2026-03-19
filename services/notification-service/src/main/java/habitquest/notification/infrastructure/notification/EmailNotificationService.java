@@ -1,4 +1,4 @@
-package habitquest.notification.infrastructure;
+package habitquest.notification.infrastructure.notification;
 
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,6 @@
 server:
   port: 9003
 
-
-
 spring:
   application:
     name: notification-service
@@ -96,6 +94,10 @@ spring:
           group: notification-service
         habitNotAttended-in-0:
           destination: habit.not-attended
+          group: notification-service
+
+        userRegistered-in-0:
+          destination: user.registered
           group: notification-service
 
       kafka:

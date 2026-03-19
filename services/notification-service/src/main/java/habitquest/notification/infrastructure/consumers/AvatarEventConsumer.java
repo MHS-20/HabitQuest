@@ -1,8 +1,7 @@
 package habitquest.notification.infrastructure.consumers;
 
 import common.hexagonal.Adapter;
-import habitquest.notification.infrastructure.EventConsumer;
-import habitquest.notification.infrastructure.NotificationService;
+import habitquest.notification.infrastructure.notification.NotificationService;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
