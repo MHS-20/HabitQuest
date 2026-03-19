@@ -9,6 +9,7 @@ import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;
 import habitquest.tracking.domain.events.HabitEvent;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.events.HabitNotAttended;
 import habitquest.tracking.domain.events.HabitObserver;
 import habitquest.tracking.domain.factory.HabitFactory;
@@ -38,8 +39,10 @@ class HabitServiceImplTest {
   private static final String TITLE = "Hydrate";
   private static final String DESCRIPTION = "Drink 2L of water";
   private static final String UNKNOWN_ID = "missing";
+  private static final String OVERDUE_HABIT_ID = "habit-overdue";
 
   @Mock private HabitRepository habitRepository;
+  @Mock private HabitHistoryRepository historyRepository;
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
 
@@ -58,7 +61,7 @@ class HabitServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    service = new HabitServiceImpl(habitRepository, habitFactory, habitObserver);
+    service = new HabitServiceImpl(habitRepository, historyRepository, habitFactory, habitObserver);
   }
 
   @Nested
@@ -77,6 +80,7 @@ class HabitServiceImplTest {
       assertThat(created).isSameAs(habit);
       verify(habitFactory).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
       verify(habitRepository).save(habit);
+      verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
 
     @Test
@@ -92,6 +96,7 @@ class HabitServiceImplTest {
       assertThat(created).isSameAs(habit);
       verify(habitFactory).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
       verify(habitRepository).save(habit);
+      verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
 
     @Test
@@ -106,6 +111,7 @@ class HabitServiceImplTest {
       assertThat(created).isSameAs(habit);
       verify(habitFactory).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
       verify(habitRepository).save(habit);
+      verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
   }
 
@@ -140,9 +146,12 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("deletes and emits HabitDeleted event")
     void deletesAndEmitsEvent() {
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(stubHabit()));
+
       service.deleteHabitById(HABIT_ID);
 
       verify(habitRepository).deleteById(HABIT_ID);
+      verify(historyRepository).append(any(HabitHistoryEvent.class));
       ArgumentCaptor<HabitEvent> captor = ArgumentCaptor.forClass(HabitEvent.class);
       verify(habitObserver).notifyHabitEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(HabitDeleted.class);
@@ -301,6 +310,7 @@ class HabitServiceImplTest {
       verify(habitObserver).notifyHabitEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(HabitAttended.class);
       assertThat(((HabitAttended) captor.getValue()).habit()).isSameAs(habit);
+      verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
 
     @Test
@@ -329,6 +339,7 @@ class HabitServiceImplTest {
       neverAttended.setRecurrence(new DailyRecurrence());
 
       when(habitRepository.findAll()).thenReturn(List.of(neverAttended));
+      when(historyRepository.findByHabitId("habit-null")).thenReturn(List.of());
 
       service.detectOverdueHabits();
 
@@ -343,7 +354,7 @@ class HabitServiceImplTest {
     void emitsForOverdueHabit() {
       Habit overdue =
           new Habit(
-              "habit-overdue",
+              OVERDUE_HABIT_ID,
               AVATAR_ID,
               TITLE,
               DESCRIPTION,
@@ -355,6 +366,7 @@ class HabitServiceImplTest {
       overdue.attendHabit(LocalDateTime.now().minusDays(2));
 
       when(habitRepository.findAll()).thenReturn(List.of(overdue));
+      when(historyRepository.findByHabitId(OVERDUE_HABIT_ID)).thenReturn(List.of());
 
       service.detectOverdueHabits();
 
@@ -385,6 +397,56 @@ class HabitServiceImplTest {
       service.detectOverdueHabits();
 
       verify(habitObserver, never()).notifyHabitEvent(any(HabitNotAttended.class));
+    }
+
+    @Test
+    @DisplayName("does not append duplicate NOT_ATTENDED marker for same overdue slot")
+    void deduplicatesNotAttendedHistory() {
+      Habit overdue =
+          new Habit(
+              OVERDUE_HABIT_ID,
+              AVATAR_ID,
+              TITLE,
+              DESCRIPTION,
+              new DailyRecurrence(),
+              Optional.empty());
+      overdue.setRecurrence(new DailyRecurrence());
+      overdue.attendHabit(LocalDateTime.now().minusDays(2));
+      String expectedMarker =
+          "expectedAt=" + overdue.getRecurrence().nextAfter(overdue.getLastAttendedDate());
+
+      when(habitRepository.findAll()).thenReturn(List.of(overdue));
+      when(historyRepository.findByHabitId(OVERDUE_HABIT_ID))
+          .thenReturn(
+              List.of(
+                  new HabitHistoryEvent(
+                      new HabitNotAttended(overdue),
+                      LocalDateTime.now().minusMinutes(1),
+                      expectedMarker)));
+
+      service.detectOverdueHabits();
+
+      verify(historyRepository, never())
+          .append(argThat(e -> e.event() instanceof HabitNotAttended));
+    }
+  }
+
+  @Nested
+  @DisplayName("getHistory")
+  class GetHistory {
+
+    @Test
+    @DisplayName("returns stored history for an existing habit")
+    void returnsHistory() {
+      Habit habit = stubHabit();
+      List<HabitHistoryEvent> history =
+          List.of(new HabitHistoryEvent(new HabitAttended(habit), LocalDateTime.now(), "attended"));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+      when(historyRepository.findByHabitId(HABIT_ID)).thenReturn(history);
+
+      List<HabitHistoryEvent> result = service.getHistory(HABIT_ID);
+
+      assertThat(result).isEqualTo(history);
     }
   }
 }
