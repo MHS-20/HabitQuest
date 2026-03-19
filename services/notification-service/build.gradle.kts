@@ -5,16 +5,15 @@ plugins {
 description = "notification-service"
 
 dependencies {
-
-    // --- Spring Boot ---
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-
-    // --- Utilities ---
     implementation("org.springframework.retry:spring-retry")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.cloud:spring-cloud-stream")
+    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 
-    // --- Runtime ---
-
-    // --- Test ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.cloud:spring-cloud-stream-test-binder")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:kafka")
 }
