@@ -10,6 +10,8 @@ import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
+import habitquest.tracking.domain.events.HabitAttended;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
@@ -316,6 +318,29 @@ public class HabitControllerIT {
           .perform(get("/api/v1/habits/{id}/last-attended-date", HABIT_ID))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.date").value("2026-03-16T10:15:00"));
+    }
+  }
+
+  @Nested
+  @DisplayName("GET /api/v1/habits/{id}/history")
+  class GetHistory {
+
+    @Test
+    @DisplayName("returns 200 with habit event history")
+    void shouldReturnHistory() throws Exception {
+      when(habitService.getHistory(HABIT_ID))
+          .thenReturn(
+              List.of(
+                  new HabitHistoryEvent(
+                      new HabitAttended(stubHabit()),
+                      LocalDateTime.of(2026, 3, 17, 9, 30),
+                      "attendedAt=2026-03-17T09:30")));
+
+      mockMvc
+          .perform(get("/api/v1/habits/{id}/history", HABIT_ID))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.history[0].event.habit.id").value(HABIT_ID))
+          .andExpect(jsonPath("$.history[0].details").value("attendedAt=2026-03-17T09:30"));
     }
   }
 

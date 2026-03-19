@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import habitquest.tracking.application.HabitHistoryRepository;
 import habitquest.tracking.application.HabitRepository;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.application.HabitServiceImpl;
@@ -31,6 +32,7 @@ class HabitCheckerJobTest {
 
   @Mock private HabitService habitService;
   @Mock private HabitRepository habitRepository;
+  @Mock private HabitHistoryRepository historyRepository;
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
 
@@ -62,8 +64,10 @@ class HabitCheckerJobTest {
             new DailyRecurrence(),
             Optional.empty());
     when(habitRepository.findAll()).thenReturn(List.of(neverAttendedHabit));
+    when(historyRepository.findByHabitId("habit-1")).thenReturn(List.of());
 
-    HabitService realService = new HabitServiceImpl(habitRepository, habitFactory, habitObserver);
+    HabitService realService =
+        new HabitServiceImpl(habitRepository, historyRepository, habitFactory, habitObserver);
     HabitCheckerJob realJob = new HabitCheckerJob(realService);
 
     realJob.run();

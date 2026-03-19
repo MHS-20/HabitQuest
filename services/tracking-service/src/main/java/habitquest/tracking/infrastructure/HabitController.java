@@ -6,6 +6,7 @@ import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
@@ -61,7 +62,8 @@ public class HabitController {
             linkTo(methodOn(HabitController.class).getHabit(created.getId())).withRel("habit"),
             linkTo(methodOn(HabitController.class).getTags(created.getId())).withRel("tags"),
             linkTo(methodOn(HabitController.class).getRecurrence(created.getId()))
-                .withRel("recurrence"));
+                .withRel("recurrence"),
+            linkTo(methodOn(HabitController.class).getHistory(created.getId())).withRel("history"));
 
     return ResponseEntity.created(URI.create("/api/v1/habits/" + created.getId())).body(model);
   }
@@ -82,6 +84,7 @@ public class HabitController {
             linkTo(methodOn(HabitController.class).getRecurrence(id)).withRel("recurrence"),
             linkTo(methodOn(HabitController.class).getLastAttendedDate(id))
                 .withRel("lastAttendedDate"),
+            linkTo(methodOn(HabitController.class).getHistory(id)).withRel("history"),
             linkTo(methodOn(HabitController.class).deleteHabit(id)).withRel("delete"));
 
     return ResponseEntity.ok(model);
@@ -158,6 +161,17 @@ public class HabitController {
             selfLink(id),
             habitLink(id),
             linkTo(methodOn(HabitController.class).attendHabit(id, null)).withRel("attend"));
+
+    return ResponseEntity.ok(model);
+  }
+
+  @GetMapping("/{id}/history")
+  public ResponseEntity<EntityModel<HistoryResponse>> getHistory(@PathVariable String id)
+      throws HabitNotFoundException {
+
+    List<HabitHistoryEvent> history = habitService.getHistory(id);
+    EntityModel<HistoryResponse> model =
+        EntityModel.of(new HistoryResponse(history), selfLink(id), habitLink(id));
 
     return ResponseEntity.ok(model);
   }
@@ -277,6 +291,8 @@ public class HabitController {
   public record TagsResponse(List<Tag> tags) {}
 
   public record LastAttendedDateResponse(LocalDateTime date) {}
+
+  public record HistoryResponse(List<HabitHistoryEvent> history) {}
 
   public record ErrorResponse(String message) {}
 }
