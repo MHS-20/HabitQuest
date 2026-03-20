@@ -17,9 +17,9 @@ public class HabitNotifierImpl implements HabitNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(HabitNotifierImpl.class);
 
-  static final String HABIT_DELETED_BINDING = "habit-deleted-out-0";
-  static final String HABIT_ATTENDED_BINDING = "habit-attended-out-0";
-  static final String HABIT_NOT_ATTENDED_BINDING = "habit-not-attended-out-0";
+  static final String HABIT_DELETED_BINDING = "habit.deleted";
+  static final String HABIT_ATTENDED_BINDING = "habit.attended";
+  static final String HABIT_NOT_ATTENDED_BINDING = "habit.not-attended-out";
 
   private final StreamBridge streamBridge;
 
