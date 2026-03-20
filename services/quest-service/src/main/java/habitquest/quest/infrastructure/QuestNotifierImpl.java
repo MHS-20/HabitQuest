@@ -19,11 +19,11 @@ public class QuestNotifierImpl implements QuestNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(QuestNotifierImpl.class);
 
-  static final String QUEST_CREATED_BINDING = "quest-created-out-0";
-  static final String QUEST_COMPLETED_BINDING = "quest-completed-out-0";
-  static final String QUEST_NOT_COMPLETED_BINDING = "quest-not-completed-out-0";
-  static final String QUEST_JOINED_BINDING = "quest-joined-out-0";
-  static final String QUEST_LEFT_BINDING = "quest-left-out-0";
+  static final String QUEST_CREATED_BINDING = "quest.created";
+  static final String QUEST_COMPLETED_BINDING = "quest.completed";
+  static final String QUEST_NOT_COMPLETED_BINDING = "quest.not-completed";
+  static final String QUEST_JOINED_BINDING = "quest.joined";
+  static final String QUEST_LEFT_BINDING = "quest.left";
 
   private final StreamBridge streamBridge;
 
