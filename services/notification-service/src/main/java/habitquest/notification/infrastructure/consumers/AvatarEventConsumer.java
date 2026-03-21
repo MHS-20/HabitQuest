@@ -34,6 +34,7 @@ public class AvatarEventConsumer extends AvatarAwareEventConsumer {
   public Consumer<DeadMessage> avatarDead() {
     return message -> {
       logger().info("Received Dead: avatarId={}", message.avatarId());
+      logger().info("### CONSUMER TRIGGERED: avatarDead, avatarId={}", message.avatarId());
       sendToAvatar(
           message.avatarId(),
           "Il tuo avatar è morto!",
