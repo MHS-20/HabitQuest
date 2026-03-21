@@ -16,13 +16,8 @@ public class AvatarFactory {
     this.idGenerator = idGenerator;
   }
 
-  public Avatar create(String name) {
-    return new Avatar(
-        name,
-        idGenerator.nextId(),
-        idGenerator.nextId(),
-        idGenerator.nextId(),
-        idGenerator.nextId());
+  public Avatar create(String id, String name) {
+    return new Avatar(name, id, idGenerator.nextId(), idGenerator.nextId(), idGenerator.nextId());
   }
 
   public Optional<Spell> createSpellForLevel(Integer level) {

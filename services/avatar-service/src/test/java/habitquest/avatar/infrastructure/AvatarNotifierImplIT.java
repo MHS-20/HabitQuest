@@ -55,6 +55,7 @@ public class AvatarNotifierImplIT {
   private static final String TOPIC_DEAD = "avatar.dead";
   private static final String TOPIC_SKILL_POINT = "avatar.skill-point-assigned";
 
+  private static final String AVATAR_ID = "avatar-123";
   private static final Duration POLL_TIMEOUT = Duration.ofSeconds(10);
 
   private KafkaConsumer<String, String> consumer;
@@ -117,7 +118,7 @@ public class AvatarNotifierImplIT {
     void shouldPublishToLevelUppedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_LEVEL_UPPED);
       Level level = new Level(5, new Experience(0), new Experience(500));
-      notifier.notifyLevelUpped(new LevelUpped(level));
+      notifier.notifyLevelUpped(new LevelUpped(AVATAR_ID, level));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -132,7 +133,7 @@ public class AvatarNotifierImplIT {
     void shouldIncludeCorrectLevelNumber() throws Exception {
       subscribeAndSeekToEnd(TOPIC_LEVEL_UPPED);
       Level level = new Level(10, new Experience(0), new Experience(1000));
-      notifier.notifyLevelUpped(new LevelUpped(level));
+      notifier.notifyLevelUpped(new LevelUpped(AVATAR_ID, level));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("newLevel").asInt()).isEqualTo(10);
@@ -180,7 +181,7 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes a Strength assignment to avatar.skill-point-assigned")
     void shouldPublishStrengthAssignment() throws Exception {
       subscribeAndSeekToEnd(TOPIC_SKILL_POINT);
-      notifier.notifySkillPointAssigned(new SkillPointAssigned(new Strength(15)));
+      notifier.notifySkillPointAssigned(new SkillPointAssigned(AVATAR_ID, new Strength(15)));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -195,7 +196,7 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes a Defense assignment with the correct stat type")
     void shouldPublishDefenseAssignment() throws Exception {
       subscribeAndSeekToEnd(TOPIC_SKILL_POINT);
-      notifier.notifySkillPointAssigned(new SkillPointAssigned(new Defense(8)));
+      notifier.notifySkillPointAssigned(new SkillPointAssigned(AVATAR_ID, new Defense(8)));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("statType").asText()).isEqualTo("Defense");
@@ -206,7 +207,7 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes an Intelligence assignment with the correct stat type")
     void shouldPublishIntelligenceAssignment() throws Exception {
       subscribeAndSeekToEnd(TOPIC_SKILL_POINT);
-      notifier.notifySkillPointAssigned(new SkillPointAssigned(new Intelligence(20)));
+      notifier.notifySkillPointAssigned(new SkillPointAssigned(AVATAR_ID, new Intelligence(20)));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("statType").asText()).isEqualTo("Intelligence");

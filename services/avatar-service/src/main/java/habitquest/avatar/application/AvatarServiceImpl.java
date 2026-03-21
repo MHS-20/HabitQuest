@@ -27,8 +27,8 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public String createAvatar(String name) {
-    Avatar avatar = this.avatarFactory.create(name);
+  public String createAvatar(String id, String name) {
+    Avatar avatar = this.avatarFactory.create(id, name);
     avatarRepository.save(avatar);
     return avatar.getId();
   }
@@ -183,7 +183,7 @@ public class AvatarServiceImpl implements AvatarService {
     Level levelAfter = avatar.getLevel();
     avatarRepository.save(avatar);
     if (levelAfter.levelNumber() > levelBefore.levelNumber()) {
-      avatarObserver.notifyAvatarEvent(new LevelUpped(avatar.getLevel()));
+      avatarObserver.notifyAvatarEvent(new LevelUpped(avatarId, avatar.getLevel()));
     }
   }
 
@@ -192,7 +192,8 @@ public class AvatarServiceImpl implements AvatarService {
     Avatar avatar = getAvatarById(avatarId);
     avatar.incrementStrength();
     avatarRepository.save(avatar);
-    avatarObserver.notifyAvatarEvent(new SkillPointAssigned(avatar.getAvatarStats().getStrength()));
+    avatarObserver.notifyAvatarEvent(
+        new SkillPointAssigned(avatarId, avatar.getAvatarStats().getStrength()));
   }
 
   @Override
@@ -200,7 +201,8 @@ public class AvatarServiceImpl implements AvatarService {
     Avatar avatar = getAvatarById(avatarId);
     avatar.incrementDefense();
     avatarRepository.save(avatar);
-    avatarObserver.notifyAvatarEvent(new SkillPointAssigned(avatar.getAvatarStats().getDefense()));
+    avatarObserver.notifyAvatarEvent(
+        new SkillPointAssigned(avatarId, avatar.getAvatarStats().getDefense()));
   }
 
   @Override
@@ -209,6 +211,6 @@ public class AvatarServiceImpl implements AvatarService {
     avatar.incrementIntelligence();
     avatarRepository.save(avatar);
     avatarObserver.notifyAvatarEvent(
-        new SkillPointAssigned(avatar.getAvatarStats().getIntelligence()));
+        new SkillPointAssigned(avatarId, avatar.getAvatarStats().getIntelligence()));
   }
 }

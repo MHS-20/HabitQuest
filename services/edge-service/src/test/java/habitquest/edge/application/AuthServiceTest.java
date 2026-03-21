@@ -9,7 +9,6 @@ import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
 import habitquest.edge.domain.UserExceptions.UserAlreadyExistsException;
 import habitquest.edge.domain.UserExceptions.UserNotFoundException;
 import habitquest.edge.domain.UserFactory;
-import habitquest.edge.domain.UserRole;
 import habitquest.edge.infrastructure.JwtService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +38,8 @@ class AuthServiceTest {
   private static final String HASHED_PASSWORD = "$2a$10$hashedpassword";
   private static final String JWT_TOKEN = "eyJ.fake.token";
   private static final String USER_ID = "user-123";
-  private static final User FAKE_USER = new User(USER_ID, EMAIL, HASHED_PASSWORD, UserRole.USER);
+  private static final String NAME = "Mario Rossi";
+  private static final User FAKE_USER = new User(USER_ID, NAME, EMAIL, HASHED_PASSWORD);
 
   // ── register ──────────────────────────────────────────────────────────────
   @Nested
@@ -51,11 +51,11 @@ class AuthServiceTest {
     void register_success() {
       when(userRepository.existsByEmail(EMAIL)).thenReturn(false);
       when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(HASHED_PASSWORD);
-      when(userFactory.create(EMAIL, HASHED_PASSWORD)).thenReturn(FAKE_USER);
+      when(userFactory.create(NAME, EMAIL, HASHED_PASSWORD)).thenReturn(FAKE_USER);
       when(userRepository.save(FAKE_USER)).thenReturn(FAKE_USER);
       when(jwtService.generateToken(FAKE_USER)).thenReturn(JWT_TOKEN);
 
-      AuthService.AuthResponse response = authService.register(EMAIL, RAW_PASSWORD);
+      AuthService.AuthResponse response = authService.register(NAME, EMAIL, RAW_PASSWORD);
 
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
       assertThat(response.userId()).isEqualTo(USER_ID);
@@ -67,7 +67,7 @@ class AuthServiceTest {
     void register_duplicateEmail_throws() {
       when(userRepository.existsByEmail(EMAIL)).thenReturn(true);
 
-      assertThatThrownBy(() -> authService.register(EMAIL, RAW_PASSWORD))
+      assertThatThrownBy(() -> authService.register(NAME, EMAIL, RAW_PASSWORD))
           .isInstanceOf(UserAlreadyExistsException.class);
 
       verify(userRepository, never()).save(any());
@@ -78,14 +78,14 @@ class AuthServiceTest {
     void register_passwordIsHashed() {
       when(userRepository.existsByEmail(EMAIL)).thenReturn(false);
       when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(HASHED_PASSWORD);
-      when(userFactory.create(EMAIL, HASHED_PASSWORD)).thenReturn(FAKE_USER);
+      when(userFactory.create(NAME, EMAIL, HASHED_PASSWORD)).thenReturn(FAKE_USER);
       when(userRepository.save(FAKE_USER)).thenReturn(FAKE_USER);
       when(jwtService.generateToken(FAKE_USER)).thenReturn(JWT_TOKEN);
 
-      authService.register(EMAIL, RAW_PASSWORD);
+      authService.register(NAME, EMAIL, RAW_PASSWORD);
 
       verify(passwordEncoder).encode(RAW_PASSWORD);
-      verify(userFactory).create(EMAIL, HASHED_PASSWORD);
+      verify(userFactory).create(NAME, EMAIL, HASHED_PASSWORD);
     }
   }
 
@@ -98,7 +98,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-      existingUser = new User(USER_ID, EMAIL, HASHED_PASSWORD, UserRole.USER);
+      existingUser = new User(USER_ID, NAME, EMAIL, HASHED_PASSWORD);
     }
 
     @Test

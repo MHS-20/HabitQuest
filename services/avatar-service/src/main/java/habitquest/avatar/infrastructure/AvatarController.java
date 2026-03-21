@@ -34,7 +34,7 @@ public class AvatarController {
   public ResponseEntity<EntityModel<AvatarCreatedResponse>> createAvatar(
       @RequestBody CreateAvatarRequest request) {
 
-    String id = avatarService.createAvatar(request.name());
+    String id = avatarService.createAvatar(request.id(), request.name());
     marketplaceClient.createMarketplace(id);
     AvatarCreatedResponse body = new AvatarCreatedResponse(id);
 
@@ -408,7 +408,7 @@ public class AvatarController {
     return linkTo(methodOn(AvatarController.class).getAvatar(id)).withRel("avatar");
   }
 
-  public record CreateAvatarRequest(String name) {}
+  public record CreateAvatarRequest(String id, String name) {}
 
   public record UpdateNameRequest(String name) {}
 
