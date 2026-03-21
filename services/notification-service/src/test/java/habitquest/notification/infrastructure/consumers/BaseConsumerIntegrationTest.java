@@ -11,19 +11,15 @@ import java.time.Duration;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
-@Testcontainers
 @TestPropertySource(
     properties = {
       "spring.mail.host=localhost",
@@ -39,10 +35,6 @@ public abstract class BaseConsumerIntegrationTest {
   private static final int SMTP_PORT = 3025;
   private static final Duration EMAIL_TIMEOUT = Duration.ofSeconds(5);
 
-  @Container
-  static final KafkaContainer KAFKA =
-      new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
-
   protected static GreenMail greenMail;
 
   @Autowired protected StreamBridge streamBridge;
@@ -51,8 +43,17 @@ public abstract class BaseConsumerIntegrationTest {
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.cloud.stream.kafka.binder.brokers", KAFKA::getBootstrapServers);
-    registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
+    registry.add(
+        "spring.cloud.stream.kafka.binder.brokers",
+        SharedKafkaContainer.INSTANCE::getBootstrapServers);
+    registry.add(
+        "spring.kafka.bootstrap-servers", SharedKafkaContainer.INSTANCE::getBootstrapServers);
+  }
+
+  @BeforeEach
+  void resetRepositories() {
+    userEmailRepository.clear();
+    guildMemberRepository.clear();
   }
 
   @BeforeAll

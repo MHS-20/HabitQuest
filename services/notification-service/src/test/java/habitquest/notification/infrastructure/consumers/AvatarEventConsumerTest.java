@@ -47,10 +47,13 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
                 .getProducerFactory()
                 .getConfigurationProperties()
                 .get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
-    System.out.println("### Container bootstrap servers: " + KAFKA.getBootstrapServers());
+    System.out.println(
+        "### Container bootstrap servers: " + SharedKafkaContainer.INSTANCE.getBootstrapServers());
 
     Map<String, Object> producerProps = new HashMap<>();
-    producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA.getBootstrapServers());
+    producerProps.put(
+        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+        SharedKafkaContainer.INSTANCE.getBootstrapServers());
     producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     KafkaTemplate<String, String> template =
@@ -60,7 +63,9 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
     template.flush();
 
     Map<String, Object> consumerProps = new HashMap<>();
-    consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA.getBootstrapServers());
+    consumerProps.put(
+        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+        SharedKafkaContainer.INSTANCE.getBootstrapServers());
     consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "test-verify-" + System.nanoTime());
     consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
