@@ -24,10 +24,12 @@ public class EmailNotificationService implements NotificationService {
       message.setTo(to);
       message.setSubject(subject);
       message.setText(body);
+      message.setFrom("noreply@habitquest.it");
       mailSender.send(message);
       log.info("Email inviata a {}: {}", to, subject);
     } catch (Exception e) {
       log.error("Errore nell'invio dell'email a {}: {}", to, e.getMessage(), e);
+      throw new RuntimeException("Errore nell'invio dell'email a " + to, e);
     }
   }
 }

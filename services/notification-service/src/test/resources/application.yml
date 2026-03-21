@@ -11,21 +11,17 @@ spring:
           starttls:
             enable: false
             required: false
-
-
-
   cloud:
     config:
       enabled: false
+    function:
+        definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
     stream:
       kafka:
         binder:
-          brokers: ""
+          auto-create-topics: true
           configuration:
             auto.offset.reset: earliest
-      binders:
-        kafka:
-          defaultCandidate: false
       default-binder: kafka
       default:
         group: notification-service
