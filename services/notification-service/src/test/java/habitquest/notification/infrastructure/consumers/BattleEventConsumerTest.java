@@ -42,9 +42,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "guild.battle-won",
         new BattleEventConsumer.BattleWonMessage("battle-1", "guild-1", Instant.now()));
-
     MimeMessage[] mails = waitForEmails(3);
-
     assertThat(mails).hasSize(3);
     assertThat(mails)
         .allSatisfy(
@@ -57,9 +55,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "guild.battle-lost",
         new BattleEventConsumer.BattleLostMessage("battle-1", "guild-1", Instant.now()));
-
     MimeMessage[] mails = waitForEmails(3);
-
     assertThat(mails).hasSize(3);
     assertThat(mails)
         .allSatisfy(

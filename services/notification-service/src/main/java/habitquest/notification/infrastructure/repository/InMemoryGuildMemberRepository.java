@@ -34,4 +34,9 @@ public class InMemoryGuildMemberRepository implements GuildMemberRepository {
   public Set<String> findMembersByGuildId(String guildId) {
     return Collections.unmodifiableSet(store.getOrDefault(guildId, Collections.emptySet()));
   }
+
+  @Override
+  public void clear() {
+    store.clear();
+  }
 }

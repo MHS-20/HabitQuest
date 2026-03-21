@@ -10,4 +10,6 @@ public interface GuildMemberRepository {
   void removeGuild(String guildId);
 
   Set<String> findMembersByGuildId(String guildId);
+
+  void clear();
 }
