@@ -17,4 +17,9 @@ public class InMemoryUserEmailRepository implements UserEmailRepository {
   public Optional<String> findEmailByUserId(String userId) {
     return Optional.ofNullable(store.get(userId));
   }
+
+  @Override
+  public void clear() {
+    store.clear();
+  }
 }

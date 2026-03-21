@@ -15,13 +15,17 @@ spring:
     config:
       enabled: false
     function:
-        definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
+      definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
     stream:
       kafka:
         binder:
+          producer-properties:
+            max.block.ms: 5000
           auto-create-topics: true
           configuration:
             auto.offset.reset: earliest
+            request.timeout.ms: 5000
+            default.api.timeout.ms: 5000
       default-binder: kafka
       default:
         group: notification-service
@@ -80,9 +84,3 @@ spring:
 
         userRegistered-in-0:
           destination: user.registered
-
-logging:
-  level:
-    habitquest: DEBUG
-    org.springframework.cloud.stream: DEBUG
-    org.springframework.mail: DEBUG
