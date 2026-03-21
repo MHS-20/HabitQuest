@@ -25,11 +25,17 @@ public class UserEventConsumer implements EventConsumer {
   public Consumer<UserRegisteredMessage> userRegistered() {
     return message -> {
       logger()
-          .info("Received UserRegistered: userId={}, email={}", message.userId(), message.email());
-      userEmailRepository.save(message.userId(), message.email());
-      notificationService.send("Welcome! Your account has been successfully created.");
+          .info(
+              "Received UserRegistered: avatarId={}, email={}",
+              message.avatarId(),
+              message.email());
+      userEmailRepository.save(message.avatarId(), message.email());
+      notificationService.send(
+          message.email(),
+          "Benvenuto su HabitQuest!",
+          "Il tuo account è stato creato con successo. Buona avventura!");
     };
   }
 
-  public record UserRegisteredMessage(String userId, String email, Instant occurredOn) {}
+  public record UserRegisteredMessage(String avatarId, String email, Instant occurredOn) {}
 }

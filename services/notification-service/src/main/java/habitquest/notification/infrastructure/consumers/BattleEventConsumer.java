@@ -2,6 +2,8 @@ package habitquest.notification.infrastructure.consumers;
 
 import common.hexagonal.Adapter;
 import habitquest.notification.infrastructure.notification.NotificationService;
+import habitquest.notification.infrastructure.repository.GuildMemberRepository;
+import habitquest.notification.infrastructure.repository.UserEmailRepository;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
@@ -9,12 +11,13 @@ import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class BattleEventConsumer implements EventConsumer {
+public class BattleEventConsumer extends GuildAwareEventConsumer {
 
-  private final NotificationService notificationService;
-
-  public BattleEventConsumer(NotificationService notificationService) {
-    this.notificationService = notificationService;
+  public BattleEventConsumer(
+      UserEmailRepository userEmailRepository,
+      GuildMemberRepository guildMemberRepository,
+      NotificationService notificationService) {
+    super(userEmailRepository, guildMemberRepository, notificationService);
   }
 
   @Bean
@@ -25,12 +28,10 @@ public class BattleEventConsumer implements EventConsumer {
               "Received BattleStarted: battleId={}, guildId={}",
               message.battleId(),
               message.guildId());
-      notificationService.send(
-          "La battaglia "
-              + message.battleId()
-              + " è iniziata per la guild "
-              + message.guildId()
-              + "!");
+      sendToGuild(
+          message.guildId(),
+          "La tua guild è in battaglia!",
+          "La battaglia \"" + message.battleId() + "\" è iniziata per la tua guild. Forza!");
     };
   }
 
@@ -40,12 +41,10 @@ public class BattleEventConsumer implements EventConsumer {
       logger()
           .info(
               "Received BattleWon: battleId={}, guildId={}", message.battleId(), message.guildId());
-      notificationService.send(
-          "La tua guild "
-              + message.guildId()
-              + " ha vinto la battaglia "
-              + message.battleId()
-              + "!");
+      sendToGuild(
+          message.guildId(),
+          "Vittoria! La tua guild ha vinto!",
+          "Congratulazioni! La vostra guild ha vinto la battaglia \"" + message.battleId() + "\"!");
     };
   }
 
@@ -57,12 +56,12 @@ public class BattleEventConsumer implements EventConsumer {
               "Received BattleLost: battleId={}, guildId={}",
               message.battleId(),
               message.guildId());
-      notificationService.send(
-          "La tua guild "
-              + message.guildId()
-              + " ha perso la battaglia "
+      sendToGuild(
+          message.guildId(),
+          "La tua guild ha perso la battaglia",
+          "Purtroppo la vostra guild ha perso la battaglia \""
               + message.battleId()
-              + ".");
+              + "\". Ci rifaremo!");
     };
   }
 

@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import common.hexagonal.Adapter;
 import habitquest.notification.infrastructure.notification.NotificationService;
+import habitquest.notification.infrastructure.repository.UserEmailRepository;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
@@ -9,19 +10,23 @@ import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class AvatarEventConsumer implements EventConsumer {
+public class AvatarEventConsumer extends AvatarAwareEventConsumer {
 
-  private final NotificationService notificationService;
-
-  public AvatarEventConsumer(NotificationService notificationService) {
-    this.notificationService = notificationService;
+  public AvatarEventConsumer(
+      UserEmailRepository userEmailRepository, NotificationService notificationService) {
+    super(userEmailRepository, notificationService);
   }
 
   @Bean
   public Consumer<LevelUppedMessage> avatarLevelUpped() {
     return message -> {
-      logger().info("Received LevelUpped: level={}", message.newLevel());
-      notificationService.send("Hai raggiunto il livello " + message.newLevel() + "!");
+      logger()
+          .info(
+              "Received LevelUpped: avatarId={}, level={}", message.avatarId(), message.newLevel());
+      sendToAvatar(
+          message.avatarId(),
+          "Livello aumentato!",
+          "Congratulazioni! Hai raggiunto il livello " + message.newLevel() + "!");
     };
   }
 
@@ -29,7 +34,10 @@ public class AvatarEventConsumer implements EventConsumer {
   public Consumer<DeadMessage> avatarDead() {
     return message -> {
       logger().info("Received Dead: avatarId={}", message.avatarId());
-      notificationService.send("Il tuo avatar " + message.avatarId() + " è morto!");
+      sendToAvatar(
+          message.avatarId(),
+          "Il tuo avatar è morto!",
+          "Il tuo avatar " + message.avatarId() + " è morto! Torna in gioco per rinascere.");
     };
   }
 
@@ -38,20 +46,25 @@ public class AvatarEventConsumer implements EventConsumer {
     return message -> {
       logger()
           .info(
-              "Received SkillPointAssigned: stat={}, newValue={}",
+              "Received SkillPointAssigned: avatarId= {}, stat={}, newValue={}",
+              message.avatarId(),
               message.statType(),
               message.newValue());
-      notificationService.send(
-          "Hai assegnato un punto a "
+      sendToAvatar(
+          message.avatarId(),
+          "Punto abilità assegnato!",
+          "Hai assegnato un punto abilità a "
               + message.statType()
-              + ", nuovo valore: "
-              + message.newValue());
+              + ". Il nuovo valore è "
+              + message.newValue()
+              + ".");
     };
   }
 
-  public record LevelUppedMessage(Integer newLevel, Instant occurredOn) {}
+  public record LevelUppedMessage(String avatarId, Integer newLevel, Instant occurredOn) {}
 
   public record DeadMessage(String avatarId, Instant occurredOn) {}
 
-  public record SkillPointAssignedMessage(String statType, Integer newValue, Instant occurredOn) {}
+  public record SkillPointAssignedMessage(
+      String avatarId, String statType, Integer newValue, Instant occurredOn) {}
 }

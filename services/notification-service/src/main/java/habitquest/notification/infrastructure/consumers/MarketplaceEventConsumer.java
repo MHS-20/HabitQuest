@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import common.hexagonal.Adapter;
 import habitquest.notification.infrastructure.notification.NotificationService;
+import habitquest.notification.infrastructure.repository.UserEmailRepository;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
@@ -9,12 +10,11 @@ import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class MarketplaceEventConsumer implements EventConsumer {
+public class MarketplaceEventConsumer extends AvatarAwareEventConsumer {
 
-  private final NotificationService notificationService;
-
-  public MarketplaceEventConsumer(NotificationService notificationService) {
-    this.notificationService = notificationService;
+  public MarketplaceEventConsumer(
+      UserEmailRepository userEmailRepository, NotificationService notificationService) {
+    super(userEmailRepository, notificationService);
   }
 
   @Bean
@@ -26,7 +26,10 @@ public class MarketplaceEventConsumer implements EventConsumer {
               message.marketplaceId(),
               message.itemName(),
               message.avatarId());
-      notificationService.send("Hai acquistato \"" + message.itemName() + "\" dal marketplace!");
+      sendToAvatar(
+          message.avatarId(),
+          "Acquisto completato!",
+          "Hai acquistato \"" + message.itemName() + "\" dal marketplace. Buon utilizzo!");
     };
   }
 
@@ -39,7 +42,10 @@ public class MarketplaceEventConsumer implements EventConsumer {
               message.marketplaceId(),
               message.itemName(),
               message.avatarId());
-      notificationService.send("Hai venduto \"" + message.itemName() + "\" sul marketplace!");
+      sendToAvatar(
+          message.avatarId(),
+          "Oggetto venduto!",
+          "Hai venduto \"" + message.itemName() + "\" sul marketplace con successo!");
     };
   }
 
