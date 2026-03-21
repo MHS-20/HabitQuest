@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
@@ -23,6 +24,16 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @Testcontainers
+@TestPropertySource(
+    properties = {
+      "spring.mail.host=localhost",
+      "spring.mail.port=3025",
+      "spring.mail.username=",
+      "spring.mail.password=",
+      "spring.mail.properties.mail.smtp.auth=false",
+      "spring.mail.properties.mail.smtp.starttls.enable=false",
+      "spring.mail.properties.mail.smtp.starttls.required=false"
+    })
 public abstract class BaseConsumerIntegrationTest {
 
   private static final int SMTP_PORT = 3025;
@@ -41,23 +52,14 @@ public abstract class BaseConsumerIntegrationTest {
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.cloud.stream.kafka.binder.brokers", KAFKA::getBootstrapServers);
-    registry.add("spring.cloud.stream.kafka.binder.brokers", KAFKA::getBootstrapServers);
-  }
-
-  @DynamicPropertySource
-  static void mailProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.mail.host", () -> "localhost");
-    registry.add("spring.mail.port", () -> SMTP_PORT);
-    registry.add("spring.mail.protocol", () -> "smtp");
-    registry.add("spring.mail.properties.mail.smtp.auth", () -> "false");
-    registry.add("spring.mail.properties.mail.smtp.starttls.enable", () -> "false");
+    registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
   }
 
   @BeforeAll
   static void setupMail() {
     if (greenMail == null) {
       greenMail = new GreenMail(new ServerSetup(SMTP_PORT, "localhost", ServerSetup.PROTOCOL_SMTP));
-      greenMail.setUser("test@habitquest.it", "test");
+      // greenMail.setUser("test@habitquest.it", "test");
       greenMail.start();
     }
   }

@@ -18,6 +18,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka")
 
     testImplementation("com.icegreen:greenmail:2.1.2")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
     //testImplementation("com.icegreen:greenmail-spring-boot-starter")
     testImplementation("org.awaitility:awaitility")
 
