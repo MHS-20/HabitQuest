@@ -18,19 +18,26 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
   private final AuthService authService;
+  private final AvatarClient avatarClient;
 
-  public AuthController(AuthService authService) {
+  public AuthController(AuthService authService, AvatarClient avatarClient) {
     this.authService = authService;
+    this.avatarClient = avatarClient;
   }
 
   // ── POST /auth/register ───────────────────────────────────────────────────
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     try {
-      AuthResponse response = authService.register(request.email(), request.password());
+      AuthResponse response =
+          authService.register(request.name, request.email(), request.password());
+      avatarClient.createAvatar(response.userId(), request.name());
+
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (UserAlreadyExistsException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    } catch (AvatarCreationException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -67,6 +74,7 @@ public class AuthController {
 
   // ── request / response records ────────────────────────────────────────────
   public record RegisterRequest(
+      @NotBlank String name,
       @Email @NotBlank String email,
       @NotBlank @Size(min = 8, message = "Password must be at least 8 characters")
           String password) {}

@@ -1,3 +1,3 @@
 package habitquest.guild.domain.events.guildEvents;
 
-public record RankUpdated(String id) implements GuildEvent {}
+public record RankUpdated(String guildId) implements GuildEvent {}

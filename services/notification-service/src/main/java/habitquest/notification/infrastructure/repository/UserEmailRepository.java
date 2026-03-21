@@ -1,12 +1,11 @@
 package habitquest.notification.infrastructure.repository;
 
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserEmailRepository {
-    Optional<String> findEmailByUserId(String userId);
-        void save(String userId, String email);
+  Optional<String> findEmailByUserId(String userId);
 
+  void save(String userId, String email);
 }

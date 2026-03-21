@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import habitquest.edge.application.UserRepository;
 import habitquest.edge.domain.User;
-import habitquest.edge.domain.UserRole;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -40,6 +39,7 @@ public class UserNotifierImplIT {
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.cloud.stream.kafka.binder.brokers", KAFKA::getBootstrapServers);
+    registry.add("services.avatar.base-url", () -> "http://localhost:0");
   }
 
   @Autowired private UserNotifierImpl notifier;
@@ -107,7 +107,7 @@ public class UserNotifierImplIT {
     @DisplayName("publishes a message to user.registered")
     void shouldPublishToUserRegisteredTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("user-1", "mario@example.com", "hashedpw", UserRole.USER);
+      User user = new User("user-1", "paolo rossi", "mario@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
 
       ConsumerRecord<String, String> record = pollOne();
@@ -123,7 +123,7 @@ public class UserNotifierImplIT {
     @DisplayName("preserves the userId in the payload")
     void shouldPreserveUserId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("special-user-id", "test@example.com", "hashedpw", UserRole.USER);
+      User user = new User("special-user-id", "paolo bianchi", "test@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
 
       var node = objectMapper.readTree(pollOne().value());
@@ -134,7 +134,7 @@ public class UserNotifierImplIT {
     @DisplayName("preserves the email in the payload")
     void shouldPreserveEmail() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("user-2", "luigi@example.com", "hashedpw", UserRole.USER);
+      User user = new User("user-2", "mario rossi", "luigi@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
 
       var node = objectMapper.readTree(pollOne().value());
@@ -145,7 +145,7 @@ public class UserNotifierImplIT {
     @DisplayName("does not include the password hash in the payload")
     void shouldNotExposePasswordHash() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("user-3", "peach@example.com", "supersecrethashedpw", UserRole.USER);
+      User user = new User("user-3", "mario bianchi", "peach@example.com", "supersecrethashedpw");
       notifier.notifyUserRegistered(user);
 
       var node = objectMapper.readTree(pollOne().value());

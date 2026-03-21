@@ -41,6 +41,7 @@ public class GuildNotifierImplIT {
   public static final String GUILD_ID = "guildId";
   public static final String MEMBER_ID = "memberId";
   public static final String OCCURRED_ON = "occurredOn";
+  public static final String LEADER_ID = "leaderId";
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -120,7 +121,7 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.created")
     void shouldPublishToGuildCreatedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_CREATED);
-      notifier.notifyGuildCreated(new GuildCreated("guild-42", "The Brave"));
+      notifier.notifyGuildCreated(new GuildCreated("guild-42", LEADER_ID, "The Brave"));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -136,7 +137,7 @@ public class GuildNotifierImplIT {
     @DisplayName("preserves guildId and name in the payload")
     void shouldPreserveGuildIdAndName() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_CREATED);
-      notifier.notifyGuildCreated(new GuildCreated("my-guild", "Legends"));
+      notifier.notifyGuildCreated(new GuildCreated("my-guild", LEADER_ID, "Legends"));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(GUILD_ID).asText()).isEqualTo("my-guild");

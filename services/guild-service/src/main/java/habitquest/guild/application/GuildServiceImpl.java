@@ -35,7 +35,7 @@ public class GuildServiceImpl implements GuildService {
   public String createGuild(String name, String creatorAvatarId, String creatorNickname) {
     var guild = guildFactory.create(name, creatorAvatarId, creatorNickname);
     guildRepository.save(guild);
-    guildObserver.notifyGuildEvent(new GuildCreated(guild.getId(), name));
+    guildObserver.notifyGuildEvent(new GuildCreated(guild.getId(), creatorAvatarId, name));
     return guild.getId();
   }
 

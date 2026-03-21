@@ -11,7 +11,6 @@ import habitquest.edge.domain.User;
 import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
 import habitquest.edge.domain.UserExceptions.UserAlreadyExistsException;
 import habitquest.edge.domain.UserExceptions.UserNotFoundException;
-import habitquest.edge.domain.UserRole;
 import habitquest.edge.security.JwtAuthenticationFilter;
 import habitquest.edge.security.SecurityConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -36,6 +35,7 @@ class AuthControllerTest {
 
   @Autowired MockMvc mockMvc;
 
+  @MockitoBean AvatarClient avatarClient;
   @MockitoBean AuthService authService;
   @MockitoBean JwtService jwtService;
 
@@ -43,23 +43,24 @@ class AuthControllerTest {
   @MockitoBean RateLimiterRegistry rateLimiterRegistry;
 
   private static final String JWT_TOKEN = "eyJ.fake.token";
-
-  // Constants to avoid repeated string literals in tests
+  private static final String USER_ID = "user-123";
   private static final String TEST_EMAIL = "mario@example.com";
   private static final String TEST_PASSWORD = "password123";
   private static final String REGISTER_PATH = "/auth/register";
   private static final String LOGIN_PATH = "/auth/login";
+  private static final String NAME = "Mario Rossi";
 
-  // Helper to build JSON bodies for credentials (keeps newline like text blocks did)
-  private static String credentialsJson(String email, String password) {
-    return String.format("{\"email\":\"%s\",\"password\":\"%s\"}%n", email, password);
+  // Helper to build JSON bodies for credentials
+  private static String credentialsJson(String name, String email, String password) {
+    return String.format(
+        "{\"name\":\"%s\", \"email\":\"%s\",\"password\":\"%s\"}%n", name, email, password);
   }
 
   private final JwtService realJwtService =
       new JwtService("test-secret-key-minimum-32-chars!!", 3600L);
 
   private io.jsonwebtoken.Claims fakeClaims() {
-    User user = new User("user-1", TEST_EMAIL, "hash", UserRole.USER);
+    User user = new User("user-1", NAME, TEST_EMAIL, "hash");
     String token = realJwtService.generateToken(user);
     return realJwtService.validateAndExtract(token);
   }
@@ -81,30 +82,75 @@ class AuthControllerTest {
     @Test
     @DisplayName("201 con token per registrazione valida")
     void register_success_returns201() throws Exception {
-      when(authService.register(TEST_EMAIL, TEST_PASSWORD))
-          .thenReturn(new AuthResponse(JWT_TOKEN, "user-123"));
+      when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
 
       mockMvc
           .perform(
               post(REGISTER_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(TEST_EMAIL, TEST_PASSWORD)))
+                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.token").value(JWT_TOKEN))
-          .andExpect(jsonPath("$.userId").value("user-123"));
+          .andExpect(jsonPath("$.userId").value(USER_ID));
+    }
+
+    @Test
+    @DisplayName("chiama avatarClient con userId da authService e name dalla request")
+    void register_success_callsAvatarClientWithCorrectArgs() throws Exception {
+      when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
+
+      mockMvc.perform(
+          post(REGISTER_PATH)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)));
+
+      verify(avatarClient).createAvatar(USER_ID, NAME);
+    }
+
+    @Test
+    @DisplayName("non chiama avatarClient se la registrazione fallisce")
+    void register_authServiceFails_doesNotCallAvatarClient() throws Exception {
+      when(authService.register(anyString(), anyString(), anyString()))
+          .thenThrow(new UserAlreadyExistsException(TEST_EMAIL));
+
+      mockMvc.perform(
+          post(REGISTER_PATH)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)));
+
+      verify(avatarClient, never()).createAvatar(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("500 se avatarClient lancia AvatarCreationException")
+    void register_avatarClientFails_returns500() throws Exception {
+      when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
+      doThrow(new AvatarCreationException("avatar-service unreachable"))
+          .when(avatarClient)
+          .createAvatar(anyString(), anyString());
+
+      mockMvc
+          .perform(
+              post(REGISTER_PATH)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
+          .andExpect(status().isInternalServerError());
     }
 
     @Test
     @DisplayName("409 se email già registrata")
     void register_duplicateEmail_returns409() throws Exception {
-      when(authService.register(anyString(), anyString()))
+      when(authService.register(anyString(), anyString(), anyString()))
           .thenThrow(new UserAlreadyExistsException(TEST_EMAIL));
 
       mockMvc
           .perform(
               post(REGISTER_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(TEST_EMAIL, TEST_PASSWORD)))
+                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
           .andExpect(status().isConflict());
     }
 
@@ -115,7 +161,7 @@ class AuthControllerTest {
           .perform(
               post(REGISTER_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson("not-an-email", TEST_PASSWORD)))
+                  .content(credentialsJson(NAME, "not-an-email", TEST_PASSWORD)))
           .andExpect(status().isBadRequest());
     }
 
@@ -126,7 +172,7 @@ class AuthControllerTest {
           .perform(
               post(REGISTER_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(TEST_EMAIL, "short")))
+                  .content(credentialsJson(NAME, TEST_EMAIL, "short")))
           .andExpect(status().isBadRequest());
     }
   }
@@ -141,13 +187,13 @@ class AuthControllerTest {
     @DisplayName("200 con token per credenziali corrette")
     void login_success_returns200() throws Exception {
       when(authService.login(TEST_EMAIL, TEST_PASSWORD))
-          .thenReturn(new AuthResponse(JWT_TOKEN, "user-123"));
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
 
       mockMvc
           .perform(
               post(LOGIN_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(TEST_EMAIL, TEST_PASSWORD)))
+                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.token").value(JWT_TOKEN));
     }
@@ -162,7 +208,7 @@ class AuthControllerTest {
           .perform(
               post(LOGIN_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(TEST_EMAIL, TEST_PASSWORD)))
+                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
           .andExpect(status().isUnauthorized());
     }
 
@@ -176,7 +222,7 @@ class AuthControllerTest {
           .perform(
               post(LOGIN_PATH)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(TEST_EMAIL, "wrongpass")))
+                  .content(credentialsJson(NAME, TEST_EMAIL, "wrongpass")))
           .andExpect(status().isUnauthorized());
     }
   }

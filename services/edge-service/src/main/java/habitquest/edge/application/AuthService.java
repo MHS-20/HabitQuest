@@ -34,13 +34,13 @@ public class AuthService implements DomainService {
     this.userNotifier = userNotifier;
   }
 
-  public AuthResponse register(String email, String rawPassword) {
+  public AuthResponse register(String name, String email, String rawPassword) {
     if (userRepository.existsByEmail(email)) {
       throw new UserAlreadyExistsException(email);
     }
 
     String hash = passwordEncoder.encode(rawPassword);
-    User user = userRepository.save(userFactory.create(email, hash));
+    User user = userRepository.save(userFactory.create(name, email, hash));
     userNotifier.notifyUserRegistered(user);
     return new AuthResponse(jwtService.generateToken(user), user.getId());
   }
