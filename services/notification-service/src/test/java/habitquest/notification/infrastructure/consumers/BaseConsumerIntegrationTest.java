@@ -6,7 +6,9 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import habitquest.notification.infrastructure.repository.GuildMemberRepository;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.time.Duration;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
@@ -30,6 +32,7 @@ import org.springframework.test.context.TestPropertySource;
       "spring.mail.properties.mail.smtp.starttls.enable=false",
       "spring.mail.properties.mail.smtp.starttls.required=false"
     })
+@SuppressWarnings({"checkstyle:VisibilityModifier"})
 public abstract class BaseConsumerIntegrationTest {
 
   private static final int SMTP_PORT = 3025;
@@ -97,7 +100,7 @@ public abstract class BaseConsumerIntegrationTest {
   protected String subjectOf(MimeMessage msg) {
     try {
       return msg.getSubject();
-    } catch (Exception e) {
+    } catch (MessagingException e) {
       throw new RuntimeException(e);
     }
   }
@@ -105,7 +108,7 @@ public abstract class BaseConsumerIntegrationTest {
   protected String recipientOf(MimeMessage msg) {
     try {
       return msg.getAllRecipients()[0].toString();
-    } catch (Exception e) {
+    } catch (MessagingException e) {
       throw new RuntimeException(e);
     }
   }
@@ -113,7 +116,7 @@ public abstract class BaseConsumerIntegrationTest {
   protected String bodyOf(MimeMessage msg) {
     try {
       return msg.getContent().toString();
-    } catch (Exception e) {
+    } catch (MessagingException | IOException e) {
       throw new RuntimeException(e);
     }
   }

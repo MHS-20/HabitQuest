@@ -10,15 +10,11 @@ import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class UserEventConsumer implements EventConsumer {
-
-  private final UserEmailRepository userEmailRepository;
-  private final NotificationService notificationService;
+public class UserEventConsumer extends AvatarAwareEventConsumer {
 
   public UserEventConsumer(
       UserEmailRepository userEmailRepository, NotificationService notificationService) {
-    this.userEmailRepository = userEmailRepository;
-    this.notificationService = notificationService;
+    super(userEmailRepository, notificationService);
   }
 
   @Bean
@@ -29,11 +25,12 @@ public class UserEventConsumer implements EventConsumer {
               "Received UserRegistered: avatarId={}, email={}",
               message.avatarId(),
               message.email());
-      userEmailRepository.save(message.avatarId(), message.email());
-      notificationService.send(
-          message.email(),
-          "Benvenuto su HabitQuest!",
-          "Il tuo account è stato creato con successo. Buona avventura!");
+      super.getUserEmailRepository().save(message.avatarId(), message.email());
+      super.getNotificationService()
+          .send(
+              message.email(),
+              "Benvenuto su HabitQuest!",
+              "Il tuo account è stato creato con successo. Buona avventura!");
     };
   }
 

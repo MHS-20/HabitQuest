@@ -5,8 +5,8 @@ import habitquest.notification.infrastructure.repository.UserEmailRepository;
 
 public abstract class AvatarAwareEventConsumer implements EventConsumer {
 
-  protected final UserEmailRepository userEmailRepository;
-  protected final NotificationService notificationService;
+  private final UserEmailRepository userEmailRepository;
+  private final NotificationService notificationService;
 
   protected AvatarAwareEventConsumer(
       UserEmailRepository userEmailRepository, NotificationService notificationService) {
@@ -22,5 +22,13 @@ public abstract class AvatarAwareEventConsumer implements EventConsumer {
             () ->
                 logger()
                     .warn("Nessuna email trovata per avatarId={}, notifica non inviata", avatarId));
+  }
+
+  public UserEmailRepository getUserEmailRepository() {
+    return userEmailRepository;
+  }
+
+  public NotificationService getNotificationService() {
+    return notificationService;
   }
 }

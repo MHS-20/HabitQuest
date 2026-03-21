@@ -23,18 +23,21 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
 
+  public static final String AVATAR_1 = "avatar-1";
+  public static final String MAIL = "mario@example.com";
+  public static final String AVATAR_DEAD = "avatar.dead";
   @Autowired private NotificationService notificationService;
   @Autowired private KafkaTemplate<String, String> kafkaTemplate;
 
   @BeforeEach
   void setUp() {
     resetGreenMail();
-    userEmailRepository.save("avatar-1", "mario@example.com");
+    userEmailRepository.save(AVATAR_1, MAIL);
   }
 
   @Test
   void greenMailIsReachable() throws Exception {
-    notificationService.send("mario@example.com", "test", "test body");
+    notificationService.send(MAIL, "test", "test body");
     MimeMessage[] mails = waitForEmails(1);
     assertThat(mails).hasSize(1);
   }
@@ -59,7 +62,7 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
     KafkaTemplate<String, String> template =
         new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProps));
 
-    template.send("avatar.dead", "{\"avatarId\":\"test\",\"occurredOn\":\"2024-01-01T00:00:00Z\"}");
+    template.send(AVATAR_DEAD, "{\"avatarId\":\"test\",\"occurredOn\":\"2024-01-01T00:00:00Z\"}");
     template.flush();
 
     Map<String, Object> consumerProps = new HashMap<>();
@@ -72,7 +75,7 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
     consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
     try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProps)) {
-      consumer.subscribe(List.of("avatar.dead"));
+      consumer.subscribe(List.of(AVATAR_DEAD));
 
       Awaitility.await()
           .atMost(Duration.ofSeconds(10))
@@ -88,24 +91,22 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenLevelUpped_thenEmailSentWithNewLevel() throws Exception {
     publish(
         "avatar.level-upped",
-        new AvatarEventConsumer.LevelUppedMessage("avatar-1", 10, Instant.now()));
+        new AvatarEventConsumer.LevelUppedMessage(AVATAR_1, 10, Instant.now()));
     MimeMessage[] mails = waitForEmails(1);
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Livello aumentato!");
     assertThat(bodyOf(mails[0])).contains("10");
   }
 
   @Test
   void whenDead_thenEmailSentWithAvatarId() throws Exception {
-    assertThat(userEmailRepository.findEmailByUserId("avatar-1"))
-        .isPresent()
-        .hasValue("mario@example.com");
+    assertThat(userEmailRepository.findEmailByUserId(AVATAR_1)).isPresent().hasValue(MAIL);
 
-    publish("avatar.dead", new AvatarEventConsumer.DeadMessage("avatar-1", Instant.now()));
+    publish(AVATAR_DEAD, new AvatarEventConsumer.DeadMessage(AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Il tuo avatar è morto!");
   }
 
@@ -113,19 +114,18 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenSkillPointAssigned_thenEmailSentWithStatDetails() throws Exception {
     publish(
         "avatar.skill-point-assigned",
-        new AvatarEventConsumer.SkillPointAssignedMessage(
-            "avatar-1", "STRENGTH", 15, Instant.now()));
+        new AvatarEventConsumer.SkillPointAssignedMessage(AVATAR_1, "STRENGTH", 15, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Punto abilità assegnato!");
     assertThat(bodyOf(mails[0])).contains("STRENGTH").contains("15");
   }
 
   @Test
   void whenAvatarNotRegistered_thenNoEmailIsSent() {
-    publish("avatar.dead", new AvatarEventConsumer.DeadMessage("avatar-unknown", Instant.now()));
+    publish(AVATAR_DEAD, new AvatarEventConsumer.DeadMessage("avatar-unknown", Instant.now()));
     assertThat(greenMail.getReceivedMessages()).isEmpty();
   }
 }
