@@ -1,0 +1,92 @@
+spring:
+  mail:
+    host: localhost
+    port: 3025
+    username: test@habitquest.it
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+
+
+
+  cloud:
+    config:
+      enabled: false
+    stream:
+      kafka:
+        binder:
+          brokers: ""
+          configuration:
+            auto.offset.reset: earliest
+      binders:
+        kafka:
+          defaultCandidate: false
+      default-binder: kafka
+      default:
+        group: notification-service
+      bindings:
+        avatarLevelUpped-in-0:
+          destination: avatar.level-upped
+        avatarDead-in-0:
+          destination: avatar.dead
+        avatarSkillPointAssigned-in-0:
+          destination: avatar.skill-point-assigned
+
+        guildBattleStarted-in-0:
+          destination: guild.battle-started
+        guildBattleWon-in-0:
+          destination: guild.battle-won
+        guildBattleLost-in-0:
+          destination: guild.battle-lost
+
+        guildCreated-in-0:
+          destination: guild.created
+        guildDeleted-in-0:
+          destination: guild.deleted
+        guildJoined-in-0:
+          destination: guild.joined
+        guildLeft-in-0:
+          destination: guild.left
+        guildRemoved-in-0:
+          destination: guild.removed
+        guildRoleAssigned-in-0:
+          destination: guild.role-assigned
+        guildInviteSent-in-0:
+          destination: guild.invite-sent
+
+        marketplaceItemBought-in-0:
+          destination: marketplace.item-bought
+        marketplaceItemSold-in-0:
+          destination: marketplace.item-sold
+
+        questCreated-in-0:
+          destination: quest.created
+        questCompleted-in-0:
+          destination: quest.completed
+        questNotCompleted-in-0:
+          destination: quest.not-completed
+        questJoined-in-0:
+          destination: quest.joined
+        questLeft-in-0:
+          destination: quest.left
+
+        habitDeleted-in-0:
+          destination: habit.deleted
+        habitAttended-in-0:
+          destination: habit.attended
+        habitNotAttended-in-0:
+          destination: habit.not-attended
+
+        userRegistered-in-0:
+          destination: user.registered
+
+logging:
+  level:
+    habitquest: DEBUG
+    org.springframework.cloud.stream: DEBUG
+    org.springframework.mail: DEBUG
