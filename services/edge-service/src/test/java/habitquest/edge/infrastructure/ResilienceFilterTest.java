@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-@SuppressWarnings({"checkstyle:MethodName", "checkstyle:VisibilityModifier"})
+@SuppressWarnings({"checkstyle:VisibilityModifier"})
 @ExtendWith(MockitoExtension.class)
 class ResilienceFilterTest {
 
