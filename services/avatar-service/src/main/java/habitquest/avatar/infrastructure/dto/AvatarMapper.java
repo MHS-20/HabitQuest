@@ -21,7 +21,7 @@ public final class AvatarMapper {
 
   public static AvatarResponse toResponse(Avatar avatar) {
     return new AvatarResponse(
-        avatar.getId(),
+        avatar.getId().value(),
         avatar.getName(),
         toResponse(avatar.getMoney()),
         toResponse(avatar.getLevel()),
@@ -63,12 +63,12 @@ public final class AvatarMapper {
 
   public static InventoryResponse toResponse(Inventory inventory) {
     List<ItemResponse> items = inventory.getItems().stream().map(ItemMapper::toResponse).toList();
-    return new InventoryResponse(inventory.getId(), items);
+    return new InventoryResponse(inventory.getId().value(), items);
   }
 
   public static EquippedItemsResponse toResponse(EquippedItems equippedItems) {
     List<ItemResponse> items =
         equippedItems.getItems().stream().map(ItemMapper::toResponse).toList();
-    return new EquippedItemsResponse(equippedItems.getId(), items);
+    return new EquippedItemsResponse(equippedItems.getId().value(), items);
   }
 }

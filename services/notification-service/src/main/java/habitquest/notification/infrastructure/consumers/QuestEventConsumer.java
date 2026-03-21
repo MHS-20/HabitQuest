@@ -28,10 +28,8 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Nuova quest disponibile!",
-          "È stata creata una nuova quest: \""
-              + message.name()
-              + "\". Unisciti subito per partecipare!");
+          "New quest available!",
+          "A new quest has been created: \"" + message.name() + "\". Join now to participate!");
     };
   }
 
@@ -45,8 +43,8 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Quest completata!",
-          "Congratulazioni! Hai completato la quest \"" + message.questId() + "\".");
+          "Quest completed!",
+          "Congratulations! You completed the quest \"" + message.questId() + "\".");
     };
   }
 
@@ -56,8 +54,8 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
       logger().info("Received QuestNotCompleted: avatarId={}", message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Quest non completata",
-          "Purtroppo non hai completato la quest in tempo. Riprova con la prossima!");
+          "Quest not completed",
+          "Unfortunately you did not complete the quest in time. Try again next time!");
     };
   }
 
@@ -71,8 +69,8 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Sei entrato in una quest!",
-          "Ti sei unito alla quest \"" + message.questId() + "\". Buona fortuna!");
+          "You joined a quest!",
+          "You've joined the quest \"" + message.questId() + "\". Good luck!");
     };
   }
 
@@ -84,8 +82,8 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
               "Received QuestLeft: questId={}, avatarId={}", message.questId(), message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Hai abbandonato la quest",
-          "Hai abbandonato la quest \"" + message.questId() + "\".");
+          "You left the quest",
+          "You left the quest \"" + message.questId() + "\".");
     };
   }
 

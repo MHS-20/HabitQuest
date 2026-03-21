@@ -28,7 +28,7 @@ class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
-    assertThat(subjectOf(mails[0])).isEqualTo("Abitudine eliminata");
+    assertThat(subjectOf(mails[0])).isEqualTo("Habit removed");
     assertThat(bodyOf(mails[0])).contains(HABIT_ABC);
   }
 
@@ -41,7 +41,7 @@ class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
-    assertThat(subjectOf(mails[0])).isEqualTo("Abitudine completata!");
+    assertThat(subjectOf(mails[0])).isEqualTo("Habit completed!");
     assertThat(bodyOf(mails[0])).contains(HABIT_ABC);
   }
 
@@ -54,7 +54,7 @@ class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
-    assertThat(subjectOf(mails[0])).isEqualTo("Abitudine non completata");
-    assertThat(bodyOf(mails[0])).contains("Non mollare");
+    assertThat(subjectOf(mails[0])).isEqualTo("Habit missed");
+    assertThat(bodyOf(mails[0])).contains("Don't give up");
   }
 }

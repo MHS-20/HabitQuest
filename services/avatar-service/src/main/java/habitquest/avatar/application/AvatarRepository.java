@@ -1,5 +1,6 @@
 package habitquest.avatar.application;
 
+import common.ddd.Id;
 import common.ddd.Repository;
 import common.hexagonal.OutBoundPort;
 import habitquest.avatar.domain.avatar.Avatar;
@@ -10,9 +11,9 @@ import java.util.Optional;
 public interface AvatarRepository extends Repository {
   Avatar save(Avatar avatar);
 
-  Optional<Avatar> findById(String id);
+  Optional<Avatar> findById(Id<Avatar> id);
 
-  void deleteById(String id);
+  void deleteById(Id<Avatar> id);
 
   List<Avatar> search(AvatarSearchRequest criteria);
 }

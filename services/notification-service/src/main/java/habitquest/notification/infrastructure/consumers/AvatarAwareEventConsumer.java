@@ -19,9 +19,7 @@ public abstract class AvatarAwareEventConsumer implements EventConsumer {
         .findEmailByUserId(avatarId)
         .ifPresentOrElse(
             email -> notificationService.send(email, subject, body),
-            () ->
-                logger()
-                    .warn("Nessuna email trovata per avatarId={}, notifica non inviata", avatarId));
+            () -> logger().warn("No email found for avatarId={}, notification not sent", avatarId));
   }
 
   public UserEmailRepository getUserEmailRepository() {

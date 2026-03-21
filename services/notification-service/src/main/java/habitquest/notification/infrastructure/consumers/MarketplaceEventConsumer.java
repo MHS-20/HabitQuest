@@ -28,8 +28,8 @@ public class MarketplaceEventConsumer extends AvatarAwareEventConsumer {
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Acquisto completato!",
-          "Hai acquistato \"" + message.itemName() + "\" dal marketplace. Buon utilizzo!");
+          "Purchase completed!",
+          "You bought \"" + message.itemName() + "\" from the marketplace. Enjoy it!");
     };
   }
 
@@ -44,8 +44,8 @@ public class MarketplaceEventConsumer extends AvatarAwareEventConsumer {
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Oggetto venduto!",
-          "Hai venduto \"" + message.itemName() + "\" sul marketplace con successo!");
+          "Item sold!",
+          "You sold \"" + message.itemName() + "\" on the marketplace successfully!");
     };
   }
 

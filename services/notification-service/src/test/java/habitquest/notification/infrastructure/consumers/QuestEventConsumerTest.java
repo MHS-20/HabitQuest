@@ -24,13 +24,13 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "quest.created",
         new QuestEventConsumer.QuestCreatedMessage(
-            QUEST_1, AVATAR_1, "Uccidi il drago", Instant.now()));
+            QUEST_1, AVATAR_1, "Kill the dragon", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
-    assertThat(subjectOf(mails[0])).isEqualTo("Nuova quest disponibile!");
-    assertThat(bodyOf(mails[0])).contains("Uccidi il drago");
+    assertThat(subjectOf(mails[0])).isEqualTo("New quest available!");
+    assertThat(bodyOf(mails[0])).contains("Kill the dragon");
   }
 
   @Test
@@ -42,7 +42,7 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
-    assertThat(subjectOf(mails[0])).isEqualTo("Quest completata!");
+    assertThat(subjectOf(mails[0])).isEqualTo("Quest completed!");
   }
 
   @Test
@@ -53,8 +53,8 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(subjectOf(mails[0])).isEqualTo("Quest non completata");
-    assertThat(bodyOf(mails[0])).contains("Riprova");
+    assertThat(subjectOf(mails[0])).isEqualTo("Quest not completed");
+    assertThat(bodyOf(mails[0])).contains("Try again");
   }
 
   @Test
@@ -65,7 +65,7 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(subjectOf(mails[0])).isEqualTo("Sei entrato in una quest!");
+    assertThat(subjectOf(mails[0])).isEqualTo("You joined a quest!");
     assertThat(bodyOf(mails[0])).contains(QUEST_1);
   }
 
@@ -76,6 +76,6 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(subjectOf(mails[0])).isEqualTo("Hai abbandonato la quest");
+    assertThat(subjectOf(mails[0])).isEqualTo("You left the quest");
   }
 }

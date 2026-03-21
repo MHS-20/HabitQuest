@@ -25,8 +25,8 @@ public class AvatarEventConsumer extends AvatarAwareEventConsumer {
               "Received LevelUpped: avatarId={}, level={}", message.avatarId(), message.newLevel());
       sendToAvatar(
           message.avatarId(),
-          "Livello aumentato!",
-          "Congratulazioni! Hai raggiunto il livello " + message.newLevel() + "!");
+          "Level up!",
+          "Congratulations! You've reached level " + message.newLevel() + "!");
     };
   }
 
@@ -37,8 +37,8 @@ public class AvatarEventConsumer extends AvatarAwareEventConsumer {
       logger().info("### CONSUMER TRIGGERED: avatarDead, avatarId={}", message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Il tuo avatar è morto!",
-          "Il tuo avatar " + message.avatarId() + " è morto! Torna in gioco per rinascere.");
+          "Your avatar has died!",
+          "Your avatar " + message.avatarId() + " has died! Come back to the game to resurrect.");
     };
   }
 
@@ -53,10 +53,10 @@ public class AvatarEventConsumer extends AvatarAwareEventConsumer {
               message.newValue());
       sendToAvatar(
           message.avatarId(),
-          "Punto abilità assegnato!",
-          "Hai assegnato un punto abilità a "
+          "Skill point assigned!",
+          "You assigned a skill point to "
               + message.statType()
-              + ". Il nuovo valore è "
+              + ". The new value is "
               + message.newValue()
               + ".");
     };

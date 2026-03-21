@@ -153,7 +153,11 @@ jobs:
 
       - name: Update Grype DB
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          for i in 1 2 3; do
+            curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+              | sh -s -- -b /usr/local/bin && break
+            sleep 5
+          done
           grype db update
 
       - name: Scan Docker image

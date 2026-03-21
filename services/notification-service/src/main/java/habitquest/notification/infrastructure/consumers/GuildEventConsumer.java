@@ -27,8 +27,8 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
           .info("Received GuildCreated: guildId={}, name={}", message.guildId(), message.name());
       sendToAvatar(
           message.leaderId(),
-          "Guild creata!",
-          "La guild " + message.name() + " è stata creata con successo!");
+          "Guild created!",
+          "The guild " + message.name() + " has been created successfully!");
       super.getGuildMemberRepository().addMember(message.guildId(), message.leaderId());
     };
   }
@@ -39,8 +39,8 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
       logger().info("Received GuildDeleted: guildId={}", message.guildId());
       sendToGuild(
           message.guildId(),
-          "Guild eliminata",
-          "La guild " + message.guildId() + " è stata eliminata.");
+          "Guild deleted",
+          "The guild " + message.guildId() + " has been deleted.");
       super.getGuildMemberRepository().removeGuild(message.guildId());
     };
   }
@@ -56,8 +56,8 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
       super.getGuildMemberRepository().addMember(message.guildId(), message.memberId());
       sendToAvatar(
           message.memberId(),
-          "Benvenuto nella guild!",
-          "Ti sei unito alla guild " + message.guildId() + "! Buona avventura insieme.");
+          "Welcome to the guild!",
+          "You've joined the guild " + message.guildId() + "! Have a great adventure together.");
     };
   }
 
@@ -70,8 +70,8 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
       super.getGuildMemberRepository().removeMember(message.guildId(), message.memberId());
       sendToAvatar(
           message.memberId(),
-          "Hai lasciato la guild",
-          "Hai lasciato la guild " + message.guildId() + ".");
+          "You left the guild",
+          "You left the guild " + message.guildId() + ".");
     };
   }
 
@@ -86,8 +86,8 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
       super.getGuildMemberRepository().removeMember(message.guildId(), message.memberId());
       sendToAvatar(
           message.memberId(),
-          "Sei stato rimosso dalla guild",
-          "Sei stato rimosso dalla guild " + message.guildId() + ".");
+          "You have been removed from the guild",
+          "You have been removed from the guild " + message.guildId() + ".");
     };
   }
 
@@ -102,10 +102,10 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
               message.roleName());
       sendToAvatar(
           message.memberId(),
-          "Nuovo ruolo assegnato!",
-          "Ti è stato assegnato il ruolo \""
+          "New role assigned!",
+          "You have been assigned the role \""
               + message.roleName()
-              + "\" nella guild \""
+              + "\" in the guild \""
               + message.guildId()
               + "\".");
     };
@@ -121,8 +121,8 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
               message.targetAvatarId());
       sendToAvatar(
           message.targetAvatarId(),
-          "Invito nella guild!",
-          "Hai ricevuto un invito a unirti alla guild " + message.guildId() + ".");
+          "Guild invitation!",
+          "You've received an invitation to join the guild " + message.guildId() + ".");
     };
   }
 
