@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import habitquest.edge.domain.User;
-import habitquest.edge.domain.UserRole;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -106,6 +105,7 @@ class GatewayRoutingTest {
         () -> LOCALHOST_PREFIX + trackingService.getPort());
     registry.add(
         "spring.cloud.gateway.mvc.routes[4].predicates[0]", () -> "Path=/api/v1/habits/**");
+    registry.add("services.avatar.base-url", () -> LOCALHOST_PREFIX + avatarService.getPort());
   }
 
   @Autowired MockMvc mockMvc;
@@ -117,7 +117,7 @@ class GatewayRoutingTest {
 
   @BeforeEach
   void setUp() {
-    User user = new User("user-1", "mario@example.com", "hash", UserRole.USER);
+    User user = new User("user-1", "mario rossi", "mario@example.com", "hash");
     authHeader = "Bearer " + jwtService.generateToken(user);
   }
 

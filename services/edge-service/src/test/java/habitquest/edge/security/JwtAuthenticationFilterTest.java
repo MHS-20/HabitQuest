@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import habitquest.edge.domain.User;
-import habitquest.edge.domain.UserRole;
 import habitquest.edge.infrastructure.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest
 @Import({
   JwtAuthenticationFilter.class,
-  SecurityConfig.class, // your HttpSecurity config
-  JwtAuthenticationFilterTest.TestConfig.class // provides real JwtService
+  SecurityConfig.class,
+  JwtAuthenticationFilterTest.TestConfig.class
 })
 @TestPropertySource(
     properties = {
@@ -34,7 +33,7 @@ class JwtAuthenticationFilterTest {
 
   @Autowired MockMvc mockMvc;
   private final JwtService jwtService = new JwtService("test-secret-key-minimum-32-chars!!", 3600L);
-  private final User user = new User("user-1", "mario@example.com", "hash", UserRole.USER);
+  private final User user = new User("user-1", "mario rossi", "mario@example.com", "hash");
 
   @Configuration
   @SuppressWarnings("PMD.TestClassWithoutTestCases")

@@ -58,10 +58,10 @@ class AvatarServiceImplTest {
     @DisplayName("delegates to factory, saves, and returns the new id")
     void createsAndReturnsId() {
       Avatar avatar = stubAvatar();
-      when(avatarFactory.create(AVATAR_NAME)).thenReturn(avatar);
+      when(avatarFactory.create(AVATAR_ID, AVATAR_NAME)).thenReturn(avatar);
       when(avatarRepository.save(avatar)).thenReturn(avatar);
 
-      String id = service.createAvatar(AVATAR_NAME);
+      String id = service.createAvatar(AVATAR_ID, AVATAR_NAME);
 
       assertThat(id).isEqualTo(AVATAR_ID);
       verify(avatarRepository).save(avatar);

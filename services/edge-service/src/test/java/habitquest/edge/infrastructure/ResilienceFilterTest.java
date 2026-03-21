@@ -31,7 +31,6 @@ class ResilienceFilterTest {
 
   ResilienceFilter resilienceFilter;
 
-  // istanze reali riusate dai test happy-path e service-name
   private RateLimiter defaultRateLimiter;
   private CircuitBreaker defaultCircuitBreaker;
 

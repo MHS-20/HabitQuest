@@ -12,7 +12,7 @@ import java.util.List;
 public interface AvatarService {
 
   // --- Avatar ---
-  String createAvatar(String name);
+  String createAvatar(String id, String name);
 
   Avatar getAvatarById(String id) throws AvatarNotFoundException;
 

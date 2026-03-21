@@ -4,29 +4,25 @@ import common.ddd.Aggregate;
 
 public class User implements Aggregate<String> {
 
-  private final String id;
+  private final String avatarId;
   private final String email;
+  private String name;
   private String passwordHash;
-  private UserRole role;
 
-  public User(String id, String email, String passwordHash, UserRole role) {
-    this.id = id;
+  public User(String avatarId, String name, String email, String passwordHash) {
+    this.avatarId = avatarId;
     this.email = email;
     this.passwordHash = passwordHash;
-    this.role = role;
+    this.name = name;
   }
 
   public boolean matchesPassword(String candidateHash) {
     return this.passwordHash.equals(candidateHash);
   }
 
-  public void changeRole(UserRole newRole) {
-    this.role = newRole;
-  }
-
   @Override
   public String getId() {
-    return id;
+    return avatarId;
   }
 
   public String getEmail() {
@@ -37,7 +33,7 @@ public class User implements Aggregate<String> {
     return passwordHash;
   }
 
-  public UserRole getRole() {
-    return role;
+  public String getName() {
+    return name;
   }
 }

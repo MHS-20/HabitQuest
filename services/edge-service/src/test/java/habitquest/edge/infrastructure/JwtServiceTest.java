@@ -3,7 +3,6 @@ package habitquest.edge.infrastructure;
 import static org.assertj.core.api.Assertions.*;
 
 import habitquest.edge.domain.User;
-import habitquest.edge.domain.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +21,7 @@ class JwtServiceTest {
   @BeforeEach
   void setUp() {
     jwtService = new JwtService(SECRET, EXPIRATION);
-    user = new User("user-abc", "mario@example.com", "$2a$hashed", UserRole.USER);
+    user = new User("user-abc", "mario rossi", "mario@example.com", "$2a$hashed");
   }
 
   // ── generateToken ─────────────────────────────────────────────────────────
@@ -36,7 +35,6 @@ class JwtServiceTest {
 
     assertThat(claims.getSubject()).isEqualTo("user-abc");
     assertThat(claims.get("email", String.class)).isEqualTo("mario@example.com");
-    assertThat(claims.get("role", String.class)).isEqualTo("USER");
   }
 
   // ── isValid ───────────────────────────────────────────────────────────────

@@ -51,13 +51,13 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 201 with the new avatar id")
     void shouldReturn201WithId() throws Exception {
-      when(avatarService.createAvatar(AVATAR_NAME)).thenReturn(AVATAR_ID);
+      when(avatarService.createAvatar(AVATAR_ID, AVATAR_NAME)).thenReturn(AVATAR_ID);
 
       mockMvc
           .perform(
               post("/api/v1/avatars")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\": \"Hero\"}"))
+                  .content("{\"id\":\"avatar-1\",\"name\": \"Hero\"}"))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.id").value(AVATAR_ID));
     }
@@ -65,16 +65,16 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("delegates name to the service")
     void shouldDelegateNameToService() throws Exception {
-      when(avatarService.createAvatar(anyString())).thenReturn(AVATAR_ID);
+      when(avatarService.createAvatar(anyString(), anyString())).thenReturn(AVATAR_ID);
 
       mockMvc
           .perform(
               post("/api/v1/avatars")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\": \"Hero\"}"))
+                  .content("{\"id\":\"avatar-1\",\"name\": \"Hero\"}"))
           .andExpect(status().isCreated());
 
-      verify(avatarService).createAvatar("Hero");
+      verify(avatarService).createAvatar(AVATAR_ID, "Hero");
     }
   }
 
