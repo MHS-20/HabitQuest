@@ -1,6 +1,7 @@
 package habitquest.avatar.domain.avatar;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
@@ -9,13 +10,12 @@ import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Avatar implements Aggregate<String> {
-  private final String id;
+public class Avatar implements Aggregate<Id<Avatar>> {
+  private final Id<Avatar> id;
   private String name;
   private Money money;
   private Inventory inventory;
   private EquippedItems equippedItems;
-  // private Experience experience;
   private Level level;
   private AvatarHealth health;
   private AvatarMana mana;
@@ -23,13 +23,16 @@ public class Avatar implements Aggregate<String> {
   private List<Spell> spells;
 
   public Avatar(
-      String name, String id, String invetoryId, String equippedItemsId, String avatarStatsId) {
+      String name,
+      Id<Avatar> id,
+      Id<Inventory> invetoryId,
+      Id<EquippedItems> equippedItemsId,
+      Id<AvatarStats> avatarStatsId) {
     this.id = id;
     this.name = name;
     this.money = new Money(0);
     this.inventory = new Inventory(invetoryId);
     this.equippedItems = new EquippedItems(equippedItemsId);
-    // this.experience = new Experience(0);
     this.level = new Level(1, new Experience(0), new Experience(100));
     this.health = new AvatarHealth(new Health(100), new Health(100));
     this.mana = new AvatarMana(new Mana(50), new Mana(50));
@@ -38,12 +41,11 @@ public class Avatar implements Aggregate<String> {
   }
 
   public Avatar(
-      String id,
+      Id<Avatar> id,
       String name,
       Money money,
       Inventory inventory,
       EquippedItems equippedItems,
-      Experience experience,
       Level level,
       AvatarHealth health,
       AvatarMana mana,
@@ -54,7 +56,6 @@ public class Avatar implements Aggregate<String> {
     this.money = money;
     this.inventory = inventory;
     this.equippedItems = equippedItems;
-    // this.experience = experience;
     this.level = level;
     this.health = health;
     this.mana = mana;
@@ -63,7 +64,7 @@ public class Avatar implements Aggregate<String> {
   }
 
   @Override
-  public String getId() {
+  public Id<Avatar> getId() {
     return this.id;
   }
 

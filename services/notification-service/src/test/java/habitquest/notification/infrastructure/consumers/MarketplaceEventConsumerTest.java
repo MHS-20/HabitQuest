@@ -20,13 +20,13 @@ class MarketplaceEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "marketplace.item-bought",
         new MarketplaceEventConsumer.ItemBoughtMessage(
-            "mkt-1", "Spada del Destino", "avatar-1", Instant.now()));
+            "mkt-1", "Sword of Destiny", "avatar-1", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
-    assertThat(subjectOf(mails[0])).isEqualTo("Acquisto completato!");
-    assertThat(bodyOf(mails[0])).contains("Spada del Destino");
+    assertThat(subjectOf(mails[0])).isEqualTo("Purchase completed!");
+    assertThat(bodyOf(mails[0])).contains("Sword of Destiny");
   }
 
   @Test
@@ -34,12 +34,12 @@ class MarketplaceEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "marketplace.item-sold",
         new MarketplaceEventConsumer.ItemSoldMessage(
-            "mkt-1", "Scudo Antico", "avatar-1", Instant.now()));
+            "mkt-1", "Ancient Shield", "avatar-1", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
-    assertThat(subjectOf(mails[0])).isEqualTo("Oggetto venduto!");
-    assertThat(bodyOf(mails[0])).contains("Scudo Antico");
+    assertThat(subjectOf(mails[0])).isEqualTo("Item sold!");
+    assertThat(bodyOf(mails[0])).contains("Ancient Shield");
   }
 }

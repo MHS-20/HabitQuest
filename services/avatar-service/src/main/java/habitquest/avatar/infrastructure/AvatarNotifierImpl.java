@@ -41,7 +41,7 @@ public class AvatarNotifierImpl implements AvatarNotifier {
 
   @Override
   public void notifyDead(Dead event) {
-    DeadMessage message = new DeadMessage(event.avatarId(), Instant.now());
+    DeadMessage message = new DeadMessage(event.avatarId().value(), Instant.now());
 
     LOG.info("Publishing Dead event: avatarId={}", message.avatarId());
     boolean sent = streamBridge.send(DEAD_BINDING, message);

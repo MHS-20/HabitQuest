@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
+import habitquest.avatar.domain.items.EquippedItems;
+import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.items.Weapon;
+import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +44,17 @@ class AvatarServiceImplTest {
 
   /** A fresh avatar wired to the same IDs every test uses. */
   private Avatar stubAvatar() {
-    return new Avatar(AVATAR_NAME, AVATAR_ID, INVENTORY_ID, EQUIPPED_ID, STATS_ID);
+    return new Avatar(
+        new Id<>(AVATAR_ID),
+        AVATAR_NAME,
+        new Money(0),
+        new Inventory(new Id<>(INVENTORY_ID)),
+        new EquippedItems(new Id<>(EQUIPPED_ID)),
+        new Level(1, new Experience(0), new Experience(100)),
+        new AvatarHealth(new Health(100), new Health(100)),
+        new AvatarMana(new Mana(50), new Mana(50)),
+        new AvatarStats(new Id<>(STATS_ID), 10, 10, 10),
+        List.of());
   }
 
   @BeforeEach
@@ -58,12 +72,12 @@ class AvatarServiceImplTest {
     @DisplayName("delegates to factory, saves, and returns the new id")
     void createsAndReturnsId() {
       Avatar avatar = stubAvatar();
-      when(avatarFactory.create(AVATAR_ID, AVATAR_NAME)).thenReturn(avatar);
+      when(avatarFactory.create(new Id<>(AVATAR_ID), AVATAR_NAME)).thenReturn(avatar);
       when(avatarRepository.save(avatar)).thenReturn(avatar);
 
-      String id = service.createAvatar(AVATAR_ID, AVATAR_NAME);
+      Id<Avatar> id = service.createAvatar(new Id<>(AVATAR_ID), AVATAR_NAME);
 
-      assertThat(id).isEqualTo(AVATAR_ID);
+      assertThat(id.value()).isEqualTo(AVATAR_ID);
       verify(avatarRepository).save(avatar);
     }
   }
@@ -78,17 +92,17 @@ class AvatarServiceImplTest {
     @DisplayName("returns the avatar when found")
     void found() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getAvatarById(AVATAR_ID)).isSameAs(avatar);
+      assertThat(service.getAvatarById(new Id<>(AVATAR_ID))).isSameAs(avatar);
     }
 
     @Test
     @DisplayName("throws AvatarNotFoundExpection when id is unknown")
     void notFound() {
-      when(avatarRepository.findById(UNKNOWN_ID)).thenReturn(Optional.empty());
+      when(avatarRepository.findById(new Id<>(UNKNOWN_ID))).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.getAvatarById(UNKNOWN_ID))
+      assertThatThrownBy(() -> service.getAvatarById(new Id<>(UNKNOWN_ID)))
           .isInstanceOf(AvatarNotFoundException.class);
     }
   }
@@ -101,19 +115,19 @@ class AvatarServiceImplTest {
     @Test
     @DisplayName("calls deleteById after confirming existence")
     void deletes() throws AvatarNotFoundException {
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(stubAvatar()));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(stubAvatar()));
 
-      service.deleteAvatar(AVATAR_ID);
+      service.deleteAvatar(new Id<>(AVATAR_ID));
 
-      verify(avatarRepository).deleteById(AVATAR_ID);
+      verify(avatarRepository).deleteById(new Id<>(AVATAR_ID));
     }
 
     @Test
     @DisplayName("throws when id not found")
     void throwsWhenNotFound() {
-      when(avatarRepository.findById(BAD_ID)).thenReturn(Optional.empty());
+      when(avatarRepository.findById(new Id<>(BAD_ID))).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.deleteAvatar(BAD_ID))
+      assertThatThrownBy(() -> service.deleteAvatar(new Id<>(BAD_ID)))
           .isInstanceOf(AvatarNotFoundException.class);
     }
   }
@@ -128,9 +142,9 @@ class AvatarServiceImplTest {
     @DisplayName("renames the avatar and persists it")
     void renames() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.updateName(AVATAR_ID, "Mage");
+      service.updateName(new Id<>(AVATAR_ID), "Mage");
 
       assertThat(avatar.getName()).isEqualTo("Mage");
       verify(avatarRepository).save(avatar);
@@ -147,9 +161,9 @@ class AvatarServiceImplTest {
     @DisplayName("earnMoney increases money and saves")
     void earnMoney() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.earnMoney(AVATAR_ID, 50);
+      service.earnMoney(new Id<>(AVATAR_ID), 50);
 
       assertThat(avatar.getMoney().amount()).isEqualTo(50);
       verify(avatarRepository).save(avatar);
@@ -161,9 +175,9 @@ class AvatarServiceImplTest {
       Avatar avatar = stubAvatar();
       // give the avatar some money first via the domain method
       avatar.earnMoney(100);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.spendMoney(AVATAR_ID, 40);
+      service.spendMoney(new Id<>(AVATAR_ID), 40);
 
       assertThat(avatar.getMoney().amount()).isEqualTo(60);
       verify(avatarRepository).save(avatar);
@@ -180,9 +194,9 @@ class AvatarServiceImplTest {
     @DisplayName("reduces avatar health and saves without firing Dead event when alive")
     void damageSurvived() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.applyDamage(AVATAR_ID, 10);
+      service.applyDamage(new Id<>(AVATAR_ID), 10);
 
       assertThat(avatar.getHealth().current().value()).isEqualTo(90);
       verify(avatarObserver, never()).notifyAvatarEvent(any(Dead.class));
@@ -194,14 +208,14 @@ class AvatarServiceImplTest {
     void damageLethal() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       avatar.earnMoney(200); // prevent money from going negative on death
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.applyDamage(AVATAR_ID, 9999);
+      service.applyDamage(new Id<>(AVATAR_ID), 9999);
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(Dead.class);
-      assertThat(((Dead) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
+      assertThat(((Dead) captor.getValue()).avatarId().value()).isEqualTo(AVATAR_ID);
     }
   }
 
@@ -214,9 +228,9 @@ class AvatarServiceImplTest {
     void heals() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       avatar.takeDamage(40);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.healAvatar(AVATAR_ID, 20);
+      service.healAvatar(new Id<>(AVATAR_ID), 20);
 
       assertThat(avatar.getHealth().current().value()).isEqualTo(80);
       verify(avatarRepository).save(avatar);
@@ -231,9 +245,9 @@ class AvatarServiceImplTest {
     @DisplayName("spendMana reduces mana and saves")
     void spendMana() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.spendMana(AVATAR_ID, 10);
+      service.spendMana(new Id<>(AVATAR_ID), 10);
 
       assertThat(avatar.getMana().amount().value()).isEqualTo(40);
       verify(avatarRepository).save(avatar);
@@ -244,9 +258,9 @@ class AvatarServiceImplTest {
     void restoreMana() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       avatar.spendMana(20);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.restoreMana(AVATAR_ID, 10);
+      service.restoreMana(new Id<>(AVATAR_ID), 10);
 
       assertThat(avatar.getMana().amount().value()).isEqualTo(40);
       verify(avatarRepository).save(avatar);
@@ -263,9 +277,9 @@ class AvatarServiceImplTest {
     @DisplayName("does NOT fire LevelUpped event when threshold is not reached")
     void noLevelUp() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.grantExperience(AVATAR_ID, 50);
+      service.grantExperience(new Id<>(AVATAR_ID), 50);
 
       verify(avatarObserver, never()).notifyAvatarEvent(any(LevelUpped.class));
       verify(avatarRepository).save(avatar);
@@ -275,9 +289,9 @@ class AvatarServiceImplTest {
     @DisplayName("fires LevelUpped event when avatar crosses the threshold")
     void levelUp() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.grantExperience(AVATAR_ID, 100);
+      service.grantExperience(new Id<>(AVATAR_ID), 100);
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
@@ -294,9 +308,9 @@ class AvatarServiceImplTest {
     @DisplayName("fires SkillPointAssigned for strength and saves")
     void firesEvent() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.increaseStrength(AVATAR_ID);
+      service.increaseStrength(new Id<>(AVATAR_ID));
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
@@ -313,9 +327,9 @@ class AvatarServiceImplTest {
     @DisplayName("fires SkillPointAssigned for defense and saves")
     void firesEvent() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.increaseDefense(AVATAR_ID);
+      service.increaseDefense(new Id<>(AVATAR_ID));
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
@@ -332,9 +346,9 @@ class AvatarServiceImplTest {
     @DisplayName("fires SkillPointAssigned for intelligence and saves")
     void firesEvent() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.increaseIntelligence(AVATAR_ID);
+      service.increaseIntelligence(new Id<>(AVATAR_ID));
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
@@ -355,9 +369,9 @@ class AvatarServiceImplTest {
     @DisplayName("addToInventory adds item and saves")
     void addToInventory() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.addToInventory(AVATAR_ID, sword);
+      service.addToInventory(new Id<>(AVATAR_ID), sword);
 
       assertThat(avatar.getInventory().getItems()).contains(sword);
       verify(avatarRepository).save(avatar);
@@ -368,9 +382,9 @@ class AvatarServiceImplTest {
     void removeItem() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       avatar.addItemToInventory(sword);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.removeItem(AVATAR_ID, sword);
+      service.removeItem(new Id<>(AVATAR_ID), sword);
 
       assertThat(avatar.getInventory().getItems()).doesNotContain(sword);
       verify(avatarRepository).save(avatar);
@@ -381,9 +395,9 @@ class AvatarServiceImplTest {
     void equipItem() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       avatar.addItemToInventory(sword);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.equipItem(AVATAR_ID, sword);
+      service.equipItem(new Id<>(AVATAR_ID), sword);
 
       assertThat(avatar.getEquippedItems().getItems()).contains(sword);
       assertThat(avatar.getInventory().getItems()).doesNotContain(sword);
@@ -396,9 +410,9 @@ class AvatarServiceImplTest {
       Avatar avatar = stubAvatar();
       avatar.addItemToInventory(sword);
       avatar.equipItem(sword);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
 
-      service.unequipItem(AVATAR_ID, sword);
+      service.unequipItem(new Id<>(AVATAR_ID), sword);
 
       assertThat(avatar.getInventory().getItems()).contains(sword);
       assertThat(avatar.getEquippedItems().getItems()).doesNotContain(sword);
@@ -416,40 +430,40 @@ class AvatarServiceImplTest {
     @DisplayName("getName delegates to avatar.getName()")
     void getName() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getName(AVATAR_ID)).isEqualTo(AVATAR_NAME);
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getName(new Id<>(AVATAR_ID))).isEqualTo(AVATAR_NAME);
     }
 
     @Test
     @DisplayName("getMoney delegates to avatar.getMoney()")
     void getMoney() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getMoney(AVATAR_ID).amount()).isZero();
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getMoney(new Id<>(AVATAR_ID)).amount()).isZero();
     }
 
     @Test
     @DisplayName("getLevel delegates to avatar.getLevel()")
     void getLevel() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getLevel(AVATAR_ID).levelNumber()).isEqualTo(1);
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getLevel(new Id<>(AVATAR_ID)).levelNumber()).isEqualTo(1);
     }
 
     @Test
     @DisplayName("getHealth delegates to avatar.getHealth()")
     void getHealth() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getHealth(AVATAR_ID).current().value()).isEqualTo(100);
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getHealth(new Id<>(AVATAR_ID)).current().value()).isEqualTo(100);
     }
 
     @Test
     @DisplayName("getMana delegates to avatar.getMana()")
     void getMana() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getMana(AVATAR_ID).amount().value()).isEqualTo(50);
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getMana(new Id<>(AVATAR_ID)).amount().value()).isEqualTo(50);
     }
 
     @Test
@@ -457,16 +471,16 @@ class AvatarServiceImplTest {
     void getExperience() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       avatar.gainExperience(30);
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getExperience(AVATAR_ID).amount()).isEqualTo(30);
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getExperience(new Id<>(AVATAR_ID)).amount()).isEqualTo(30);
     }
 
     @Test
     @DisplayName("getAvatarStats delegates to avatar.getAvatarStats()")
     void getAvatarStats() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      assertThat(service.getAvatarStats(AVATAR_ID)).isSameAs(avatar.getAvatarStats());
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      assertThat(service.getAvatarStats(new Id<>(AVATAR_ID))).isSameAs(avatar.getAvatarStats());
     }
   }
 

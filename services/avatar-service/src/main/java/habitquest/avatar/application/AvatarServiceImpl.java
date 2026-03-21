@@ -1,5 +1,6 @@
 package habitquest.avatar.application;
 
+import common.ddd.Id;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
@@ -27,15 +28,15 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public String createAvatar(String id, String name) {
+  public Id<Avatar> createAvatar(Id<Avatar> id, String name) {
     Avatar avatar = this.avatarFactory.create(id, name);
     avatarRepository.save(avatar);
     return avatar.getId();
   }
 
   @Override
-  public Avatar getAvatarById(String id) throws AvatarNotFoundException {
-    return avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id));
+  public Avatar getAvatarById(Id<Avatar> id) throws AvatarNotFoundException {
+    return avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id.value()));
   }
 
   @Override
@@ -44,107 +45,107 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void deleteAvatar(String id) throws AvatarNotFoundException {
-    avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id));
+  public void deleteAvatar(Id<Avatar> id) throws AvatarNotFoundException {
+    avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id.value()));
     avatarRepository.deleteById(id);
   }
 
   @Override
-  public String getName(String avatarId) throws AvatarNotFoundException {
+  public String getName(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getName();
   }
 
   @Override
-  public Money getMoney(String avatarId) throws AvatarNotFoundException {
+  public Money getMoney(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getMoney();
   }
 
   @Override
-  public Inventory getInventory(String avatarId) throws AvatarNotFoundException {
+  public Inventory getInventory(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getInventory();
   }
 
   @Override
-  public EquippedItems getEquippedItems(String avatarId) throws AvatarNotFoundException {
+  public EquippedItems getEquippedItems(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getEquippedItems();
   }
 
   @Override
-  public Experience getExperience(String avatarId) throws AvatarNotFoundException {
+  public Experience getExperience(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getLevel().currentExperience();
   }
 
   @Override
-  public Level getLevel(String avatarId) throws AvatarNotFoundException {
+  public Level getLevel(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getLevel();
   }
 
   @Override
-  public AvatarHealth getHealth(String avatarId) throws AvatarNotFoundException {
+  public AvatarHealth getHealth(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getHealth();
   }
 
   @Override
-  public AvatarMana getMana(String avatarId) throws AvatarNotFoundException {
+  public AvatarMana getMana(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getMana();
   }
 
   @Override
-  public AvatarStats getAvatarStats(String avatarId) throws AvatarNotFoundException {
+  public AvatarStats getAvatarStats(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getAvatarStats();
   }
 
   @Override
-  public void updateName(String avatarId, String name) throws AvatarNotFoundException {
+  public void updateName(Id<Avatar> avatarId, String name) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.rename(name);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void spendMoney(String avatarId, Integer money) throws AvatarNotFoundException {
+  public void spendMoney(Id<Avatar> avatarId, Integer money) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.spendMoney(money);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void earnMoney(String avatarId, Integer money) throws AvatarNotFoundException {
+  public void earnMoney(Id<Avatar> avatarId, Integer money) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.earnMoney(money);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void addToInventory(String avatarId, Item item) throws AvatarNotFoundException {
+  public void addToInventory(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.addItemToInventory(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void removeItem(String avatarId, Item item) throws AvatarNotFoundException {
+  public void removeItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.removeItemFromInventory(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void equipItem(String avatarId, Item item) throws AvatarNotFoundException {
+  public void equipItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.equipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void unequipItem(String avatarId, Item item) throws AvatarNotFoundException {
+  public void unequipItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.unequipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public boolean applyDamage(String avatarId, Integer amount) throws AvatarNotFoundException {
+  public boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     boolean died = avatar.takeDamage(amount);
     if (died) {
@@ -155,28 +156,28 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void healAvatar(String avatarId, Integer amount) throws AvatarNotFoundException {
+  public void healAvatar(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.heal(amount);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void spendMana(String avatarId, Integer amount) throws AvatarNotFoundException {
+  public void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.spendMana(amount);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void restoreMana(String avatarId, Integer amount) throws AvatarNotFoundException {
+  public void restoreMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.restoreMana(amount);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void grantExperience(String avatarId, Integer amount) throws AvatarNotFoundException {
+  public void grantExperience(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     Level levelBefore = avatar.getLevel();
     avatar.gainExperience(amount);
@@ -188,7 +189,7 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void increaseStrength(String avatarId) throws AvatarNotFoundException {
+  public void increaseStrength(Id<Avatar> avatarId) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.incrementStrength();
     avatarRepository.save(avatar);
@@ -197,7 +198,7 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void increaseDefense(String avatarId) throws AvatarNotFoundException {
+  public void increaseDefense(Id<Avatar> avatarId) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.incrementDefense();
     avatarRepository.save(avatar);
@@ -206,7 +207,7 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void increaseIntelligence(String avatarId) throws AvatarNotFoundException {
+  public void increaseIntelligence(Id<Avatar> avatarId) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.incrementIntelligence();
     avatarRepository.save(avatar);

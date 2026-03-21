@@ -1,10 +1,14 @@
 package habitquest.avatar.domain.factory;
 
+import common.ddd.Id;
 import habitquest.avatar.domain.avatar.*;
+import habitquest.avatar.domain.items.EquippedItems;
+import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.spells.Blizzard;
 import habitquest.avatar.domain.spells.FireBall;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.spells.Thunder;
+import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +20,13 @@ public class AvatarFactory {
     this.idGenerator = idGenerator;
   }
 
-  public Avatar create(String id, String name) {
-    return new Avatar(name, id, idGenerator.nextId(), idGenerator.nextId(), idGenerator.nextId());
+  public Avatar create(Id<Avatar> id, String name) {
+    return new Avatar(
+        name,
+        id,
+        new Id<Inventory>(idGenerator.nextId()),
+        new Id<EquippedItems>(idGenerator.nextId()),
+        new Id<AvatarStats>(idGenerator.nextId()));
   }
 
   public Optional<Spell> createSpellForLevel(Integer level) {

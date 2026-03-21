@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.ddd.Id;
 import habitquest.avatar.application.AvatarNotFoundException;
 import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
@@ -39,7 +40,17 @@ public class AvatarControllerIT {
   private static final String UNKNOWN_ID = "ghost-99";
 
   private Avatar stubAvatar() {
-    return new Avatar(AVATAR_NAME, AVATAR_ID, "inv-1", "equip-1", "stats-1");
+    return new Avatar(
+        new Id<>(AVATAR_ID),
+        AVATAR_NAME,
+        new Money(0),
+        new Inventory(new Id<>("inv-1")),
+        new EquippedItems(new Id<>("equip-1")),
+        new Level(1, new Experience(0), new Experience(100)),
+        new AvatarHealth(new Health(100), new Health(100)),
+        new AvatarMana(new Mana(50), new Mana(50)),
+        new AvatarStats(new Id<>("stats-1"), 10, 10, 10),
+        List.of());
   }
 
   // ── POST /api/v1/avatars ──────────────────────────────────────────────────────
@@ -51,7 +62,8 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 201 with the new avatar id")
     void shouldReturn201WithId() throws Exception {
-      when(avatarService.createAvatar(AVATAR_ID, AVATAR_NAME)).thenReturn(AVATAR_ID);
+      when(avatarService.createAvatar(new Id<>(AVATAR_ID), AVATAR_NAME))
+          .thenReturn(new Id<>(AVATAR_ID));
 
       mockMvc
           .perform(
@@ -65,7 +77,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("delegates name to the service")
     void shouldDelegateNameToService() throws Exception {
-      when(avatarService.createAvatar(anyString(), anyString())).thenReturn(AVATAR_ID);
+      when(avatarService.createAvatar(any(Id.class), anyString())).thenReturn(new Id<>(AVATAR_ID));
 
       mockMvc
           .perform(
@@ -74,11 +86,11 @@ public class AvatarControllerIT {
                   .content("{\"id\":\"avatar-1\",\"name\": \"Hero\"}"))
           .andExpect(status().isCreated());
 
-      verify(avatarService).createAvatar(AVATAR_ID, "Hero");
+      verify(avatarService).createAvatar(new Id<>(AVATAR_ID), "Hero");
     }
   }
 
-  // ── GET /api/v1/avatars/{id} ──────────────────────────────────────────────────
+  // ── GET /api/v1/avatars/{id} ─────────────────��────────────────────────────────
 
   @Nested
   @DisplayName("GET /api/v1/avatars/{id}")
@@ -87,7 +99,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with avatar data when found")
     void shouldReturn200WhenFound() throws Exception {
-      when(avatarService.getAvatarById(AVATAR_ID)).thenReturn(stubAvatar());
+      when(avatarService.getAvatarById(new Id<>(AVATAR_ID))).thenReturn(stubAvatar());
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}", AVATAR_ID))
@@ -98,7 +110,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(avatarService.getAvatarById(UNKNOWN_ID))
+      when(avatarService.getAvatarById(new Id<>(UNKNOWN_ID)))
           .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
 
       mockMvc.perform(get("/api/v1/avatars/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
@@ -190,17 +202,19 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 on successful deletion")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarService).deleteAvatar(AVATAR_ID);
+      doNothing().when(avatarService).deleteAvatar(new Id<>(AVATAR_ID));
 
       mockMvc.perform(delete("/api/v1/avatars/{id}", AVATAR_ID)).andExpect(status().isNoContent());
 
-      verify(avatarService).deleteAvatar(AVATAR_ID);
+      verify(avatarService).deleteAvatar(new Id<>(AVATAR_ID));
     }
 
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new AvatarNotFoundException(UNKNOWN_ID)).when(avatarService).deleteAvatar(UNKNOWN_ID);
+      doThrow(new AvatarNotFoundException(UNKNOWN_ID))
+          .when(avatarService)
+          .deleteAvatar(new Id<>(UNKNOWN_ID));
 
       mockMvc.perform(delete("/api/v1/avatars/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
     }
@@ -215,7 +229,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates new name to service")
     void shouldReturn204AndDelegate() throws Exception {
-      doNothing().when(avatarService).updateName(eq(AVATAR_ID), anyString());
+      doNothing().when(avatarService).updateName(eq(new Id<>(AVATAR_ID)), anyString());
 
       mockMvc
           .perform(
@@ -224,7 +238,7 @@ public class AvatarControllerIT {
                   .content("{\"name\": \"NewHero\"}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).updateName(AVATAR_ID, "NewHero");
+      verify(avatarService).updateName(new Id<>(AVATAR_ID), "NewHero");
     }
 
     @Test
@@ -232,7 +246,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnBlankName() throws Exception {
       doThrow(new IllegalArgumentException("Name cannot be null or blank"))
           .when(avatarService)
-          .updateName(eq(AVATAR_ID), eq(""));
+          .updateName(eq(new Id<>(AVATAR_ID)), eq(""));
 
       mockMvc
           .perform(
@@ -253,7 +267,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with money amount")
     void shouldReturnMoney() throws Exception {
-      when(avatarService.getMoney(AVATAR_ID)).thenReturn(new Money(250));
+      when(avatarService.getMoney(new Id<>(AVATAR_ID))).thenReturn(new Money(250));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/money", AVATAR_ID))
@@ -271,7 +285,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarService).earnMoney(AVATAR_ID, 100);
+      doNothing().when(avatarService).earnMoney(new Id<>(AVATAR_ID), 100);
 
       mockMvc
           .perform(
@@ -280,7 +294,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 100}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).earnMoney(AVATAR_ID, 100);
+      verify(avatarService).earnMoney(new Id<>(AVATAR_ID), 100);
     }
 
     @Test
@@ -288,7 +302,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnNonPositiveAmount() throws Exception {
       doThrow(new IllegalArgumentException("Amount must be positive"))
           .when(avatarService)
-          .earnMoney(AVATAR_ID, 0);
+          .earnMoney(new Id<>(AVATAR_ID), 0);
 
       mockMvc
           .perform(
@@ -308,7 +322,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 on success")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarService).spendMoney(AVATAR_ID, 50);
+      doNothing().when(avatarService).spendMoney(new Id<>(AVATAR_ID), 50);
 
       mockMvc
           .perform(
@@ -317,7 +331,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 50}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).spendMoney(AVATAR_ID, 50);
+      verify(avatarService).spendMoney(new Id<>(AVATAR_ID), 50);
     }
 
     @Test
@@ -325,7 +339,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnInsufficientFunds() throws Exception {
       doThrow(new IllegalStateException("Not enough money"))
           .when(avatarService)
-          .spendMoney(AVATAR_ID, 9999);
+          .spendMoney(new Id<>(AVATAR_ID), 9999);
 
       mockMvc
           .perform(
@@ -347,7 +361,7 @@ public class AvatarControllerIT {
     @DisplayName("returns 200 with current level number")
     void shouldReturnLevel() throws Exception {
       Level level = new Level(3, new Experience(50), new Experience(200));
-      when(avatarService.getLevel(AVATAR_ID)).thenReturn(level);
+      when(avatarService.getLevel(new Id<>(AVATAR_ID))).thenReturn(level);
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/level", AVATAR_ID))
@@ -368,7 +382,7 @@ public class AvatarControllerIT {
     @DisplayName("returns 200 with current and max health")
     void shouldReturnHealth() throws Exception {
       AvatarHealth health = new AvatarHealth(new Health(75), new Health(100));
-      when(avatarService.getHealth(AVATAR_ID)).thenReturn(health);
+      when(avatarService.getHealth(new Id<>(AVATAR_ID))).thenReturn(health);
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/health", AVATAR_ID))
@@ -387,7 +401,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates damage amount")
     void shouldApplyDamage() throws Exception {
-      when(avatarService.applyDamage(AVATAR_ID, 30)).thenReturn(false);
+      when(avatarService.applyDamage(new Id<>(AVATAR_ID), 30)).thenReturn(false);
 
       mockMvc
           .perform(
@@ -396,7 +410,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 30}"))
           .andExpect(status().is2xxSuccessful());
 
-      verify(avatarService).applyDamage(AVATAR_ID, 30);
+      verify(avatarService).applyDamage(new Id<>(AVATAR_ID), 30);
     }
   }
 
@@ -409,7 +423,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates heal amount")
     void shouldHealAvatar() throws Exception {
-      doNothing().when(avatarService).healAvatar(AVATAR_ID, 20);
+      doNothing().when(avatarService).healAvatar(new Id<>(AVATAR_ID), 20);
 
       mockMvc
           .perform(
@@ -418,7 +432,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 20}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).healAvatar(AVATAR_ID, 20);
+      verify(avatarService).healAvatar(new Id<>(AVATAR_ID), 20);
     }
   }
 
@@ -432,7 +446,7 @@ public class AvatarControllerIT {
     @DisplayName("returns 200 with current and max mana")
     void shouldReturnMana() throws Exception {
       AvatarMana mana = new AvatarMana(new Mana(30), new Mana(50));
-      when(avatarService.getMana(AVATAR_ID)).thenReturn(mana);
+      when(avatarService.getMana(new Id<>(AVATAR_ID))).thenReturn(mana);
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/mana", AVATAR_ID))
@@ -451,7 +465,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 on success")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarService).spendMana(AVATAR_ID, 10);
+      doNothing().when(avatarService).spendMana(new Id<>(AVATAR_ID), 10);
 
       mockMvc
           .perform(
@@ -466,7 +480,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnInsufficientMana() throws Exception {
       doThrow(new IllegalArgumentException("Cannot subtract more mana than available"))
           .when(avatarService)
-          .spendMana(AVATAR_ID, 999);
+          .spendMana(new Id<>(AVATAR_ID), 999);
 
       mockMvc
           .perform(
@@ -486,7 +500,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates restore amount")
     void shouldRestoreMana() throws Exception {
-      doNothing().when(avatarService).restoreMana(AVATAR_ID, 15);
+      doNothing().when(avatarService).restoreMana(new Id<>(AVATAR_ID), 15);
 
       mockMvc
           .perform(
@@ -495,7 +509,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 15}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).restoreMana(AVATAR_ID, 15);
+      verify(avatarService).restoreMana(new Id<>(AVATAR_ID), 15);
     }
   }
 
@@ -508,7 +522,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates XP amount")
     void shouldGrantExperience() throws Exception {
-      doNothing().when(avatarService).grantExperience(AVATAR_ID, 500);
+      doNothing().when(avatarService).grantExperience(new Id<>(AVATAR_ID), 500);
 
       mockMvc
           .perform(
@@ -517,7 +531,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 500}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).grantExperience(AVATAR_ID, 500);
+      verify(avatarService).grantExperience(new Id<>(AVATAR_ID), 500);
     }
   }
 
@@ -530,7 +544,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with experience amount")
     void shouldReturnExperience() throws Exception {
-      when(avatarService.getExperience(AVATAR_ID)).thenReturn(new Experience(350));
+      when(avatarService.getExperience(new Id<>(AVATAR_ID))).thenReturn(new Experience(350));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/experience", AVATAR_ID))
@@ -541,7 +555,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(avatarService.getExperience(UNKNOWN_ID))
+      when(avatarService.getExperience(new Id<>(UNKNOWN_ID)))
           .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
 
       mockMvc
@@ -559,7 +573,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and adds weapon to inventory")
     void shouldAddWeapon() throws Exception {
-      doNothing().when(avatarService).addToInventory(eq(AVATAR_ID), any(Item.class));
+      doNothing().when(avatarService).addToInventory(eq(new Id<>(AVATAR_ID)), any(Item.class));
 
       mockMvc
           .perform(
@@ -571,7 +585,7 @@ public class AvatarControllerIT {
                                   """))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).addToInventory(eq(AVATAR_ID), any(Weapon.class));
+      verify(avatarService).addToInventory(eq(new Id<>(AVATAR_ID)), any(Weapon.class));
     }
 
     @Test
@@ -598,7 +612,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 on successful removal")
     void shouldRemoveItem() throws Exception {
-      doNothing().when(avatarService).removeItem(eq(AVATAR_ID), any(Item.class));
+      doNothing().when(avatarService).removeItem(eq(new Id<>(AVATAR_ID)), any(Item.class));
 
       mockMvc
           .perform(
@@ -621,9 +635,9 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with inventory items")
     void shouldReturnInventory() throws Exception {
-      Inventory inventory = new Inventory("inv-1");
+      Inventory inventory = new Inventory(new Id<>("inv-1"));
       inventory.addItem(new Weapon("Iron Sword", "A basic sword", 15));
-      when(avatarService.getInventory(AVATAR_ID)).thenReturn(inventory);
+      when(avatarService.getInventory(new Id<>(AVATAR_ID))).thenReturn(inventory);
 
       mockMvc.perform(get("/api/v1/avatars/{id}/inventory", AVATAR_ID)).andExpect(status().isOk());
     }
@@ -638,8 +652,8 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with equipped items list")
     void shouldReturnEquippedItems() throws Exception {
-      EquippedItems equippedItems = new EquippedItems("equip-1");
-      when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems);
+      EquippedItems equippedItems = new EquippedItems(new Id<>("equip-1"));
+      when(avatarService.getEquippedItems(new Id<>(AVATAR_ID))).thenReturn(equippedItems);
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_ID))
@@ -649,7 +663,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(avatarService.getEquippedItems(UNKNOWN_ID))
+      when(avatarService.getEquippedItems(new Id<>(UNKNOWN_ID)))
           .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
 
       mockMvc
@@ -667,7 +681,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldEquipItem() throws Exception {
-      doNothing().when(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
+      doNothing().when(avatarService).equipItem(eq(new Id<>(AVATAR_ID)), any(Item.class));
 
       mockMvc
           .perform(
@@ -679,7 +693,7 @@ public class AvatarControllerIT {
                                   """))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
+      verify(avatarService).equipItem(eq(new Id<>(AVATAR_ID)), any(Item.class));
     }
 
     @Test
@@ -687,7 +701,7 @@ public class AvatarControllerIT {
     void shouldReturn400WhenItemNotInInventory() throws Exception {
       doThrow(new IllegalStateException("Item not in inventory"))
           .when(avatarService)
-          .equipItem(eq(AVATAR_ID), any(Item.class));
+          .equipItem(eq(new Id<>(AVATAR_ID)), any(Item.class));
 
       mockMvc
           .perform(
@@ -711,7 +725,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldUnequipItem() throws Exception {
-      doNothing().when(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
+      doNothing().when(avatarService).unequipItem(eq(new Id<>(AVATAR_ID)), any(Item.class));
 
       mockMvc
           .perform(
@@ -723,7 +737,7 @@ public class AvatarControllerIT {
                                   """))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
+      verify(avatarService).unequipItem(eq(new Id<>(AVATAR_ID)), any(Item.class));
     }
   }
 
@@ -736,13 +750,13 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldIncreaseStrength() throws Exception {
-      doNothing().when(avatarService).increaseStrength(AVATAR_ID);
+      doNothing().when(avatarService).increaseStrength(new Id<>(AVATAR_ID));
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/strength", AVATAR_ID))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).increaseStrength(AVATAR_ID);
+      verify(avatarService).increaseStrength(new Id<>(AVATAR_ID));
     }
 
     @Test
@@ -750,7 +764,7 @@ public class AvatarControllerIT {
     void shouldReturn404WhenAvatarMissing() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_ID))
           .when(avatarService)
-          .increaseStrength(UNKNOWN_ID);
+          .increaseStrength(new Id<>(UNKNOWN_ID));
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/strength", UNKNOWN_ID))
@@ -767,13 +781,13 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldIncreaseDefense() throws Exception {
-      doNothing().when(avatarService).increaseDefense(AVATAR_ID);
+      doNothing().when(avatarService).increaseDefense(new Id<>(AVATAR_ID));
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/defense", AVATAR_ID))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).increaseDefense(AVATAR_ID);
+      verify(avatarService).increaseDefense(new Id<>(AVATAR_ID));
     }
 
     @Test
@@ -781,7 +795,7 @@ public class AvatarControllerIT {
     void shouldReturn404WhenAvatarMissing() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_ID))
           .when(avatarService)
-          .increaseDefense(UNKNOWN_ID);
+          .increaseDefense(new Id<>(UNKNOWN_ID));
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/defense", UNKNOWN_ID))
@@ -798,13 +812,13 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldIncreaseIntelligence() throws Exception {
-      doNothing().when(avatarService).increaseIntelligence(AVATAR_ID);
+      doNothing().when(avatarService).increaseIntelligence(new Id<>(AVATAR_ID));
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/intelligence", AVATAR_ID))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).increaseIntelligence(AVATAR_ID);
+      verify(avatarService).increaseIntelligence(new Id<>(AVATAR_ID));
     }
 
     @Test
@@ -812,7 +826,7 @@ public class AvatarControllerIT {
     void shouldReturn404WhenAvatarMissing() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_ID))
           .when(avatarService)
-          .increaseIntelligence(UNKNOWN_ID);
+          .increaseIntelligence(new Id<>(UNKNOWN_ID));
 
       mockMvc
           .perform(post("/api/v1/avatars/{id}/stats/intelligence", UNKNOWN_ID))
@@ -829,8 +843,8 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with avatar stats")
     void shouldReturnStats() throws Exception {
-      AvatarStats stats = new AvatarStats("stats-1", 10, 8, 12);
-      when(avatarService.getAvatarStats(AVATAR_ID)).thenReturn(stats);
+      AvatarStats stats = new AvatarStats(new Id<>("stats-1"), 10, 8, 12);
+      when(avatarService.getAvatarStats(new Id<>(AVATAR_ID))).thenReturn(stats);
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/stats", AVATAR_ID))
@@ -843,7 +857,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(avatarService.getAvatarStats(UNKNOWN_ID))
+      when(avatarService.getAvatarStats(new Id<>(UNKNOWN_ID)))
           .thenThrow(new AvatarNotFoundException(UNKNOWN_ID));
 
       mockMvc
