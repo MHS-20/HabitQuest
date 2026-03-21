@@ -29,8 +29,8 @@ public class UserEventConsumer extends AvatarAwareEventConsumer {
       super.getNotificationService()
           .send(
               message.email(),
-              "Benvenuto su HabitQuest!",
-              "Il tuo account è stato creato con successo. Buona avventura!");
+              "Welcome to HabitQuest!",
+              "Your account has been created successfully. Enjoy your adventure!");
     };
   }
 

@@ -3,6 +3,7 @@ package habitquest.avatar.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.ddd.Id;
 import habitquest.avatar.application.AvatarRepository;
 import habitquest.avatar.domain.avatar.Experience;
 import habitquest.avatar.domain.avatar.Level;
@@ -118,7 +119,7 @@ public class AvatarNotifierImplIT {
     void shouldPublishToLevelUppedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_LEVEL_UPPED);
       Level level = new Level(5, new Experience(0), new Experience(500));
-      notifier.notifyLevelUpped(new LevelUpped(AVATAR_ID, level));
+      notifier.notifyLevelUpped(new LevelUpped(new Id<>(AVATAR_ID), level));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -133,7 +134,7 @@ public class AvatarNotifierImplIT {
     void shouldIncludeCorrectLevelNumber() throws Exception {
       subscribeAndSeekToEnd(TOPIC_LEVEL_UPPED);
       Level level = new Level(10, new Experience(0), new Experience(1000));
-      notifier.notifyLevelUpped(new LevelUpped(AVATAR_ID, level));
+      notifier.notifyLevelUpped(new LevelUpped(new Id<>(AVATAR_ID), level));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("newLevel").asInt()).isEqualTo(10);
@@ -150,7 +151,7 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes a message to avatar.dead")
     void shouldPublishToDeadTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_DEAD);
-      notifier.notifyDead(new Dead("avatar-42"));
+      notifier.notifyDead(new Dead(new Id<>("avatar-42")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -164,14 +165,14 @@ public class AvatarNotifierImplIT {
     @DisplayName("preserves the avatarId in the payload")
     void shouldPreserveAvatarId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_DEAD);
-      notifier.notifyDead(new Dead("special-avatar-id"));
+      notifier.notifyDead(new Dead(new Id<>("special-avatar-id")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("avatarId").asText()).isEqualTo("special-avatar-id");
     }
   }
 
-  // ── notifySkillPointAssigned ──────────────────────────────────────────────────
+  // ── notifySkillPointAssigned ──────────────────────────────────────��───────────
 
   @Nested
   @DisplayName("notifySkillPointAssigned")
@@ -181,7 +182,8 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes a Strength assignment to avatar.skill-point-assigned")
     void shouldPublishStrengthAssignment() throws Exception {
       subscribeAndSeekToEnd(TOPIC_SKILL_POINT);
-      notifier.notifySkillPointAssigned(new SkillPointAssigned(AVATAR_ID, new Strength(15)));
+      notifier.notifySkillPointAssigned(
+          new SkillPointAssigned(new Id<>(AVATAR_ID), new Strength(15)));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -196,7 +198,8 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes a Defense assignment with the correct stat type")
     void shouldPublishDefenseAssignment() throws Exception {
       subscribeAndSeekToEnd(TOPIC_SKILL_POINT);
-      notifier.notifySkillPointAssigned(new SkillPointAssigned(AVATAR_ID, new Defense(8)));
+      notifier.notifySkillPointAssigned(
+          new SkillPointAssigned(new Id<>(AVATAR_ID), new Defense(8)));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("statType").asText()).isEqualTo("Defense");
@@ -207,7 +210,8 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes an Intelligence assignment with the correct stat type")
     void shouldPublishIntelligenceAssignment() throws Exception {
       subscribeAndSeekToEnd(TOPIC_SKILL_POINT);
-      notifier.notifySkillPointAssigned(new SkillPointAssigned(AVATAR_ID, new Intelligence(20)));
+      notifier.notifySkillPointAssigned(
+          new SkillPointAssigned(new Id<>(AVATAR_ID), new Intelligence(20)));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("statType").asText()).isEqualTo("Intelligence");

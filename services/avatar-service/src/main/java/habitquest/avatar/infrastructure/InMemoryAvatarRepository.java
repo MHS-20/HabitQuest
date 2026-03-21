@@ -1,5 +1,6 @@
 package habitquest.avatar.infrastructure;
 
+import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.avatar.application.AvatarRepository;
 import habitquest.avatar.application.AvatarSearchRequest;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Adapter
 public class InMemoryAvatarRepository implements AvatarRepository {
-  private final Map<String, Avatar> store = new ConcurrentHashMap<>();
+  private final Map<Id<Avatar>, Avatar> store = new ConcurrentHashMap<>();
 
   @Override
   public Avatar save(Avatar avatar) {
@@ -21,12 +22,12 @@ public class InMemoryAvatarRepository implements AvatarRepository {
   }
 
   @Override
-  public Optional<Avatar> findById(String id) {
+  public Optional<Avatar> findById(Id<Avatar> id) {
     return Optional.ofNullable(store.get(id));
   }
 
   @Override
-  public void deleteById(String id) {
+  public void deleteById(Id<Avatar> id) {
     store.remove(id);
   }
 

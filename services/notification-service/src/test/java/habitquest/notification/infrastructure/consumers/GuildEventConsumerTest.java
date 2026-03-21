@@ -33,10 +33,10 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("leader@example.com");
-    assertThat(subjectOf(mails[0])).isEqualTo("Guild creata!");
+    assertThat(subjectOf(mails[0])).isEqualTo("Guild created!");
     assertThat(bodyOf(mails[0])).contains("I Draghi");
 
-    // Il leader deve essere aggiunto come membro
+    // The leader should be added as a member
     assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).contains(LEADER_1);
   }
 
@@ -51,7 +51,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("member1@example.com");
-    assertThat(subjectOf(mails[0])).isEqualTo("Benvenuto nella guild!");
+    assertThat(subjectOf(mails[0])).isEqualTo("Welcome to the guild!");
 
     assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).contains(MEMBER_1);
   }
@@ -67,7 +67,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(subjectOf(mails[0])).isEqualTo("Hai lasciato la guild");
+    assertThat(subjectOf(mails[0])).isEqualTo("You left the guild");
     assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).doesNotContain(MEMBER_1);
   }
 
@@ -83,7 +83,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(subjectOf(mails[0])).isEqualTo("Sei stato rimosso dalla guild");
+    assertThat(subjectOf(mails[0])).isEqualTo("You have been removed from the guild");
     assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).doesNotContain(MEMBER_1);
   }
 
@@ -96,13 +96,13 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
 
     publish("guild.deleted", new GuildEventConsumer.GuildDeletedMessage(GUILD_1, Instant.now()));
 
-    // Due membri → due mail
+    // Two members → two emails
     MimeMessage[] mails = waitForEmails(2);
 
     assertThat(mails).hasSize(2);
-    assertThat(mails).allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("Guild eliminata"));
+    assertThat(mails).allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("Guild deleted"));
 
-    // Dopo la cancellazione la guild non deve più esistere nella repository
+    // After deletion the guild should not exist in the repository
     assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).isEmpty();
   }
 
@@ -117,7 +117,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(subjectOf(mails[0])).isEqualTo("Nuovo ruolo assegnato!");
+    assertThat(subjectOf(mails[0])).isEqualTo("New role assigned!");
     assertThat(bodyOf(mails[0])).contains("VICE_LEADER");
   }
 
@@ -132,7 +132,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("member1@example.com");
-    assertThat(subjectOf(mails[0])).isEqualTo("Invito nella guild!");
+    assertThat(subjectOf(mails[0])).isEqualTo("Guild invitation!");
     assertThat(bodyOf(mails[0])).contains(GUILD_1);
   }
 }

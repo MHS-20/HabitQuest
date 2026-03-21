@@ -23,10 +23,10 @@ public class HabitEventConsumer extends AvatarAwareEventConsumer {
       logger().info("Received HabitDeleted: habitId={}", message.habitId());
       sendToAvatar(
           message.avatarId(),
-          "Abitudine eliminata",
-          "L'abitudine \""
+          "Habit removed",
+          "The habit \""
               + message.habitId()
-              + "\" è stata eliminata. Se è stata un'abitudine importante, considera di crearne una nuova!");
+              + "\" has been removed. If it was important, consider creating a new one!");
     };
   }
 
@@ -35,13 +35,13 @@ public class HabitEventConsumer extends AvatarAwareEventConsumer {
     return message -> {
       logger()
           .info(
-              "Received HabitAttended: habitId={}, avatarId={}",
+              "Received HabitAttended: habitId={}, avatarId= {}",
               message.habitId(),
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Abitudine completata!",
-          "Ottimo lavoro! Hai completato l'abitudine \"" + message.habitId() + "\" oggi.");
+          "Habit completed!",
+          "Great job! You completed the habit \"" + message.habitId() + "\" today.");
     };
   }
 
@@ -55,8 +55,8 @@ public class HabitEventConsumer extends AvatarAwareEventConsumer {
               message.avatarId());
       sendToAvatar(
           message.avatarId(),
-          "Abitudine non completata",
-          "Hai mancato l'abitudine \"" + message.habitId() + "\" oggi. Non mollare!");
+          "Habit missed",
+          "You missed the habit \"" + message.habitId() + "\" today. Don't give up!");
     };
   }
 

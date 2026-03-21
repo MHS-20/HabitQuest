@@ -30,8 +30,8 @@ public class BattleEventConsumer extends GuildAwareEventConsumer {
               message.guildId());
       sendToGuild(
           message.guildId(),
-          "La tua guild è in battaglia!",
-          "La battaglia \"" + message.battleId() + "\" è iniziata per la tua guild. Forza!");
+          "Your guild is in battle!",
+          "The battle \"" + message.battleId() + "\" has started for your guild. Fight on!");
     };
   }
 
@@ -43,8 +43,8 @@ public class BattleEventConsumer extends GuildAwareEventConsumer {
               "Received BattleWon: battleId={}, guildId={}", message.battleId(), message.guildId());
       sendToGuild(
           message.guildId(),
-          "Vittoria! La tua guild ha vinto!",
-          "Congratulazioni! La vostra guild ha vinto la battaglia \"" + message.battleId() + "\"!");
+          "Victory! Your guild won!",
+          "Congratulations! Your guild won the battle \"" + message.battleId() + "\"!");
     };
   }
 
@@ -58,10 +58,10 @@ public class BattleEventConsumer extends GuildAwareEventConsumer {
               message.guildId());
       sendToGuild(
           message.guildId(),
-          "La tua guild ha perso la battaglia",
-          "Purtroppo la vostra guild ha perso la battaglia \""
+          "Your guild lost the battle",
+          "Unfortunately your guild lost the battle \""
               + message.battleId()
-              + "\". Ci rifaremo!");
+              + "\". We'll get them next time!");
     };
   }
 

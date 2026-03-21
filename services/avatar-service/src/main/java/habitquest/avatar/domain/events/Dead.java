@@ -1,3 +1,6 @@
 package habitquest.avatar.domain.events;
 
-public record Dead(String avatarId) implements AvatarEvent {}
+import common.ddd.Id;
+import habitquest.avatar.domain.avatar.Avatar;
+
+public record Dead(Id<Avatar> avatarId) implements AvatarEvent {}

@@ -25,8 +25,8 @@ class UserEventConsumerTest extends BaseConsumerIntegrationTest {
 
     assertThat(mails).hasSize(1);
     assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
-    assertThat(subjectOf(mails[0])).isEqualTo("Benvenuto su HabitQuest!");
-    assertThat(bodyOf(mails[0])).contains("creato con successo");
+    assertThat(subjectOf(mails[0])).isEqualTo("Welcome to HabitQuest!");
+    assertThat(bodyOf(mails[0])).contains("created successfully");
   }
 
   @Test

@@ -16,11 +16,11 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
   @BeforeEach
   void setUp() {
     resetGreenMail();
-    // Tre membri registrati con email
+    // Three registered members with email addresses
     userEmailRepository.save("avatar-1", "guerriero@example.com");
     userEmailRepository.save("avatar-2", "mago@example.com");
     userEmailRepository.save("avatar-3", "ladro@example.com");
-    // Tutti e tre nella stessa guild
+    // All three in the same guild
     guildMemberRepository.addMember(GUILD_1, "avatar-1");
     guildMemberRepository.addMember(GUILD_1, "avatar-2");
     guildMemberRepository.addMember(GUILD_1, "avatar-3");
@@ -34,7 +34,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
     assertThat(mails)
-        .allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("La tua guild è in battaglia!"));
+        .allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("Your guild is in battle!"));
     assertThat(Stream.of(mails).map(this::recipientOf))
         .containsExactlyInAnyOrder(
             "guerriero@example.com", "mago@example.com", "ladro@example.com");
@@ -48,8 +48,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
     assertThat(mails)
-        .allSatisfy(
-            mail -> assertThat(subjectOf(mail)).isEqualTo("Vittoria! La tua guild ha vinto!"));
+        .allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("Victory! Your guild won!"));
     assertThat(mails).allSatisfy(mail -> assertThat(bodyOf(mail)).contains(BATTLE_1));
   }
 
@@ -61,9 +60,9 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
     assertThat(mails)
-        .allSatisfy(
-            mail -> assertThat(subjectOf(mail)).isEqualTo("La tua guild ha perso la battaglia"));
-    assertThat(mails).allSatisfy(mail -> assertThat(bodyOf(mail)).contains("Ci rifaremo"));
+        .allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("Your guild lost the battle"));
+    assertThat(mails)
+        .allSatisfy(mail -> assertThat(bodyOf(mail)).contains("We'll get them next time"));
   }
 
   @Test
