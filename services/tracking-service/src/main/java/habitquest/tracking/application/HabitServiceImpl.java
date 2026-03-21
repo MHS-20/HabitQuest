@@ -43,7 +43,7 @@ public class HabitServiceImpl implements HabitService {
   public Habit createDailyHabit(String avatarId, String name, String description) {
     Habit habit = habitFactory.createDailyHabit(avatarId, name, description);
     Habit saved = habitRepository.save(habit);
-    appendHistory(new HabitCreated(saved), "daily recurrence");
+    appendHistory(new HabitCreated(saved, saved.getAvatarId()), "daily recurrence");
     return saved;
   }
 
@@ -52,7 +52,8 @@ public class HabitServiceImpl implements HabitService {
       String avatarId, String title, String description, DayOfWeek dayOfWeek) {
     Habit habit = habitFactory.createWeeklyHabit(avatarId, title, description, dayOfWeek);
     Habit saved = habitRepository.save(habit);
-    appendHistory(new HabitCreated(saved), "weekly recurrence day=" + dayOfWeek);
+    appendHistory(
+        new HabitCreated(saved, saved.getAvatarId()), "weekly recurrence day=" + dayOfWeek);
     return saved;
   }
 
@@ -61,7 +62,8 @@ public class HabitServiceImpl implements HabitService {
       String avatarId, String title, String description, Integer dayOfMonth) {
     Habit habit = habitFactory.createMonthlyHabit(avatarId, title, description, dayOfMonth);
     Habit saved = habitRepository.save(habit);
-    appendHistory(new HabitCreated(saved), "monthly recurrence day=" + dayOfMonth);
+    appendHistory(
+        new HabitCreated(saved, saved.getAvatarId()), "monthly recurrence day=" + dayOfMonth);
     return saved;
   }
 
@@ -72,10 +74,11 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public void deleteHabitById(String habitId) throws HabitNotFoundException {
-    getHabitById(habitId);
+    Habit habit = getHabitById(habitId);
     habitRepository.deleteById(habitId);
-    appendHistory(new HabitDeleted(habitId), "habit deleted");
-    habitObserver.notifyHabitEvent(new HabitDeleted(habitId));
+    HabitDeleted event = new HabitDeleted(habitId, habit.getAvatarId());
+    appendHistory(event, "habit deleted");
+    habitObserver.notifyHabitEvent(event);
   }
 
   @Override
@@ -130,7 +133,7 @@ public class HabitServiceImpl implements HabitService {
         habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setTitle(title);
     habitRepository.save(habit);
-    appendHistory(new HabitUpdated(habit), "title=" + title);
+    appendHistory(new HabitUpdated(habit, habit.getAvatarId()), "title=" + title);
     return habit;
   }
 
@@ -140,7 +143,7 @@ public class HabitServiceImpl implements HabitService {
         habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setDescription(description);
     habitRepository.save(habit);
-    appendHistory(new HabitUpdated(habit), "description updated");
+    appendHistory(new HabitUpdated(habit, habit.getAvatarId()), "description updated");
     return habit;
   }
 
@@ -150,7 +153,8 @@ public class HabitServiceImpl implements HabitService {
         habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setTags(tags);
     habitRepository.save(habit);
-    appendHistory(new HabitUpdated(habit), "tags updated count=" + tags.size());
+    appendHistory(
+        new HabitUpdated(habit, habit.getAvatarId()), "tags updated count=" + tags.size());
     return habit;
   }
 
@@ -161,7 +165,9 @@ public class HabitServiceImpl implements HabitService {
         habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.setRecurrence(recurrence);
     habitRepository.save(habit);
-    appendHistory(new HabitUpdated(habit), "recurrence=" + recurrence.getClass().getSimpleName());
+    appendHistory(
+        new HabitUpdated(habit, habit.getAvatarId()),
+        "recurrence=" + recurrence.getClass().getSimpleName());
     return habit;
   }
 
@@ -171,8 +177,9 @@ public class HabitServiceImpl implements HabitService {
         habitRepository.findById(habitId).orElseThrow(() -> new HabitNotFoundException(habitId));
     habit.attendHabit(date);
     habitRepository.save(habit);
-    appendHistory(new HabitAttended(habit), "attendedAt=" + date);
-    habitObserver.notifyHabitEvent(new HabitAttended(habit));
+    HabitAttended event = new HabitAttended(habit, habit.getAvatarId());
+    appendHistory(event, "attendedAt=" + date);
+    habitObserver.notifyHabitEvent(event);
     return habit;
   }
 
@@ -183,15 +190,16 @@ public class HabitServiceImpl implements HabitService {
     for (Habit habit : habits) {
       LocalDateTime lastAttendedDate = habit.getLastAttendedDate();
       if (lastAttendedDate == null) {
-        appendNotAttendedHistoryIfNew(habit, "never-attended", new HabitNotAttended(habit));
-        habitObserver.notifyHabitEvent(new HabitNotAttended(habit));
+        HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
+        appendNotAttendedHistoryIfNew(habit, "never-attended", event);
+        habitObserver.notifyHabitEvent(event);
         continue;
       }
       LocalDateTime nextExpected = habit.getRecurrence().nextAfter(lastAttendedDate);
       if (nextExpected.isBefore(now)) {
-        appendNotAttendedHistoryIfNew(
-            habit, "expectedAt=" + nextExpected, new HabitNotAttended(habit));
-        habitObserver.notifyHabitEvent(new HabitNotAttended(habit));
+        HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
+        appendNotAttendedHistoryIfNew(habit, "expectedAt=" + nextExpected, event);
+        habitObserver.notifyHabitEvent(event);
       }
     }
   }

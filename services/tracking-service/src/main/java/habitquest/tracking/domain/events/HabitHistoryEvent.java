@@ -21,4 +21,15 @@ public record HabitHistoryEvent(HabitEvent event, LocalDateTime occurredAt, Stri
       default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass());
     };
   }
+
+  public String avatarId() {
+    return switch (event) {
+      case HabitCreated e -> e.avatarId();
+      case HabitUpdated e -> e.avatarId();
+      case HabitAttended e -> e.avatarId();
+      case HabitNotAttended e -> e.avatarId();
+      case HabitDeleted e -> e.avatarId();
+      default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass());
+    };
+  }
 }
