@@ -156,6 +156,7 @@ class HabitServiceImplTest {
       verify(habitObserver).notifyHabitEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(HabitDeleted.class);
       assertThat(((HabitDeleted) captor.getValue()).habitId()).isEqualTo(HABIT_ID);
+      assertThat(((HabitDeleted) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
     }
   }
 
@@ -310,6 +311,7 @@ class HabitServiceImplTest {
       verify(habitObserver).notifyHabitEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(HabitAttended.class);
       assertThat(((HabitAttended) captor.getValue()).habit()).isSameAs(habit);
+      assertThat(((HabitAttended) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
 
@@ -347,6 +349,7 @@ class HabitServiceImplTest {
       verify(habitObserver).notifyHabitEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(HabitNotAttended.class);
       assertThat(((HabitNotAttended) captor.getValue()).habit()).isSameAs(neverAttended);
+      assertThat(((HabitNotAttended) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
     }
 
     @Test
@@ -374,6 +377,7 @@ class HabitServiceImplTest {
       verify(habitObserver).notifyHabitEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(HabitNotAttended.class);
       assertThat(((HabitNotAttended) captor.getValue()).habit()).isSameAs(overdue);
+      assertThat(((HabitNotAttended) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
     }
 
     @Test
@@ -420,7 +424,7 @@ class HabitServiceImplTest {
           .thenReturn(
               List.of(
                   new HabitHistoryEvent(
-                      new HabitNotAttended(overdue),
+                      new HabitNotAttended(overdue, overdue.getAvatarId()),
                       LocalDateTime.now().minusMinutes(1),
                       expectedMarker)));
 
@@ -440,7 +444,9 @@ class HabitServiceImplTest {
     void returnsHistory() {
       Habit habit = stubHabit();
       List<HabitHistoryEvent> history =
-          List.of(new HabitHistoryEvent(new HabitAttended(habit), LocalDateTime.now(), "attended"));
+          List.of(
+              new HabitHistoryEvent(
+                  new HabitAttended(habit, habit.getAvatarId()), LocalDateTime.now(), "attended"));
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
       when(historyRepository.findByHabitId(HABIT_ID)).thenReturn(history);
 
