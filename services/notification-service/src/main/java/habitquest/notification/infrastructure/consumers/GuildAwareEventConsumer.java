@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class GuildAwareEventConsumer extends AvatarAwareEventConsumer {
 
-  protected final GuildMemberRepository guildMemberRepository;
+  private final GuildMemberRepository guildMemberRepository;
 
   protected GuildAwareEventConsumer(
       UserEmailRepository userEmailRepository,
@@ -24,5 +24,9 @@ public class GuildAwareEventConsumer extends AvatarAwareEventConsumer {
       return;
     }
     members.forEach(avatarId -> sendToAvatar(avatarId, subject, body));
+  }
+
+  public GuildMemberRepository getGuildMemberRepository() {
+    return guildMemberRepository;
   }
 }

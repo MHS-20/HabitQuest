@@ -9,12 +9,17 @@ import org.junit.jupiter.api.Test;
 
 class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
 
+  public static final String LEADER_1 = "leader-1";
+  public static final String MEMBER_1 = "member-1";
+  public static final String MEMBER_2 = "member-2";
+  public static final String GUILD_1 = "guild-1";
+
   @BeforeEach
   void setUp() {
     resetGreenMail();
-    userEmailRepository.save("leader-1", "leader@example.com");
-    userEmailRepository.save("member-1", "member1@example.com");
-    userEmailRepository.save("member-2", "member2@example.com");
+    userEmailRepository.save(LEADER_1, "leader@example.com");
+    userEmailRepository.save(MEMBER_1, "member1@example.com");
+    userEmailRepository.save(MEMBER_2, "member2@example.com");
   }
 
   // --- GuildCreated ---
@@ -23,8 +28,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenGuildCreated_thenLeaderReceivesEmailAndIsMemberOfGuild() throws Exception {
     publish(
         "guild.created",
-        new GuildEventConsumer.GuildCreatedMessage(
-            "guild-1", "leader-1", "I Draghi", Instant.now()));
+        new GuildEventConsumer.GuildCreatedMessage(GUILD_1, LEADER_1, "I Draghi", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -33,7 +37,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     assertThat(bodyOf(mails[0])).contains("I Draghi");
 
     // Il leader deve essere aggiunto come membro
-    assertThat(guildMemberRepository.findMembersByGuildId("guild-1")).contains("leader-1");
+    assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).contains(LEADER_1);
   }
 
   // --- GuildJoined ---
@@ -42,56 +46,55 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenGuildJoined_thenMemberReceivesEmailAndIsAddedToGuild() throws Exception {
     publish(
         "guild.joined",
-        new GuildEventConsumer.GuildJoinedMessage("guild-1", "member-1", Instant.now()));
+        new GuildEventConsumer.GuildJoinedMessage(GUILD_1, MEMBER_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("member1@example.com");
     assertThat(subjectOf(mails[0])).isEqualTo("Benvenuto nella guild!");
 
-    assertThat(guildMemberRepository.findMembersByGuildId("guild-1")).contains("member-1");
+    assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).contains(MEMBER_1);
   }
 
   // --- GuildLeft ---
 
   @Test
   void whenGuildLeft_thenMemberReceivesEmailAndIsRemovedFromGuild() throws Exception {
-    guildMemberRepository.addMember("guild-1", "member-1");
+    guildMemberRepository.addMember(GUILD_1, MEMBER_1);
 
     publish(
-        "guild.left",
-        new GuildEventConsumer.GuildLeftMessage("guild-1", "member-1", Instant.now()));
+        "guild.left", new GuildEventConsumer.GuildLeftMessage(GUILD_1, MEMBER_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(subjectOf(mails[0])).isEqualTo("Hai lasciato la guild");
-    assertThat(guildMemberRepository.findMembersByGuildId("guild-1")).doesNotContain("member-1");
+    assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).doesNotContain(MEMBER_1);
   }
 
   // --- RemovedFromGuild ---
 
   @Test
   void whenRemovedFromGuild_thenMemberReceivesEmailAndIsRemovedFromGuild() throws Exception {
-    guildMemberRepository.addMember("guild-1", "member-1");
+    guildMemberRepository.addMember(GUILD_1, MEMBER_1);
 
     publish(
         "guild.removed",
-        new GuildEventConsumer.RemovedFromGuildMessage("guild-1", "member-1", Instant.now()));
+        new GuildEventConsumer.RemovedFromGuildMessage(GUILD_1, MEMBER_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(subjectOf(mails[0])).isEqualTo("Sei stato rimosso dalla guild");
-    assertThat(guildMemberRepository.findMembersByGuildId("guild-1")).doesNotContain("member-1");
+    assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).doesNotContain(MEMBER_1);
   }
 
   // --- GuildDeleted ---
 
   @Test
   void whenGuildDeleted_thenAllMembersReceiveEmailAndGuildIsRemoved() throws Exception {
-    guildMemberRepository.addMember("guild-1", "leader-1");
-    guildMemberRepository.addMember("guild-1", "member-1");
+    guildMemberRepository.addMember(GUILD_1, LEADER_1);
+    guildMemberRepository.addMember(GUILD_1, MEMBER_1);
 
-    publish("guild.deleted", new GuildEventConsumer.GuildDeletedMessage("guild-1", Instant.now()));
+    publish("guild.deleted", new GuildEventConsumer.GuildDeletedMessage(GUILD_1, Instant.now()));
 
     // Due membri → due mail
     MimeMessage[] mails = waitForEmails(2);
@@ -100,7 +103,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     assertThat(mails).allSatisfy(mail -> assertThat(subjectOf(mail)).isEqualTo("Guild eliminata"));
 
     // Dopo la cancellazione la guild non deve più esistere nella repository
-    assertThat(guildMemberRepository.findMembersByGuildId("guild-1")).isEmpty();
+    assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).isEmpty();
   }
 
   // --- RoleAssigned ---
@@ -110,7 +113,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "guild.role-assigned",
         new GuildEventConsumer.RoleAssignedMessage(
-            "guild-1", "member-1", "VICE_LEADER", Instant.now()));
+            GUILD_1, MEMBER_1, "VICE_LEADER", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -124,13 +127,12 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenInviteSent_thenTargetAvatarReceivesEmail() throws Exception {
     publish(
         "guild.invite-sent",
-        new GuildEventConsumer.InviteSentMessage(
-            "guild-1", "member-1", "invite-xyz", Instant.now()));
+        new GuildEventConsumer.InviteSentMessage(GUILD_1, MEMBER_1, "invite-xyz", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("member1@example.com");
     assertThat(subjectOf(mails[0])).isEqualTo("Invito nella guild!");
-    assertThat(bodyOf(mails[0])).contains("guild-1");
+    assertThat(bodyOf(mails[0])).contains(GUILD_1);
   }
 }

@@ -9,10 +9,14 @@ import org.junit.jupiter.api.Test;
 
 class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
+  public static final String AVATAR_1 = "avatar-1";
+  public static final String MAIL = "mario@example.com";
+  public static final String QUEST_1 = "quest-1";
+
   @BeforeEach
   void setUp() {
     resetGreenMail();
-    userEmailRepository.save("avatar-1", "mario@example.com");
+    userEmailRepository.save(AVATAR_1, MAIL);
   }
 
   @Test
@@ -20,11 +24,11 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "quest.created",
         new QuestEventConsumer.QuestCreatedMessage(
-            "quest-1", "avatar-1", "Uccidi il drago", Instant.now()));
+            QUEST_1, AVATAR_1, "Uccidi il drago", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Nuova quest disponibile!");
     assertThat(bodyOf(mails[0])).contains("Uccidi il drago");
   }
@@ -33,11 +37,11 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenQuestCompleted_thenCongratulationsEmailSent() throws Exception {
     publish(
         "quest.completed",
-        new QuestEventConsumer.QuestCompletedMessage("quest-1", "avatar-1", Instant.now()));
+        new QuestEventConsumer.QuestCompletedMessage(QUEST_1, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Quest completata!");
   }
 
@@ -45,7 +49,7 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenQuestNotCompleted_thenEncouragementEmailSent() throws Exception {
     publish(
         "quest.not-completed",
-        new QuestEventConsumer.QuestNotCompletedMessage("avatar-1", Instant.now()));
+        new QuestEventConsumer.QuestNotCompletedMessage(AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -57,19 +61,18 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenQuestJoined_thenEmailSent() throws Exception {
     publish(
         "quest.joined",
-        new QuestEventConsumer.QuestJoinedMessage("quest-1", "avatar-1", Instant.now()));
+        new QuestEventConsumer.QuestJoinedMessage(QUEST_1, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(subjectOf(mails[0])).isEqualTo("Sei entrato in una quest!");
-    assertThat(bodyOf(mails[0])).contains("quest-1");
+    assertThat(bodyOf(mails[0])).contains(QUEST_1);
   }
 
   @Test
   void whenQuestLeft_thenEmailSent() throws Exception {
     publish(
-        "quest.left",
-        new QuestEventConsumer.QuestLeftMessage("quest-1", "avatar-1", Instant.now()));
+        "quest.left", new QuestEventConsumer.QuestLeftMessage(QUEST_1, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 

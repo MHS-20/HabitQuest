@@ -9,47 +9,51 @@ import org.junit.jupiter.api.Test;
 
 class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
 
+  public static final String AVATAR_1 = "avatar-1";
+  public static final String MAIL = "mario@example.com";
+  public static final String HABIT_ABC = "habit-abc";
+
   @BeforeEach
   void setUp() {
     resetGreenMail();
-    userEmailRepository.save("avatar-1", "mario@example.com");
+    userEmailRepository.save(AVATAR_1, MAIL);
   }
 
   @Test
   void whenHabitDeleted_thenEmailSent() throws Exception {
     publish(
         "habit.deleted",
-        new HabitEventConsumer.HabitDeletedMessage("habit-abc", "avatar-1", Instant.now()));
+        new HabitEventConsumer.HabitDeletedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Abitudine eliminata");
-    assertThat(bodyOf(mails[0])).contains("habit-abc");
+    assertThat(bodyOf(mails[0])).contains(HABIT_ABC);
   }
 
   @Test
   void whenHabitAttended_thenPositiveEmailSent() throws Exception {
     publish(
         "habit.attended",
-        new HabitEventConsumer.HabitAttendedMessage("habit-abc", "avatar-1", Instant.now()));
+        new HabitEventConsumer.HabitAttendedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Abitudine completata!");
-    assertThat(bodyOf(mails[0])).contains("habit-abc");
+    assertThat(bodyOf(mails[0])).contains(HABIT_ABC);
   }
 
   @Test
   void whenHabitNotAttended_thenMotivationalEmailSent() throws Exception {
     publish(
         "habit.not-attended",
-        new HabitEventConsumer.HabitNotAttendedMessage("habit-abc", "avatar-1", Instant.now()));
+        new HabitEventConsumer.HabitNotAttendedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
-    assertThat(recipientOf(mails[0])).isEqualTo("mario@example.com");
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Abitudine non completata");
     assertThat(bodyOf(mails[0])).contains("Non mollare");
   }

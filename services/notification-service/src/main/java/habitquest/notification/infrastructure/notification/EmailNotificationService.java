@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.notification;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailNotificationService implements NotificationService {
 
-  private static final Logger log = LoggerFactory.getLogger(EmailNotificationService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailNotificationService.class);
 
   private final JavaMailSender mailSender;
 
@@ -26,9 +27,9 @@ public class EmailNotificationService implements NotificationService {
       message.setText(body);
       message.setFrom("noreply@habitquest.it");
       mailSender.send(message);
-      log.info("Email inviata a {}: {}", to, subject);
-    } catch (Exception e) {
-      log.error("Errore nell'invio dell'email a {}: {}", to, e.getMessage(), e);
+      LOG.info("Email inviata a {}: {}", to, subject);
+    } catch (MailException e) {
+      LOG.error("Errore nell'invio dell'email a {}: {}", to, e.getMessage(), e);
       throw new RuntimeException("Errore nell'invio dell'email a " + to, e);
     }
   }
