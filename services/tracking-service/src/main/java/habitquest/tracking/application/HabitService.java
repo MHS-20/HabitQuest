@@ -3,13 +3,19 @@ package habitquest.tracking.application;
 import common.hexagonal.InBoundPort;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.Recurrence;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @InBoundPort
 public interface HabitService {
-  Habit createHabit(Habit habit);
+  Habit createDailyHabit(String avatarId, String title, String description);
+
+  Habit createWeeklyHabit(String avatarId, String title, String description, DayOfWeek dayOfWeek);
+
+  Habit createMonthlyHabit(String avatarId, String title, String description, Integer dayOfMonth);
 
   Habit getHabitById(String habitId) throws HabitNotFoundException;
 
@@ -25,6 +31,8 @@ public interface HabitService {
   Recurrence getRecurrence(String habitId) throws HabitNotFoundException;
 
   LocalDateTime getLastAttendedDate(String habitId) throws HabitNotFoundException;
+
+  List<HabitHistoryEvent> getHistory(String habitId);
 
   // endregion
 

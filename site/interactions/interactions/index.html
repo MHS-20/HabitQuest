@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Event Storming - HabitQuest</title>
+    <title>Interactions - HabitQuest</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Event Storming";
-        var mkdocs_page_input_path = "eventStorming/event_storming.md";
+        var mkdocs_page_name = "Interactions";
+        var mkdocs_page_input_path = "interactions/interactions.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -67,28 +67,28 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">Event Storming</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#events">Events</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#timeline">Timeline</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#commands-and-policies">Commands and Policies</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#aggregates">Aggregates</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#bounded-context">Bounded Context</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
                 </li>
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../../eventFlows/event_flows/">Event Flows</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../interactions/interactions/">Interactions</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Interactions</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#tracking-service">Tracking Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#quest-service">Quest Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-service">Avatar Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-service">Guild Service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#marketplace-service">Marketplace Service</a>
+    </li>
+    </ul>
                 </li>
               </ul>
       </div>
@@ -105,7 +105,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Event Storming</li>
+      <li class="breadcrumb-item active">Interactions</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -114,23 +114,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="event-storming">Event Storming</h1>
-<h2 id="events">Events</h2>
-<p><img alt="Event Storming - Events" src="../01_EventStorming.drawio.png" /></p>
-<h2 id="timeline">Timeline</h2>
-<p><img alt="Event Storming - Timeline" src="../02_EventStorming_Timeline.drawio.png" /></p>
-<h2 id="commands-and-policies">Commands and Policies</h2>
-<p><img alt="Event Storming - Commands and Policies" src="../03_EventStorming_CommandAndPolicy.drawio.png" /></p>
-<h2 id="aggregates">Aggregates</h2>
-<p><img alt="Event Storming - Aggregates" src="../04_EventStorming_Aggregate.drawio.png" /></p>
-<h2 id="bounded-context">Bounded Context</h2>
-<p><img alt="Event Storming - Bounded Context" src="../05_EventStorming_BoundedContext.drawio.png" /></p>
+                <h1 id="interactions">Interactions</h1>
+<h2 id="tracking-service">Tracking Service</h2>
+<p><img alt="Tracking Service Interactions" src="../01_tracking-service.drawio.png" /></p>
+<h2 id="quest-service">Quest Service</h2>
+<p><img alt="Quest Service Interactions" src="../02_quest-service.drawio.png" /></p>
+<h2 id="avatar-service">Avatar Service</h2>
+<p><img alt="Avatar Service Interactions" src="../03_avatar-service.drawio.png" /></p>
+<h2 id="guild-service">Guild Service</h2>
+<p><img alt="Guild Service Interactions" src="../04_guild-service.drawio.png" /></p>
+<h2 id="marketplace-service">Marketplace Service</h2>
+<p><img alt="Marketplace Service Interactions" src="../05_marketplace-service.drawio.png" /></p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../useCases/use_cases/" class="btn btn-neutral float-left" title="Use Cases"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../eventFlows/event_flows/" class="btn btn-neutral float-right" title="Event Flows">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../eventFlows/event_flows/" class="btn btn-neutral float-left" title="Event Flows"><span class="icon icon-circle-arrow-left"></span> Previous</a>
     </div>
 
   <hr/>
@@ -153,10 +152,8 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../useCases/use_cases/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../eventFlows/event_flows/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="../../eventFlows/event_flows/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

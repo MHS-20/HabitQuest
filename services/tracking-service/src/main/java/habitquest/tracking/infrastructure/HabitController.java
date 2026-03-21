@@ -6,7 +6,7 @@ import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
-import habitquest.tracking.domain.factory.HabitFactory;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
@@ -16,6 +16,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +38,21 @@ public class HabitController {
   public ResponseEntity<EntityModel<HabitCreatedResponse>> createHabit(
       @RequestBody CreateHabitRequest request) {
 
-    Habit habit = request.toHabit();
-    Habit created = habitService.createHabit(habit);
+    Habit created =
+        switch (Objects.requireNonNull(request.recurrenceType()).toUpperCase(Locale.ITALIAN)) {
+          case "DAILY" ->
+              habitService.createDailyHabit(
+                  request.avatarId(), request.title(), request.description());
+          case "WEEKLY" ->
+              habitService.createWeeklyHabit(
+                  request.avatarId(), request.title(), request.description(), request.dayOfWeek());
+          case "MONTHLY" ->
+              habitService.createMonthlyHabit(
+                  request.avatarId(), request.title(), request.description(), request.dayOfMonth());
+          default ->
+              throw new IllegalArgumentException(
+                  "Unknown recurrence type: " + request.recurrenceType());
+        };
     HabitCreatedResponse body = new HabitCreatedResponse(created.getId());
 
     EntityModel<HabitCreatedResponse> model =
@@ -48,7 +62,8 @@ public class HabitController {
             linkTo(methodOn(HabitController.class).getHabit(created.getId())).withRel("habit"),
             linkTo(methodOn(HabitController.class).getTags(created.getId())).withRel("tags"),
             linkTo(methodOn(HabitController.class).getRecurrence(created.getId()))
-                .withRel("recurrence"));
+                .withRel("recurrence"),
+            linkTo(methodOn(HabitController.class).getHistory(created.getId())).withRel("history"));
 
     return ResponseEntity.created(URI.create("/api/v1/habits/" + created.getId())).body(model);
   }
@@ -69,6 +84,7 @@ public class HabitController {
             linkTo(methodOn(HabitController.class).getRecurrence(id)).withRel("recurrence"),
             linkTo(methodOn(HabitController.class).getLastAttendedDate(id))
                 .withRel("lastAttendedDate"),
+            linkTo(methodOn(HabitController.class).getHistory(id)).withRel("history"),
             linkTo(methodOn(HabitController.class).deleteHabit(id)).withRel("delete"));
 
     return ResponseEntity.ok(model);
@@ -145,6 +161,17 @@ public class HabitController {
             selfLink(id),
             habitLink(id),
             linkTo(methodOn(HabitController.class).attendHabit(id, null)).withRel("attend"));
+
+    return ResponseEntity.ok(model);
+  }
+
+  @GetMapping("/{id}/history")
+  public ResponseEntity<EntityModel<HistoryResponse>> getHistory(@PathVariable String id)
+      throws HabitNotFoundException {
+
+    List<HabitHistoryEvent> history = habitService.getHistory(id);
+    EntityModel<HistoryResponse> model =
+        EntityModel.of(new HistoryResponse(history), selfLink(id), habitLink(id));
 
     return ResponseEntity.ok(model);
   }
@@ -234,17 +261,7 @@ public class HabitController {
       String description,
       String recurrenceType,
       DayOfWeek dayOfWeek,
-      Integer dayOfMonth) {
-
-    public Habit toHabit() {
-      return switch (recurrenceType.toUpperCase(Locale.ITALIAN)) {
-        case "DAILY" -> HabitFactory.createDailyHabit(avatarId, title, description);
-        case "WEEKLY" -> HabitFactory.createWeeklyHabit(avatarId, title, description, dayOfWeek);
-        case "MONTHLY" -> HabitFactory.createMonthlyHabit(avatarId, title, description, dayOfMonth);
-        default -> throw new IllegalArgumentException("Unknown recurrence type: " + recurrenceType);
-      };
-    }
-  }
+      Integer dayOfMonth) {}
 
   public record UpdateTitleRequest(String title) {}
 
@@ -274,6 +291,8 @@ public class HabitController {
   public record TagsResponse(List<Tag> tags) {}
 
   public record LastAttendedDateResponse(LocalDateTime date) {}
+
+  public record HistoryResponse(List<HabitHistoryEvent> history) {}
 
   public record ErrorResponse(String message) {}
 }

@@ -17,9 +17,9 @@ public class HabitNotifierImpl implements HabitNotifier {
 
   private static final Logger LOG = LoggerFactory.getLogger(HabitNotifierImpl.class);
 
-  static final String HABIT_DELETED_BINDING = "habit-deleted-out-0";
-  static final String HABIT_ATTENDED_BINDING = "habit-attended-out-0";
-  static final String HABIT_NOT_ATTENDED_BINDING = "habit-not-attended-out-0";
+  static final String HABIT_DELETED_BINDING = "habit.deleted";
+  static final String HABIT_ATTENDED_BINDING = "habit.attended";
+  static final String HABIT_NOT_ATTENDED_BINDING = "habit.not-attended-out";
 
   private final StreamBridge streamBridge;
 
@@ -29,9 +29,13 @@ public class HabitNotifierImpl implements HabitNotifier {
 
   @Override
   public void notifyHabitDeleted(HabitDeleted event) {
-    HabitDeletedMessage message = new HabitDeletedMessage(event.habitId(), Instant.now());
+    HabitDeletedMessage message =
+        new HabitDeletedMessage(event.habitId(), event.avatarId(), Instant.now());
 
-    LOG.info("Publishing HabitDeleted event: habitId={}", message.habitId());
+    LOG.info(
+        "Publishing HabitDeleted event: habitId={}, avatarId={}",
+        message.habitId(),
+        message.avatarId());
     boolean sent = streamBridge.send(HABIT_DELETED_BINDING, message);
     if (!sent) {
       LOG.error("Failed to publish HabitDeleted event for habitId {}", message.habitId());
@@ -41,7 +45,7 @@ public class HabitNotifierImpl implements HabitNotifier {
   @Override
   public void notifyHabitAttended(HabitAttended event) {
     HabitAttendedMessage message =
-        new HabitAttendedMessage(event.habit().getId(), event.habit().getAvatarId(), Instant.now());
+        new HabitAttendedMessage(event.habit().getId(), event.avatarId(), Instant.now());
 
     LOG.info(
         "Publishing HabitAttended event: habitId={}, avatarId={}",
@@ -56,8 +60,7 @@ public class HabitNotifierImpl implements HabitNotifier {
   @Override
   public void notifyHabitNotAttended(HabitNotAttended event) {
     HabitNotAttendedMessage message =
-        new HabitNotAttendedMessage(
-            event.habit().getId(), event.habit().getAvatarId(), Instant.now());
+        new HabitNotAttendedMessage(event.habit().getId(), event.avatarId(), Instant.now());
 
     LOG.info(
         "Publishing HabitNotAttended event: habitId={}, avatarId={}",
@@ -69,7 +72,7 @@ public class HabitNotifierImpl implements HabitNotifier {
     }
   }
 
-  public record HabitDeletedMessage(String habitId, Instant occurredOn) {}
+  public record HabitDeletedMessage(String habitId, String avatarId, Instant occurredOn) {}
 
   public record HabitAttendedMessage(String habitId, String avatarId, Instant occurredOn) {}
 
