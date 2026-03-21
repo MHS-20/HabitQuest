@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import common.hexagonal.Adapter;
 import habitquest.notification.infrastructure.notification.NotificationService;
+import habitquest.notification.infrastructure.repository.UserEmailRepository;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
@@ -9,20 +10,28 @@ import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class QuestEventConsumer implements EventConsumer {
+public class QuestEventConsumer extends AvatarAwareEventConsumer {
 
-  private final NotificationService notificationService;
-
-  public QuestEventConsumer(NotificationService notificationService) {
-    this.notificationService = notificationService;
+  public QuestEventConsumer(
+      UserEmailRepository userEmailRepository, NotificationService notificationService) {
+    super(userEmailRepository, notificationService);
   }
 
   @Bean
   public Consumer<QuestCreatedMessage> questCreated() {
     return message -> {
       logger()
-          .info("Received QuestCreated: questId={}, name={}", message.questId(), message.name());
-      notificationService.send("È stata creata una nuova quest: \"" + message.name() + "\"!");
+          .info(
+              "Received QuestCreated: questId={}, name={}, avatarId={}",
+              message.questId(),
+              message.name(),
+              message.avatarId());
+      sendToAvatar(
+          message.avatarId(),
+          "Nuova quest disponibile!",
+          "È stata creata una nuova quest: \""
+              + message.name()
+              + "\". Unisciti subito per partecipare!");
     };
   }
 
@@ -34,15 +43,21 @@ public class QuestEventConsumer implements EventConsumer {
               "Received QuestCompleted: questId={}, avatarId={}",
               message.questId(),
               message.avatarId());
-      notificationService.send("Hai completato la quest " + message.questId() + "!");
+      sendToAvatar(
+          message.avatarId(),
+          "Quest completata!",
+          "Congratulazioni! Hai completato la quest \"" + message.questId() + "\".");
     };
   }
 
   @Bean
   public Consumer<QuestNotCompletedMessage> questNotCompleted() {
     return message -> {
-      logger().info("Received QuestNotCompleted");
-      notificationService.send("Non hai completato la quest in tempo!");
+      logger().info("Received QuestNotCompleted: avatarId={}", message.avatarId());
+      sendToAvatar(
+          message.avatarId(),
+          "Quest non completata",
+          "Purtroppo non hai completato la quest in tempo. Riprova con la prossima!");
     };
   }
 
@@ -54,7 +69,10 @@ public class QuestEventConsumer implements EventConsumer {
               "Received QuestJoined: questId={}, avatarId={}",
               message.questId(),
               message.avatarId());
-      notificationService.send("Ti sei unito alla quest " + message.questId() + "!");
+      sendToAvatar(
+          message.avatarId(),
+          "Sei entrato in una quest!",
+          "Ti sei unito alla quest \"" + message.questId() + "\". Buona fortuna!");
     };
   }
 
@@ -64,15 +82,19 @@ public class QuestEventConsumer implements EventConsumer {
       logger()
           .info(
               "Received QuestLeft: questId={}, avatarId={}", message.questId(), message.avatarId());
-      notificationService.send("Hai abbandonato la quest " + message.questId() + ".");
+      sendToAvatar(
+          message.avatarId(),
+          "Hai abbandonato la quest",
+          "Hai abbandonato la quest \"" + message.questId() + "\".");
     };
   }
 
-  public record QuestCreatedMessage(String questId, String name, Instant occurredOn) {}
+  public record QuestCreatedMessage(
+      String questId, String avatarId, String name, Instant occurredOn) {}
 
   public record QuestCompletedMessage(String questId, String avatarId, Instant occurredOn) {}
 
-  public record QuestNotCompletedMessage(Instant occurredOn) {}
+  public record QuestNotCompletedMessage(String avatarId, Instant occurredOn) {}
 
   public record QuestJoinedMessage(String questId, String avatarId, Instant occurredOn) {}
 

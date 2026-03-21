@@ -2,6 +2,8 @@ package habitquest.notification.infrastructure.consumers;
 
 import common.hexagonal.Adapter;
 import habitquest.notification.infrastructure.notification.NotificationService;
+import habitquest.notification.infrastructure.repository.GuildMemberRepository;
+import habitquest.notification.infrastructure.repository.UserEmailRepository;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
@@ -9,12 +11,13 @@ import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class GuildEventConsumer implements EventConsumer {
+public class GuildEventConsumer extends GuildAwareEventConsumer {
 
-  private final NotificationService notificationService;
-
-  public GuildEventConsumer(NotificationService notificationService) {
-    this.notificationService = notificationService;
+  public GuildEventConsumer(
+      UserEmailRepository userEmailRepository,
+      GuildMemberRepository guildMemberRepository,
+      NotificationService notificationService) {
+    super(userEmailRepository, guildMemberRepository, notificationService);
   }
 
   @Bean
@@ -22,7 +25,12 @@ public class GuildEventConsumer implements EventConsumer {
     return message -> {
       logger()
           .info("Received GuildCreated: guildId={}, name={}", message.guildId(), message.name());
-      notificationService.send("La guild \"" + message.name() + "\" è stata creata!");
+      sendToAvatar(
+          message.leaderId(),
+          "Guild creata!",
+          "La guild \"" + message.name() + "\" è stata creata con successo!");
+
+      guildMemberRepository.addMember(message.guildId(), message.leaderId());
     };
   }
 
@@ -30,7 +38,11 @@ public class GuildEventConsumer implements EventConsumer {
   public Consumer<GuildDeletedMessage> guildDeleted() {
     return message -> {
       logger().info("Received GuildDeleted: guildId={}", message.guildId());
-      notificationService.send("La guild " + message.guildId() + " è stata eliminata.");
+      sendToGuild(
+          message.guildId(),
+          "Guild eliminata",
+          "La guild \"" + message.guildId() + "\" è stata eliminata.");
+      guildMemberRepository.removeGuild(message.guildId());
     };
   }
 
@@ -42,8 +54,11 @@ public class GuildEventConsumer implements EventConsumer {
               "Received GuildJoined: guildId={}, memberId={}",
               message.guildId(),
               message.memberId());
-      notificationService.send(
-          "Il membro " + message.memberId() + " si è unito alla guild " + message.guildId() + "!");
+      guildMemberRepository.addMember(message.guildId(), message.memberId());
+      sendToAvatar(
+          message.memberId(),
+          "Benvenuto nella guild!",
+          "Ti sei unito alla guild \"" + message.guildId() + "\"! Buona avventura insieme.");
     };
   }
 
@@ -53,8 +68,11 @@ public class GuildEventConsumer implements EventConsumer {
       logger()
           .info(
               "Received GuildLeft: guildId={}, memberId={}", message.guildId(), message.memberId());
-      notificationService.send(
-          "Il membro " + message.memberId() + " ha lasciato la guild " + message.guildId() + ".");
+      guildMemberRepository.removeMember(message.guildId(), message.memberId());
+      sendToAvatar(
+          message.memberId(),
+          "Hai lasciato la guild",
+          "Hai lasciato la guild \"" + message.guildId() + "\".");
     };
   }
 
@@ -66,12 +84,11 @@ public class GuildEventConsumer implements EventConsumer {
               "Received RemovedFromGuild: guildId={}, memberId={}",
               message.guildId(),
               message.memberId());
-      notificationService.send(
-          "Il membro "
-              + message.memberId()
-              + " è stato rimosso dalla guild "
-              + message.guildId()
-              + ".");
+      guildMemberRepository.removeMember(message.guildId(), message.memberId());
+      sendToAvatar(
+          message.memberId(),
+          "Sei stato rimosso dalla guild",
+          "Sei stato rimosso dalla guild \"" + message.guildId() + "\".");
     };
   }
 
@@ -84,14 +101,14 @@ public class GuildEventConsumer implements EventConsumer {
               message.guildId(),
               message.memberId(),
               message.roleName());
-      notificationService.send(
-          "Al membro "
-              + message.memberId()
-              + " è stato assegnato il ruolo "
+      sendToAvatar(
+          message.memberId(),
+          "Nuovo ruolo assegnato!",
+          "Ti è stato assegnato il ruolo \""
               + message.roleName()
-              + " nella guild "
+              + "\" nella guild \""
               + message.guildId()
-              + ".");
+              + "\".");
     };
   }
 
@@ -103,11 +120,15 @@ public class GuildEventConsumer implements EventConsumer {
               "Received InviteSent: guildId={}, targetAvatarId={}",
               message.guildId(),
               message.targetAvatarId());
-      notificationService.send("Hai ricevuto un invito dalla guild " + message.guildId() + "!");
+      sendToAvatar(
+          message.targetAvatarId(),
+          "Invito nella guild!",
+          "Hai ricevuto un invito a unirti alla guild \"" + message.guildId() + "\".");
     };
   }
 
-  public record GuildCreatedMessage(String guildId, String name, Instant occurredOn) {}
+  public record GuildCreatedMessage(
+      String guildId, String leaderId, String name, Instant occurredOn) {}
 
   public record GuildDeletedMessage(String guildId, Instant occurredOn) {}
 

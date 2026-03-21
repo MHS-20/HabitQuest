@@ -16,4 +16,9 @@ dependencies {
     testImplementation("org.springframework.cloud:spring-cloud-stream-test-binder")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:kafka")
+
+    testImplementation("com.icegreen:greenmail:2.1.2")
+    //testImplementation("com.icegreen:greenmail-spring-boot-starter")
+    testImplementation("org.awaitility:awaitility")
+
 }
