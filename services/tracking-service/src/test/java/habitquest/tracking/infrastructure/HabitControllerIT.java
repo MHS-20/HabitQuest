@@ -332,7 +332,7 @@ public class HabitControllerIT {
           .thenReturn(
               List.of(
                   new HabitHistoryEvent(
-                      new HabitAttended(stubHabit()),
+                      new HabitAttended(stubHabit(), AVATAR_ID),
                       LocalDateTime.of(2026, 3, 17, 9, 30),
                       "attendedAt=2026-03-17T09:30")));
 
@@ -340,6 +340,7 @@ public class HabitControllerIT {
           .perform(get("/api/v1/habits/{id}/history", HABIT_ID))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.history[0].event.habit.id").value(HABIT_ID))
+          .andExpect(jsonPath("$.history[0].event.avatarId").value(AVATAR_ID))
           .andExpect(jsonPath("$.history[0].details").value("attendedAt=2026-03-17T09:30"));
     }
   }
