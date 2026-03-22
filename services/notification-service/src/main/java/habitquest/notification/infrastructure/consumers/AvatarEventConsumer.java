@@ -62,10 +62,28 @@ public class AvatarEventConsumer extends AvatarAwareEventConsumer {
     };
   }
 
+  @Bean
+  public Consumer<NewSpellLearnedMessage> avatarNewSpellLearned() {
+    return message -> {
+      logger()
+          .info(
+              "Received NewSpellLearned: avatarId={}, spell={}",
+              message.avatarId(),
+              message.spellName());
+      sendToAvatar(
+          message.avatarId(),
+          "New spell learned!",
+          "You learned a new spell: " + message.spellName() + "! " + message.description());
+    };
+  }
+
   public record LevelUppedMessage(String avatarId, Integer newLevel, Instant occurredOn) {}
 
   public record DeadMessage(String avatarId, Instant occurredOn) {}
 
   public record SkillPointAssignedMessage(
       String avatarId, String statType, Integer newValue, Instant occurredOn) {}
+
+  public record NewSpellLearnedMessage(
+      String avatarId, String spellName, String description, Instant occurredOn) {}
 }

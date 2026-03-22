@@ -57,12 +57,22 @@ class AvatarEventConsumerTest extends BaseConsumerIntegrationTest {
     publish(
         "avatar.skill-point-assigned",
         new AvatarEventConsumer.SkillPointAssignedMessage(AVATAR_1, "STRENGTH", 15, Instant.now()));
-
     MimeMessage[] mails = waitForEmails(1);
-
     assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
     assertThat(subjectOf(mails[0])).isEqualTo("Skill point assigned!");
     assertThat(bodyOf(mails[0])).contains("STRENGTH").contains("15");
+  }
+
+  @Test
+  void whenNewSpellLearned_thenEmailSentWithSpellDetails() throws Exception {
+    publish(
+        "avatar.new-spell-learned",
+        new AvatarEventConsumer.NewSpellLearnedMessage(
+            AVATAR_1, "Fireball", "A basic fire spell.", Instant.now()));
+    MimeMessage[] mails = waitForEmails(1);
+    assertThat(recipientOf(mails[0])).isEqualTo(MAIL);
+    assertThat(subjectOf(mails[0])).isEqualTo("New spell learned!");
+    assertThat(bodyOf(mails[0])).contains("Fireball").contains("A basic fire spell.");
   }
 
   @Test
