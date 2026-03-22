@@ -8,6 +8,6 @@ public record MarketplaceResponse(String id, List<ItemResponse> items) {
   public static MarketplaceResponse from(Marketplace marketplace) {
     List<ItemResponse> items =
         marketplace.getCatalogItems().stream().map(ItemMapper::toResponse).toList();
-    return new MarketplaceResponse(marketplace.getId(), items);
+    return new MarketplaceResponse(marketplace.getId().value(), items);
   }
 }

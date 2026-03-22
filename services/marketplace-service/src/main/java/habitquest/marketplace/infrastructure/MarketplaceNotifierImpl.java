@@ -29,7 +29,10 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
   public void notifyItemBought(ItemBought event) {
     ItemBoughtMessage message =
         new ItemBoughtMessage(
-            event.marketplaceId(), event.itemName(), event.avatarId(), Instant.now());
+            event.marketplaceId().value(),
+            event.itemName(),
+            event.avatarId().value(),
+            Instant.now());
 
     LOG.info(
         "Publishing ItemBought event: marketplaceId={}, itemName={}, avatarId={}",
@@ -50,7 +53,10 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
   public void notifyItemSold(ItemSold event) {
     ItemSoldMessage message =
         new ItemSoldMessage(
-            event.marketplaceId(), event.itemName(), event.avatarId(), Instant.now());
+            event.marketplaceId().value(),
+            event.itemName(),
+            event.avatarId().value(),
+            Instant.now());
 
     LOG.info(
         "Publishing ItemSold event: marketplaceId={}, itemName={}, avatarId={}",

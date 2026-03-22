@@ -1,5 +1,7 @@
 package habitquest.marketplace.application;
 
+import common.ddd.Id;
+import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.events.ItemBought;
@@ -29,37 +31,39 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   // Queries
   // -------------------------------------------------
   @Override
-  public Marketplace getMarketplace(String marketplaceId) throws MarketplaceNotFoundException {
+  public Marketplace getMarketplace(Id<Marketplace> marketplaceId)
+      throws MarketplaceNotFoundException {
     return marketplaceRepository
         .findById(marketplaceId)
-        .orElseThrow(() -> new MarketplaceNotFoundException(marketplaceId));
+        .orElseThrow(() -> new MarketplaceNotFoundException(marketplaceId.value()));
   }
 
   @Override
-  public String createMarketplaceForAvatar(String avatarId) {
+  public Id<Marketplace> createMarketplaceForAvatar(Id<Avatar> avatarId) {
     Marketplace marketplace = marketplaceFactory.create(avatarId);
     marketplaceRepository.save(marketplace);
     return marketplace.getId();
   }
 
   @Override
-  public String getAvatarId(String marketplaceId) throws MarketplaceNotFoundException {
+  public Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getAvatarId();
   }
 
   @Override
-  public List<Item> getAllAvailableItems(String marketplaceId) throws MarketplaceNotFoundException {
+  public List<Item> getAllAvailableItems(Id<Marketplace> marketplaceId)
+      throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getAllAvailableItems();
   }
 
   @Override
-  public List<Item> getAvailableItemsByType(String marketplaceId, ItemType type)
+  public List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemType type)
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getAvailableItemsByType(type);
   }
 
   @Override
-  public Item getAvailableItem(String marketplaceId, String itemName)
+  public Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId)
         .getAvailableItem(itemName)
@@ -67,12 +71,13 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public List<Item> getSoldItems(String marketplaceId) throws MarketplaceNotFoundException {
+  public List<Item> getSoldItems(Id<Marketplace> marketplaceId)
+      throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getSoldItems();
   }
 
   @Override
-  public Item getSoldItem(String marketplaceId, String itemName)
+  public Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId)
         .getSoldItem(itemName)
@@ -83,7 +88,8 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   // Commands
   // -------------------------------------------------
   @Override
-  public void buyItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException {
+  public void buyItem(Id<Marketplace> marketplaceId, String itemName)
+      throws MarketplaceNotFoundException {
     Marketplace marketplace = getMarketplace(marketplaceId);
     marketplace.buyItem(itemName);
     marketplaceRepository.save(marketplace);
@@ -92,7 +98,8 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public void sellItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException {
+  public void sellItem(Id<Marketplace> marketplaceId, String itemName)
+      throws MarketplaceNotFoundException {
     Marketplace marketplace = getMarketplace(marketplaceId);
     marketplace.sellItem(itemName);
     marketplaceRepository.save(marketplace);
