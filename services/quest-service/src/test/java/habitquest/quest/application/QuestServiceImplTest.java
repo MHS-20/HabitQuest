@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
 import habitquest.quest.domain.Quest;
@@ -11,6 +12,7 @@ import habitquest.quest.domain.Reward;
 import habitquest.quest.domain.events.QuestCreated;
 import habitquest.quest.domain.events.QuestEvent;
 import habitquest.quest.domain.events.QuestObserver;
+import habitquest.quest.domain.factory.QuestFactory;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,12 +27,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("QuestServiceImpl")
 class QuestServiceImplTest {
 
-  private static final String QUEST_ID = "quest-1";
+  private static final Id<Quest> QUEST_ID = new Id<>("quest-1");
   private static final String QUEST_NAME = "Morning Routine";
-  private static final String UNKNOWN_ID = "missing";
-  private static final String HABIT_ID = "habit-1";
+  private static final Id<Quest> UNKNOWN_ID = new Id<>("missing");
+  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
   @Mock private QuestRepository questRepository;
   @Mock private QuestObserver questObserver;
+  @Mock private QuestFactory questFactory;
 
   private QuestServiceImpl service;
 
@@ -44,7 +47,7 @@ class QuestServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    service = new QuestServiceImpl(questRepository, questObserver);
+    service = new QuestServiceImpl(questRepository, questObserver, questFactory);
   }
 
   @Nested
@@ -54,12 +57,14 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("saves and emits QuestCreated event")
     void createsAndEmitsEvent() {
+      Quest quest = stubQuest();
+      when(questFactory.createQuest(QUEST_NAME)).thenReturn(quest);
       when(questRepository.save(any(Quest.class)))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
       Quest created = service.createQuest(QUEST_NAME);
 
-      assertThat(created.getId()).isNotBlank();
+      assertThat(created.getId().value()).isNotBlank();
       assertThat(created.getName()).isEqualTo(QUEST_NAME);
       verify(questRepository).save(created);
 
@@ -86,11 +91,12 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("throws QuestNotFoundException when id is unknown")
     void notFound() {
-      when(questRepository.findById(UNKNOWN_ID)).thenThrow(new QuestNotFoundException(UNKNOWN_ID));
+      when(questRepository.findById(UNKNOWN_ID))
+          .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
 
       assertThatThrownBy(() -> service.getQuest(UNKNOWN_ID))
           .isInstanceOf(QuestNotFoundException.class)
-          .hasMessage(UNKNOWN_ID);
+          .hasMessage(UNKNOWN_ID.value());
     }
   }
 
@@ -102,7 +108,7 @@ class QuestServiceImplTest {
     @DisplayName("checks existence and saves the provided quest")
     void updates() {
       Quest existing = stubQuest();
-      Quest replacement = new Quest("quest-2", "Evening Routine");
+      Quest replacement = new Quest(new Id<>("quest-2"), "Evening Routine");
       when(questRepository.findById(QUEST_ID)).thenReturn(existing);
       when(questRepository.save(replacement)).thenReturn(replacement);
 
@@ -167,17 +173,18 @@ class QuestServiceImplTest {
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
 
       assertThat(service.getHabits(QUEST_ID)).hasSize(1);
-      assertThat(service.getHabits(QUEST_ID).get(0).getId()).isEqualTo(HABIT_ID);
+      assertThat(service.getHabits(QUEST_ID).getFirst().getId()).isEqualTo(HABIT_ID);
     }
 
     @Test
     @DisplayName("propagates QuestNotFoundException from repository")
     void notFound() {
-      when(questRepository.findById(UNKNOWN_ID)).thenThrow(new QuestNotFoundException(UNKNOWN_ID));
+      when(questRepository.findById(UNKNOWN_ID))
+          .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
 
       assertThatThrownBy(() -> service.getName(UNKNOWN_ID))
           .isInstanceOf(QuestNotFoundException.class)
-          .hasMessage(UNKNOWN_ID);
+          .hasMessage(UNKNOWN_ID.value());
     }
   }
 
@@ -245,13 +252,15 @@ class QuestServiceImplTest {
     @DisplayName("adds habit and saves")
     void adds() {
       Quest quest = stubQuest();
-      Habit newHabit = new Habit("habit-2");
+      Habit newHabit = new Habit(new Id<>("habit-2"));
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
 
       Quest updated = service.addHabit(QUEST_ID, newHabit);
 
-      assertThat(updated.getHabits()).extracting(Habit::getId).contains(HABIT_ID, "habit-2");
+      assertThat(updated.getHabits())
+          .extracting(Habit::getId)
+          .contains(HABIT_ID, new Id<>("habit-2"));
       verify(questRepository).save(quest);
     }
   }

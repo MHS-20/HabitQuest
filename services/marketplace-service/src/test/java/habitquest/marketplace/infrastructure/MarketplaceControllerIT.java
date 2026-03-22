@@ -7,10 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.marketplace.Avatar;
 import habitquest.marketplace.application.AvatarNotFoundException;
 import habitquest.marketplace.application.MarketplaceNotFoundException;
 import habitquest.marketplace.application.MarketplaceService;
+import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;

@@ -1,7 +1,7 @@
 package habitquest.marketplace.domain.events;
 
 import common.ddd.Id;
-import habitquest.marketplace.Avatar;
+import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.Marketplace;
 
 public record ItemBought(Id<Marketplace> marketplaceId, String itemName, Id<Avatar> avatarId)

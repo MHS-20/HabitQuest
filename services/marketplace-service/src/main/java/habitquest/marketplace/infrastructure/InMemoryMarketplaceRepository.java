@@ -2,8 +2,8 @@ package habitquest.marketplace.infrastructure;
 
 import common.ddd.Id;
 import common.hexagonal.Adapter;
-import habitquest.marketplace.Avatar;
 import habitquest.marketplace.application.MarketplaceRepository;
+import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.MarketplaceImpl;
