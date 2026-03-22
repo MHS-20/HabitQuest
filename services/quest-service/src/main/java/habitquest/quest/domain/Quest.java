@@ -12,7 +12,7 @@ public class Quest implements Aggregate<Id<Quest>> {
   private String name;
   private final List<Habit> habits;
   private Duration duration;
-  private Reward reward;
+  private MoneyReward reward;
 
   public Quest(Id<Quest> id) {
     this.id = id;
@@ -41,11 +41,11 @@ public class Quest implements Aggregate<Id<Quest>> {
     this.duration = duration;
   }
 
-  public Reward getReward() {
+  public MoneyReward getReward() {
     return reward;
   }
 
-  public void setReward(Reward reward) {
+  public void setReward(MoneyReward reward) {
     this.reward = reward;
   }
 
@@ -57,8 +57,8 @@ public class Quest implements Aggregate<Id<Quest>> {
     this.habits.add(habit);
   }
 
-  public void removeHabit(Habit habit) {
-    this.habits.remove(habit);
+  public void removeHabit(Id<Habit> habitId) {
+    this.habits.removeIf(h -> h.getId().equals(habitId));
   }
 
   @Override
