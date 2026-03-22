@@ -29,7 +29,7 @@ public class BattleNotifierImpl implements BattleNotifier {
   @Override
   public void notifyBattleStarted(BattleStarted event) {
     BattleStartedMessage message =
-        new BattleStartedMessage(event.battleId(), event.guildId(), Instant.now());
+        new BattleStartedMessage(event.battleId().value(), event.guildId().value(), Instant.now());
 
     LOG.info(
         "Publishing BattleStarted event: battleId={}, guildId={}",
@@ -44,7 +44,7 @@ public class BattleNotifierImpl implements BattleNotifier {
   @Override
   public void notifyBattleWon(BattleWon event) {
     BattleWonMessage message =
-        new BattleWonMessage(event.battleId(), event.guildId(), Instant.now());
+        new BattleWonMessage(event.battleId().value(), event.guildId().value(), Instant.now());
 
     LOG.info(
         "Publishing BattleWon event: battleId={}, guildId={}",
@@ -59,7 +59,7 @@ public class BattleNotifierImpl implements BattleNotifier {
   @Override
   public void notifyBattleLost(BattleLost event) {
     BattleLostMessage message =
-        new BattleLostMessage(event.battleId(), event.guildId(), Instant.now());
+        new BattleLostMessage(event.battleId().value(), event.guildId().value(), Instant.now());
 
     LOG.info(
         "Publishing BattleLost event: battleId={}, guildId={}",

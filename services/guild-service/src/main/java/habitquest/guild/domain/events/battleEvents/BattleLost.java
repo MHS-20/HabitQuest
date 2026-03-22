@@ -1,3 +1,8 @@
 package habitquest.guild.domain.events.battleEvents;
 
-public record BattleLost(String battleId, String guildId, Integer penalty) implements BattleEvent {}
+import common.ddd.Id;
+import habitquest.guild.domain.battle.Battle;
+import habitquest.guild.domain.guild.Guild;
+
+public record BattleLost(Id<Battle> battleId, Id<Guild> guildId, Integer penalty)
+    implements BattleEvent {}

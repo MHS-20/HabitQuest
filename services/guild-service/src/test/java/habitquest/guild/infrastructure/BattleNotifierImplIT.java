@@ -3,11 +3,14 @@ package habitquest.guild.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.ddd.Id;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.application.GuildRepository;
+import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.events.battleEvents.BattleLost;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
+import habitquest.guild.domain.guild.Guild;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -114,7 +117,8 @@ public class BattleNotifierImplIT {
     @DisplayName("publishes a message to guild.battle-started")
     void shouldPublishToBattleStartedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_STARTED);
-      notifier.notifyBattleStarted(new BattleStarted("battle-1", "guild-1"));
+      notifier.notifyBattleStarted(
+          new BattleStarted(new Id<Battle>("battle-1"), new Id<Guild>("guild-1")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -130,7 +134,8 @@ public class BattleNotifierImplIT {
     @DisplayName("preserves battleId and guildId in the payload")
     void shouldPreserveBattleIdAndGuildId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_STARTED);
-      notifier.notifyBattleStarted(new BattleStarted("battle-42", "guild-99"));
+      notifier.notifyBattleStarted(
+          new BattleStarted(new Id<Battle>("battle-42"), new Id<Guild>("guild-99")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(BATTLE_ID).asText()).isEqualTo("battle-42");
@@ -147,7 +152,8 @@ public class BattleNotifierImplIT {
     void shouldPublishToBattleWonTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_WON);
 
-      notifier.notifyBattleWon(new BattleWon("battle-2", "guild-2", 200, 100));
+      notifier.notifyBattleWon(
+          new BattleWon(new Id<Battle>("battle-2"), new Id<Guild>("guild-2"), 200, 100));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -163,7 +169,8 @@ public class BattleNotifierImplIT {
     @DisplayName("preserves battleId and guildId when publishing victory event")
     void shouldPreserveIdsInWonPayload() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_WON);
-      notifier.notifyBattleWon(new BattleWon("epic-battle", "champion-guild", 500, 250));
+      notifier.notifyBattleWon(
+          new BattleWon(new Id<Battle>("epic-battle"), new Id<Guild>("champion-guild"), 500, 250));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(BATTLE_ID).asText()).isEqualTo("epic-battle");
@@ -179,7 +186,8 @@ public class BattleNotifierImplIT {
     @DisplayName("publishes a message to guild.battle-lost")
     void shouldPublishToBattleLostTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_LOST);
-      notifier.notifyBattleLost(new BattleLost("battle-3", "guild-3", 50));
+      notifier.notifyBattleLost(
+          new BattleLost(new Id<Battle>("battle-3"), new Id<Guild>("guild-3"), 50));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -195,7 +203,8 @@ public class BattleNotifierImplIT {
     @DisplayName("preserves battleId and guildId in the defeat payload")
     void shouldPreserveIdsInLostPayload() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_LOST);
-      notifier.notifyBattleLost(new BattleLost("lost-battle", "defeated-guild", 100));
+      notifier.notifyBattleLost(
+          new BattleLost(new Id<Battle>("lost-battle"), new Id<Guild>("defeated-guild"), 100));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(BATTLE_ID).asText()).isEqualTo("lost-battle");

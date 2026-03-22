@@ -1,3 +1,7 @@
 package habitquest.guild.domain.events.guildEvents;
 
-public record RemovedFromGuild(String guildId, String memberId) implements GuildEvent {}
+import common.ddd.Id;
+import habitquest.guild.domain.guild.Guild;
+import habitquest.guild.domain.guild.GuildMember;
+
+public record RemovedFromGuild(Id<Guild> guildId, Id<GuildMember> memberId) implements GuildEvent {}

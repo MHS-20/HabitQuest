@@ -2,9 +2,12 @@ package habitquest.guild.domain;
 
 import static org.assertj.core.api.Assertions.*;
 
+import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossType;
+import habitquest.guild.domain.guild.Guild;
+import habitquest.guild.domain.guild.GuildMember;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,11 +16,12 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Battle")
 class BattleTest {
 
-  private static final String BATTLE_ID = "battle-1";
-  private static final String GUILD_ID = "guild-1";
-  private static final String MEMBER_1 = "member-1";
-  private static final String MEMBER_2 = "member-2";
-  private static final String MEMBER_3 = "member-3";
+  private static final Id<Battle> BATTLE_ID = new Id<>("battle-1");
+  private static final Id<Guild> GUILD_ID = new Id<>("guild-1");
+  private static final Id<GuildMember> MEMBER_1 = new Id<>("member-1");
+  private static final Id<GuildMember> MEMBER_2 = new Id<>("member-2");
+  private static final Id<GuildMember> MEMBER_3 = new Id<>("member-3");
+  private static final Id<GuildMember> MEMBER_4 = new Id<>("member-4");
   private static final int BOSS_MAX_HEALTH = BossType.MINOTAUR.stats().health().value();
   private static final int EXP_REWARD = BossType.MINOTAUR.experienceReward().amount();
   private static final int MONEY_REWARD = BossType.MINOTAUR.moneyReward().amount();
@@ -211,10 +215,10 @@ class BattleTest {
     @DisplayName("should increase the number of turns and add member")
     void shouldIncreaseNumOfTurns() {
       int before = battle.getNumOfTurns();
-      battle.increaseNumOfTurns("member-4");
+      battle.increaseNumOfTurns(MEMBER_4);
 
       assertThat(battle.getNumOfTurns()).isEqualTo(before + 1);
-      assertThat(battle.getMembers()).contains("member-4");
+      assertThat(battle.getMembers()).contains(MEMBER_4);
     }
 
     @Test
