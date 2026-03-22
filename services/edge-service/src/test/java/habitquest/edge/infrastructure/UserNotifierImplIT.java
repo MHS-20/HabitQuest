@@ -3,6 +3,7 @@ package habitquest.edge.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.ddd.Id;
 import habitquest.edge.application.UserRepository;
 import habitquest.edge.domain.User;
 import java.time.Duration;
@@ -107,11 +108,9 @@ public class UserNotifierImplIT {
     @DisplayName("publishes a message to user.registered")
     void shouldPublishToUserRegisteredTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("user-1", "paolo rossi", "mario@example.com", "hashedpw");
+      User user = new User(new Id<>("user-1"), "paolo rossi", "mario@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
-
       ConsumerRecord<String, String> record = pollOne();
-
       assertThat(record.topic()).isEqualTo(TOPIC_USER_REGISTERED);
       var node = objectMapper.readTree(record.value());
       assertThat(node.get("userId").asText()).isEqualTo("user-1");
@@ -123,9 +122,9 @@ public class UserNotifierImplIT {
     @DisplayName("preserves the userId in the payload")
     void shouldPreserveUserId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("special-user-id", "paolo bianchi", "test@example.com", "hashedpw");
+      User user =
+          new User(new Id<>("special-user-id"), "paolo bianchi", "test@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
-
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("userId").asText()).isEqualTo("special-user-id");
     }
@@ -134,9 +133,8 @@ public class UserNotifierImplIT {
     @DisplayName("preserves the email in the payload")
     void shouldPreserveEmail() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("user-2", "mario rossi", "luigi@example.com", "hashedpw");
+      User user = new User(new Id<>("user-2"), "mario rossi", "luigi@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
-
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("email").asText()).isEqualTo("luigi@example.com");
     }
@@ -145,9 +143,9 @@ public class UserNotifierImplIT {
     @DisplayName("does not include the password hash in the payload")
     void shouldNotExposePasswordHash() throws Exception {
       subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
-      User user = new User("user-3", "mario bianchi", "peach@example.com", "supersecrethashedpw");
+      User user =
+          new User(new Id<>("user-3"), "mario bianchi", "peach@example.com", "supersecrethashedpw");
       notifier.notifyUserRegistered(user);
-
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.has("passwordHash")).isFalse();
       assertThat(node.toString()).doesNotContain("supersecrethashedpw");

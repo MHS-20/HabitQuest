@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import common.ddd.Id;
 import habitquest.edge.domain.User;
 import habitquest.edge.infrastructure.JwtService;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,8 @@ class JwtAuthenticationFilterTest {
 
   @Autowired MockMvc mockMvc;
   private final JwtService jwtService = new JwtService("test-secret-key-minimum-32-chars!!", 3600L);
-  private final User user = new User("user-1", "mario rossi", "mario@example.com", "hash");
+  private final User user =
+      new User(new Id<>("user-1"), "mario rossi", "mario@example.com", "hash");
 
   @Configuration
   @SuppressWarnings("PMD.TestClassWithoutTestCases")
