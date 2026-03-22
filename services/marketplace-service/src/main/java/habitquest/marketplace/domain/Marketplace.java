@@ -1,12 +1,14 @@
 package habitquest.marketplace.domain;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
+import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface Marketplace extends Aggregate<String> {
+public interface Marketplace extends Aggregate<Id<Marketplace>> {
   List<Item> getCatalogItems();
 
   List<Item> getAvailableItemsByType(ItemType type);
@@ -25,5 +27,5 @@ public interface Marketplace extends Aggregate<String> {
 
   Money sellItem(String itemName);
 
-  String getAvatarId();
+  Id<Avatar> getAvatarId();
 }

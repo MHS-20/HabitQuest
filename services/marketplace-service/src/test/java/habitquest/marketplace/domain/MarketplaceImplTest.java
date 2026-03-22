@@ -3,6 +3,7 @@ package habitquest.marketplace.domain;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import java.util.Optional;
@@ -64,19 +65,19 @@ class MarketplaceImplTest {
     when(catalog.contains(MP_POTION_NAME)).thenReturn(true);
     when(catalog.contains(UNKNOWN_ITEM_NAME)).thenReturn(false);
 
-    marketplace = new MarketplaceImpl(MARKETPLACE_ID, AVATAR_ID, catalog);
+    marketplace = new MarketplaceImpl(new Id<>(MARKETPLACE_ID), new Id<>(AVATAR_ID), catalog);
   }
 
   // ── Identity ─────────────────────────────────────────────────────────────────
 
   @Test
   void shouldReturnCorrectId() {
-    assertThat(marketplace.getId()).isEqualTo(MARKETPLACE_ID);
+    assertThat(marketplace.getId().value()).isEqualTo(MARKETPLACE_ID);
   }
 
   @Test
   void shouldReturnCorrectAvatarId() {
-    assertThat(marketplace.getAvatarId()).isEqualTo(AVATAR_ID);
+    assertThat(marketplace.getAvatarId().value()).isEqualTo(AVATAR_ID);
   }
 
   // ── Empty marketplace ─────────────────────────────────────────────────────────
@@ -85,7 +86,8 @@ class MarketplaceImplTest {
   void emptyMarketplaceShouldHaveNoAvailableItems() {
     ItemCatalog emptyCatalog = mock(ItemCatalog.class);
     when(emptyCatalog.getAllItems()).thenReturn(List.of());
-    MarketplaceImpl empty = new MarketplaceImpl("empty", AVATAR_ID, emptyCatalog);
+    MarketplaceImpl empty =
+        new MarketplaceImpl(new Id<>("empty"), new Id<>(AVATAR_ID), emptyCatalog);
     assertThat(empty.getAllAvailableItems()).isEmpty();
   }
 

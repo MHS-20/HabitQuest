@@ -1,19 +1,22 @@
 package habitquest.marketplace.domain;
 
+import common.ddd.Id;
+import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.items.*;
 import java.util.*;
 
 public class MarketplaceImpl implements Marketplace {
-  private final String id;
-  private final String avatarId;
+  private final Id<Marketplace> id;
+  private final Id<Avatar> avatarId;
   private final ItemCatalog catalog;
   private final Set<String> soldItems;
 
-  public MarketplaceImpl(String id, String avatarId, ItemCatalog catalog) {
+  public MarketplaceImpl(Id<Marketplace> id, Id<Avatar> avatarId, ItemCatalog catalog) {
     this(id, avatarId, catalog, new HashSet<>());
   }
 
-  public MarketplaceImpl(String id, String avatarId, ItemCatalog catalog, Set<String> soldItems) {
+  public MarketplaceImpl(
+      Id<Marketplace> id, Id<Avatar> avatarId, ItemCatalog catalog, Set<String> soldItems) {
     this.id = id;
     this.avatarId = avatarId;
     this.soldItems = new HashSet<>(soldItems);
@@ -21,12 +24,12 @@ public class MarketplaceImpl implements Marketplace {
   }
 
   @Override
-  public String getId() {
+  public Id<Marketplace> getId() {
     return id;
   }
 
   @Override
-  public String getAvatarId() {
+  public Id<Avatar> getAvatarId() {
     return avatarId;
   }
 

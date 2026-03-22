@@ -1,6 +1,8 @@
 package habitquest.marketplace.infrastructure;
 
+import common.ddd.Id;
 import common.hexagonal.Adapter;
+import habitquest.marketplace.Avatar;
 import habitquest.marketplace.application.MarketplaceRepository;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.Marketplace;
@@ -15,9 +17,10 @@ import org.springframework.stereotype.Component;
 @Adapter
 public class InMemoryMarketplaceRepository implements MarketplaceRepository {
 
-  private record MarketplaceSnapshot(String id, String avatarId, Set<String> soldItems) {}
+  private record MarketplaceSnapshot(
+      Id<Marketplace> id, Id<Avatar> avatarId, Set<String> soldItems) {}
 
-  private final Map<String, MarketplaceSnapshot> store = new ConcurrentHashMap<>();
+  private final Map<Id<Marketplace>, MarketplaceSnapshot> store = new ConcurrentHashMap<>();
   private final ItemCatalog catalog;
 
   public InMemoryMarketplaceRepository(ItemCatalog catalog) {
@@ -33,13 +36,13 @@ public class InMemoryMarketplaceRepository implements MarketplaceRepository {
   }
 
   @Override
-  public Optional<Marketplace> findById(String id) {
+  public Optional<Marketplace> findById(Id<Marketplace> id) {
     return Optional.ofNullable(store.get(id))
         .map(s -> new MarketplaceImpl(s.id(), s.avatarId(), catalog, s.soldItems()));
   }
 
   @Override
-  public void deleteById(String id) {
+  public void deleteById(Id<Marketplace> id) {
     store.remove(id);
   }
 }
