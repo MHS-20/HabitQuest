@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.edge.domain.User;
 import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
 import habitquest.edge.domain.UserExceptions.UserAlreadyExistsException;
@@ -39,7 +40,7 @@ class AuthServiceTest {
   private static final String JWT_TOKEN = "eyJ.fake.token";
   private static final String USER_ID = "user-123";
   private static final String NAME = "Mario Rossi";
-  private static final User FAKE_USER = new User(USER_ID, NAME, EMAIL, HASHED_PASSWORD);
+  private static final User FAKE_USER = new User(new Id<>(USER_ID), NAME, EMAIL, HASHED_PASSWORD);
 
   // ── register ──────────────────────────────────────────────────────────────
   @Nested
@@ -58,7 +59,7 @@ class AuthServiceTest {
       AuthService.AuthResponse response = authService.register(NAME, EMAIL, RAW_PASSWORD);
 
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
-      assertThat(response.userId()).isEqualTo(USER_ID);
+      assertThat(response.userId().value()).isEqualTo(USER_ID);
       verify(userRepository).save(FAKE_USER);
     }
 
@@ -98,7 +99,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-      existingUser = new User(USER_ID, NAME, EMAIL, HASHED_PASSWORD);
+      existingUser = new User(new Id<>(USER_ID), NAME, EMAIL, HASHED_PASSWORD);
     }
 
     @Test
@@ -111,7 +112,7 @@ class AuthServiceTest {
       AuthService.AuthResponse response = authService.login(EMAIL, RAW_PASSWORD);
 
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
-      assertThat(response.userId()).isEqualTo(USER_ID);
+      assertThat(response.userId().value()).isEqualTo(USER_ID);
     }
 
     @Test

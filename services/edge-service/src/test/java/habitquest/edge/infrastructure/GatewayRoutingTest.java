@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import common.ddd.Id;
 import habitquest.edge.domain.User;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -117,7 +118,7 @@ class GatewayRoutingTest {
 
   @BeforeEach
   void setUp() {
-    User user = new User("user-1", "mario rossi", "mario@example.com", "hash");
+    User user = new User(new Id<>("user-1"), "mario rossi", "mario@example.com", "hash");
     authHeader = "Bearer " + jwtService.generateToken(user);
   }
 

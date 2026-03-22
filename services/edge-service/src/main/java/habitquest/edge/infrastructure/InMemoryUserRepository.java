@@ -34,7 +34,7 @@ public class InMemoryUserRepository implements UserRepository {
   @Override
   public User save(User user) {
     byEmail.put(user.getEmail().toLowerCase(Locale.getDefault()), user);
-    byId.put(user.getId(), user);
+    byId.put(user.getId().value(), user);
     return user;
   }
 

@@ -1,6 +1,7 @@
 package habitquest.edge.application;
 
 import common.ddd.DomainService;
+import common.ddd.Id;
 import common.hexagonal.InBoundPort;
 import habitquest.edge.domain.User;
 import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
@@ -59,5 +60,5 @@ public class AuthService implements DomainService {
   }
 
   // ── response DTO ──────────────────────────────────────────────────────────
-  public record AuthResponse(String token, String userId) {}
+  public record AuthResponse(String token, Id<User> userId) {}
 }

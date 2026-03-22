@@ -26,7 +26,7 @@ public class UserNotifierImpl implements UserNotifier {
   @Override
   public void notifyUserRegistered(User user) {
     UserRegisteredMessage message =
-        new UserRegisteredMessage(user.getId(), user.getEmail(), Instant.now());
+        new UserRegisteredMessage(user.getId().value(), user.getEmail(), Instant.now());
 
     LOG.info(
         "Publishing UserRegistered event: userId={}, email={}", message.userId(), message.email());
