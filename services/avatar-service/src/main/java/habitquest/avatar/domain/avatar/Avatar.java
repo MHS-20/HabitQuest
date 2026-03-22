@@ -203,7 +203,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     if (!this.spells.contains(spell)) {
       throw new IllegalStateException("Spell not known: " + spell.name());
     }
-    spendMana(spell.requiredMana().value());
+    spendMana(spell.getRequiredMana().value());
   }
 
   // --- Stats ---
