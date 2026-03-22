@@ -205,7 +205,13 @@ public class HabitControllerIT {
       mockMvc
           .perform(get("/api/v1/habits/{id}", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(HABIT_ID.value()));
+          .andExpect(jsonPath("$.id").value(HABIT_ID.value()))
+          .andExpect(jsonPath("$.avatarId").value(AVATAR_ID.value()))
+          .andExpect(jsonPath("$.title").value(TITLE))
+          .andExpect(jsonPath("$.description").value(DESCRIPTION))
+          .andExpect(jsonPath("$.tags[0]").value("health"))
+          .andExpect(jsonPath("$.recurrence.type").value("DAILY"))
+          .andExpect(jsonPath("$.associatedQuestId").value("quest-1"));
     }
 
     @Test
@@ -290,11 +296,12 @@ public class HabitControllerIT {
     void shouldReturnTags() throws Exception {
       when(habitService.getTags(HABIT_ID))
           .thenReturn(List.of(new Tag("health"), new Tag("fitness")));
+
       mockMvc
           .perform(get("/api/v1/habits/{id}/tags", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.tags[0].name").value("health"))
-          .andExpect(jsonPath("$.tags[1].name").value("fitness"));
+          .andExpect(jsonPath("$.tags[0]").value("health"))
+          .andExpect(jsonPath("$.tags[1]").value("fitness"));
     }
   }
 
@@ -310,6 +317,7 @@ public class HabitControllerIT {
       mockMvc
           .perform(get("/api/v1/habits/{id}/recurrence", HABIT_ID.value()))
           .andExpect(status().isOk())
+          .andExpect(jsonPath("$.type").value("WEEKLY"))
           .andExpect(jsonPath("$.dayOfWeek").value("MONDAY"));
     }
   }
@@ -345,11 +353,14 @@ public class HabitControllerIT {
                       new HabitAttended(stubHabit(), AVATAR_ID),
                       LocalDateTime.of(2026, 3, 17, 9, 30),
                       "attendedAt=2026-03-17T09:30")));
+
       mockMvc
           .perform(get("/api/v1/habits/{id}/history", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.history[0].event.habit.id").value(HABIT_ID.value()))
-          .andExpect(jsonPath("$.history[0].event.avatarId").value(AVATAR_ID.value()))
+          .andExpect(jsonPath("$.history[0].eventType").value("HabitAttended"))
+          .andExpect(jsonPath("$.history[0].habitId").value(HABIT_ID.value()))
+          .andExpect(jsonPath("$.history[0].avatarId").value(AVATAR_ID.value()))
+          .andExpect(jsonPath("$.history[0].occurredAt").value("2026-03-17T09:30:00"))
           .andExpect(jsonPath("$.history[0].details").value("attendedAt=2026-03-17T09:30"));
     }
   }
