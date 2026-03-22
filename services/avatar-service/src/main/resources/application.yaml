@@ -17,6 +17,10 @@ spring:
           destination: avatar.skill-point-assigned
           content-type: application/json
 
+        avatar-new-spell-out-0:
+          destination: avatar.new-spell-learned
+          content-type: application/json
+
       kafka:
         binder:
           brokers: localhost:9092          # override in production via env var

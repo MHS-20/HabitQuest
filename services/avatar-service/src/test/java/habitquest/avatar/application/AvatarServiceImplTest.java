@@ -12,7 +12,9 @@ import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.items.Weapon;
+import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +56,25 @@ class AvatarServiceImplTest {
         new AvatarHealth(new Health(100), new Health(100)),
         new AvatarMana(new Mana(50), new Mana(50)),
         new AvatarStats(new Id<>(STATS_ID), 10, 10, 10),
-        List.of());
+        new ArrayList<>());
+  }
+
+  /**
+   * An avatar that starts at level 4, one level-up away from level 5 (the first spell tier). XP
+   * required to reach level 5 is set to 100.
+   */
+  private Avatar stubAvatarAtLevel4() {
+    return new Avatar(
+        new Id<>(AVATAR_ID),
+        AVATAR_NAME,
+        new Money(0),
+        new Inventory(new Id<>(INVENTORY_ID)),
+        new EquippedItems(new Id<>(EQUIPPED_ID)),
+        new Level(4, new Experience(0), new Experience(100)),
+        new AvatarHealth(new Health(100), new Health(100)),
+        new AvatarMana(new Mana(50), new Mana(50)),
+        new AvatarStats(new Id<>(STATS_ID), 10, 10, 10),
+        new ArrayList<>());
   }
 
   @BeforeEach
@@ -290,13 +310,51 @@ class AvatarServiceImplTest {
     void levelUp() throws AvatarNotFoundException {
       Avatar avatar = stubAvatar();
       when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
-
       service.grantExperience(new Id<>(AVATAR_ID), 100);
-
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(LevelUpped.class);
       assertThat(((LevelUpped) captor.getValue()).newLevel().levelNumber()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("does NOT fire NewSpellLearned when the new level has no associated spell")
+    void noSpellOnLevelWithoutSpell() throws AvatarNotFoundException {
+      Avatar avatar = stubAvatar();
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      service.grantExperience(new Id<>(AVATAR_ID), 100);
+      verify(avatarObserver, never()).notifyAvatarEvent(any(NewSpellLearned.class));
+    }
+
+    @Test
+    @DisplayName("fires NewSpellLearned and teaches spell when avatar reaches a spell-tier level")
+    void spellLearnedOnSpellTierLevelUp() throws AvatarNotFoundException {
+      Avatar avatar = stubAvatarAtLevel4();
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+
+      service.grantExperience(new Id<>(AVATAR_ID), 100);
+      assertThat(avatar.getSpells()).contains(Spell.FIREBALL);
+
+      // Two events must have been published: LevelUpped + NewSpellLearned
+      ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
+      verify(avatarObserver, times(2)).notifyAvatarEvent(captor.capture());
+      List<AvatarEvent> events = captor.getAllValues();
+      assertThat(events).anySatisfy(e -> assertThat(e).isInstanceOf(LevelUpped.class));
+      assertThat(events)
+          .anySatisfy(
+              e -> {
+                assertThat(e).isInstanceOf(NewSpellLearned.class);
+                assertThat(((NewSpellLearned) e).spell()).isEqualTo(Spell.FIREBALL);
+              });
+    }
+
+    @Test
+    @DisplayName("persists avatar twice when a spell is learned: once after XP, once after spell")
+    void avatarSavedTwiceWhenSpellLearned() throws AvatarNotFoundException {
+      Avatar avatar = stubAvatarAtLevel4();
+      when(avatarRepository.findById(new Id<>(AVATAR_ID))).thenReturn(Optional.of(avatar));
+      service.grantExperience(new Id<>(AVATAR_ID), 100);
+      verify(avatarRepository, times(2)).save(avatar);
     }
   }
 

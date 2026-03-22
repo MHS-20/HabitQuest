@@ -9,7 +9,9 @@ import habitquest.avatar.domain.avatar.Experience;
 import habitquest.avatar.domain.avatar.Level;
 import habitquest.avatar.domain.events.Dead;
 import habitquest.avatar.domain.events.LevelUpped;
+import habitquest.avatar.domain.events.NewSpellLearned;
 import habitquest.avatar.domain.events.SkillPointAssigned;
+import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.Defense;
 import habitquest.avatar.domain.stats.Intelligence;
 import habitquest.avatar.domain.stats.Strength;
@@ -38,6 +40,7 @@ import org.testcontainers.utility.DockerImageName;
 @SpringBootTest
 @Testcontainers
 @DisplayName("AvatarNotifierImpl")
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class AvatarNotifierImplIT {
 
   @Container
@@ -55,6 +58,7 @@ public class AvatarNotifierImplIT {
   private static final String TOPIC_LEVEL_UPPED = "avatar.level-upped";
   private static final String TOPIC_DEAD = "avatar.dead";
   private static final String TOPIC_SKILL_POINT = "avatar.skill-point-assigned";
+  private static final String TOPIC_NEW_SPELL = "avatar.new-spell-learned";
 
   private static final String AVATAR_ID = "avatar-123";
   private static final Duration POLL_TIMEOUT = Duration.ofSeconds(10);
@@ -172,7 +176,7 @@ public class AvatarNotifierImplIT {
     }
   }
 
-  // ── notifySkillPointAssigned ──────────────────────────────────────��───────────
+  // ── notifySkillPointAssigned ──────────────────────────────────────────────────
 
   @Nested
   @DisplayName("notifySkillPointAssigned")
@@ -216,6 +220,36 @@ public class AvatarNotifierImplIT {
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("statType").asText()).isEqualTo("Intelligence");
       assertThat(node.get("newValue").asInt()).isEqualTo(20);
+    }
+  }
+
+  // ── notifyNewSpellLearned ─────────────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("notifyNewSpellLearned")
+  class NotifyNewSpellLearned {
+
+    @Test
+    @DisplayName("publishes a message to avatar.new-spell-learned")
+    void shouldPublishToNewSpellTopic() throws Exception {
+      subscribeAndSeekToEnd(TOPIC_NEW_SPELL);
+      notifier.notifyNewSpellLearned(new NewSpellLearned(Spell.FIREBALL));
+      ConsumerRecord<String, String> record = pollOne();
+      assertThat(record.topic()).isEqualTo(TOPIC_NEW_SPELL);
+      var node = objectMapper.readTree(record.value());
+      assertThat(node.get("spellName").asText()).isEqualTo("FIREBALL");
+      assertThat(node.get("description").asText()).isEqualTo("A basic fire spell.");
+      assertThat(node.has("occurredOn")).isTrue();
+    }
+
+    @Test
+    @DisplayName("preserves all spell fields in the payload")
+    void shouldPreserveAllSpellFields() throws Exception {
+      subscribeAndSeekToEnd(TOPIC_NEW_SPELL);
+      notifier.notifyNewSpellLearned(new NewSpellLearned(Spell.BLIZZARD));
+      var node = objectMapper.readTree(pollOne().value());
+      assertThat(node.get("spellName").asText()).isEqualTo("BLIZZARD");
+      assertThat(node.get("description").asText()).isEqualTo("A chilling spell.");
     }
   }
 }

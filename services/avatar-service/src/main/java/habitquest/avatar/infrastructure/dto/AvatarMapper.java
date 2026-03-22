@@ -30,7 +30,7 @@ public final class AvatarMapper {
         toResponse(avatar.getAvatarStats()),
         toResponse(avatar.getInventory()),
         toResponse(avatar.getEquippedItems()),
-        avatar.getSpells().stream().map(Spell::name).toList());
+        avatar.getSpells().stream().map(Spell::getName).toList());
   }
 
   public static MoneyResponse toResponse(Money money) {
