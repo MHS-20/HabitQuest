@@ -6,9 +6,7 @@ import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.Invite;
 import java.time.Instant;
-import org.springframework.stereotype.Component;
 
-@Component
 public class InviteFactory implements Factory {
   private final IdGenerator idGenerator;
 

@@ -35,7 +35,7 @@ class MarketplaceImplTest {
   private Armor shield;
   private HealthPotion hpPotion;
   private ManaPotion mpPotion;
-  @MockitoBean private ItemCatalog catalog;
+  private ItemCatalog catalog;
   private MarketplaceImpl marketplace;
 
   @BeforeEach

@@ -10,9 +10,7 @@ import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.spells.Thunder;
 import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
-@Component
 public class AvatarFactory {
   private final IdGenerator idGenerator;
 

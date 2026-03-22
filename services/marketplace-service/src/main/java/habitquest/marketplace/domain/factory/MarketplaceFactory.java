@@ -6,9 +6,7 @@ import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.MarketplaceImpl;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MarketplaceFactory implements Factory {
   private final IdGenerator idGenerator;
 
