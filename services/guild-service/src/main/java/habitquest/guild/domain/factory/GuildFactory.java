@@ -5,9 +5,7 @@ import common.ddd.Id;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
-import org.springframework.stereotype.Component;
 
-@Component
 public class GuildFactory implements Factory {
   private final IdGenerator idGenerator;
 

@@ -4,9 +4,7 @@ import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ItemCatalog {
 
   private final Map<String, Item> items =

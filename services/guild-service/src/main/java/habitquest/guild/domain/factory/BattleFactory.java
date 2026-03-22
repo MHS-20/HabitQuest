@@ -5,9 +5,7 @@ import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.guild.Guild;
-import org.springframework.stereotype.Component;
 
-@Component
 public class BattleFactory implements Factory {
 
   private final IdGenerator idGenerator;
