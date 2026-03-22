@@ -7,6 +7,7 @@ import habitquest.avatar.domain.factory.AvatarFactory;
 import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
+import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -186,6 +187,14 @@ public class AvatarServiceImpl implements AvatarService {
     if (levelAfter.levelNumber() > levelBefore.levelNumber()) {
       avatarObserver.notifyAvatarEvent(new LevelUpped(avatarId, avatar.getLevel()));
     }
+
+    Spell.unlockedAtLevel(levelAfter)
+        .ifPresent(
+            spell -> {
+              avatar.learnSpell(spell);
+              avatarRepository.save(avatar);
+              avatarObserver.notifyAvatarEvent(new NewSpellLearned(spell));
+            });
   }
 
   @Override

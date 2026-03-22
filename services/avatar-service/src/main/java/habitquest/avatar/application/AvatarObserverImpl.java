@@ -18,6 +18,7 @@ public class AvatarObserverImpl implements AvatarObserver {
       case LevelUpped e -> avatarNotifier.notifyLevelUpped(e);
       case Dead e -> avatarNotifier.notifyDead(e);
       case SkillPointAssigned e -> avatarNotifier.notifySkillPointAssigned(e);
+      case NewSpellLearned e -> avatarNotifier.notifyNewSpellLearned(e);
       default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass());
     }
   }
