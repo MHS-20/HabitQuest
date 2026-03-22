@@ -19,6 +19,8 @@ spring:
             enable: true
             required: true
   cloud:
+    function:
+      definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;avatarNewSpellLearned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
     config:
       enabled: false
       uri: http://localhost:8888
@@ -42,6 +44,8 @@ spring:
         avatarSkillPointAssigned-in-0:
           destination: avatar.skill-point-assigned
           group: notification-service
+        avatarNewSpellLearned-in-0:
+          destination: avatar.new-spell-learned
 
         guildBattleStarted-in-0:
           destination: guild.battle-started

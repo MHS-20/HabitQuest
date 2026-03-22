@@ -93,7 +93,6 @@ public class MarketplaceController {
   }
 
   // ─── Available Items ────────────────────────────────────────────────────────
-
   /** Returns all available items, optionally filtered by type. */
   @GetMapping("/{marketplaceId}/items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getAvailableItems(
@@ -127,7 +126,6 @@ public class MarketplaceController {
   }
 
   // ─── Sold Items ─────────────────────────────────────────────────────────────
-
   /** Returns all sold items. */
   @GetMapping("/{marketplaceId}/sold-items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getSoldItems(
@@ -159,9 +157,18 @@ public class MarketplaceController {
 
   @PostMapping("/{marketplaceId}/items/{itemName}/buy")
   public ResponseEntity<Void> buyItem(
-      @PathVariable String marketplaceId, @PathVariable String itemName)
+      @PathVariable String marketplaceId,
+      @PathVariable String itemName,
+      @RequestParam Integer currentLevel)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
     String avatarId = marketplaceService.getAvatarId(idOfMarketplace(marketplaceId)).value();
+
+    if (!marketplaceService.canBuyItem(
+        idOfMarketplace(marketplaceId), itemName, new Level(currentLevel))) {
+      LOG.warn("Avatar {} cannot buy item '{}' due to insufficient level", avatarId, itemName);
+      return ResponseEntity.status(403).build();
+    }
+
     LOG.info(
         "Starting buy saga: avatar {} buying item '{}' from marketplace {}",
         avatarId,
@@ -288,7 +295,7 @@ public class MarketplaceController {
         selfMarketplaceLink(marketplaceId),
         linkTo(methodOn(MarketplaceController.class).getAvailableItems(marketplaceId, ItemType.ALL))
             .withRel("items"),
-        linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name()))
+        linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name(), 0))
             .withRel("buy"));
   }
 
