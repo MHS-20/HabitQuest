@@ -6,10 +6,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import common.ddd.Id;
 import habitquest.quest.application.QuestNotFoundException;
 import habitquest.quest.application.QuestService;
-import habitquest.quest.domain.Habit;
-import habitquest.quest.domain.MoneyReward;
-import habitquest.quest.domain.Quest;
-import habitquest.quest.domain.Reward;
+import habitquest.quest.domain.*;
+import habitquest.quest.infrastructure.dto.HabitMapper;
+import habitquest.quest.infrastructure.dto.HabitResponse;
+import habitquest.quest.infrastructure.dto.QuestMapper;
+import habitquest.quest.infrastructure.dto.QuestResponse;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
@@ -60,13 +61,14 @@ public class QuestController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<EntityModel<Quest>> getQuest(@PathVariable String id)
+  public ResponseEntity<EntityModel<QuestResponse>> getQuest(@PathVariable String id)
       throws QuestNotFoundException {
     Quest quest = questService.getQuest(new Id<>(id));
+    QuestResponse dto = QuestMapper.toResponse(quest);
 
-    EntityModel<Quest> model =
+    EntityModel<QuestResponse> model =
         EntityModel.of(
-            quest,
+            dto,
             selfLink(id),
             linkTo(methodOn(QuestController.class).getName(id)).withRel("name"),
             linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
@@ -114,9 +116,11 @@ public class QuestController {
   @GetMapping("/{id}/habits")
   public ResponseEntity<EntityModel<HabitsResponse>> getHabits(@PathVariable String id)
       throws QuestNotFoundException {
+    List<HabitResponse> habitResponses =
+        questService.getHabits(new Id<>(id)).stream().map(HabitMapper::toResponse).toList();
+
     EntityModel<HabitsResponse> model =
-        EntityModel.of(
-            new HabitsResponse(questService.getHabits(new Id<>(id))), selfLink(id), questLink(id));
+        EntityModel.of(new HabitsResponse(habitResponses), selfLink(id), questLink(id));
     return ResponseEntity.ok(model);
   }
 
@@ -140,21 +144,22 @@ public class QuestController {
   public ResponseEntity<Void> updateReward(
       @PathVariable String id, @RequestBody UpdateRewardRequest request)
       throws QuestNotFoundException {
-    questService.updateReward(new Id<>(id), new MoneyReward());
+    questService.updateReward(new Id<>(id), new MoneyReward(request.money()));
     return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{id}/habits")
-  public ResponseEntity<Void> addHabit(@PathVariable String id, @RequestBody HabitRequest request)
-      throws QuestNotFoundException {
-    questService.addHabit(new Id<>(id), new Habit(new Id<>(request.habitId())));
+  public ResponseEntity<Void> addHabit(
+      @PathVariable String id, @RequestBody AddHabitRequest request) throws QuestNotFoundException {
+    questService.addHabit(new Id<>(id), HabitMapper.toDomain(request.habitId(), request));
     return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}/habits")
   public ResponseEntity<Void> removeHabit(
-      @PathVariable String id, @RequestBody HabitRequest request) throws QuestNotFoundException {
-    questService.removeHabit(new Id<>(id), new Habit(new Id<>(request.habitId())));
+      @PathVariable String id, @RequestBody RemoveHabitRequest request)
+      throws QuestNotFoundException {
+    questService.removeHabit(new Id<>(id), new Id<>(request.habitId()));
     return ResponseEntity.noContent().build();
   }
 
@@ -192,7 +197,16 @@ public class QuestController {
 
   public record UpdateRewardRequest(Integer experience, Integer money) {}
 
-  public record HabitRequest(String habitId, String title) {}
+  public record RemoveHabitRequest(String habitId, String title) {}
+
+  public record AddHabitRequest(
+      String habitId,
+      String title,
+      String description,
+      List<String> tags,
+      RecurrenceRequest recurrence) {}
+
+  public record RecurrenceRequest(String type, Integer dayOfMonth, String dayOfWeek) {}
 
   public record QuestCreatedResponse(String id) {}
 
@@ -200,7 +214,7 @@ public class QuestController {
 
   public record DurationResponse(String duration) {}
 
-  public record HabitsResponse(List<Habit> habits) {}
+  public record HabitsResponse(List<HabitResponse> habits) {}
 
   public record ErrorResponse(String message) {}
 }

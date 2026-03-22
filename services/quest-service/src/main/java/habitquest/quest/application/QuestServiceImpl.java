@@ -3,6 +3,7 @@ package habitquest.quest.application;
 import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.quest.domain.Habit;
+import habitquest.quest.domain.MoneyReward;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
 import habitquest.quest.domain.events.QuestCreated;
@@ -92,7 +93,7 @@ public class QuestServiceImpl implements QuestService {
   }
 
   @Override
-  public Quest updateReward(Id<Quest> questId, Reward reward) throws QuestNotFoundException {
+  public Quest updateReward(Id<Quest> questId, MoneyReward reward) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.setReward(reward);
     return questRepository.save(quest);
@@ -106,7 +107,7 @@ public class QuestServiceImpl implements QuestService {
   }
 
   @Override
-  public Quest removeHabit(Id<Quest> questId, Habit habit) throws QuestNotFoundException {
+  public Quest removeHabit(Id<Quest> questId, Id<Habit> habit) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.removeHabit(habit);
     return questRepository.save(quest);
