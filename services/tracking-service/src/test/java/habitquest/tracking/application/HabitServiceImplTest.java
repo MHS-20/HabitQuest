@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
+import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
@@ -34,12 +36,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("HabitServiceImpl")
 class HabitServiceImplTest {
 
-  private static final String HABIT_ID = "habit-1";
-  private static final String AVATAR_ID = "avatar-1";
+  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
+  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
   private static final String TITLE = "Hydrate";
   private static final String DESCRIPTION = "Drink 2L of water";
-  private static final String UNKNOWN_ID = "missing";
-  private static final String OVERDUE_HABIT_ID = "habit-overdue";
+  private static final Id<Habit> UNKNOWN_ID = new Id<>("missing");
+  private static final Id<Habit> OVERDUE_HABIT_ID = new Id<>("habit-overdue");
 
   @Mock private HabitRepository habitRepository;
   @Mock private HabitHistoryRepository historyRepository;
@@ -135,7 +137,7 @@ class HabitServiceImplTest {
 
       assertThatThrownBy(() -> service.getHabitById(UNKNOWN_ID))
           .isInstanceOf(HabitNotFoundException.class)
-          .hasMessage(UNKNOWN_ID);
+          .hasMessage(UNKNOWN_ID.value());
     }
   }
 
@@ -217,7 +219,7 @@ class HabitServiceImplTest {
 
       assertThatThrownBy(() -> service.getTitle(UNKNOWN_ID))
           .isInstanceOf(HabitNotFoundException.class)
-          .hasMessage(UNKNOWN_ID);
+          .hasMessage(UNKNOWN_ID.value().toString());
     }
   }
 
@@ -322,7 +324,7 @@ class HabitServiceImplTest {
 
       assertThatThrownBy(() -> service.attendHabit(UNKNOWN_ID, LocalDateTime.now()))
           .isInstanceOf(HabitNotFoundException.class)
-          .hasMessage(UNKNOWN_ID);
+          .hasMessage(UNKNOWN_ID.value().toString());
     }
   }
 
@@ -335,13 +337,18 @@ class HabitServiceImplTest {
     void emitsForNeverAttended() {
       Habit neverAttended =
           new Habit(
-              "habit-null", AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.empty());
+              new Id<>("habit-null"),
+              AVATAR_ID,
+              TITLE,
+              DESCRIPTION,
+              new DailyRecurrence(),
+              Optional.empty());
       neverAttended.setTitle(TITLE);
       neverAttended.setDescription(DESCRIPTION);
       neverAttended.setRecurrence(new DailyRecurrence());
 
       when(habitRepository.findAll()).thenReturn(List.of(neverAttended));
-      when(historyRepository.findByHabitId("habit-null")).thenReturn(List.of());
+      when(historyRepository.findByHabitId(new Id<>("habit-null"))).thenReturn(List.of());
 
       service.detectOverdueHabits();
 
@@ -385,7 +392,7 @@ class HabitServiceImplTest {
     void doesNotEmitForUpToDateHabit() {
       Habit upToDate =
           new Habit(
-              "habit-ok",
+              new Id<>("habit-ok"),
               AVATAR_ID,
               TITLE,
               DESCRIPTION,
