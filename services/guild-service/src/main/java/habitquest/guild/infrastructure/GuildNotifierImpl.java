@@ -32,7 +32,7 @@ public class GuildNotifierImpl implements GuildNotifier {
   @Override
   public void notifyGuildCreated(GuildCreated event) {
     GuildCreatedMessage message =
-        new GuildCreatedMessage(event.guildId(), event.guildName(), Instant.now());
+        new GuildCreatedMessage(event.guildId().value(), event.guildName(), Instant.now());
 
     LOG.info(
         "Publishing GuildCreated event: guildId={}, name={}", message.guildId(), message.name());
@@ -44,7 +44,7 @@ public class GuildNotifierImpl implements GuildNotifier {
 
   @Override
   public void notifyGuildDeleted(GuildDeleted event) {
-    GuildDeletedMessage message = new GuildDeletedMessage(event.guildId(), Instant.now());
+    GuildDeletedMessage message = new GuildDeletedMessage(event.guildId().value(), Instant.now());
 
     LOG.info("Publishing GuildDeleted event: guildId={}", message.guildId());
     boolean sent = streamBridge.send(GUILD_DELETED_BINDING, message);
@@ -57,7 +57,10 @@ public class GuildNotifierImpl implements GuildNotifier {
   public void notifyInviteSent(InviteSent event) {
     var message =
         new InviteSentMessage(
-            event.guildId(), event.targetAvatarId(), event.inviteId(), Instant.now());
+            event.guildId().value(),
+            event.targetAvatarId().value(),
+            event.inviteId().value(),
+            Instant.now());
     streamBridge.send(INVITE_SENT_BINDING, message);
   }
 
@@ -67,7 +70,7 @@ public class GuildNotifierImpl implements GuildNotifier {
   @Override
   public void notifyGuildJoined(GuildJoined event) {
     GuildJoinedMessage message =
-        new GuildJoinedMessage(event.guildId(), event.memberId(), Instant.now());
+        new GuildJoinedMessage(event.guildId().value(), event.memberId().value(), Instant.now());
 
     LOG.info(
         "Publishing GuildJoined event: guildId={}, memberId={}",
@@ -82,7 +85,7 @@ public class GuildNotifierImpl implements GuildNotifier {
   @Override
   public void notifyGuildLeft(GuildLeft event) {
     GuildLeftMessage message =
-        new GuildLeftMessage(event.guildId(), event.memberId(), Instant.now());
+        new GuildLeftMessage(event.guildId().value(), event.memberId().value(), Instant.now());
 
     LOG.info(
         "Publishing GuildLeft event: guildId={}, memberId={}",
@@ -97,7 +100,8 @@ public class GuildNotifierImpl implements GuildNotifier {
   @Override
   public void notifyRemovedFromGuild(RemovedFromGuild event) {
     RemovedFromGuildMessage message =
-        new RemovedFromGuildMessage(event.guildId(), event.memberId(), Instant.now());
+        new RemovedFromGuildMessage(
+            event.guildId().value(), event.memberId().value(), Instant.now());
 
     LOG.info(
         "Publishing RemovedFromGuild event: guildId={}, memberId={}",
@@ -113,7 +117,10 @@ public class GuildNotifierImpl implements GuildNotifier {
   public void notifyRoleAssigned(RoleAssigned event) {
     RoleAssignedMessage message =
         new RoleAssignedMessage(
-            event.guildId(), event.memberId(), event.newRole().name(), Instant.now());
+            event.guildId().value(),
+            event.memberId().value(),
+            event.newRole().name(),
+            Instant.now());
 
     LOG.info(
         "Publishing RoleAssigned event: guildId={}, memberId={}, role={}",

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;
@@ -26,12 +27,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GuildServiceImplTest {
 
-  public static final String BATTLE_1 = "battle-1";
-  private static final String GUILD_ID = "guild-1";
+  private static final Id<Battle> BATTLE_1 = new Id<>("battle-1");
+  private static final Id<Guild> GUILD_ID = new Id<>("guild-1");
   private static final String GUILD_NAME = "MyGuild";
-  private static final String LEADER_ID = "avatar-1";
+  private static final Id<GuildMember> LEADER_ID = new Id<>("avatar-1");
   private static final String NICK = "Hero";
-  private static final String MEMBER_ID = "avatar-2";
+  private static final Id<GuildMember> MEMBER_ID = new Id<>("avatar-2");
   private static final String MEMBER_NICK = "Newbie";
   private static final GuildRole LEADER_ROLE = GuildRole.LEADER;
   private static final GuildRole OFFICER_ROLE = GuildRole.OFFICER;
@@ -79,7 +80,7 @@ class GuildServiceImplTest {
     void shouldReturnGuildId() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      String result = guildService.createGuild(GUILD_NAME, LEADER_ID, NICK);
+      Id<Guild> result = guildService.createGuild(GUILD_NAME, LEADER_ID, NICK);
 
       assertThat(result).isEqualTo(GUILD_ID);
     }
@@ -94,7 +95,7 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(GuildCreated.class);
-      assertThat(((GuildCreated) captor.getValue()).guildId()).isEqualTo(GUILD_ID);
+      assertThat(((GuildCreated) captor.getValue()).guildId().value()).isEqualTo(GUILD_ID.value());
     }
   }
 
@@ -182,7 +183,9 @@ class GuildServiceImplTest {
     void shouldSaveAndPublishEvent() throws GuildNotFoundException {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(inviteFactory.create(GUILD_ID, MEMBER_ID))
-          .thenReturn(new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+          .thenReturn(
+              new Invite(
+                  new Id<>(INVITE_ID), GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
 
       guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
 
@@ -190,9 +193,9 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       InviteSent event = (InviteSent) captor.getValue();
-      assertThat(event.guildId()).isEqualTo(GUILD_ID);
-      assertThat(event.targetAvatarId()).isEqualTo(MEMBER_ID);
-      assertThat(event.inviteId()).isEqualTo(INVITE_ID);
+      assertThat(event.guildId().value()).isEqualTo(GUILD_ID.value());
+      assertThat(event.targetAvatarId().value()).isEqualTo(MEMBER_ID.value());
+      assertThat(event.inviteId().value()).isEqualTo(INVITE_ID);
     }
 
     @Test
@@ -213,7 +216,9 @@ class GuildServiceImplTest {
       guild.addMember(new GuildMember(MEMBER_ID, MEMBER_NICK, MEMBER_ROLE));
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(inviteFactory.create(GUILD_ID, MEMBER_ID))
-          .thenReturn(new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
+          .thenReturn(
+              new Invite(
+                  new Id<>(INVITE_ID), GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400)));
 
       assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
           .isInstanceOf(IllegalStateException.class);
@@ -236,7 +241,7 @@ class GuildServiceImplTest {
   @Nested
   @DisplayName("acceptInvite")
   class AcceptInvite {
-    private static final String INVITE_ID = "invite-1";
+    private static final Id<Invite> INVITE_ID = new Id<Invite>("invite-1");
 
     @BeforeEach
     void seedInvite() {
@@ -256,8 +261,8 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       GuildJoined event = (GuildJoined) captor.getValue();
-      assertThat(event.guildId()).isEqualTo(GUILD_ID);
-      assertThat(event.memberId()).isEqualTo(MEMBER_ID);
+      assertThat(event.guildId().value()).isEqualTo(GUILD_ID.value());
+      assertThat(event.memberId().value()).isEqualTo(MEMBER_ID.value());
     }
 
     @Test
@@ -267,7 +272,9 @@ class GuildServiceImplTest {
       when(ongoingBattle.getId()).thenReturn(BATTLE_1);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
+
       guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
+
       verify(battleService).increaseNumOfTurn(BATTLE_1, MEMBER_ID);
     }
 
@@ -277,7 +284,9 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
       assertThatThrownBy(
-              () -> guildService.acceptInvite(GUILD_ID, INVITE_ID, "wrong-avatar", MEMBER_NICK))
+              () ->
+                  guildService.acceptInvite(
+                      GUILD_ID, INVITE_ID, new Id<>("wrong-avatar"), MEMBER_NICK))
           .isInstanceOf(IllegalArgumentException.class);
 
       verify(guildRepository, never()).save(any());
@@ -290,7 +299,9 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
       assertThatThrownBy(
-              () -> guildService.acceptInvite(GUILD_ID, "ghost-invite", MEMBER_ID, MEMBER_NICK))
+              () ->
+                  guildService.acceptInvite(
+                      GUILD_ID, new Id<Invite>("ghost-invite"), MEMBER_ID, MEMBER_NICK))
           .isInstanceOf(IllegalArgumentException.class);
 
       verify(guildRepository, never()).save(any());
@@ -380,7 +391,7 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       RemovedFromGuild event = (RemovedFromGuild) captor.getValue();
-      assertThat(event.memberId()).isEqualTo(MEMBER_ID);
+      assertThat(event.memberId().value()).isEqualTo(MEMBER_ID.value());
     }
 
     @Test
@@ -425,7 +436,7 @@ class GuildServiceImplTest {
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
       RoleAssigned event = (RoleAssigned) captor.getValue();
-      assertThat(event.memberId()).isEqualTo(MEMBER_ID);
+      assertThat(event.memberId().value()).isEqualTo(MEMBER_ID.value());
       assertThat(event.newRole()).isEqualTo(OFFICER_ROLE);
     }
 

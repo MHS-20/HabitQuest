@@ -8,7 +8,7 @@ public record GuildResponse(
 
   public static GuildResponse from(Guild guild) {
     return new GuildResponse(
-        guild.getId(),
+        guild.getId().value(),
         guild.getName(),
         guild.getGlobalRank(),
         guild.getMembers().stream().map(GuildMemberResponse::from).toList());

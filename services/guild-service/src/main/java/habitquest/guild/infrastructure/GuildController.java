@@ -2,11 +2,11 @@ package habitquest.guild.infrastructure;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
-import habitquest.guild.domain.guild.GuildRole;
-import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
+import habitquest.guild.domain.guild.*;
 import habitquest.guild.infrastructure.dto.GuildMemberResponse;
 import habitquest.guild.infrastructure.dto.GuildResponse;
 import java.net.URI;
@@ -29,14 +29,30 @@ public class GuildController {
     this.guildService = guildService;
   }
 
+  private Id<Guild> idOfGuild(String id) {
+    return new Id<>(id);
+  }
+
+  private Id<GuildMember> idOfGuildMember(String id) {
+    return new Id<>(id);
+  }
+
+  private Id<Invite> idOfInvite(String id) {
+    return new Id<>(id);
+  }
+
   // Guild CRUD
   @PostMapping
   public ResponseEntity<EntityModel<GuildCreatedResponse>> createGuild(
       @RequestBody CreateGuildRequest request) {
 
     String id =
-        guildService.createGuild(
-            request.name(), request.creatorAvatarId(), request.creatorNickname());
+        guildService
+            .createGuild(
+                request.name(),
+                idOfGuildMember(request.creatorAvatarId()),
+                request.creatorNickname())
+            .value();
     GuildCreatedResponse body = new GuildCreatedResponse(id);
 
     EntityModel<GuildCreatedResponse> model =
@@ -53,7 +69,7 @@ public class GuildController {
   @GetMapping("/{id}")
   public ResponseEntity<EntityModel<GuildResponse>> getGuild(@PathVariable String id)
       throws GuildNotFoundException {
-    GuildResponse body = GuildResponse.from(guildService.getGuild(id));
+    GuildResponse body = GuildResponse.from(guildService.getGuild(idOfGuild(id)));
     EntityModel<GuildResponse> model =
         EntityModel.of(
             body,
@@ -67,8 +83,7 @@ public class GuildController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteGuild(@PathVariable String id) throws GuildNotFoundException {
-
-    guildService.deleteGuild(id);
+    guildService.deleteGuild(idOfGuild(id));
     return ResponseEntity.noContent().build();
   }
 
@@ -77,7 +92,7 @@ public class GuildController {
   public ResponseEntity<CollectionModel<GuildMemberResponse>> getMembers(@PathVariable String id)
       throws GuildNotFoundException {
     List<GuildMemberResponse> members =
-        guildService.getMembers(id).stream().map(GuildMemberResponse::from).toList();
+        guildService.getMembers(idOfGuild(id)).stream().map(GuildMemberResponse::from).toList();
     CollectionModel<GuildMemberResponse> model =
         CollectionModel.of(
             members,
@@ -91,7 +106,10 @@ public class GuildController {
       @PathVariable String id, @RequestBody SendInviteRequest request)
       throws GuildNotFoundException {
     try {
-      guildService.sendInvite(id, request.requestorId(), request.targetAvatarId());
+      guildService.sendInvite(
+          idOfGuild(id),
+          idOfGuildMember(request.requestorId()),
+          idOfGuildMember(request.targetAvatarId()));
       return ResponseEntity.noContent().build();
     } catch (UnauthorizedGuildOperationException e) {
       return ResponseEntity.status(403).build();
@@ -104,24 +122,13 @@ public class GuildController {
       @PathVariable String inviteId,
       @RequestBody AcceptInviteRequest request)
       throws GuildNotFoundException {
-    guildService.acceptInvite(id, inviteId, request.avatarId(), request.nickname());
+    guildService.acceptInvite(
+        idOfGuild(id),
+        idOfInvite(inviteId),
+        idOfGuildMember(request.avatarId()),
+        request.nickname());
     return ResponseEntity.noContent().build();
   }
-
-  //  @PostMapping("/{id}/members")
-  //  public ResponseEntity<Void> addMember(
-  //      @PathVariable String id, @RequestBody AddMemberRequest request)
-  //      throws GuildNotFoundException {
-  //    GuildRole role;
-  //    try {
-  //      role = GuildRole.valueOf(request.roleName().toUpperCase(Locale.getDefault()));
-  //    } catch (IllegalArgumentException e) {
-  //      return ResponseEntity.badRequest().body(null);
-  //    }
-  //    GuildMember member = new GuildMember(request.avatarId(), request.nickname(), role);
-  //    guildService.addMember(id, member);
-  //    return ResponseEntity.noContent().build();
-  //  }
 
   @DeleteMapping("/{id}/members/{memberId}")
   public ResponseEntity<Void> removeMember(
@@ -130,7 +137,8 @@ public class GuildController {
       @RequestBody RemoveMemberRequest request)
       throws GuildNotFoundException {
     try {
-      guildService.removeMember(id, request.requestorId(), memberId);
+      guildService.removeMember(
+          idOfGuild(id), idOfGuildMember(request.requestorId()), idOfGuildMember(memberId));
       return ResponseEntity.noContent().build();
     } catch (UnauthorizedGuildOperationException e) {
       return ResponseEntity.status(403).build();
@@ -140,7 +148,7 @@ public class GuildController {
   @PostMapping("/{id}/members/{memberId}/leave")
   public ResponseEntity<Void> leaveGuild(@PathVariable String id, @PathVariable String memberId)
       throws GuildNotFoundException {
-    guildService.leaveGuild(id, memberId);
+    guildService.leaveGuild(idOfGuild(id), idOfGuildMember(memberId));
     return ResponseEntity.noContent().build();
   }
 
@@ -158,7 +166,11 @@ public class GuildController {
     }
 
     try {
-      guildService.promoteMember(id, request.requestorId(), memberId, newRole);
+      guildService.promoteMember(
+          idOfGuild(id),
+          idOfGuildMember(request.requestorId()),
+          idOfGuildMember(memberId),
+          newRole);
       return ResponseEntity.noContent().build();
     } catch (UnauthorizedGuildOperationException e) {
       return ResponseEntity.status(403).build();
@@ -169,7 +181,7 @@ public class GuildController {
   @GetMapping("/{id}/rank")
   public ResponseEntity<EntityModel<RankResponse>> getGlobalRank(@PathVariable String id)
       throws GuildNotFoundException {
-    Integer rank = guildService.getGlobalRank(id);
+    Integer rank = guildService.getGlobalRank(idOfGuild(id));
     RankResponse body = new RankResponse(rank);
     EntityModel<RankResponse> model =
         EntityModel.of(

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossType;
@@ -13,6 +14,8 @@ import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
+import habitquest.guild.domain.guild.Guild;
+import habitquest.guild.domain.guild.GuildMember;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,10 +31,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BattleServiceImplTest {
 
-  private static final String BATTLE_ID = "battle-1";
-  private static final String GUILD_ID = "guild-1";
-  private static final String MEMBER_1 = "member-1";
-  private static final String MEMBER_2 = "member-2";
+  private static final Id<Battle> BATTLE_ID = new Id<>("battle-1");
+  private static final Id<Guild> GUILD_ID = new Id<>("guild-1");
+  private static final Id<GuildMember> MEMBER_1 = new Id<>("member-1");
+  private static final Id<GuildMember> MEMBER_2 = new Id<>("member-2");
   private static final int BOSS_HEALTH = BossType.MINOTAUR.stats().health().value();
   private static final int EXP_REWARD = BossType.MINOTAUR.experienceReward().amount();
   private static final int MONEY_REWARD = BossType.MINOTAUR.moneyReward().amount();
@@ -66,7 +69,7 @@ class BattleServiceImplTest {
     void shouldCreateAndReturnId() {
       when(battleFactory.create(any(), any(), any())).thenReturn(battle);
 
-      String result = battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2);
+      Id<Battle> result = battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2);
 
       verify(battleRepository).save(battle);
       assertThat(result).isEqualTo(BATTLE_ID);
@@ -82,7 +85,8 @@ class BattleServiceImplTest {
       ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
       verify(battleObserver).notifyBattleEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(BattleStarted.class);
-      assertThat(((BattleStarted) captor.getValue()).battleId()).isEqualTo(BATTLE_ID);
+      assertThat(((BattleStarted) captor.getValue()).battleId().value())
+          .isEqualTo(BATTLE_ID.value());
     }
   }
 
@@ -209,7 +213,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
       int before = battle.getNumOfTurns();
 
-      battleService.increaseNumOfTurn(BATTLE_ID, "member-3");
+      battleService.increaseNumOfTurn(BATTLE_ID, new Id<>("member-3"));
 
       assertThat(battle.getNumOfTurns()).isEqualTo(before + 1);
       verify(battleRepository).save(battle);
@@ -251,8 +255,8 @@ class BattleServiceImplTest {
       verify(battleObserver).notifyBattleEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(BattleWon.class);
       BattleWon event = (BattleWon) captor.getValue();
-      assertThat(event.battleId()).isEqualTo(BATTLE_ID);
-      assertThat(event.guildId()).isEqualTo(GUILD_ID);
+      assertThat(event.battleId().value()).isEqualTo(BATTLE_ID.value());
+      assertThat(event.guildId().value()).isEqualTo(GUILD_ID.value());
       assertThat(event.experienceReward()).isEqualTo(EXP_REWARD);
       assertThat(event.moneyReward()).isEqualTo(MONEY_REWARD);
 

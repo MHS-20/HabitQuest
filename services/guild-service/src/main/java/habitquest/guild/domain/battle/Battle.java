@@ -1,24 +1,27 @@
 package habitquest.guild.domain.battle;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 import habitquest.guild.domain.battle.boss.BossStatus;
 import habitquest.guild.domain.battle.stats.Health;
+import habitquest.guild.domain.guild.Guild;
+import habitquest.guild.domain.guild.GuildMember;
 import java.util.*;
 
-public class Battle implements Aggregate<String> {
-  private final String battleId;
-  private final String guildId;
+public class Battle implements Aggregate<Id<Battle>> {
+  private final Id<Battle> battleId;
+  private final Id<Guild> guildId;
   private final BossEnemy boss;
   private Integer numOfTurns;
   private Integer currentTurn;
   private BossStatus bossRemainingHealth;
   private BattleOutcome battleStatus;
-  private List<String> memberIds;
-  private final Set<String> fallenAvatarIds;
+  private final List<Id<GuildMember>> memberIds;
+  private final Set<Id<GuildMember>> fallenAvatarIds;
   private static final int MIN_NUM_OF_TURNS = 1;
 
-  public Battle(String battleId, String guildId, BossEnemy boss, Integer numOfTurns) {
+  public Battle(Id<Battle> battleId, Id<Guild> guildId, BossEnemy boss, Integer numOfTurns) {
     this.battleId = battleId;
     this.guildId = guildId;
     this.boss = boss;
@@ -30,11 +33,11 @@ public class Battle implements Aggregate<String> {
     this.battleStatus = new BattleOutcome.Ongoing();
   }
 
-  public String getGuildId() {
+  public Id<Guild> getGuildId() {
     return guildId;
   }
 
-  public String getId() {
+  public Id<Battle> getId() {
     return this.battleId;
   }
 
@@ -42,7 +45,7 @@ public class Battle implements Aggregate<String> {
     return boss;
   }
 
-  public List<String> getMembers() {
+  public List<Id<GuildMember>> getMembers() {
     return Collections.unmodifiableList(memberIds);
   }
 
@@ -62,16 +65,16 @@ public class Battle implements Aggregate<String> {
     return numOfTurns;
   }
 
-  public boolean isAttackerTurn(String memberId) {
+  public boolean isAttackerTurn(Id<GuildMember> memberId) {
     return memberIds.get(currentTurn).equals(memberId);
   }
 
-  public void increaseNumOfTurns(String memberId) {
+  public void increaseNumOfTurns(Id<GuildMember> memberId) {
     numOfTurns++;
     this.memberIds.add(memberId);
   }
 
-  public void decreaseNumOfTurns(String memberId) {
+  public void decreaseNumOfTurns(Id<GuildMember> memberId) {
     numOfTurns--;
     this.memberIds.remove(memberId);
     this.fallenAvatarIds.remove(memberId);
@@ -81,7 +84,7 @@ public class Battle implements Aggregate<String> {
     return bossRemainingHealth;
   }
 
-  public BattleOutcome dealDamageOnBoss(String attackerId, int damage) {
+  public BattleOutcome dealDamageOnBoss(Id<GuildMember> attackerId, int damage) {
     int newHealth = bossRemainingHealth.remainingHealth().value() - damage;
     if (newHealth <= 0) {
       bossRemainingHealth = new BossStatus(new Health(0));
@@ -93,7 +96,7 @@ public class Battle implements Aggregate<String> {
     return battleStatus;
   }
 
-  public BattleOutcome applyCounterattack(String attackerId) {
+  public BattleOutcome applyCounterattack(Id<GuildMember> attackerId) {
     fallenAvatarIds.add(attackerId);
     if (fallenAvatarIds.size() >= numOfTurns) {
       this.battleStatus = new BattleOutcome.Lost(boss.penalty().amount());
@@ -101,32 +104,22 @@ public class Battle implements Aggregate<String> {
     return battleStatus;
   }
 
-  //  public void dealDamage(Integer damage) {
-  //    int newHealth = bossRemainingHealth.remainingHealth().value() - damage;
-  //    if (newHealth <= 0) {
-  //      this.battleStatus = BattleStatus.WON;
-  //      bossRemainingHealth = new BossStatus(new Health(0));
-  //    } else {
-  //      bossRemainingHealth = new BossStatus(new Health(newHealth));
-  //    }
-  //  }
-
   public BattleOutcome getBattleStatus() {
     return battleStatus;
   }
 
-  public void markAsFallen(String avatarId) {
+  public void markAsFallen(Id<GuildMember> avatarId) {
     fallenAvatarIds.add(avatarId);
     if (fallenAvatarIds.size() >= numOfTurns) {
       this.battleStatus = new BattleOutcome.Lost(boss.penalty().amount());
     }
   }
 
-  public boolean hasFallen(String avatarId) {
+  public boolean hasFallen(Id<GuildMember> avatarId) {
     return fallenAvatarIds.contains(avatarId);
   }
 
-  public Set<String> getFallenAvatarIds() {
+  public Set<Id<GuildMember>> getFallenAvatarIds() {
     return Collections.unmodifiableSet(fallenAvatarIds);
   }
 }

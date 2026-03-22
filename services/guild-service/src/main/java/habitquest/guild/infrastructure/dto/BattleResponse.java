@@ -14,8 +14,8 @@ public record BattleResponse(
 
   public static BattleResponse from(Battle battle) {
     return new BattleResponse(
-        battle.getId(),
-        battle.getGuildId(),
+        battle.getId().value(),
+        battle.getGuildId().value(),
         battle.getBattleStatus(),
         battle.getCurrentTurn(),
         battle.getNumOfTurns(),

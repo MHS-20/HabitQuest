@@ -1,3 +1,6 @@
 package habitquest.guild.domain.events.battleEvents;
 
-public record SpellCasted(String battleId, String spellId) implements BattleEvent {}
+import common.ddd.Id;
+import habitquest.guild.domain.battle.Battle;
+
+public record SpellCasted(Id<Battle> battleId, String spellId) implements BattleEvent {}
