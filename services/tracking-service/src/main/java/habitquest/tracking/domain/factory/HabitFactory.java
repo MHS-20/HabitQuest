@@ -1,19 +1,26 @@
 package habitquest.tracking.domain.factory;
 
 import common.ddd.Factory;
+import common.ddd.Id;
+import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import java.time.DayOfWeek;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
-@Component
 public class HabitFactory implements Factory {
-  public Habit createDailyHabit(String avatarId, String title, String description) {
+
+  private final IdGenerator idGenerator;
+
+  public HabitFactory(IdGenerator idGenerator) {
+    this.idGenerator = idGenerator;
+  }
+
+  public Habit createDailyHabit(Id<Avatar> avatarId, String title, String description) {
     return new Habit(
-        new UUIDGenerator().nextId(),
+        new Id<>(this.idGenerator.nextId()),
         avatarId,
         title,
         description,
@@ -22,9 +29,9 @@ public class HabitFactory implements Factory {
   }
 
   public Habit createWeeklyHabit(
-      String avatarId, String title, String description, DayOfWeek dayOfWeek) {
+      Id<Avatar> avatarId, String title, String description, DayOfWeek dayOfWeek) {
     return new Habit(
-        new UUIDGenerator().nextId(),
+        new Id<>(this.idGenerator.nextId()),
         avatarId,
         title,
         description,
@@ -33,9 +40,9 @@ public class HabitFactory implements Factory {
   }
 
   public Habit createMonthlyHabit(
-      String avatarId, String title, String description, Integer dayOfMonth) {
+      Id<Avatar> avatarId, String title, String description, Integer dayOfMonth) {
     return new Habit(
-        new UUIDGenerator().nextId(),
+        new Id<>(this.idGenerator.nextId()),
         avatarId,
         title,
         description,

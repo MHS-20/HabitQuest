@@ -30,7 +30,7 @@ public class HabitNotifierImpl implements HabitNotifier {
   @Override
   public void notifyHabitDeleted(HabitDeleted event) {
     HabitDeletedMessage message =
-        new HabitDeletedMessage(event.habitId(), event.avatarId(), Instant.now());
+        new HabitDeletedMessage(event.habitId().value(), event.avatarId().value(), Instant.now());
 
     LOG.info(
         "Publishing HabitDeleted event: habitId={}, avatarId={}",
@@ -45,7 +45,8 @@ public class HabitNotifierImpl implements HabitNotifier {
   @Override
   public void notifyHabitAttended(HabitAttended event) {
     HabitAttendedMessage message =
-        new HabitAttendedMessage(event.habit().getId(), event.avatarId(), Instant.now());
+        new HabitAttendedMessage(
+            event.habit().getId().value(), event.avatarId().value(), Instant.now());
 
     LOG.info(
         "Publishing HabitAttended event: habitId={}, avatarId={}",
@@ -60,7 +61,8 @@ public class HabitNotifierImpl implements HabitNotifier {
   @Override
   public void notifyHabitNotAttended(HabitNotAttended event) {
     HabitNotAttendedMessage message =
-        new HabitNotAttendedMessage(event.habit().getId(), event.avatarId(), Instant.now());
+        new HabitNotAttendedMessage(
+            event.habit().getId().value(), event.avatarId().value(), Instant.now());
 
     LOG.info(
         "Publishing HabitNotAttended event: habitId={}, avatarId={}",

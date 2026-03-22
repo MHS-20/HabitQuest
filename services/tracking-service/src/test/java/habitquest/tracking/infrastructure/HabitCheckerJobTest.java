@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import common.ddd.Id;
 import habitquest.tracking.application.HabitHistoryRepository;
 import habitquest.tracking.application.HabitRepository;
 import habitquest.tracking.application.HabitService;
@@ -57,14 +58,14 @@ class HabitCheckerJobTest {
   void runEmitsNotAttendedForNeverAttendedHabit() {
     Habit neverAttendedHabit =
         new Habit(
-            "habit-1",
-            "avatar-1",
+            new Id<>("habit-1"),
+            new Id<>("avatar-1"),
             "Hydrate",
             "Drink water",
             new DailyRecurrence(),
             Optional.empty());
     when(habitRepository.findAll()).thenReturn(List.of(neverAttendedHabit));
-    when(historyRepository.findByHabitId("habit-1")).thenReturn(List.of());
+    when(historyRepository.findByHabitId(new Id<>("habit-1"))).thenReturn(List.of());
 
     HabitService realService =
         new HabitServiceImpl(habitRepository, historyRepository, habitFactory, habitObserver);
@@ -78,6 +79,6 @@ class HabitCheckerJobTest {
     verify(habitRepository).findAll();
     verifyNoMoreInteractions(habitObserver);
     assertThat(event).isInstanceOf(HabitNotAttended.class);
-    assertThat(((HabitNotAttended) event).habit().getId()).isEqualTo("habit-1");
+    assertThat(((HabitNotAttended) event).habit().getId().value()).isEqualTo("habit-1");
   }
 }

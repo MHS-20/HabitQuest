@@ -1,24 +1,25 @@
 package habitquest.tracking.domain;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import habitquest.tracking.domain.reminder.Recurrence;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public class Habit implements Aggregate<String> {
-  private final String id;
+public class Habit implements Aggregate<Id<Habit>> {
+  private final Id<Habit> id;
   private List<Tag> tags;
   private String title;
   private String description;
   private Recurrence recurrence;
   private LocalDateTime lastAttendedDate;
-  private final String avatarId;
+  private final Id<Avatar> avatarId;
   private final Optional<String> associatedQuestId;
 
   public Habit(
-      String id,
-      String avatarId,
+      Id<Habit> id,
+      Id<Avatar> avatarId,
       String title,
       String description,
       Recurrence recurrence,
@@ -52,7 +53,7 @@ public class Habit implements Aggregate<String> {
     return description;
   }
 
-  public String getAvatarId() {
+  public Id<Avatar> getAvatarId() {
     return avatarId;
   }
 
@@ -69,7 +70,7 @@ public class Habit implements Aggregate<String> {
   }
 
   @Override
-  public String getId() {
+  public Id<Habit> getId() {
     return this.id;
   }
 
