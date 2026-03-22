@@ -1,19 +1,20 @@
 package habitquest.quest.domain;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import habitquest.quest.domain.reminder.Recurrence;
 import java.time.LocalDate;
 import java.util.List;
 
-public class Habit implements Aggregate<String> {
-  private final String id;
+public class Habit implements Aggregate<Id<Habit>> {
+  private final Id<Habit> id;
   private List<Tag> tags;
   private String title;
   private String description;
   private Recurrence recurrence;
   private LocalDate lastAttendedDate;
 
-  public Habit(String id) {
+  public Habit(Id<Habit> id) {
     this.id = id;
   }
 
@@ -42,7 +43,7 @@ public class Habit implements Aggregate<String> {
   }
 
   @Override
-  public String getId() {
+  public Id<Habit> getId() {
     return this.id;
   }
 }

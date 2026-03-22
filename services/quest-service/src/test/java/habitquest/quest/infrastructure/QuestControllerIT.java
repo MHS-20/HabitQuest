@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import common.ddd.Id;
 import habitquest.quest.application.QuestNotFoundException;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.Habit;
@@ -34,15 +35,16 @@ public class QuestControllerIT {
 
   @MockitoBean private QuestService questService;
 
-  private static final String QUEST_ID = "quest-1";
+  private static final Id<Quest> QUEST_ID = new Id<>("quest-1");
   private static final String QUEST_NAME = "Morning Routine";
-  private static final String UNKNOWN_ID = "ghost-99";
+  private static final Id<Quest> UNKNOWN_ID = new Id<>("ghost-99");
+  public static final Id<Habit> HABIT_1 = new Id<>("habit-1");
 
   private Quest stubQuest() {
     Quest quest = new Quest(QUEST_ID, QUEST_NAME);
     quest.setDuration(Duration.ofHours(2));
     quest.setReward(new MoneyReward());
-    quest.addHabit(new Habit("habit-1"));
+    quest.addHabit(new Habit(HABIT_1));
     return quest;
   }
 
@@ -61,8 +63,8 @@ public class QuestControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"name\":\"Morning Routine\"}"))
           .andExpect(status().isCreated())
-          .andExpect(header().string("Location", "/api/v1/quests/" + QUEST_ID))
-          .andExpect(jsonPath("$.id").value(QUEST_ID));
+          .andExpect(header().string("Location", "/api/v1/quests/" + QUEST_ID.value()))
+          .andExpect(jsonPath("$.id").value(QUEST_ID.value()));
     }
 
     @Test
@@ -106,7 +108,7 @@ public class QuestControllerIT {
       when(questService.getQuest(QUEST_ID)).thenReturn(stubQuest());
 
       mockMvc
-          .perform(get("/api/v1/quests/{id}", QUEST_ID))
+          .perform(get("/api/v1/quests/{id}", QUEST_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.name").value(QUEST_NAME));
     }
@@ -114,9 +116,12 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 404 when quest does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(questService.getQuest(UNKNOWN_ID)).thenThrow(new QuestNotFoundException(UNKNOWN_ID));
+      when(questService.getQuest(UNKNOWN_ID))
+          .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
 
-      mockMvc.perform(get("/api/v1/quests/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
+      mockMvc
+          .perform(get("/api/v1/quests/{id}", UNKNOWN_ID.value()))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -129,7 +134,9 @@ public class QuestControllerIT {
     void shouldReturn204() throws Exception {
       doNothing().when(questService).deleteQuest(QUEST_ID);
 
-      mockMvc.perform(delete("/api/v1/quests/{id}", QUEST_ID)).andExpect(status().isNoContent());
+      mockMvc
+          .perform(delete("/api/v1/quests/{id}", QUEST_ID.value()))
+          .andExpect(status().isNoContent());
 
       verify(questService).deleteQuest(QUEST_ID);
     }
@@ -137,9 +144,13 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 404 when quest does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new QuestNotFoundException(UNKNOWN_ID)).when(questService).deleteQuest(UNKNOWN_ID);
+      doThrow(new QuestNotFoundException(UNKNOWN_ID.value()))
+          .when(questService)
+          .deleteQuest(UNKNOWN_ID);
 
-      mockMvc.perform(delete("/api/v1/quests/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
+      mockMvc
+          .perform(delete("/api/v1/quests/{id}", UNKNOWN_ID.value()))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -153,7 +164,7 @@ public class QuestControllerIT {
       when(questService.getName(QUEST_ID)).thenReturn(QUEST_NAME);
 
       mockMvc
-          .perform(get("/api/v1/quests/{id}/name", QUEST_ID))
+          .perform(get("/api/v1/quests/{id}/name", QUEST_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.name").value(QUEST_NAME));
     }
@@ -169,7 +180,7 @@ public class QuestControllerIT {
       when(questService.getDuration(QUEST_ID)).thenReturn(Duration.ofMinutes(90));
 
       mockMvc
-          .perform(get("/api/v1/quests/{id}/duration", QUEST_ID))
+          .perform(get("/api/v1/quests/{id}/duration", QUEST_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.duration").value("PT1H30M"));
     }
@@ -184,7 +195,9 @@ public class QuestControllerIT {
     void shouldReturnReward() throws Exception {
       when(questService.getReward(QUEST_ID)).thenReturn(new MoneyReward());
 
-      mockMvc.perform(get("/api/v1/quests/{id}/reward", QUEST_ID)).andExpect(status().isOk());
+      mockMvc
+          .perform(get("/api/v1/quests/{id}/reward", QUEST_ID.value()))
+          .andExpect(status().isOk());
     }
   }
 
@@ -195,12 +208,11 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 200 with quest habits")
     void shouldReturnHabits() throws Exception {
-      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(new Habit("habit-1")));
-
+      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(new Habit(HABIT_1)));
       mockMvc
-          .perform(get("/api/v1/quests/{id}/habits", QUEST_ID))
+          .perform(get("/api/v1/quests/{id}/habits", QUEST_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.habits[0].id").value("habit-1"));
+          .andExpect(jsonPath("$.habits[0].id").value(HABIT_1.value()));
     }
   }
 
@@ -212,14 +224,12 @@ public class QuestControllerIT {
     @DisplayName("returns 204 and delegates new name to service")
     void shouldReturn204AndDelegate() throws Exception {
       when(questService.updateName(eq(QUEST_ID), anyString())).thenReturn(stubQuest());
-
       mockMvc
           .perform(
-              patch("/api/v1/quests/{id}/name", QUEST_ID)
+              patch("/api/v1/quests/{id}/name", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"name\":\"New Name\"}"))
           .andExpect(status().isNoContent());
-
       verify(questService).updateName(QUEST_ID, "New Name");
     }
 
@@ -228,10 +238,9 @@ public class QuestControllerIT {
     void shouldReturn400OnBlankName() throws Exception {
       when(questService.updateName(QUEST_ID, ""))
           .thenThrow(new IllegalArgumentException("Name cannot be blank"));
-
       mockMvc
           .perform(
-              patch("/api/v1/quests/{id}/name", QUEST_ID)
+              patch("/api/v1/quests/{id}/name", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"name\":\"\"}"))
           .andExpect(status().isBadRequest())
@@ -247,10 +256,9 @@ public class QuestControllerIT {
     @DisplayName("returns 204 and delegates parsed duration to service")
     void shouldReturn204AndDelegateDuration() throws Exception {
       when(questService.updateDuration(eq(QUEST_ID), any(Duration.class))).thenReturn(stubQuest());
-
       mockMvc
           .perform(
-              patch("/api/v1/quests/{id}/duration", QUEST_ID)
+              patch("/api/v1/quests/{id}/duration", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"duration\":\"PT45M\"}"))
           .andExpect(status().isNoContent());
@@ -269,10 +277,9 @@ public class QuestControllerIT {
     @DisplayName("returns 204 and delegates a MoneyReward to service")
     void shouldReturn204AndDelegateMoneyReward() throws Exception {
       when(questService.updateReward(eq(QUEST_ID), any(MoneyReward.class))).thenReturn(stubQuest());
-
       mockMvc
           .perform(
-              patch("/api/v1/quests/{id}/reward", QUEST_ID)
+              patch("/api/v1/quests/{id}/reward", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"experience\":100,\"money\":10}"))
           .andExpect(status().isNoContent());
@@ -289,28 +296,26 @@ public class QuestControllerIT {
     @DisplayName("returns 204 and delegates habit id to service")
     void shouldReturn204AndDelegateHabit() throws Exception {
       when(questService.addHabit(eq(QUEST_ID), any(Habit.class))).thenReturn(stubQuest());
-
       mockMvc
           .perform(
-              post("/api/v1/quests/{id}/habits", QUEST_ID)
+              post("/api/v1/quests/{id}/habits", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"habitId\":\"habit-7\",\"title\":\"Hydrate\"}"))
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<Habit> captor = ArgumentCaptor.forClass(Habit.class);
       verify(questService).addHabit(eq(QUEST_ID), captor.capture());
-      assertThat(captor.getValue().getId()).isEqualTo("habit-7");
+      assertThat(captor.getValue().getId().value()).isEqualTo("habit-7");
     }
 
     @Test
     @DisplayName("returns 404 when quest does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       when(questService.addHabit(eq(UNKNOWN_ID), any(Habit.class)))
-          .thenThrow(new QuestNotFoundException(UNKNOWN_ID));
-
+          .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
       mockMvc
           .perform(
-              post("/api/v1/quests/{id}/habits", UNKNOWN_ID)
+              post("/api/v1/quests/{id}/habits", UNKNOWN_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"habitId\":\"habit-7\"}"))
           .andExpect(status().isNotFound());
@@ -325,17 +330,16 @@ public class QuestControllerIT {
     @DisplayName("returns 204 and delegates habit id to service")
     void shouldReturn204AndDelegateHabit() throws Exception {
       when(questService.removeHabit(eq(QUEST_ID), any(Habit.class))).thenReturn(stubQuest());
-
       mockMvc
           .perform(
-              delete("/api/v1/quests/{id}/habits", QUEST_ID)
+              delete("/api/v1/quests/{id}/habits", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"habitId\":\"habit-7\"}"))
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<Habit> captor = ArgumentCaptor.forClass(Habit.class);
       verify(questService).removeHabit(eq(QUEST_ID), captor.capture());
-      assertThat(captor.getValue().getId()).isEqualTo("habit-7");
+      assertThat(captor.getValue().getId().value()).isEqualTo("habit-7");
     }
 
     @Test
@@ -343,10 +347,9 @@ public class QuestControllerIT {
     void shouldReturn400OnInvalidRemove() throws Exception {
       when(questService.removeHabit(eq(QUEST_ID), any(Habit.class)))
           .thenThrow(new IllegalStateException("Habit is not part of this quest"));
-
       mockMvc
           .perform(
-              delete("/api/v1/quests/{id}/habits", QUEST_ID)
+              delete("/api/v1/quests/{id}/habits", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"habitId\":\"habit-404\"}"))
           .andExpect(status().isBadRequest())

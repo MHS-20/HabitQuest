@@ -1,7 +1,6 @@
 package habitquest.marketplace.domain;
 
 import common.ddd.Id;
-import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.items.*;
 import java.util.*;
 
