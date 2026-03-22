@@ -31,7 +31,7 @@ public class AuthController {
     try {
       AuthResponse response =
           authService.register(request.name, request.email(), request.password());
-      avatarClient.createAvatar(response.userId(), request.name());
+      avatarClient.createAvatar(response.userId().value(), request.name());
 
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (UserAlreadyExistsException e) {

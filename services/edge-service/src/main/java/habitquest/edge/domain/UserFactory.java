@@ -1,6 +1,7 @@
 package habitquest.edge.domain;
 
 import common.ddd.Factory;
+import common.ddd.Id;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,6 +20,6 @@ public class UserFactory implements Factory {
     if (passwordHash == null || passwordHash.isBlank()) {
       throw new IllegalArgumentException("Password hash must not be blank");
     }
-    return new User(idGenerator.nextId(), name, email, passwordHash);
+    return new User(new Id<>(idGenerator.nextId()), name, email, passwordHash);
   }
 }

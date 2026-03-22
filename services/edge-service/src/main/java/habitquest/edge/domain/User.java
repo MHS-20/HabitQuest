@@ -1,15 +1,16 @@
 package habitquest.edge.domain;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 
-public class User implements Aggregate<String> {
+public class User implements Aggregate<Id<User>> {
 
-  private final String avatarId;
+  private final Id<User> avatarId;
   private final String email;
   private String name;
   private String passwordHash;
 
-  public User(String avatarId, String name, String email, String passwordHash) {
+  public User(Id<User> avatarId, String name, String email, String passwordHash) {
     this.avatarId = avatarId;
     this.email = email;
     this.passwordHash = passwordHash;
@@ -21,7 +22,7 @@ public class User implements Aggregate<String> {
   }
 
   @Override
-  public String getId() {
+  public Id<User> getId() {
     return avatarId;
   }
 

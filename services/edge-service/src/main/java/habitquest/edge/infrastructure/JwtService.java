@@ -30,7 +30,7 @@ public class JwtService {
   public String generateToken(User user) {
     Instant now = Instant.now();
     return Jwts.builder()
-        .subject(user.getId())
+        .subject(user.getId().value())
         .claim("email", user.getEmail())
         .issuedAt(Date.from(now))
         .expiration(Date.from(now.plusSeconds(expirationSeconds)))

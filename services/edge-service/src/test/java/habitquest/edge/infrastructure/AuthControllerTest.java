@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import common.ddd.Id;
 import habitquest.edge.application.AuthService;
 import habitquest.edge.application.AuthService.AuthResponse;
 import habitquest.edge.domain.User;
@@ -17,6 +18,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,6 +46,7 @@ class AuthControllerTest {
 
   private static final String JWT_TOKEN = "eyJ.fake.token";
   private static final String USER_ID = "user-123";
+  private static final Id<User> USER_ID_TYPE = new Id<>(USER_ID);
   private static final String TEST_EMAIL = "mario@example.com";
   private static final String TEST_PASSWORD = "password123";
   private static final String REGISTER_PATH = "/auth/register";
@@ -59,8 +62,8 @@ class AuthControllerTest {
   private final JwtService realJwtService =
       new JwtService("test-secret-key-minimum-32-chars!!", 3600L);
 
-  private io.jsonwebtoken.Claims fakeClaims() {
-    User user = new User("user-1", NAME, TEST_EMAIL, "hash");
+  private Claims fakeClaims() {
+    User user = new User(new Id<>("user-1"), NAME, TEST_EMAIL, "hash");
     String token = realJwtService.generateToken(user);
     return realJwtService.validateAndExtract(token);
   }
@@ -83,7 +86,7 @@ class AuthControllerTest {
     @DisplayName("201 con token per registrazione valida")
     void register_success_returns201() throws Exception {
       when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
-          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
 
       mockMvc
           .perform(
@@ -92,14 +95,14 @@ class AuthControllerTest {
                   .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.token").value(JWT_TOKEN))
-          .andExpect(jsonPath("$.userId").value(USER_ID));
+          .andExpect(jsonPath("$.userId.value").value(USER_ID));
     }
 
     @Test
     @DisplayName("chiama avatarClient con userId da authService e name dalla request")
     void register_success_callsAvatarClientWithCorrectArgs() throws Exception {
       when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
-          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
 
       mockMvc.perform(
           post(REGISTER_PATH)
@@ -127,7 +130,7 @@ class AuthControllerTest {
     @DisplayName("500 se avatarClient lancia AvatarCreationException")
     void register_avatarClientFails_returns500() throws Exception {
       when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
-          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
       doThrow(new AvatarCreationException("avatar-service unreachable"))
           .when(avatarClient)
           .createAvatar(anyString(), anyString());
@@ -187,7 +190,7 @@ class AuthControllerTest {
     @DisplayName("200 con token per credenziali corrette")
     void login_success_returns200() throws Exception {
       when(authService.login(TEST_EMAIL, TEST_PASSWORD))
-          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID));
+          .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
 
       mockMvc
           .perform(

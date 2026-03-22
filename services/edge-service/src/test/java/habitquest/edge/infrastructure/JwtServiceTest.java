@@ -2,6 +2,7 @@ package habitquest.edge.infrastructure;
 
 import static org.assertj.core.api.Assertions.*;
 
+import common.ddd.Id;
 import habitquest.edge.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -21,7 +22,7 @@ class JwtServiceTest {
   @BeforeEach
   void setUp() {
     jwtService = new JwtService(SECRET, EXPIRATION);
-    user = new User("user-abc", "mario rossi", "mario@example.com", "$2a$hashed");
+    user = new User(new Id<>("user-abc"), "mario rossi", "mario@example.com", "$2a$hashed");
   }
 
   // ── generateToken ─────────────────────────────────────────────────────────
