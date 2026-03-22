@@ -1,8 +1,10 @@
 package habitquest.guild.domain.factory;
 
 import common.ddd.Factory;
+import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.boss.BossType;
+import habitquest.guild.domain.guild.Guild;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,8 +16,7 @@ public class BattleFactory implements Factory {
     this.idGenerator = idGenerator;
   }
 
-  public Battle create(String guildId, BossType bossType, Integer numOfTurns) {
-    String battleId = idGenerator.nextId();
-    return new Battle(battleId, guildId, bossType, numOfTurns);
+  public Battle create(Id<Guild> guildId, BossType bossType, Integer numOfTurns) {
+    return new Battle(new Id<Battle>(idGenerator.nextId()), guildId, bossType, numOfTurns);
   }
 }

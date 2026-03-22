@@ -1,9 +1,11 @@
 package habitquest.guild.infrastructure;
 
+import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
+import habitquest.guild.domain.guild.Guild;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Adapter
 public class InMemoryBattleRepository implements BattleRepository {
 
-  private final Map<String, Battle> store = new ConcurrentHashMap<>();
+  private final Map<Id<Battle>, Battle> store = new ConcurrentHashMap<>();
 
   @Override
   public Battle save(Battle battle) {
@@ -23,17 +25,17 @@ public class InMemoryBattleRepository implements BattleRepository {
   }
 
   @Override
-  public Optional<Battle> findById(String id) {
+  public Optional<Battle> findById(Id<Battle> id) {
     return Optional.ofNullable(store.get(id));
   }
 
   @Override
-  public void deleteById(String id) {
+  public void deleteById(Id<Battle> id) {
     store.remove(id);
   }
 
   @Override
-  public Optional<Battle> findByGuildId(String guildId) {
+  public Optional<Battle> findByGuildId(Id<Guild> guildId) {
     return store.values().stream().filter(b -> b.getGuildId().equals(guildId)).findFirst();
   }
 

@@ -1,5 +1,6 @@
 package habitquest.guild.application;
 
+import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossEnemy;
@@ -10,6 +11,8 @@ import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
+import habitquest.guild.domain.guild.Guild;
+import habitquest.guild.domain.guild.GuildMember;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +33,7 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Battle lifecycle ---
   @Override
-  public String createBattle(String guildId, BossType bossType, Integer numOfTurns) {
+  public Id<Battle> createBattle(Id<Guild> guildId, BossType bossType, Integer numOfTurns) {
     Battle battle = battleFactory.create(guildId, bossType, numOfTurns);
     battleRepository.save(battle);
     battleObserver.notifyBattleEvent(new BattleStarted(battle.getId(), battle.getGuildId()));
@@ -38,18 +41,18 @@ public class BattleServiceImpl implements BattleService {
   }
 
   @Override
-  public void deleteBattle(String battleId) {
+  public void deleteBattle(Id<Battle> battleId) {
     battleRepository.deleteById(battleId);
   }
 
   @Override
-  public Battle getBattleById(String battleId) throws BattleNotFoundException {
+  public Battle getBattleById(Id<Battle> battleId) throws BattleNotFoundException {
     return battleRepository
         .findById(battleId)
-        .orElseThrow(() -> new BattleNotFoundException(battleId));
+        .orElseThrow(() -> new BattleNotFoundException(battleId.value()));
   }
 
-  public BattleOutcome markAsFallen(String battleId, String avatarId)
+  public BattleOutcome markAsFallen(Id<Battle> battleId, Id<GuildMember> avatarId)
       throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     battle.markAsFallen(avatarId);
@@ -64,12 +67,12 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Query ---
   @Override
-  public Optional<Battle> getBattleByGuild(String guildId) {
+  public Optional<Battle> getBattleByGuild(Id<Guild> guildId) {
     return battleRepository.findByGuildId(guildId);
   }
 
   @Override
-  public boolean hasBattleInProgress(String guildId) throws BattleNotFoundException {
+  public boolean hasBattleInProgress(Id<Guild> guildId) throws BattleNotFoundException {
     return !getBattleByGuild(guildId)
         .orElseThrow(() -> new BattleNotFoundException("No battle found for guild: " + guildId))
         .getBattleStatus()
@@ -78,47 +81,49 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Boss info ---
   @Override
-  public String getGuildId(String battleId) throws BattleNotFoundException {
+  public Id<Guild> getGuildId(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getGuildId();
   }
 
   @Override
-  public BossEnemy getBoss(String battleId) throws BattleNotFoundException {
+  public BossEnemy getBoss(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getBoss();
   }
 
   @Override
-  public BossStatus getBossRemainingHealth(String battleId) throws BattleNotFoundException {
+  public BossStatus getBossRemainingHealth(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getBossRemainingHealth();
   }
 
   // --- Turn management ---
   @Override
-  public Integer getCurrentTurn(String battleId) throws BattleNotFoundException {
+  public Integer getCurrentTurn(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getCurrentTurn();
   }
 
   @Override
-  public Integer getNumOfTurns(String battleId) throws BattleNotFoundException {
+  public Integer getNumOfTurns(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getNumOfTurns();
   }
 
   @Override
-  public void nextTurn(String battleId) throws BattleNotFoundException {
+  public void nextTurn(Id<Battle> battleId) throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     battle.nextTurn();
     battleRepository.save(battle);
   }
 
   @Override
-  public void increaseNumOfTurn(String battleId, String memberId) throws BattleNotFoundException {
+  public void increaseNumOfTurn(Id<Battle> battleId, Id<GuildMember> memberId)
+      throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     battle.increaseNumOfTurns(memberId);
     battleRepository.save(battle);
   }
 
   @Override
-  public void decreaseNumOfTurn(String battleId, String memberId) throws BattleNotFoundException {
+  public void decreaseNumOfTurn(Id<Battle> battleId, Id<GuildMember> memberId)
+      throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     battle.decreaseNumOfTurns(memberId);
     battleRepository.save(battle);
@@ -126,7 +131,7 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Battle ---
   @Override
-  public BattleOutcome dealDamageOnBoss(String battleId, String attackerId, int damage)
+  public BattleOutcome dealDamageOnBoss(Id<Battle> battleId, Id<GuildMember> attackerId, int damage)
       throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     var outcome = battle.dealDamageOnBoss(attackerId, damage);
@@ -141,7 +146,7 @@ public class BattleServiceImpl implements BattleService {
   }
 
   @Override
-  public BattleOutcome applyCounterattack(String battleId, String attackerId)
+  public BattleOutcome applyCounterattack(Id<Battle> battleId, Id<GuildMember> attackerId)
       throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     var outcome = battle.applyCounterattack(attackerId);
@@ -154,55 +159,25 @@ public class BattleServiceImpl implements BattleService {
     return outcome;
   }
 
-  //  @Override
-  //  public BattleOutcome dealDamage(String battleId, String attackerId, int damage, boolean
-  // attackerDied)
-  //          throws BattleNotFoundException {
-  //    Battle battle = getBattleById(battleId);
-  //    BossEnemy boss = battle.getBoss();
-  //    battle.dealDamage(damage);
-  //
-  //    if (battle.getBattleStatus() == BattleStatus.WON) {
-  //      battleObserver.notifyBattleEvent(
-  //              new BattleWon(battleId, battle.getGuildId(), boss.experienceReward(),
-  // boss.moneyReward()));
-  //      battleRepository.save(battle);
-  //      return new BattleOutcome.Won(boss.experienceReward().amount(),
-  // boss.moneyReward().amount());
-  //    }
-  //
-  //    if (attackerDied) {
-  //      battle.markAsFallen(attackerId);
-  //      if (battle.getBattleStatus() == BattleStatus.LOST) {
-  //        battleObserver.notifyBattleEvent(
-  //                new BattleLost(battleId, battle.getGuildId(), boss.penalty()));
-  //        battleRepository.save(battle);
-  //        return new BattleOutcome.Lost(boss.penalty().amount());
-  //      }
-  //    }
-  //
-  //    battleRepository.save(battle);
-  //    return new BattleOutcome.Ongoing(attackerId, attackerDied);
-  //  }
-
   @Override
-  public boolean isAttackerTurn(String battleId, String attackerId) throws BattleNotFoundException {
+  public boolean isAttackerTurn(Id<Battle> battleId, Id<GuildMember> attackerId)
+      throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     return battle.isAttackerTurn(attackerId);
   }
 
   @Override
-  public BattleOutcome getBattleStatus(String battleId) throws BattleNotFoundException {
+  public BattleOutcome getBattleStatus(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getBattleStatus();
   }
 
   @Override
-  public boolean isBattleOver(String battleId) throws BattleNotFoundException {
+  public boolean isBattleOver(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getBattleStatus().isOver();
   }
 
   @Override
-  public boolean isBattleWon(String battleId) throws BattleNotFoundException {
+  public boolean isBattleWon(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getBattleStatus().isWon();
   }
 }

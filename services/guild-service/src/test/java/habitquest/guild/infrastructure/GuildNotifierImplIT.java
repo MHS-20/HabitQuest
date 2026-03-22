@@ -3,9 +3,12 @@ package habitquest.guild.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.ddd.Id;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.application.GuildRepository;
 import habitquest.guild.domain.events.guildEvents.*;
+import habitquest.guild.domain.guild.Guild;
+import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import java.time.Duration;
 import java.util.Collections;
@@ -184,7 +187,8 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.joined")
     void shouldPublishToGuildJoinedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_JOINED);
-      notifier.notifyGuildJoined(new GuildJoined("guild-1", "avatar-5"));
+      notifier.notifyGuildJoined(
+          new GuildJoined(new Id<Guild>("guild-1"), new Id<GuildMember>("avatar-5")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -200,7 +204,8 @@ public class GuildNotifierImplIT {
     @DisplayName("preserves both guildId and memberId in the payload")
     void shouldPreserveGuildIdAndMemberId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_JOINED);
-      notifier.notifyGuildJoined(new GuildJoined("g-10", "m-20"));
+      notifier.notifyGuildJoined(
+          new GuildJoined(new Id<Guild>("g-10"), new Id<GuildMember>("m-20")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(GUILD_ID).asText()).isEqualTo("g-10");
@@ -217,7 +222,8 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.left")
     void shouldPublishToGuildLeftTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_LEFT);
-      notifier.notifyGuildLeft(new GuildLeft("guild-3", "avatar-7"));
+      notifier.notifyGuildLeft(
+          new GuildLeft(new Id<Guild>("guild-3"), new Id<GuildMember>("avatar-7")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -239,7 +245,8 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.member-removed")
     void shouldPublishToMemberRemovedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_MEMBER_REMOVED);
-      notifier.notifyRemovedFromGuild(new RemovedFromGuild("guild-4", "avatar-9"));
+      notifier.notifyRemovedFromGuild(
+          new RemovedFromGuild(new Id<Guild>("guild-4"), new Id<GuildMember>("avatar-9")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -261,7 +268,9 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.role-assigned with correct role name")
     void shouldPublishToRoleAssignedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ROLE_ASSIGNED);
-      notifier.notifyRoleAssigned(new RoleAssigned("guild-5", "avatar-11", GuildRole.OFFICER));
+      notifier.notifyRoleAssigned(
+          new RoleAssigned(
+              new Id<Guild>("guild-5"), new Id<GuildMember>("avatar-11"), GuildRole.OFFICER));
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_ROLE_ASSIGNED);
@@ -277,7 +286,9 @@ public class GuildNotifierImplIT {
     @DisplayName("preserves the role name for a LEADER role assignment")
     void shouldPreserveLeaderRole() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ROLE_ASSIGNED);
-      notifier.notifyRoleAssigned(new RoleAssigned("guild-6", "avatar-12", GuildRole.LEADER));
+      notifier.notifyRoleAssigned(
+          new RoleAssigned(
+              new Id<Guild>("guild-6"), new Id<GuildMember>("avatar-12"), GuildRole.LEADER));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("roleName").asText()).isEqualTo("LEADER");

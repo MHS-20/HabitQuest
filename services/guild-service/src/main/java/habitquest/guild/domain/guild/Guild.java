@@ -1,18 +1,19 @@
 package habitquest.guild.domain.guild;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Guild implements Aggregate<String> {
-  private final String id;
+public class Guild implements Aggregate<Id<Guild>> {
+  private final Id<Guild> id;
   private String name;
   private List<GuildMember> members;
   private Integer globalRank;
   private final List<Invite> pendingInvites;
 
-  public Guild(String id, String name, GuildMember leader) {
+  public Guild(Id<Guild> id, String name, GuildMember leader) {
     this.id = id;
     this.name = name;
     this.members = new ArrayList<>();
@@ -21,7 +22,7 @@ public class Guild implements Aggregate<String> {
     this.pendingInvites = new ArrayList<>();
   }
 
-  public String getId() {
+  public Id<Guild> getId() {
     return this.id;
   }
 
@@ -37,13 +38,13 @@ public class Guild implements Aggregate<String> {
     return Collections.unmodifiableList(pendingInvites);
   }
 
-  public boolean isLeader(String memberId) {
+  public boolean isLeader(Id<GuildMember> memberId) {
     return members.stream()
         .filter(member -> member.getId().equals(memberId))
         .anyMatch(member -> member.getRole() == GuildRole.LEADER);
   }
 
-  public void sendInvite(String requestorId, Invite invite) {
+  public void sendInvite(Id<GuildMember> requestorId, Invite invite) {
     requireLeader(requestorId, "sendInvite");
     if (invite == null) {
       throw new IllegalArgumentException("invite must not be null");
@@ -56,7 +57,7 @@ public class Guild implements Aggregate<String> {
     pendingInvites.add(invite);
   }
 
-  public void acceptInvite(String inviteId, String avatarId, String nickname) {
+  public void acceptInvite(Id<Invite> inviteId, Id<GuildMember> avatarId, String nickname) {
     Invite invite =
         pendingInvites.stream()
             .filter(i -> i.inviteId().equals(inviteId) && i.avatarId().equals(avatarId))
@@ -70,20 +71,20 @@ public class Guild implements Aggregate<String> {
     this.members.add(member);
   }
 
-  public void leaveGuild(String memberId) {
+  public void leaveGuild(Id<GuildMember> memberId) {
     this.members.removeIf(member -> member.getId().equals(memberId));
   }
 
-  private void removeMember(String memberId) {
+  private void removeMember(Id<GuildMember> memberId) {
     this.members.removeIf(member -> member.getId().equals(memberId));
   }
 
-  public void removeMember(String requestorId, String targetMemberId) {
+  public void removeMember(Id<GuildMember> requestorId, Id<GuildMember> targetMemberId) {
     requireLeader(requestorId, "removeMember");
     removeMember(targetMemberId);
   }
 
-  private void promoteMember(String memberId, GuildRole newRole) {
+  private void promoteMember(Id<GuildMember> memberId, GuildRole newRole) {
     members.stream()
         .filter(m -> m.getId().equals(memberId))
         .findFirst()
@@ -91,14 +92,15 @@ public class Guild implements Aggregate<String> {
         .promoteTo(newRole);
   }
 
-  public void promoteMember(String requestorId, String targetMemberId, GuildRole newRole) {
+  public void promoteMember(
+      Id<GuildMember> requestorId, Id<GuildMember> targetMemberId, GuildRole newRole) {
     requireLeader(requestorId, "promoteMember");
     promoteMember(targetMemberId, newRole);
   }
 
-  private void requireLeader(String requestorId, String operation) {
+  private void requireLeader(Id<GuildMember> requestorId, String operation) {
     if (!isLeader(requestorId)) {
-      throw new UnauthorizedGuildOperationException(requestorId, operation);
+      throw new UnauthorizedGuildOperationException(requestorId.value(), operation);
     }
   }
 
