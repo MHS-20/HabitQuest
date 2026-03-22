@@ -2,6 +2,7 @@ package habitquest.quest.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import common.ddd.Id;
 import java.time.Duration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,11 +10,11 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Quest domain")
 class QuestTest {
 
-  private static final String QUEST_ID = "quest-1";
+  private static final Id<Quest> QUEST_ID = new Id<>("quest-1");
   private static final String QUEST_NAME = "Morning Routine";
   private static final String UPDATED_NAME = "Evening Routine";
-  private static final String HABIT_ID_1 = "habit-1";
-  private static final String HABIT_ID_2 = "habit-2";
+  private static final Id<Habit> HABIT_ID_1 = new Id<>("habit-1");
+  private static final Id<Habit> HABIT_ID_2 = new Id<>("habit-2");
 
   @Test
   @DisplayName("constructor with name initializes id and name")

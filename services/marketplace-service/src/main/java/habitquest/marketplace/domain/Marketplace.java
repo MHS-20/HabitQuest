@@ -2,7 +2,6 @@ package habitquest.marketplace.domain;
 
 import common.ddd.Aggregate;
 import common.ddd.Id;
-import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import java.util.Optional;

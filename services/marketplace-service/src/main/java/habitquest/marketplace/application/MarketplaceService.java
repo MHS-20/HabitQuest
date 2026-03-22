@@ -2,7 +2,7 @@ package habitquest.marketplace.application;
 
 import common.ddd.Id;
 import common.hexagonal.InBoundPort;
-import habitquest.marketplace.Avatar;
+import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
