@@ -26,6 +26,9 @@ public class Habit implements Aggregate<Id<Habit>> {
       Optional<String> associatedQuestId) {
     this.id = id;
     this.avatarId = avatarId;
+    this.title = title;
+    this.description = description;
+    this.recurrence = recurrence;
     this.associatedQuestId = associatedQuestId;
   }
 
@@ -34,7 +37,11 @@ public class Habit implements Aggregate<Id<Habit>> {
   }
 
   public LocalDateTime nextRecurrence() {
-    return this.recurrence.nextAfter(this.lastAttendedDate);
+    if (this.lastAttendedDate == null) {
+      return null;
+    } else {
+      return this.recurrence.nextAfter(this.lastAttendedDate);
+    }
   }
 
   public LocalDateTime nextRecurrence(LocalDateTime date) {

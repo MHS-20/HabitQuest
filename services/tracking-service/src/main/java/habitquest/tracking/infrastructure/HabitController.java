@@ -8,11 +8,13 @@ import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
-import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
+import habitquest.tracking.infrastructure.dto.HabitHistoryEventResponse;
+import habitquest.tracking.infrastructure.dto.HabitMapper;
+import habitquest.tracking.infrastructure.dto.HabitResponse;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -47,7 +49,6 @@ public class HabitController {
   @PostMapping
   public ResponseEntity<EntityModel<HabitCreatedResponse>> createHabit(
       @RequestBody CreateHabitRequest request) {
-
     Habit created =
         switch (Objects.requireNonNull(request.recurrenceType()).toUpperCase(Locale.ITALIAN)) {
           case "DAILY" ->
@@ -89,14 +90,12 @@ public class HabitController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<EntityModel<Habit>> getHabit(@PathVariable String id)
+  public ResponseEntity<EntityModel<HabitResponse>> getHabit(@PathVariable String id)
       throws HabitNotFoundException {
-
     Habit habit = habitService.getHabitById(idOfHabit(id));
-
-    EntityModel<Habit> model =
+    EntityModel<HabitResponse> model =
         EntityModel.of(
-            habit,
+            HabitMapper.toResponse(habit),
             selfLink(id),
             linkTo(methodOn(HabitController.class).getTitle(id)).withRel("title"),
             linkTo(methodOn(HabitController.class).getDescription(id)).withRel("description"),
@@ -106,7 +105,6 @@ public class HabitController {
                 .withRel("lastAttendedDate"),
             linkTo(methodOn(HabitController.class).getHistory(id)).withRel("history"),
             linkTo(methodOn(HabitController.class).deleteHabit(id)).withRel("delete"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -143,30 +141,27 @@ public class HabitController {
   @GetMapping("/{id}/tags")
   public ResponseEntity<EntityModel<TagsResponse>> getTags(@PathVariable String id)
       throws HabitNotFoundException {
-
-    List<Tag> tags = habitService.getTags(idOfHabit(id));
+    List<String> tags = habitService.getTags(idOfHabit(id)).stream().map(Tag::name).toList();
     EntityModel<TagsResponse> model =
         EntityModel.of(
             new TagsResponse(tags),
             selfLink(id),
             habitLink(id),
             linkTo(methodOn(HabitController.class).updateTags(id, null)).withRel("update"));
-
     return ResponseEntity.ok(model);
   }
 
   @GetMapping("/{id}/recurrence")
-  public ResponseEntity<EntityModel<Recurrence>> getRecurrence(@PathVariable String id)
+  public ResponseEntity<EntityModel<RecurrenceResponse>> getRecurrence(@PathVariable String id)
       throws HabitNotFoundException {
-
-    Recurrence recurrence = habitService.getRecurrence(idOfHabit(id));
-    EntityModel<Recurrence> model =
+    RecurrenceResponse recurrence =
+        HabitMapper.toRecurrenceResponse(habitService.getRecurrence(idOfHabit(id)));
+    EntityModel<RecurrenceResponse> model =
         EntityModel.of(
             recurrence,
             selfLink(id),
             habitLink(id),
             linkTo(methodOn(HabitController.class).updateRecurrence(id, null)).withRel("update"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -188,11 +183,10 @@ public class HabitController {
   @GetMapping("/{id}/history")
   public ResponseEntity<EntityModel<HistoryResponse>> getHistory(@PathVariable String id)
       throws HabitNotFoundException {
-
-    List<HabitHistoryEvent> history = habitService.getHistory(idOfHabit(id));
+    List<HabitHistoryEventResponse> history =
+        habitService.getHistory(idOfHabit(id)).stream().map(HabitMapper::toResponse).toList();
     EntityModel<HistoryResponse> model =
         EntityModel.of(new HistoryResponse(history), selfLink(id), habitLink(id));
-
     return ResponseEntity.ok(model);
   }
 
@@ -305,11 +299,13 @@ public class HabitController {
 
   public record DescriptionResponse(String description) {}
 
-  public record TagsResponse(List<Tag> tags) {}
+  public record TagsResponse(List<String> tags) {}
+
+  public record HistoryResponse(List<HabitHistoryEventResponse> history) {}
 
   public record LastAttendedDateResponse(LocalDateTime date) {}
 
-  public record HistoryResponse(List<HabitHistoryEvent> history) {}
-
   public record ErrorResponse(String message) {}
+
+  public record RecurrenceResponse(String type, Integer dayOfMonth, String dayOfWeek) {}
 }
