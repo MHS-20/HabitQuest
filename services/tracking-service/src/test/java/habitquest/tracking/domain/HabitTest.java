@@ -2,6 +2,7 @@ package habitquest.tracking.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import common.ddd.Id;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import java.time.LocalDateTime;
@@ -12,8 +13,8 @@ import org.junit.jupiter.api.Test;
 
 @DisplayName("Habit domain")
 class HabitTest {
-  private static final String HABIT_ID = "habit-1";
-  private static final String AVATAR_ID = "avatar-1";
+  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
+  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
   private static final String TITLE = "Hydrate";
   private static final String DESCRIPTION = "Drink water";
 
@@ -64,8 +65,8 @@ class HabitTest {
         new Habit(
             HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.of("quest-9"));
 
-    assertThat(habit.getId()).isEqualTo("habit-1");
-    assertThat(habit.getAvatarId()).isEqualTo("avatar-1");
+    assertThat(habit.getId()).isEqualTo(new Id<>("habit-1"));
+    assertThat(habit.getAvatarId()).isEqualTo(new Id<>("avatar-1"));
     assertThat(habit.getAssociatedQuestId()).contains("quest-9");
   }
 }

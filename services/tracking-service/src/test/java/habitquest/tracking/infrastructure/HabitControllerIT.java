@@ -6,8 +6,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import common.ddd.Id;
 import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
+import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
@@ -40,11 +42,11 @@ public class HabitControllerIT {
 
   @MockitoBean private HabitService habitService;
 
-  private static final String HABIT_ID = "habit-1";
-  private static final String AVATAR_ID = "avatar-1";
+  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
+  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
   private static final String TITLE = "Hydrate";
   private static final String DESCRIPTION = "Drink 2L of water";
-  private static final String UNKNOWN_ID = "ghost-99";
+  private static final Id<Habit> UNKNOWN_ID = new Id<>("ghost-99");
 
   private Habit stubHabit() {
     Habit habit =
@@ -65,7 +67,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 201 with the new habit id")
     void shouldReturn201WithId() throws Exception {
-      when(habitService.createDailyHabit(anyString(), anyString(), anyString()))
+      when(habitService.createDailyHabit(any(Id.class), anyString(), anyString()))
           .thenReturn(stubHabit());
 
       mockMvc
@@ -82,14 +84,14 @@ public class HabitControllerIT {
                       }
                       """))
           .andExpect(status().isCreated())
-          .andExpect(header().string("Location", "/api/v1/habits/" + HABIT_ID))
-          .andExpect(jsonPath("$.id").value(HABIT_ID));
+          .andExpect(header().string("Location", "/api/v1/habits/" + HABIT_ID.value()))
+          .andExpect(jsonPath("$.id").value(HABIT_ID.value()));
     }
 
     @Test
     @DisplayName("delegates DAILY payload to createDailyHabit")
     void shouldDelegateDailyPayloadToService() throws Exception {
-      when(habitService.createDailyHabit(anyString(), anyString(), anyString()))
+      when(habitService.createDailyHabit(any(Id.class), anyString(), anyString()))
           .thenReturn(stubHabit());
 
       mockMvc
@@ -107,16 +109,17 @@ public class HabitControllerIT {
                       """))
           .andExpect(status().isCreated());
 
-      verify(habitService).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
-      verify(habitService, never()).createWeeklyHabit(anyString(), anyString(), anyString(), any());
+      verify(habitService).createDailyHabit(eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION));
       verify(habitService, never())
-          .createMonthlyHabit(anyString(), anyString(), anyString(), anyInt());
+          .createWeeklyHabit(eq(AVATAR_ID), anyString(), anyString(), any());
+      verify(habitService, never())
+          .createMonthlyHabit(eq(AVATAR_ID), anyString(), anyString(), anyInt());
     }
 
     @Test
     @DisplayName("delegates WEEKLY payload to createWeeklyHabit")
     void shouldDelegateWeeklyPayloadToService() throws Exception {
-      when(habitService.createWeeklyHabit(anyString(), anyString(), anyString(), any()))
+      when(habitService.createWeeklyHabit(any(Id.class), anyString(), anyString(), any()))
           .thenReturn(stubHabit());
 
       mockMvc
@@ -141,7 +144,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("delegates MONTHLY payload to createMonthlyHabit")
     void shouldDelegateMonthlyPayloadToService() throws Exception {
-      when(habitService.createMonthlyHabit(anyString(), anyString(), anyString(), anyInt()))
+      when(habitService.createMonthlyHabit(any(Id.class), anyString(), anyString(), anyInt()))
           .thenReturn(stubHabit());
 
       mockMvc
@@ -182,10 +185,11 @@ public class HabitControllerIT {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Unknown recurrence type: YEARLY"));
 
-      verify(habitService, never()).createDailyHabit(anyString(), anyString(), anyString());
-      verify(habitService, never()).createWeeklyHabit(anyString(), anyString(), anyString(), any());
+      verify(habitService, never()).createDailyHabit(eq(AVATAR_ID), anyString(), anyString());
       verify(habitService, never())
-          .createMonthlyHabit(anyString(), anyString(), anyString(), anyInt());
+          .createWeeklyHabit(eq(AVATAR_ID), anyString(), anyString(), any());
+      verify(habitService, never())
+          .createMonthlyHabit(eq(AVATAR_ID), anyString(), anyString(), anyInt());
     }
   }
 
@@ -199,17 +203,20 @@ public class HabitControllerIT {
       when(habitService.getHabitById(HABIT_ID)).thenReturn(stubHabit());
 
       mockMvc
-          .perform(get("/api/v1/habits/{id}", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(HABIT_ID));
+          .andExpect(jsonPath("$.id").value(HABIT_ID.value()));
     }
 
     @Test
     @DisplayName("returns 404 when habit does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(habitService.getHabitById(UNKNOWN_ID)).thenThrow(new HabitNotFoundException(UNKNOWN_ID));
+      when(habitService.getHabitById(UNKNOWN_ID))
+          .thenThrow(new HabitNotFoundException(UNKNOWN_ID.value()));
 
-      mockMvc.perform(get("/api/v1/habits/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
+      mockMvc
+          .perform(get("/api/v1/habits/{id}", UNKNOWN_ID.value()))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -222,7 +229,9 @@ public class HabitControllerIT {
     void shouldReturn204() throws Exception {
       doNothing().when(habitService).deleteHabitById(HABIT_ID);
 
-      mockMvc.perform(delete("/api/v1/habits/{id}", HABIT_ID)).andExpect(status().isNoContent());
+      mockMvc
+          .perform(delete("/api/v1/habits/{id}", HABIT_ID.value()))
+          .andExpect(status().isNoContent());
 
       verify(habitService).deleteHabitById(HABIT_ID);
     }
@@ -230,11 +239,13 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 404 when habit does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new HabitNotFoundException(UNKNOWN_ID))
+      doThrow(new HabitNotFoundException(UNKNOWN_ID.value()))
           .when(habitService)
           .deleteHabitById(UNKNOWN_ID);
 
-      mockMvc.perform(delete("/api/v1/habits/{id}", UNKNOWN_ID)).andExpect(status().isNotFound());
+      mockMvc
+          .perform(delete("/api/v1/habits/{id}", UNKNOWN_ID.value()))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -248,7 +259,7 @@ public class HabitControllerIT {
       when(habitService.getTitle(HABIT_ID)).thenReturn(TITLE);
 
       mockMvc
-          .perform(get("/api/v1/habits/{id}/title", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}/title", HABIT_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.title").value(TITLE));
     }
@@ -264,7 +275,7 @@ public class HabitControllerIT {
       when(habitService.getDescription(HABIT_ID)).thenReturn(DESCRIPTION);
 
       mockMvc
-          .perform(get("/api/v1/habits/{id}/description", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}/description", HABIT_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.description").value(DESCRIPTION));
     }
@@ -279,9 +290,8 @@ public class HabitControllerIT {
     void shouldReturnTags() throws Exception {
       when(habitService.getTags(HABIT_ID))
           .thenReturn(List.of(new Tag("health"), new Tag("fitness")));
-
       mockMvc
-          .perform(get("/api/v1/habits/{id}/tags", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}/tags", HABIT_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.tags[0].name").value("health"))
           .andExpect(jsonPath("$.tags[1].name").value("fitness"));
@@ -298,7 +308,7 @@ public class HabitControllerIT {
       when(habitService.getRecurrence(HABIT_ID)).thenReturn(new WeeklyRecurrence(DayOfWeek.MONDAY));
 
       mockMvc
-          .perform(get("/api/v1/habits/{id}/recurrence", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}/recurrence", HABIT_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.dayOfWeek").value("MONDAY"));
     }
@@ -315,7 +325,7 @@ public class HabitControllerIT {
       when(habitService.getLastAttendedDate(HABIT_ID)).thenReturn(attendedAt);
 
       mockMvc
-          .perform(get("/api/v1/habits/{id}/last-attended-date", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}/last-attended-date", HABIT_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.date").value("2026-03-16T10:15:00"));
     }
@@ -335,12 +345,11 @@ public class HabitControllerIT {
                       new HabitAttended(stubHabit(), AVATAR_ID),
                       LocalDateTime.of(2026, 3, 17, 9, 30),
                       "attendedAt=2026-03-17T09:30")));
-
       mockMvc
-          .perform(get("/api/v1/habits/{id}/history", HABIT_ID))
+          .perform(get("/api/v1/habits/{id}/history", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.history[0].event.habit.id").value(HABIT_ID))
-          .andExpect(jsonPath("$.history[0].event.avatarId").value(AVATAR_ID))
+          .andExpect(jsonPath("$.history[0].event.habit.id").value(HABIT_ID.value()))
+          .andExpect(jsonPath("$.history[0].event.avatarId").value(AVATAR_ID.value()))
           .andExpect(jsonPath("$.history[0].details").value("attendedAt=2026-03-17T09:30"));
     }
   }
@@ -356,7 +365,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/title", HABIT_ID)
+              patch("/api/v1/habits/{id}/title", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"title\":\"Read\"}"))
           .andExpect(status().isNoContent());
@@ -376,7 +385,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/description", HABIT_ID)
+              patch("/api/v1/habits/{id}/description", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"description\":\"Read 20 pages\"}"))
           .andExpect(status().isNoContent());
@@ -396,7 +405,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/tags", HABIT_ID)
+              patch("/api/v1/habits/{id}/tags", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"tags\":[\"health\",\"mindset\"]}"))
           .andExpect(status().isNoContent());
@@ -420,7 +429,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/recurrence", HABIT_ID)
+              patch("/api/v1/habits/{id}/recurrence", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"type\":\"DAILY\"}"))
           .andExpect(status().isNoContent());
@@ -436,7 +445,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/recurrence", HABIT_ID)
+              patch("/api/v1/habits/{id}/recurrence", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"type\":\"WEEKLY\",\"dayOfWeek\":\"MONDAY\"}"))
           .andExpect(status().isNoContent());
@@ -455,7 +464,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/recurrence", HABIT_ID)
+              patch("/api/v1/habits/{id}/recurrence", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"type\":\"MONTHLY\",\"dayOfMonth\":15}"))
           .andExpect(status().isNoContent());
@@ -471,7 +480,7 @@ public class HabitControllerIT {
     void shouldReturn400OnUnknownType() throws Exception {
       mockMvc
           .perform(
-              patch("/api/v1/habits/{id}/recurrence", HABIT_ID)
+              patch("/api/v1/habits/{id}/recurrence", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"type\":\"YEARLY\"}"))
           .andExpect(status().isBadRequest())
@@ -493,7 +502,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              post("/api/v1/habits/{id}/attend", HABIT_ID)
+              post("/api/v1/habits/{id}/attend", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"date\":\"2026-03-17T09:30:00\"}"))
           .andExpect(status().isNoContent());
@@ -511,7 +520,7 @@ public class HabitControllerIT {
 
       mockMvc
           .perform(
-              post("/api/v1/habits/{id}/attend", HABIT_ID)
+              post("/api/v1/habits/{id}/attend", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"date\":\"2027-01-01T10:00:00\"}"))
           .andExpect(status().isBadRequest())

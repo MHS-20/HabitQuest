@@ -1,5 +1,8 @@
 package habitquest.tracking.domain.events;
 
+import common.ddd.Id;
+import habitquest.tracking.domain.Avatar;
+import habitquest.tracking.domain.Habit;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -11,7 +14,7 @@ public record HabitHistoryEvent(HabitEvent event, LocalDateTime occurredAt, Stri
     details = details == null ? "" : details;
   }
 
-  public String habitId() {
+  public Id<Habit> habitId() {
     return switch (event) {
       case HabitCreated e -> e.habit().getId();
       case HabitUpdated e -> e.habit().getId();
@@ -22,7 +25,7 @@ public record HabitHistoryEvent(HabitEvent event, LocalDateTime occurredAt, Stri
     };
   }
 
-  public String avatarId() {
+  public Id<Avatar> avatarId() {
     return switch (event) {
       case HabitCreated e -> e.avatarId();
       case HabitUpdated e -> e.avatarId();
