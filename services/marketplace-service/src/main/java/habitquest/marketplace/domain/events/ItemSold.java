@@ -1,4 +1,8 @@
 package habitquest.marketplace.domain.events;
 
-public record ItemSold(String marketplaceId, String itemName, String avatarId)
+import common.ddd.Id;
+import habitquest.marketplace.Avatar;
+import habitquest.marketplace.domain.Marketplace;
+
+public record ItemSold(Id<Marketplace> marketplaceId, String itemName, Id<Avatar> avatarId)
     implements MarketplaceEvent {}

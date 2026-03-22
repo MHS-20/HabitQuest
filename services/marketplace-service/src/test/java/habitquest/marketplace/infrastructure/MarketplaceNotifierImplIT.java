@@ -3,6 +3,7 @@ package habitquest.marketplace.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.ddd.Id;
 import habitquest.marketplace.application.MarketplaceRepository;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
@@ -115,7 +116,8 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("publishes a message to marketplace.item-bought")
     void shouldPublishToItemBoughtTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_BOUGHT);
-      notifier.notifyItemBought(new ItemBought(MARKET_1, "Iron Sword", "avatar-42"));
+      notifier.notifyItemBought(
+          new ItemBought(new Id<>(MARKET_1), "Iron Sword", new Id<>("avatar-42")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -131,7 +133,8 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("preserves all fields in the item-bought payload")
     void shouldPreserveAllFields() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_BOUGHT);
-      notifier.notifyItemBought(new ItemBought("market-99", "Dragon Shield", "hero-7"));
+      notifier.notifyItemBought(
+          new ItemBought(new Id<>("market-99"), "Dragon Shield", new Id<>("hero-7")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(MARKETPLACE_FIELD).asText()).isEqualTo("market-99");
@@ -143,7 +146,8 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("each purchase event has its own occurredOn timestamp")
     void shouldHaveTimestamp() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_BOUGHT);
-      notifier.notifyItemBought(new ItemBought(MARKET_1, "Mana Potion", "avatar-1"));
+      notifier.notifyItemBought(
+          new ItemBought(new Id<>(MARKET_1), "Mana Potion", new Id<>("avatar-1")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(OCCURRED_ON).asText()).isNotBlank();
@@ -159,7 +163,8 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("publishes a message to marketplace.item-sold")
     void shouldPublishToItemSoldTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_SOLD);
-      notifier.notifyItemSold(new ItemSold("market-2", "Old Armor", "avatar-10"));
+      notifier.notifyItemSold(
+          new ItemSold(new Id<>("market-2"), "Old Armor", new Id<>("avatar-10")));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -175,7 +180,8 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("preserves all fields in the item-sold payload")
     void shouldPreserveAllFields() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_SOLD);
-      notifier.notifyItemSold(new ItemSold("market-5", "Rusty Sword", "warrior-3"));
+      notifier.notifyItemSold(
+          new ItemSold(new Id<>("market-5"), "Rusty Sword", new Id<>("warrior-3")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(MARKETPLACE_FIELD).asText()).isEqualTo("market-5");
@@ -187,7 +193,8 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("each sale event has its own occurredOn timestamp")
     void shouldHaveTimestamp() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_SOLD);
-      notifier.notifyItemSold(new ItemSold(MARKET_1, "Health Potion", "avatar-2"));
+      notifier.notifyItemSold(
+          new ItemSold(new Id<>(MARKET_1), "Health Potion", new Id<>("avatar-2")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(OCCURRED_ON).asText()).isNotBlank();

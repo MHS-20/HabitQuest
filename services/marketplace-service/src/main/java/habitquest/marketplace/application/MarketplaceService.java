@@ -1,6 +1,8 @@
 package habitquest.marketplace.application;
 
+import common.ddd.Id;
 import common.hexagonal.InBoundPort;
+import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
@@ -8,26 +10,27 @@ import java.util.List;
 
 @InBoundPort
 public interface MarketplaceService {
-  Marketplace getMarketplace(String marketplaceId) throws MarketplaceNotFoundException;
+  Marketplace getMarketplace(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
-  String createMarketplaceForAvatar(String avatarId);
+  Id<Marketplace> createMarketplaceForAvatar(Id<Avatar> avatarId);
 
-  List<Item> getAllAvailableItems(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<Item> getAvailableItemsByType(String marketplaceId, ItemType type)
+  List<Item> getAllAvailableItems(Id<Marketplace> marketplaceId)
       throws MarketplaceNotFoundException;
 
-  Item getAvailableItem(String marketplaceId, String itemName)
+  List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemType type)
+      throws MarketplaceNotFoundException;
+
+  Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException;
 
-  List<Item> getSoldItems(String marketplaceId) throws MarketplaceNotFoundException;
+  List<Item> getSoldItems(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
-  Item getSoldItem(String marketplaceId, String itemName)
+  Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException;
 
-  String getAvatarId(String marketplaceId) throws MarketplaceNotFoundException;
+  Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
-  void buyItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException;
+  void buyItem(Id<Marketplace> marketplaceId, String itemName) throws MarketplaceNotFoundException;
 
-  void sellItem(String marketplaceId, String itemName) throws MarketplaceNotFoundException;
+  void sellItem(Id<Marketplace> marketplaceId, String itemName) throws MarketplaceNotFoundException;
 }

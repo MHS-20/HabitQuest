@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
+import habitquest.marketplace.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.Money;
@@ -35,16 +37,16 @@ class MarketplaceServiceImplTest {
   @InjectMocks private MarketplaceServiceImpl service;
 
   // ── Fixtures ─────────────────────────────────────────────────────────────────
-  private static final String MARKETPLACE_ID = "mp-1";
-  private static final String AVATAR_ID = "avatar-99";
+  private static final Id<Marketplace> MARKETPLACE_ID = new Id<>("mp-1");
+  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-99");
   private static final String SWORD_NAME = "Iron Sword";
   private static final String SHIELD_NAME = "Iron Shield";
   private static final String HP_POTION_NAME = "HP Potion";
   private static final String MP_POTION_NAME = "MP Potion";
   private static final String UNKNOWN_ITEM_NAME = "Dragon Blade";
-  private static final String MISSING_MARKETPLACE_ID = "missing";
-  private static final String GHOST_MARKETPLACE_ID = "ghost";
-  private static final String UNKNOWN_MARKETPLACE_ID = "unknown";
+  private static final Id<Marketplace> MISSING_MARKETPLACE_ID = new Id<>("missing");
+  private static final Id<Marketplace> GHOST_MARKETPLACE_ID = new Id<>("ghost");
+  private static final Id<Marketplace> UNKNOWN_MARKETPLACE_ID = new Id<>("unknown");
   private static final Money SWORD_PRICE = new Money(50);
   private static final Money SHIELD_PRICE = new Money(30);
   private static final Money HP_PRICE = new Money(10);
@@ -74,7 +76,7 @@ class MarketplaceServiceImplTest {
     when(marketplace.getAvatarId()).thenReturn(AVATAR_ID);
   }
 
-  private void givenMarketplaceNotFound(String id) {
+  private void givenMarketplaceNotFound(Id<Marketplace> id) {
     when(marketplaceRepository.findById(id)).thenReturn(Optional.empty());
   }
 
