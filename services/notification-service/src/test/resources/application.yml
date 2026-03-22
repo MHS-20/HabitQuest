@@ -15,7 +15,7 @@ spring:
     config:
       enabled: false
     function:
-      definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
+      definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;avatarNewSpellLearned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
     stream:
       kafka:
         binder:
@@ -36,6 +36,8 @@ spring:
           destination: avatar.dead
         avatarSkillPointAssigned-in-0:
           destination: avatar.skill-point-assigned
+        avatarNewSpellLearned-in-0:
+          destination: avatar.new-spell-learned
 
         guildBattleStarted-in-0:
           destination: guild.battle-started

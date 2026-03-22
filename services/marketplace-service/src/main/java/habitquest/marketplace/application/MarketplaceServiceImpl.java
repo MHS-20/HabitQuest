@@ -106,4 +106,15 @@ public class MarketplaceServiceImpl implements MarketplaceService {
     marketplaceObserver.notifyMarketplaceEvent(
         new ItemSold(marketplaceId, itemName, marketplace.getAvatarId()));
   }
+
+  @Override
+  public boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
+      throws MarketplaceNotFoundException {
+    Marketplace marketplace = getMarketplace(marketplaceId);
+    Item item =
+        marketplace
+            .getAvailableItem(itemName)
+            .orElseThrow(() -> new ItemNotFoundException(itemName));
+    return item.requiredLevel().levelNumber() <= level.levelNumber();
+  }
 }
