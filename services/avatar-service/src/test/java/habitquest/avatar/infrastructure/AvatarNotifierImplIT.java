@@ -233,7 +233,7 @@ public class AvatarNotifierImplIT {
     @DisplayName("publishes a message to avatar.new-spell-learned")
     void shouldPublishToNewSpellTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_NEW_SPELL);
-      notifier.notifyNewSpellLearned(new NewSpellLearned(Spell.FIREBALL));
+      notifier.notifyNewSpellLearned(new NewSpellLearned(new Id<>(AVATAR_ID), Spell.FIREBALL));
       ConsumerRecord<String, String> record = pollOne();
       assertThat(record.topic()).isEqualTo(TOPIC_NEW_SPELL);
       var node = objectMapper.readTree(record.value());
@@ -246,7 +246,7 @@ public class AvatarNotifierImplIT {
     @DisplayName("preserves all spell fields in the payload")
     void shouldPreserveAllSpellFields() throws Exception {
       subscribeAndSeekToEnd(TOPIC_NEW_SPELL);
-      notifier.notifyNewSpellLearned(new NewSpellLearned(Spell.BLIZZARD));
+      notifier.notifyNewSpellLearned(new NewSpellLearned(new Id<>(AVATAR_ID), Spell.BLIZZARD));
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("spellName").asText()).isEqualTo("BLIZZARD");
       assertThat(node.get("description").asText()).isEqualTo("A chilling spell.");

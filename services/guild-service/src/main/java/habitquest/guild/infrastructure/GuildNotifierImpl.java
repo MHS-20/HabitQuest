@@ -32,7 +32,8 @@ public class GuildNotifierImpl implements GuildNotifier {
   @Override
   public void notifyGuildCreated(GuildCreated event) {
     GuildCreatedMessage message =
-        new GuildCreatedMessage(event.guildId().value(), event.guildName(), Instant.now());
+        new GuildCreatedMessage(
+            event.guildId().value(), event.leaderId().value(), event.guildName(), Instant.now());
 
     LOG.info(
         "Publishing GuildCreated event: guildId={}, name={}", message.guildId(), message.name());
@@ -63,9 +64,6 @@ public class GuildNotifierImpl implements GuildNotifier {
             Instant.now());
     streamBridge.send(INVITE_SENT_BINDING, message);
   }
-
-  public record InviteSentMessage(
-      String guildId, String targetAvatarId, String inviteId, Instant occurredOn) {}
 
   @Override
   public void notifyGuildJoined(GuildJoined event) {
@@ -133,7 +131,8 @@ public class GuildNotifierImpl implements GuildNotifier {
     }
   }
 
-  public record GuildCreatedMessage(String guildId, String name, Instant occurredOn) {}
+  public record GuildCreatedMessage(
+      String guildId, String leaderId, String name, Instant occurredOn) {}
 
   public record GuildDeletedMessage(String guildId, Instant occurredOn) {}
 
@@ -145,4 +144,7 @@ public class GuildNotifierImpl implements GuildNotifier {
 
   public record RoleAssignedMessage(
       String guildId, String memberId, String roleName, Instant occurredOn) {}
+
+  public record InviteSentMessage(
+      String guildId, String targetAvatarId, String inviteId, Instant occurredOn) {}
 }

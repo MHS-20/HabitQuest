@@ -74,13 +74,15 @@ public class UserNotifierImplIT {
     consumer.close();
   }
 
-  private void subscribeAndSeekToEnd(String topic) {
-    consumer.subscribe(Collections.singletonList(topic));
+  private void subscribeAndSeekToEnd() {
+    consumer.subscribe(Collections.singletonList(UserNotifierImplIT.TOPIC_USER_REGISTERED));
     long deadline = System.currentTimeMillis() + POLL_TIMEOUT.toMillis();
     while (consumer.assignment().isEmpty()) {
       consumer.poll(Duration.ofMillis(200));
       if (System.currentTimeMillis() > deadline) {
-        throw new AssertionError("Consumer never got partition assignment for topic: " + topic);
+        throw new AssertionError(
+            "Consumer never got partition assignment for topic: "
+                + UserNotifierImplIT.TOPIC_USER_REGISTERED);
       }
     }
     consumer.seekToEnd(consumer.assignment());
@@ -107,13 +109,13 @@ public class UserNotifierImplIT {
     @Test
     @DisplayName("publishes a message to user.registered")
     void shouldPublishToUserRegisteredTopic() throws Exception {
-      subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
+      subscribeAndSeekToEnd();
       User user = new User(new Id<>("user-1"), "paolo rossi", "mario@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
       ConsumerRecord<String, String> record = pollOne();
       assertThat(record.topic()).isEqualTo(TOPIC_USER_REGISTERED);
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get("userId").asText()).isEqualTo("user-1");
+      assertThat(node.get("avatarId").asText()).isEqualTo("user-1");
       assertThat(node.get("email").asText()).isEqualTo("mario@example.com");
       assertThat(node.has("occurredOn")).isTrue();
     }
@@ -121,18 +123,18 @@ public class UserNotifierImplIT {
     @Test
     @DisplayName("preserves the userId in the payload")
     void shouldPreserveUserId() throws Exception {
-      subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
+      subscribeAndSeekToEnd();
       User user =
           new User(new Id<>("special-user-id"), "paolo bianchi", "test@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get("userId").asText()).isEqualTo("special-user-id");
+      assertThat(node.get("avatarId").asText()).isEqualTo("special-user-id");
     }
 
     @Test
     @DisplayName("preserves the email in the payload")
     void shouldPreserveEmail() throws Exception {
-      subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
+      subscribeAndSeekToEnd();
       User user = new User(new Id<>("user-2"), "mario rossi", "luigi@example.com", "hashedpw");
       notifier.notifyUserRegistered(user);
       var node = objectMapper.readTree(pollOne().value());
@@ -142,7 +144,7 @@ public class UserNotifierImplIT {
     @Test
     @DisplayName("does not include the password hash in the payload")
     void shouldNotExposePasswordHash() throws Exception {
-      subscribeAndSeekToEnd(TOPIC_USER_REGISTERED);
+      subscribeAndSeekToEnd();
       User user =
           new User(new Id<>("user-3"), "mario bianchi", "peach@example.com", "supersecrethashedpw");
       notifier.notifyUserRegistered(user);

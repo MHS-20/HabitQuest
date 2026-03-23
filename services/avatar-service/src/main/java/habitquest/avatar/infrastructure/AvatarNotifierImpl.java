@@ -32,7 +32,8 @@ public class AvatarNotifierImpl implements AvatarNotifier {
   @Override
   public void notifyLevelUpped(LevelUpped event) {
     LevelUppedMessage message =
-        new LevelUppedMessage(event.newLevel().levelNumber(), Instant.now());
+        new LevelUppedMessage(
+            event.avatarId().value(), event.newLevel().levelNumber(), Instant.now());
 
     LOG.info("Publishing LevelUpped event: newLevel={}", message.newLevel());
     boolean sent = streamBridge.send(LEVEL_UPPED_BINDING, message);
@@ -56,7 +57,10 @@ public class AvatarNotifierImpl implements AvatarNotifier {
   public void notifySkillPointAssigned(SkillPointAssigned event) {
     SkillPointAssignedMessage message =
         new SkillPointAssignedMessage(
-            event.stat().getClass().getSimpleName(), event.stat().value(), Instant.now());
+            event.avatarId().value(),
+            event.stat().getClass().getSimpleName(),
+            event.stat().value(),
+            Instant.now());
     LOG.info(
         "Publishing SkillPointAssigned event: stat={}, newValue={}",
         message.statType(),
@@ -71,7 +75,10 @@ public class AvatarNotifierImpl implements AvatarNotifier {
   public void notifyNewSpellLearned(NewSpellLearned event) {
     NewSpellLearnedMessage message =
         new NewSpellLearnedMessage(
-            event.spell().name(), event.spell().getDescription(), Instant.now());
+            event.avatarId().value(),
+            event.spell().name(),
+            event.spell().getDescription(),
+            Instant.now());
     LOG.info("Publishing NewSpellLearned event: spell={}", message.spellName());
     boolean sent = streamBridge.send(NEW_SPELL_BINDING, message);
     if (!sent) {
@@ -79,11 +86,13 @@ public class AvatarNotifierImpl implements AvatarNotifier {
     }
   }
 
-  public record LevelUppedMessage(Integer newLevel, Instant occurredOn) {}
+  public record LevelUppedMessage(String avatarId, Integer newLevel, Instant occurredOn) {}
 
   public record DeadMessage(String avatarId, Instant occurredOn) {}
 
-  public record SkillPointAssignedMessage(String statType, Integer newValue, Instant occurredOn) {}
+  public record SkillPointAssignedMessage(
+      String avatarId, String statType, Integer newValue, Instant occurredOn) {}
 
-  public record NewSpellLearnedMessage(String spellName, String description, Instant occurredOn) {}
+  public record NewSpellLearnedMessage(
+      String avatarId, String spellName, String description, Instant occurredOn) {}
 }
