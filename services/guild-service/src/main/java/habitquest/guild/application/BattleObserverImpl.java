@@ -15,11 +15,23 @@ public class BattleObserverImpl implements BattleObserver {
   @Override
   public void notifyBattleEvent(BattleEvent event) {
     switch (event) {
-      case BattleStarted e -> battleNotifier.notifyBattleStarted(e);
-      case BattleWon e -> battleNotifier.notifyBattleWon(e);
-      case BattleLost e -> battleNotifier.notifyBattleLost(e);
+      case BattleStarted e -> handleBattleStarted(e);
+      case BattleWon e -> handleBattleWon(e);
+      case BattleLost e -> handleBattleLost(e);
       default ->
           throw new IllegalArgumentException("Unknown event type: " + event.getClass().getName());
     }
+  }
+
+  public void handleBattleStarted(BattleStarted e) {
+    battleNotifier.notifyBattleStarted(e);
+  }
+
+  public void handleBattleWon(BattleWon e) {
+    battleNotifier.notifyBattleWon(e);
+  }
+
+  public void handleBattleLost(BattleLost e) {
+    battleNotifier.notifyBattleLost(e);
   }
 }

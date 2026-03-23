@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
+import habitquest.avatar.application.AvatarLogger;
 import habitquest.avatar.application.AvatarNotFoundException;
 import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
@@ -32,6 +33,7 @@ public class AvatarControllerIT {
 
   @MockitoBean private MarketplaceClient marketplaceClient;
   @MockitoBean private AvatarService avatarService;
+  @MockitoBean private AvatarLogger avatarLogger;
 
   // ── Fixtures ─────────────────────────────────────────────────────────────────
 
