@@ -23,12 +23,32 @@ public class QuestObserverImpl implements QuestObserver {
   @Override
   public void notifyQuestEvent(QuestEvent event) {
     switch (event) {
-      case QuestCreated e -> questNotifier.notifyQuestCreated(e);
-      case QuestCompleted e -> questNotifier.notifyQuestCompleted(e);
-      case QuestNotCompleted e -> questNotifier.notifyQuestNotCompleted(e);
-      case QuestJoined e -> questNotifier.notifyQuestJoined(e);
-      case QuestLeft e -> questNotifier.notifyQuestLeft(e);
+      case QuestCreated e -> handleQuestCreated(e);
+      case QuestCompleted e -> handleQuestCompleted(e);
+      case QuestNotCompleted e -> handleQuestNotCompleted(e);
+      case QuestJoined e -> handleQuestJoined(e);
+      case QuestLeft e -> handleQuestLeft(e);
       default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass());
     }
+  }
+
+  public void handleQuestCreated(QuestCreated e) {
+    questNotifier.notifyQuestCreated(e);
+  }
+
+  public void handleQuestCompleted(QuestCompleted e) {
+    questNotifier.notifyQuestCompleted(e);
+  }
+
+  public void handleQuestNotCompleted(QuestNotCompleted e) {
+    questNotifier.notifyQuestNotCompleted(e);
+  }
+
+  public void handleQuestJoined(QuestJoined e) {
+    questNotifier.notifyQuestJoined(e);
+  }
+
+  public void handleQuestLeft(QuestLeft e) {
+    questNotifier.notifyQuestLeft(e);
   }
 }
