@@ -1,8 +1,7 @@
 package habitquest.avatar.infrastructure;
 
 import common.hexagonal.Adapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import habitquest.avatar.application.AvatarLogger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -11,26 +10,22 @@ import org.springframework.web.client.RestClientException;
 @Component
 public class MarketplaceClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MarketplaceClient.class);
-
   private final RestClient restClient;
+  private final AvatarLogger log;
 
-  public MarketplaceClient(RestClient marketplaceRestClient) {
+  public MarketplaceClient(RestClient marketplaceRestClient, AvatarLogger log) {
     this.restClient = marketplaceRestClient;
+    this.log = log;
   }
 
   public void createMarketplace(String avatarId) {
-    LOG.info("Creating marketplace for avatar {}", avatarId);
+    CreateMarketplaceRequest request = new CreateMarketplaceRequest(avatarId);
+    log.info(request, "Creating marketplace");
 
     try {
-      restClient
-          .post()
-          .uri("/api/v1/marketplaces")
-          .body(new CreateMarketplaceRequest(avatarId))
-          .retrieve()
-          .toBodilessEntity();
+      restClient.post().uri("/api/v1/marketplaces").body(request).retrieve().toBodilessEntity();
     } catch (RestClientException ex) {
-      LOG.error("Failed to create marketplace for avatar {}: {}", avatarId, ex.getMessage());
+      log.error(request, "Failed to create marketplace", ex);
       throw new MarketplaceCommunicationException(
           "Could not create marketplace for avatar " + avatarId, ex);
     }

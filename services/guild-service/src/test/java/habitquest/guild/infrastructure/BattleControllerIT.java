@@ -7,10 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.guild.application.BattleNotFoundException;
-import habitquest.guild.application.BattleService;
-import habitquest.guild.application.GuildNotFoundException;
-import habitquest.guild.application.GuildService;
+import habitquest.guild.application.*;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossStatus;
@@ -43,6 +40,7 @@ public class BattleControllerIT {
   @MockitoBean private BattleService battleService;
   @MockitoBean private GuildService guildService;
   @MockitoBean private AvatarClient avatarClient;
+  @MockitoBean private GuildLogger log;
 
   // ── Fixtures ──────────────────────────────────────────────────────────────────
 

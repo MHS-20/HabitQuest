@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 public class GuildObserverImpl implements GuildObserver {
 
   private final GuildNotifier guildNotifier;
+  private final GuildLogger log;
 
-  public GuildObserverImpl(GuildNotifier guildNotifier) {
+  public GuildObserverImpl(GuildNotifier guildNotifier, GuildLogger log) {
     this.guildNotifier = guildNotifier;
+    this.log = log;
   }
 
   @Override
@@ -28,30 +30,37 @@ public class GuildObserverImpl implements GuildObserver {
   }
 
   public void handleGuildCreated(GuildCreated e) {
+    log.info(e, "Handling GuildCreated event");
     guildNotifier.notifyGuildCreated(e);
   }
 
   public void handleGuildDeleted(GuildDeleted e) {
+    log.info(e, "Handling GuildDeleted event");
     guildNotifier.notifyGuildDeleted(e);
   }
 
   public void handleGuildJoined(GuildJoined e) {
+    log.info(e, "Handling GuildJoined event");
     guildNotifier.notifyGuildJoined(e);
   }
 
   public void handleGuildLeft(GuildLeft e) {
+    log.info(e, "Handling GuildLeft event");
     guildNotifier.notifyGuildLeft(e);
   }
 
   public void handleRemovedFromGuild(RemovedFromGuild e) {
+    log.info(e, "Handling RemovedFromGuild event");
     guildNotifier.notifyRemovedFromGuild(e);
   }
 
   public void handleRoleAssigned(RoleAssigned e) {
+    log.info(e, "Handling RoleAssigned event");
     guildNotifier.notifyRoleAssigned(e);
   }
 
   public void handleInviteSent(InviteSent e) {
+    log.info(e, "Handling InviteSent event");
     guildNotifier.notifyInviteSent(e);
   }
 }

@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 public class BattleObserverImpl implements BattleObserver {
 
   private final BattleNotifier battleNotifier;
+  private final GuildLogger log;
 
-  public BattleObserverImpl(BattleNotifier battleNotifier) {
+  public BattleObserverImpl(BattleNotifier battleNotifier, GuildLogger log) {
     this.battleNotifier = battleNotifier;
+    this.log = log;
   }
 
   @Override
@@ -24,14 +26,17 @@ public class BattleObserverImpl implements BattleObserver {
   }
 
   public void handleBattleStarted(BattleStarted e) {
+    log.info(e, "Handling BattleStarted event");
     battleNotifier.notifyBattleStarted(e);
   }
 
   public void handleBattleWon(BattleWon e) {
+    log.info(e, "Handling BattleWon event");
     battleNotifier.notifyBattleWon(e);
   }
 
   public void handleBattleLost(BattleLost e) {
+    log.info(e, "Handling BattleLost event");
     battleNotifier.notifyBattleLost(e);
   }
 }
