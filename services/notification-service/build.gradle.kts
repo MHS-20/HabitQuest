@@ -10,6 +10,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-stream")
     implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-json")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -19,7 +20,6 @@ dependencies {
 
     testImplementation("com.icegreen:greenmail:2.1.2")
     testImplementation("org.springframework.kafka:spring-kafka-test")
-    //testImplementation("com.icegreen:greenmail-spring-boot-starter")
     testImplementation("org.awaitility:awaitility")
 
 }
