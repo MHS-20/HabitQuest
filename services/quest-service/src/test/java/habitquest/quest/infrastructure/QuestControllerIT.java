@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import common.ddd.Id;
+import habitquest.quest.application.QuestLogger;
 import habitquest.quest.application.QuestNotFoundException;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.Habit;
@@ -36,6 +37,7 @@ public class QuestControllerIT {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private QuestService questService;
+  @MockitoBean private QuestLogger log;
 
   private static final Id<Quest> QUEST_ID = new Id<>("quest-1");
   private static final String QUEST_NAME = "Morning Routine";
