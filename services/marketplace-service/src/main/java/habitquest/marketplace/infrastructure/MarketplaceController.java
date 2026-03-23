@@ -4,6 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import common.ddd.Id;
 import habitquest.marketplace.application.AvatarNotFoundException;
+import habitquest.marketplace.application.MarketplaceLogger;
 import habitquest.marketplace.application.MarketplaceNotFoundException;
 import habitquest.marketplace.application.MarketplaceService;
 import habitquest.marketplace.domain.Avatar;
@@ -15,8 +16,6 @@ import habitquest.marketplace.infrastructure.dto.ItemMapper;
 import habitquest.marketplace.infrastructure.dto.ItemResponse;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -28,14 +27,16 @@ import org.springframework.web.client.RestClientException;
 @RequestMapping("/api/v1/marketplaces")
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class MarketplaceController {
-  private static final Logger LOG = LoggerFactory.getLogger(MarketplaceController.class);
 
   private final MarketplaceService marketplaceService;
   private final AvatarClient avatarClient;
+  private final MarketplaceLogger log;
 
-  public MarketplaceController(MarketplaceService marketplaceService, AvatarClient avatarClient) {
+  public MarketplaceController(
+      MarketplaceService marketplaceService, AvatarClient avatarClient, MarketplaceLogger log) {
     this.marketplaceService = marketplaceService;
     this.avatarClient = avatarClient;
+    this.log = log;
   }
 
   private Id<Marketplace> idOfMarketplace(String marketplaceId) {
@@ -52,8 +53,10 @@ public class MarketplaceController {
   public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplace(
       @PathVariable String marketplaceId) {
 
-    MarketplaceResponse dto =
-        MarketplaceResponse.from(marketplaceService.getMarketplace(idOfMarketplace(marketplaceId)));
+    Marketplace marketplace = marketplaceService.getMarketplace(idOfMarketplace(marketplaceId));
+    log.info(marketplace, "Fetched marketplace");
+
+    MarketplaceResponse dto = MarketplaceResponse.from(marketplace);
     EntityModel<MarketplaceResponse> model =
         EntityModel.of(
             dto,
@@ -70,14 +73,15 @@ public class MarketplaceController {
   @PostMapping
   public ResponseEntity<EntityModel<MarketplaceResponse>> createMarketplace(
       @RequestBody CreateMarketplaceRequest request) throws AvatarCommunicationException {
-    String avatarId = request.avatarId();
-    LOG.info("Creating marketplace for avatar {}", avatarId);
+    log.info(request, "Creating marketplace");
 
     String marketplaceId =
-        marketplaceService.createMarketplaceForAvatar(idOfAvatar(avatarId)).value();
+        marketplaceService.createMarketplaceForAvatar(idOfAvatar(request.avatarId())).value();
 
-    MarketplaceResponse dto =
-        MarketplaceResponse.from(marketplaceService.getMarketplace(idOfMarketplace(marketplaceId)));
+    Marketplace marketplace = marketplaceService.getMarketplace(idOfMarketplace(marketplaceId));
+    log.info(marketplace, "Marketplace created");
+
+    MarketplaceResponse dto = MarketplaceResponse.from(marketplace);
     EntityModel<MarketplaceResponse> model =
         EntityModel.of(
             dto,
@@ -93,7 +97,7 @@ public class MarketplaceController {
   }
 
   // ─── Available Items ────────────────────────────────────────────────────────
-  /** Returns all available items, optionally filtered by type. */
+
   @GetMapping("/{marketplaceId}/items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getAvailableItems(
       @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemType type)
@@ -103,6 +107,8 @@ public class MarketplaceController {
         type == ItemType.ALL
             ? marketplaceService.getAllAvailableItems(idOfMarketplace(marketplaceId))
             : marketplaceService.getAvailableItemsByType(idOfMarketplace(marketplaceId), type);
+
+    log.info(items, "Fetched available items");
 
     List<EntityModel<ItemResponse>> itemModels =
         items.stream().map(item -> availableItemModel(marketplaceId, item)).toList();
@@ -116,25 +122,26 @@ public class MarketplaceController {
     return ResponseEntity.ok(model);
   }
 
-  /** Returns a single available item by name. */
   @GetMapping("/{marketplaceId}/items/{itemName}")
   public ResponseEntity<EntityModel<ItemResponse>> getAvailableItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
     Item item = marketplaceService.getAvailableItem(idOfMarketplace(marketplaceId), itemName);
+    log.info(item, "Fetched available item");
     return ResponseEntity.ok(availableItemModel(marketplaceId, item));
   }
 
   // ─── Sold Items ─────────────────────────────────────────────────────────────
-  /** Returns all sold items. */
+
   @GetMapping("/{marketplaceId}/sold-items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getSoldItems(
       @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
 
+    List<Item> items = marketplaceService.getSoldItems(idOfMarketplace(marketplaceId));
+    log.info(items, "Fetched sold items");
+
     List<EntityModel<ItemResponse>> itemModels =
-        marketplaceService.getSoldItems(idOfMarketplace(marketplaceId)).stream()
-            .map(item -> soldItemModel(marketplaceId, item))
-            .toList();
+        items.stream().map(item -> soldItemModel(marketplaceId, item)).toList();
 
     CollectionModel<EntityModel<ItemResponse>> model =
         CollectionModel.of(
@@ -144,12 +151,12 @@ public class MarketplaceController {
     return ResponseEntity.ok(model);
   }
 
-  /** Returns a single sold item by name. */
   @GetMapping("/{marketplaceId}/sold-items/{itemName}")
   public ResponseEntity<EntityModel<ItemResponse>> getSoldItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
     Item item = marketplaceService.getSoldItem(idOfMarketplace(marketplaceId), itemName);
+    log.info(item, "Fetched sold item");
     return ResponseEntity.ok(soldItemModel(marketplaceId, item));
   }
 
@@ -161,22 +168,22 @@ public class MarketplaceController {
       @PathVariable String itemName,
       @RequestParam Integer currentLevel)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
+
     String avatarId = marketplaceService.getAvatarId(idOfMarketplace(marketplaceId)).value();
+    log.info(
+        currentLevel, "Buy request received from avatar " + avatarId + " for item " + itemName);
 
     if (!marketplaceService.canBuyItem(
         idOfMarketplace(marketplaceId), itemName, new Level(currentLevel))) {
-      LOG.warn("Avatar {} cannot buy item '{}' due to insufficient level", avatarId, itemName);
+      log.warn(
+          idOfMarketplace(marketplaceId),
+          "Avatar " + avatarId + " cannot buy item '" + itemName + "' due to insufficient level");
       return ResponseEntity.status(403).build();
     }
 
-    LOG.info(
-        "Starting buy saga: avatar {} buying item '{}' from marketplace {}",
-        avatarId,
-        itemName,
-        marketplaceId);
-
     Item item = marketplaceService.getAvailableItem(idOfMarketplace(marketplaceId), itemName);
     Money price = item.price();
+    log.info(item, "Starting buy saga for avatar " + avatarId);
 
     boolean moneySpent = false;
     boolean inventoryAdded = false;
@@ -188,9 +195,11 @@ public class MarketplaceController {
       inventoryAdded = true;
 
       marketplaceService.buyItem(idOfMarketplace(marketplaceId), itemName);
+      log.info(item, "Buy saga completed for avatar " + avatarId);
       return ResponseEntity.noContent().build();
+
     } catch (RestClientException | AvatarCommunicationException ex) {
-      LOG.error("Buy saga error for avatar {} item {}: {}", avatarId, itemName, ex.getMessage());
+      log.error(item, "Buy saga failed for avatar " + avatarId, ex);
       try {
         if (inventoryAdded) {
           avatarClient.removeItemFromInventory(avatarId, item);
@@ -199,11 +208,7 @@ public class MarketplaceController {
           avatarClient.earnMoney(avatarId, price);
         }
       } catch (RestClientException | AvatarCommunicationException compensationEx) {
-        LOG.error(
-            "Buy saga compensation failed for avatar {} item {}: {}",
-            avatarId,
-            itemName,
-            compensationEx.getMessage());
+        log.error(item, "Buy saga compensation failed for avatar " + avatarId, compensationEx);
         throw new AvatarCommunicationException(
             "Partial failure and compensation failed during buy saga", compensationEx);
       }
@@ -216,15 +221,12 @@ public class MarketplaceController {
   public ResponseEntity<Void> sellItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
-    String avatarId = marketplaceService.getAvatarId(idOfMarketplace(marketplaceId)).value();
-    LOG.info(
-        "Starting sell saga: avatar {} selling item '{}' to marketplace {}",
-        avatarId,
-        itemName,
-        marketplaceId);
 
+    String avatarId = marketplaceService.getAvatarId(idOfMarketplace(marketplaceId)).value();
     Item item = marketplaceService.getSoldItem(idOfMarketplace(marketplaceId), itemName);
     Money price = item.price();
+
+    log.info(item, "Starting sell saga for avatar " + avatarId);
 
     boolean removedFromInventory = false;
     boolean earnedMoney = false;
@@ -236,9 +238,11 @@ public class MarketplaceController {
       earnedMoney = true;
 
       marketplaceService.sellItem(idOfMarketplace(marketplaceId), itemName);
+      log.info(item, "Sell saga completed for avatar " + avatarId);
       return ResponseEntity.noContent().build();
+
     } catch (RestClientException | AvatarCommunicationException ex) {
-      LOG.error("Sell saga error for avatar {} item {}: {}", avatarId, itemName, ex.getMessage());
+      log.error(item, "Sell saga failed for avatar " + avatarId, ex);
       try {
         if (earnedMoney) {
           avatarClient.spendMoney(avatarId, price);
@@ -247,11 +251,7 @@ public class MarketplaceController {
           avatarClient.addItemToInventory(avatarId, item);
         }
       } catch (RestClientException | AvatarCommunicationException compensationEx) {
-        LOG.error(
-            "Sell saga compensation failed for avatar {} item {}: {}",
-            avatarId,
-            itemName,
-            compensationEx.getMessage());
+        log.error(item, "Sell saga compensation failed for avatar " + avatarId, compensationEx);
         throw new AvatarCommunicationException(
             "Partial failure and compensation failed during sell saga", compensationEx);
       }
@@ -275,7 +275,7 @@ public class MarketplaceController {
   @ExceptionHandler(AvatarCommunicationException.class)
   public ResponseEntity<ErrorResponse> handleAvatarCommunicationError(
       AvatarCommunicationException ex) {
-    LOG.error("Avatar service communication error: {}", ex.getMessage());
+    log.error(ex, "Avatar service communication error", ex);
     return ResponseEntity.status(502).body(new ErrorResponse(ex.getMessage()));
   }
 

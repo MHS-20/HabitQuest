@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class MarketplaceObserverImplTest {
 
   @Mock private MarketplaceNotifier notifier;
+  @Mock private MarketplaceLogger log;
   @InjectMocks private MarketplaceObserverImpl observer;
 
   private static final ItemBought ITEM_BOUGHT =
@@ -27,7 +28,6 @@ class MarketplaceObserverImplTest {
   @Test
   void shouldDelegateItemBoughtToNotifier() {
     observer.notifyMarketplaceEvent(ITEM_BOUGHT);
-
     verify(notifier).notifyItemBought(ITEM_BOUGHT);
     verifyNoMoreInteractions(notifier);
   }

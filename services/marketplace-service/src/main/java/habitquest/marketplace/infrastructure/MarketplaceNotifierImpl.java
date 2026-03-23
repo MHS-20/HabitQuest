@@ -1,12 +1,11 @@
 package habitquest.marketplace.infrastructure;
 
 import common.hexagonal.Adapter;
+import habitquest.marketplace.application.MarketplaceLogger;
 import habitquest.marketplace.application.MarketplaceNotifier;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
 import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
@@ -14,15 +13,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class MarketplaceNotifierImpl implements MarketplaceNotifier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MarketplaceNotifierImpl.class);
-
   static final String ITEM_BOUGHT_BINDING = "marketplace.item-bought";
   static final String ITEM_SOLD_BINDING = "marketplace.item-sold";
 
   private final StreamBridge streamBridge;
+  private final MarketplaceLogger log;
 
-  public MarketplaceNotifierImpl(StreamBridge streamBridge) {
+  public MarketplaceNotifierImpl(StreamBridge streamBridge, MarketplaceLogger log) {
     this.streamBridge = streamBridge;
+    this.log = log;
   }
 
   @Override
@@ -34,18 +33,11 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
             event.avatarId().value(),
             Instant.now());
 
-    LOG.info(
-        "Publishing ItemBought event: marketplaceId={}, itemName={}, avatarId={}",
-        message.marketplaceId(),
-        message.itemName(),
-        message.avatarId());
+    log.info(message, "Publishing ItemBought event");
 
     boolean sent = streamBridge.send(ITEM_BOUGHT_BINDING, message);
     if (!sent) {
-      LOG.error(
-          "Failed to publish ItemBought event for item '{}' and avatar '{}'",
-          message.itemName(),
-          message.avatarId());
+      log.error(message, "Failed to publish ItemBought event", null);
     }
   }
 
@@ -58,18 +50,11 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
             event.avatarId().value(),
             Instant.now());
 
-    LOG.info(
-        "Publishing ItemSold event: marketplaceId={}, itemName={}, avatarId={}",
-        message.marketplaceId(),
-        message.itemName(),
-        message.avatarId());
+    log.info(message, "Publishing ItemSold event");
 
     boolean sent = streamBridge.send(ITEM_SOLD_BINDING, message);
     if (!sent) {
-      LOG.error(
-          "Failed to publish ItemSold event for item '{}' and avatar '{}'",
-          message.itemName(),
-          message.avatarId());
+      log.error(message, "Failed to publish ItemSold event", null);
     }
   }
 
