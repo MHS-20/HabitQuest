@@ -193,7 +193,7 @@ public class AvatarServiceImpl implements AvatarService {
             spell -> {
               avatar.learnSpell(spell);
               avatarRepository.save(avatar);
-              avatarObserver.notifyAvatarEvent(new NewSpellLearned(spell));
+              avatarObserver.notifyAvatarEvent(new NewSpellLearned(avatarId, spell));
             });
   }
 
