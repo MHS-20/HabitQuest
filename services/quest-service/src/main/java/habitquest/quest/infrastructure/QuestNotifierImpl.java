@@ -33,8 +33,8 @@ public class QuestNotifierImpl implements QuestNotifier {
   @Override
   public void notifyQuestCreated(QuestCreated event) {
     QuestCreatedMessage message =
-            new QuestCreatedMessage(
-                    event.quest().getId().value(), event.quest().getName(), Instant.now());
+        new QuestCreatedMessage(
+            event.quest().getId().value(), event.quest().getName(), Instant.now());
 
     log.info(message, "Publishing QuestCreated event");
     boolean sent = streamBridge.send(QUEST_CREATED_BINDING, message);
@@ -46,8 +46,8 @@ public class QuestNotifierImpl implements QuestNotifier {
   @Override
   public void notifyQuestCompleted(QuestCompleted event) {
     QuestCompletedMessage message =
-            new QuestCompletedMessage(
-                    event.quest().getId().value(), event.avatarId().value(), Instant.now());
+        new QuestCompletedMessage(
+            event.quest().getId().value(), event.avatarId().value(), Instant.now());
 
     log.info(message, "Publishing QuestCompleted event");
     boolean sent = streamBridge.send(QUEST_COMPLETED_BINDING, message);
@@ -70,8 +70,8 @@ public class QuestNotifierImpl implements QuestNotifier {
   @Override
   public void notifyQuestJoined(QuestJoined event) {
     QuestJoinedMessage message =
-            new QuestJoinedMessage(
-                    event.quest().getId().value(), event.avatarId().value(), Instant.now());
+        new QuestJoinedMessage(
+            event.quest().getId().value(), event.avatarId().value(), Instant.now());
 
     log.info(message, "Publishing QuestJoined event");
     boolean sent = streamBridge.send(QUEST_JOINED_BINDING, message);
@@ -83,8 +83,8 @@ public class QuestNotifierImpl implements QuestNotifier {
   @Override
   public void notifyQuestLeft(QuestLeft event) {
     QuestLeftMessage message =
-            new QuestLeftMessage(
-                    event.quest().getId().value(), event.avatarId().value(), Instant.now());
+        new QuestLeftMessage(
+            event.quest().getId().value(), event.avatarId().value(), Instant.now());
 
     log.info(message, "Publishing QuestLeft event");
     boolean sent = streamBridge.send(QUEST_LEFT_BINDING, message);
