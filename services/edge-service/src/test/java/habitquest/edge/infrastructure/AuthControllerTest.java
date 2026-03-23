@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import common.ddd.Id;
 import habitquest.edge.application.AuthService;
 import habitquest.edge.application.AuthService.AuthResponse;
+import habitquest.edge.application.EdgeLogger;
 import habitquest.edge.domain.User;
 import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
 import habitquest.edge.domain.UserExceptions.UserAlreadyExistsException;
@@ -40,6 +41,7 @@ class AuthControllerTest {
   @MockitoBean AvatarClient avatarClient;
   @MockitoBean AuthService authService;
   @MockitoBean JwtService jwtService;
+  @MockitoBean EdgeLogger log;
 
   @MockitoBean CircuitBreakerRegistry circuitBreakerRegistry;
   @MockitoBean RateLimiterRegistry rateLimiterRegistry;

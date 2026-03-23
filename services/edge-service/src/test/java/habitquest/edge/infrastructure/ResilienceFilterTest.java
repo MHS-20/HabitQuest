@@ -2,6 +2,7 @@ package habitquest.edge.infrastructure;
 
 import static org.mockito.Mockito.*;
 
+import habitquest.edge.application.EdgeLogger;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiter;
@@ -25,6 +26,7 @@ class ResilienceFilterTest {
 
   @Mock CircuitBreakerRegistry circuitBreakerRegistry;
   @Mock RateLimiterRegistry rateLimiterRegistry;
+  @Mock EdgeLogger log;
   @Mock HttpServletRequest request;
   @Mock HttpServletResponse response;
   @Mock FilterChain chain;
@@ -36,7 +38,7 @@ class ResilienceFilterTest {
 
   @BeforeEach
   void setUp() {
-    resilienceFilter = new ResilienceFilter(circuitBreakerRegistry, rateLimiterRegistry);
+    resilienceFilter = new ResilienceFilter(circuitBreakerRegistry, rateLimiterRegistry, log);
     defaultRateLimiter = RateLimiter.ofDefaults("test");
     defaultCircuitBreaker = CircuitBreaker.ofDefaults("test");
     when(rateLimiterRegistry.rateLimiter(anyString())).thenReturn(defaultRateLimiter);
