@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import common.ddd.Id;
+import habitquest.tracking.application.HabitLogger;
 import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Avatar;
@@ -41,6 +42,7 @@ public class HabitControllerIT {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private HabitService habitService;
+  @MockitoBean private HabitLogger log;
 
   private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
   private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
