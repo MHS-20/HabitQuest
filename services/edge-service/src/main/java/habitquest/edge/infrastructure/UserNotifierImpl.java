@@ -29,12 +29,14 @@ public class UserNotifierImpl implements UserNotifier {
         new UserRegisteredMessage(user.getId().value(), user.getEmail(), Instant.now());
 
     LOG.info(
-        "Publishing UserRegistered event: userId={}, email={}", message.userId(), message.email());
+        "Publishing UserRegistered event: userId={}, email={}",
+        message.avatarId(),
+        message.email());
     boolean sent = streamBridge.send(USER_REGISTERED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish UserRegistered event for userId {}", message.userId());
+      LOG.error("Failed to publish UserRegistered event for userId {}", message.avatarId());
     }
   }
 
-  public record UserRegisteredMessage(String userId, String email, Instant occurredOn) {}
+  public record UserRegisteredMessage(String avatarId, String email, Instant occurredOn) {}
 }
