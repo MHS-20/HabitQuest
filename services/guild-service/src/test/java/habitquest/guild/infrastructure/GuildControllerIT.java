@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
+import habitquest.guild.application.GuildLogger;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.*;
@@ -31,6 +32,7 @@ public class GuildControllerIT {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private GuildService guildService;
+  @MockitoBean private GuildLogger log;
 
   // ── Fixtures ──────────────────────────────────────────────────────────────────
 

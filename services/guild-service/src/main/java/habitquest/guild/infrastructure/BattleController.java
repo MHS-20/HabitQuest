@@ -6,6 +6,7 @@ import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.BattleNotFoundException;
 import habitquest.guild.application.BattleService;
+import habitquest.guild.application.GuildLogger;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.battle.Battle;
@@ -33,12 +34,17 @@ public class BattleController {
   private final BattleService battleService;
   private final GuildService guildService;
   private final AvatarClient avatarClient;
+  private final GuildLogger log;
 
   public BattleController(
-      BattleService battleService, GuildService guildService, AvatarClient avatarClient) {
+      BattleService battleService,
+      GuildService guildService,
+      AvatarClient avatarClient,
+      GuildLogger log) {
     this.battleService = battleService;
     this.guildService = guildService;
     this.avatarClient = avatarClient;
+    this.log = log;
   }
 
   private Id<Battle> idOfBattle(String id) {
@@ -53,23 +59,21 @@ public class BattleController {
     return new Id<>(id);
   }
 
-  // ─── Battle lifecycle ────────────────────────────────────────────────────────
   @PostMapping
   public ResponseEntity<EntityModel<BattleCreatedResponse>> createBattle(
       @RequestBody CreateBattleRequest request) {
-
     BossType bossType;
     try {
       bossType = BossType.valueOf(request.bossType().toUpperCase(Locale.getDefault()));
     } catch (IllegalArgumentException e) {
+      log.warn(request, "Invalid boss type: " + request.bossType());
       return ResponseEntity.badRequest().build();
     }
-
     if (!guildService.isLeader(
         idOfGuild(request.guildId()), idOfGuildMember(request.requesterId()))) {
+      log.warn(request, "Unauthorized battle creation attempt");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-
     String id =
         battleService
             .createBattle(
@@ -77,26 +81,27 @@ public class BattleController {
                 bossType,
                 guildService.getMembers(idOfGuild(request.guildId())).size())
             .value();
-
+    BattleCreatedResponse body = new BattleCreatedResponse(id);
+    log.info(body, "Battle created");
     EntityModel<BattleCreatedResponse> model =
         EntityModel.of(
-            new BattleCreatedResponse(id),
+            body,
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBattle(id)).withRel("battle"),
             linkTo(methodOn(BattleController.class).getBoss(id)).withRel("boss"),
             linkTo(methodOn(BattleController.class).getBattleStatus(id)).withRel("status"),
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"));
-
     return ResponseEntity.created(URI.create("/api/v1/battles/" + id)).body(model);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<EntityModel<BattleResponse>> getBattle(@PathVariable String id)
       throws BattleNotFoundException {
-
+    BattleResponse body = BattleResponse.from(battleService.getBattleById(idOfBattle(id)));
+    log.info(body, "Battle retrieved");
     EntityModel<BattleResponse> model =
         EntityModel.of(
-            BattleResponse.from(battleService.getBattleById(idOfBattle(id))),
+            body,
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBoss(id)).withRel("boss"),
             linkTo(methodOn(BattleController.class).getBossHealth(id)).withRel("bossHealth"),
@@ -104,7 +109,6 @@ public class BattleController {
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"),
             linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withRel("numOfTurns"),
             linkTo(methodOn(BattleController.class).dealDamage(id, null)).withRel("dealDamage"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -113,13 +117,14 @@ public class BattleController {
       @PathVariable String id, @RequestBody DeleteBattleRequest request) {
     if (!guildService.isLeader(
         idOfGuild(request.guildId()), idOfGuildMember(request.requesterId()))) {
+      log.warn(request, "Unauthorized battle deletion attempt");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     battleService.deleteBattle(idOfBattle(id));
+    log.info(new BattleCreatedResponse(id), "Battle deleted");
     return ResponseEntity.noContent().build();
   }
 
-  // ─── Query ──────────────────────────────────────────────────────────────────
   @GetMapping("/guild/{guildId}")
   public ResponseEntity<EntityModel<BattleResponse>> getBattleByGuild(@PathVariable String guildId)
       throws BattleNotFoundException {
@@ -129,9 +134,11 @@ public class BattleController {
             .orElseThrow(
                 () -> new BattleNotFoundException("No battle found for guild: " + guildId));
     String id = battle.getId().value();
+    BattleResponse body = BattleResponse.from(battle);
+    log.info(body, "Battle retrieved for guild: " + guildId);
     EntityModel<BattleResponse> model =
         EntityModel.of(
-            BattleResponse.from(battle),
+            body,
             linkTo(methodOn(BattleController.class).getBattleByGuild(guildId)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBattleStatus(id)).withRel("status"),
@@ -142,30 +149,28 @@ public class BattleController {
   @GetMapping("/guild/{guildId}/in-progress")
   public ResponseEntity<EntityModel<InProgressResponse>> hasBattleInProgress(
       @PathVariable String guildId) throws BattleNotFoundException {
-
     boolean inProgress = battleService.hasBattleInProgress(idOfGuild(guildId));
-
+    InProgressResponse body = new InProgressResponse(inProgress);
+    log.info(body, "Battle in-progress check for guild: " + guildId);
     EntityModel<InProgressResponse> model =
         EntityModel.of(
-            new InProgressResponse(inProgress),
+            body,
             linkTo(methodOn(BattleController.class).hasBattleInProgress(guildId)).withSelfRel(),
             linkTo(methodOn(BattleController.class).getBattleByGuild(guildId)).withRel("battle"));
-
     return ResponseEntity.ok(model);
   }
-
-  // ─── Boss info ───────────────────────────────────────────────────────────────
 
   @GetMapping("/{id}/boss")
   public ResponseEntity<EntityModel<BossResponse>> getBoss(@PathVariable String id)
       throws BattleNotFoundException {
+    BossResponse body = BossResponse.from(battleService.getBoss(idOfBattle(id)));
+    log.info(body, "Boss retrieved for battle: " + id);
     EntityModel<BossResponse> model =
         EntityModel.of(
-            BossResponse.from(battleService.getBoss(idOfBattle(id))),
+            body,
             linkTo(methodOn(BattleController.class).getBoss(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBossHealth(id)).withRel("bossHealth"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -173,29 +178,29 @@ public class BattleController {
   public ResponseEntity<EntityModel<BossHealthResponse>> getBossHealth(@PathVariable String id)
       throws BattleNotFoundException {
     int remaining = battleService.getBossRemainingHealth(idOfBattle(id)).remainingHealth().value();
+    BossHealthResponse body = new BossHealthResponse(remaining);
+    log.info(body, "Boss health retrieved for battle: " + id);
     EntityModel<BossHealthResponse> model =
         EntityModel.of(
-            new BossHealthResponse(remaining),
+            body,
             linkTo(methodOn(BattleController.class).getBossHealth(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).dealDamage(id, null)).withRel("dealDamage"));
-
     return ResponseEntity.ok(model);
   }
 
-  // ─── Turn management ────────────────────────────────────────────────────────
   @GetMapping("/{id}/turns/current")
   public ResponseEntity<EntityModel<TurnResponse>> getCurrentTurn(@PathVariable String id)
       throws BattleNotFoundException {
     Integer currentTurn = battleService.getCurrentTurn(idOfBattle(id));
-
+    TurnResponse body = new TurnResponse(currentTurn);
+    log.info(body, "Current turn retrieved for battle: " + id);
     EntityModel<TurnResponse> model =
         EntityModel.of(
-            new TurnResponse(currentTurn),
+            body,
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withRel("numOfTurns"));
-
     return ResponseEntity.ok(model);
   }
 
@@ -203,37 +208,35 @@ public class BattleController {
   public ResponseEntity<EntityModel<TurnResponse>> getNumOfTurns(@PathVariable String id)
       throws BattleNotFoundException {
     Integer numOfTurns = battleService.getNumOfTurns(idOfBattle(id));
-
+    TurnResponse body = new TurnResponse(numOfTurns);
+    log.info(body, "Total turns retrieved for battle: " + id);
     EntityModel<TurnResponse> model =
         EntityModel.of(
-            new TurnResponse(numOfTurns),
+            body,
             linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"));
-
     return ResponseEntity.ok(model);
   }
 
-  // ─── Combat ─────────────────────────────────────────────────────────────────
   @PostMapping("/{id}/damage")
   public ResponseEntity<Void> dealDamage(
       @PathVariable String id, @RequestBody DamageRequest request)
       throws BattleNotFoundException, GuildNotFoundException {
-
     if (request.attackerAvatarId() == null) {
+      log.warn(request, "Damage request missing attackerAvatarId");
       return ResponseEntity.badRequest().build();
     }
     if (!battleService.isAttackerTurn(
         idOfBattle(id), idOfGuildMember(request.attackerAvatarId()))) {
+      log.warn(request, "Not attacker's turn in battle: " + id);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-
-    // Passo 1: l'attaccante colpisce il boss
+    log.info(request, "Dealing damage in battle: " + id);
     BattleOutcome outcome =
         battleService.dealDamageOnBoss(
             idOfBattle(id), idOfGuildMember(request.attackerAvatarId()), request.damage());
 
-    // Passo 2: se il boss non è morto, il boss contrattacca l'attaccante
     if (outcome instanceof BattleOutcome.Ongoing) {
       boolean attackerDied =
           avatarClient.applyDamage(request.attackerAvatarId(), request.damage()).died();
@@ -244,23 +247,29 @@ public class BattleController {
       }
     }
 
-    // Passo 3: controllo dello stato
     switch (outcome) {
-      case BattleOutcome.Won(int exp, int money) ->
-          battleService
-              .getBattleById(idOfBattle(id))
-              .getMembers()
-              .forEach(
-                  m -> {
-                    avatarClient.grantExperience(m.value(), exp);
-                    avatarClient.earnMoney(m.value(), money);
-                  });
-      case BattleOutcome.Lost(int penalty) ->
-          battleService
-              .getBattleById(idOfBattle(id))
-              .getMembers()
-              .forEach(m -> avatarClient.applyPenalty(m.value(), penalty));
-      case BattleOutcome.Ongoing ignored -> battleService.nextTurn(idOfBattle(id));
+      case BattleOutcome.Won(int exp, int money) -> {
+        log.info(new BattleOutcomeLog(id, "WON", exp, money), "Battle won, distributing rewards");
+        battleService
+            .getBattleById(idOfBattle(id))
+            .getMembers()
+            .forEach(
+                m -> {
+                  avatarClient.grantExperience(m.value(), exp);
+                  avatarClient.earnMoney(m.value(), money);
+                });
+      }
+      case BattleOutcome.Lost(int penalty) -> {
+        log.info(new BattleOutcomeLog(id, "LOST", penalty, 0), "Battle lost, applying penalties");
+        battleService
+            .getBattleById(idOfBattle(id))
+            .getMembers()
+            .forEach(m -> avatarClient.applyPenalty(m.value(), penalty));
+      }
+      case BattleOutcome.Ongoing ignored -> {
+        log.info(new BattleCreatedResponse(id), "Battle ongoing, advancing turn");
+        battleService.nextTurn(idOfBattle(id));
+      }
     }
 
     return ResponseEntity.noContent().build();
@@ -269,49 +278,51 @@ public class BattleController {
   @GetMapping("/{id}/status")
   public ResponseEntity<EntityModel<BattleStatusResponse>> getBattleStatus(@PathVariable String id)
       throws BattleNotFoundException {
-
     BattleOutcome status = battleService.getBattleStatus(idOfBattle(id));
     boolean isOver = battleService.isBattleOver(idOfBattle(id));
     boolean isWon = battleService.isBattleWon(idOfBattle(id));
-
+    BattleStatusResponse body = new BattleStatusResponse(status, isOver, isWon);
+    log.info(body, "Battle status retrieved for battle: " + id);
     EntityModel<BattleStatusResponse> model =
         EntityModel.of(
-            new BattleStatusResponse(status, isOver, isWon),
+            body,
             linkTo(methodOn(BattleController.class).getBattleStatus(id)).withSelfRel(),
             selfLink(id),
             linkTo(methodOn(BattleController.class).getBossHealth(id)).withRel("bossHealth"),
             linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel("currentTurn"));
-
     return ResponseEntity.ok(model);
   }
 
-  // ─── Exception handling ──────────────────────────────────────────────────────
   @ExceptionHandler(BattleNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleBattleNotFound(BattleNotFoundException ex) {
+    log.warn(ex, "Battle not found");
     return ResponseEntity.notFound().build();
   }
 
   @ExceptionHandler(GuildNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleGuildNotFound(GuildNotFoundException ex) {
+    log.warn(ex, "Guild not found");
     return ResponseEntity.notFound().build();
   }
 
   @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
   public ResponseEntity<ErrorResponse> handleDomainError(RuntimeException ex) {
-    return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+    ErrorResponse error = new ErrorResponse(ex.getMessage());
+    log.warn(error, "Domain error");
+    return ResponseEntity.badRequest().body(error);
   }
 
   @ExceptionHandler(UnauthorizedGuildOperationException.class)
   public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedGuildOperationException ex) {
-    return ResponseEntity.status(403).body(new ErrorResponse(ex.getMessage()));
+    ErrorResponse error = new ErrorResponse(ex.getMessage());
+    log.warn(error, "Unauthorized guild operation");
+    return ResponseEntity.status(403).body(error);
   }
 
-  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
   private Link selfLink(String id) {
     return Link.of("/api/v1/battles/" + id).withSelfRel();
   }
 
-  // ─── Request / Response records ─────────────────────────────────────────────
   public record CreateBattleRequest(String guildId, String bossType, String requesterId) {}
 
   public record DeleteBattleRequest(String guildId, String requesterId) {}
@@ -329,4 +340,6 @@ public class BattleController {
   public record BattleStatusResponse(BattleOutcome status, boolean isOver, boolean isWon) {}
 
   public record ErrorResponse(String message) {}
+
+  private record BattleOutcomeLog(String battleId, String outcome, int primary, int secondary) {}
 }

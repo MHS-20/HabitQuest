@@ -1,5 +1,6 @@
 package habitquest.edge.infrastructure;
 
+import habitquest.edge.application.EdgeLogger;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -24,11 +25,15 @@ public class ResilienceFilter implements Filter {
 
   private final CircuitBreakerRegistry circuitBreakerRegistry;
   private final RateLimiterRegistry rateLimiterRegistry;
+  private final EdgeLogger log;
 
   public ResilienceFilter(
-      CircuitBreakerRegistry circuitBreakerRegistry, RateLimiterRegistry rateLimiterRegistry) {
+      CircuitBreakerRegistry circuitBreakerRegistry,
+      RateLimiterRegistry rateLimiterRegistry,
+      EdgeLogger log) {
     this.circuitBreakerRegistry = circuitBreakerRegistry;
     this.rateLimiterRegistry = rateLimiterRegistry;
+    this.log = log;
   }
 
   @Override
@@ -42,6 +47,8 @@ public class ResilienceFilter implements Filter {
 
     RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter("default");
     CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(serviceName);
+
+    log.info(new FilterRequest(uri, serviceName), "Incoming request");
 
     try {
       Runnable decorated =
@@ -59,8 +66,11 @@ public class ResilienceFilter implements Filter {
 
       decorated.run();
     } catch (RequestNotPermitted e) {
+      log.warn(new FilterRequest(uri, serviceName), "Rate limit exceeded");
       httpRes.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     } catch (CallNotPermittedException e) {
+      log.warn(
+          new FilterRequest(uri, serviceName), "Circuit breaker open for service: " + serviceName);
       httpRes.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
     }
   }
@@ -83,4 +93,6 @@ public class ResilienceFilter implements Filter {
     }
     return "default";
   }
+
+  public record FilterRequest(String uri, String serviceName) {}
 }

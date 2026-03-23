@@ -2,6 +2,7 @@ package habitquest.edge.infrastructure;
 
 import habitquest.edge.application.AuthService;
 import habitquest.edge.application.AuthService.AuthResponse;
+import habitquest.edge.application.EdgeLogger;
 import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
 import habitquest.edge.domain.UserExceptions.UserAlreadyExistsException;
 import habitquest.edge.domain.UserExceptions.UserNotFoundException;
@@ -19,52 +20,61 @@ public class AuthController {
 
   private final AuthService authService;
   private final AvatarClient avatarClient;
+  private final EdgeLogger log;
 
-  public AuthController(AuthService authService, AvatarClient avatarClient) {
+  public AuthController(AuthService authService, AvatarClient avatarClient, EdgeLogger log) {
     this.authService = authService;
     this.avatarClient = avatarClient;
+    this.log = log;
   }
 
-  // ── POST /auth/register ───────────────────────────────────────────────────
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     try {
       AuthResponse response =
           authService.register(request.name, request.email(), request.password());
       avatarClient.createAvatar(response.userId().value(), request.name());
-
+      log.info(response, "User registered successfully");
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (UserAlreadyExistsException e) {
+      log.warn(e, "Registration failed: user already exists");
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (AvatarCreationException e) {
+      log.error(e, "Registration failed: avatar creation error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
-  // ── POST /auth/login ──────────────────────────────────────────────────────
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
     try {
-      return ResponseEntity.ok(authService.login(request.email(), request.password()));
+      AuthResponse response = authService.login(request.email(), request.password());
+      log.info(response, "User logged in successfully");
+      return ResponseEntity.ok(response);
     } catch (UserNotFoundException | InvalidCredentialsException e) {
+      log.warn(e, "Login failed: invalid credentials or user not found");
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
   }
 
-  // ── POST /auth/validate ───────────────────────────────────────────────────
   @PostMapping("/validate")
   public ResponseEntity<ValidateResponse> validate(
       @RequestHeader("Authorization") String authHeader) {
     String token = extractBearer(authHeader);
     if (token == null) {
+      log.warn(
+          new ValidateResponse(false),
+          "Token validation failed: missing or malformed Bearer token");
       return ResponseEntity.badRequest().build();
     }
-    return authService.validateToken(token)
-        ? ResponseEntity.ok(new ValidateResponse(true))
-        : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ValidateResponse(false));
+    ValidateResponse response =
+        authService.validateToken(token) ? new ValidateResponse(true) : new ValidateResponse(false);
+    log.info(response, "Token validation result");
+    return response.valid()
+        ? ResponseEntity.ok(response)
+        : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
   }
 
-  // ── helpers ───────────────────────────────────────────────────────────────
   private String extractBearer(String header) {
     if (header != null && header.startsWith("Bearer ")) {
       return header.substring(7);
@@ -72,7 +82,6 @@ public class AuthController {
     return null;
   }
 
-  // ── request / response records ────────────────────────────────────────────
   public record RegisterRequest(
       @NotBlank String name,
       @Email @NotBlank String email,

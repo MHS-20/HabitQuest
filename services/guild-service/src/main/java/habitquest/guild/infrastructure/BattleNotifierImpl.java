@@ -2,12 +2,11 @@ package habitquest.guild.infrastructure;
 
 import common.hexagonal.Adapter;
 import habitquest.guild.application.BattleNotifier;
+import habitquest.guild.application.GuildLogger;
 import habitquest.guild.domain.events.battleEvents.BattleLost;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
@@ -15,29 +14,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class BattleNotifierImpl implements BattleNotifier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(BattleNotifierImpl.class);
   static final String BATTLE_STARTED_BINDING = "guild.battle-started";
   static final String BATTLE_WON_BINDING = "guild.battle-won";
   static final String BATTLE_LOST_BINDING = "guild.battle-lost";
 
   private final StreamBridge streamBridge;
+  private final GuildLogger log;
 
-  public BattleNotifierImpl(StreamBridge streamBridge) {
+  public BattleNotifierImpl(StreamBridge streamBridge, GuildLogger log) {
     this.streamBridge = streamBridge;
+    this.log = log;
   }
 
   @Override
   public void notifyBattleStarted(BattleStarted event) {
     BattleStartedMessage message =
         new BattleStartedMessage(event.battleId().value(), event.guildId().value(), Instant.now());
-
-    LOG.info(
-        "Publishing BattleStarted event: battleId={}, guildId={}",
-        message.battleId(),
-        message.guildId());
+    log.info(message, "Publishing BattleStarted event");
     boolean sent = streamBridge.send(BATTLE_STARTED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish BattleStarted event for battleId {}", message.battleId());
+      log.error(message, "Failed to publish BattleStarted event", null);
     }
   }
 
@@ -45,14 +41,10 @@ public class BattleNotifierImpl implements BattleNotifier {
   public void notifyBattleWon(BattleWon event) {
     BattleWonMessage message =
         new BattleWonMessage(event.battleId().value(), event.guildId().value(), Instant.now());
-
-    LOG.info(
-        "Publishing BattleWon event: battleId={}, guildId={}",
-        message.battleId(),
-        message.guildId());
+    log.info(message, "Publishing BattleWon event");
     boolean sent = streamBridge.send(BATTLE_WON_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish BattleWon event for battleId {}", message.battleId());
+      log.error(message, "Failed to publish BattleWon event", null);
     }
   }
 
@@ -60,14 +52,10 @@ public class BattleNotifierImpl implements BattleNotifier {
   public void notifyBattleLost(BattleLost event) {
     BattleLostMessage message =
         new BattleLostMessage(event.battleId().value(), event.guildId().value(), Instant.now());
-
-    LOG.info(
-        "Publishing BattleLost event: battleId={}, guildId={}",
-        message.battleId(),
-        message.guildId());
+    log.info(message, "Publishing BattleLost event");
     boolean sent = streamBridge.send(BATTLE_LOST_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish BattleLost event for battleId {}", message.battleId());
+      log.error(message, "Failed to publish BattleLost event", null);
     }
   }
 
