@@ -18,10 +18,18 @@ public class MarketplaceObserverImpl implements MarketplaceObserver {
   @Override
   public void notifyMarketplaceEvent(MarketplaceEvent event) {
     switch (event) {
-      case ItemBought e -> marketplaceNotifier.notifyItemBought(e);
-      case ItemSold e -> marketplaceNotifier.notifyItemSold(e);
+      case ItemBought e -> handleItemBought(e);
+      case ItemSold e -> handleItemSold(e);
       default ->
           throw new IllegalArgumentException("Unknown event type: " + event.getClass().getName());
     }
+  }
+
+  public void handleItemBought(ItemBought e) {
+    marketplaceNotifier.notifyItemBought(e);
+  }
+
+  public void handleItemSold(ItemSold e) {
+    marketplaceNotifier.notifyItemSold(e);
   }
 }

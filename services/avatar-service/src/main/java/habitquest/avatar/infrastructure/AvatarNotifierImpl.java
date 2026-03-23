@@ -1,14 +1,13 @@
 package habitquest.avatar.infrastructure;
 
 import common.hexagonal.Adapter;
+import habitquest.avatar.application.AvatarLogger;
 import habitquest.avatar.application.AvatarNotifier;
 import habitquest.avatar.domain.events.Dead;
 import habitquest.avatar.domain.events.LevelUpped;
 import habitquest.avatar.domain.events.NewSpellLearned;
 import habitquest.avatar.domain.events.SkillPointAssigned;
 import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
@@ -16,17 +15,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class AvatarNotifierImpl implements AvatarNotifier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AvatarNotifierImpl.class);
-
   static final String LEVEL_UPPED_BINDING = "avatar.level-upped";
   static final String DEAD_BINDING = "avatar.dead";
   static final String SKILL_POINT_BINDING = "avatar.skill-point-assigned";
   static final String NEW_SPELL_BINDING = "avatar.new-spell-learned";
 
   private final StreamBridge streamBridge;
+  private final AvatarLogger log;
 
-  public AvatarNotifierImpl(StreamBridge streamBridge) {
+  public AvatarNotifierImpl(StreamBridge streamBridge, AvatarLogger log) {
     this.streamBridge = streamBridge;
+    this.log = log;
   }
 
   @Override
@@ -35,10 +34,10 @@ public class AvatarNotifierImpl implements AvatarNotifier {
         new LevelUppedMessage(
             event.avatarId().value(), event.newLevel().levelNumber(), Instant.now());
 
-    LOG.info("Publishing LevelUpped event: newLevel={}", message.newLevel());
+    log.info(message, "Publishing LevelUpped event");
     boolean sent = streamBridge.send(LEVEL_UPPED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish LevelUpped event for level {}", message.newLevel());
+      log.error(message, "Failed to publish LevelUpped event", null);
     }
   }
 
@@ -46,10 +45,10 @@ public class AvatarNotifierImpl implements AvatarNotifier {
   public void notifyDead(Dead event) {
     DeadMessage message = new DeadMessage(event.avatarId().value(), Instant.now());
 
-    LOG.info("Publishing Dead event: avatarId={}", message.avatarId());
+    log.info(message, "Publishing Dead event");
     boolean sent = streamBridge.send(DEAD_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish Dead event for avatarId {}", message.avatarId());
+      log.error(message, "Failed to publish Dead event", null);
     }
   }
 
@@ -61,13 +60,10 @@ public class AvatarNotifierImpl implements AvatarNotifier {
             event.stat().getClass().getSimpleName(),
             event.stat().value(),
             Instant.now());
-    LOG.info(
-        "Publishing SkillPointAssigned event: stat={}, newValue={}",
-        message.statType(),
-        message.newValue());
+    log.info(message, "Publishing SkillPointAssigned event");
     boolean sent = streamBridge.send(SKILL_POINT_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish SkillPointAssigned event for stat {}", message.statType());
+      log.error(message, "Failed to publish SkillPointAssigned event", null);
     }
   }
 
@@ -79,10 +75,10 @@ public class AvatarNotifierImpl implements AvatarNotifier {
             event.spell().name(),
             event.spell().getDescription(),
             Instant.now());
-    LOG.info("Publishing NewSpellLearned event: spell={}", message.spellName());
+    log.info(message, "Publishing NewSpellLearned event");
     boolean sent = streamBridge.send(NEW_SPELL_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish NewSpellLearned event for spell {}", message.spellName());
+      log.error(message, "Failed to publish NewSpellLearned event", null);
     }
   }
 
