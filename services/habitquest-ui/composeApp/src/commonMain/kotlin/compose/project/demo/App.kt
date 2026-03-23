@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
 // Pagine disponibili nella nav bar
 enum class AppPage(val label: String, val emoji: String) {
@@ -17,25 +18,105 @@ enum class AppPage(val label: String, val emoji: String) {
     Achievements("Traguardi", "⭐"),
 }
 
+private enum class AuthRoute {
+    Login,
+    Register,
+    Main,
+}
+
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        var isLoggedIn by remember { mutableStateOf(false) }
+        val authRepository = remember { AuthRepository() }
+        val scope = rememberCoroutineScope()
 
-        if (!isLoggedIn) {
-            LoginScreen(onLoginSuccess = { isLoggedIn = true })
-        } else {
-            MainScaffold()
+        var authRoute by remember { mutableStateOf(AuthRoute.Login) }
+        var authLoading by remember { mutableStateOf(false) }
+        var authError by remember { mutableStateOf<String?>(null) }
+        var authToken by remember { mutableStateOf<String?>(null) }
+
+        when (authRoute) {
+            AuthRoute.Login -> LoginScreen(
+                isLoading = authLoading,
+                errorMessage = authError,
+                onLogin = { email, password ->
+                    scope.launch {
+                        authLoading = true
+                        authError = null
+                        when (val result = authRepository.login(email, password)) {
+                            is AuthResult.Success -> {
+                                authToken = result.token
+                                authRoute = AuthRoute.Main
+                            }
+
+                            is AuthResult.Error -> {
+                                authError = result.message
+                            }
+                        }
+                        authLoading = false
+                    }
+                },
+                onNavigateRegister = {
+                    authError = null
+                    authRoute = AuthRoute.Register
+                }
+            )
+
+            AuthRoute.Register -> RegisterScreen(
+                isLoading = authLoading,
+                errorMessage = authError,
+                onRegister = { name, email, password ->
+                    scope.launch {
+                        authLoading = true
+                        authError = null
+                        when (val result = authRepository.register(name, email, password)) {
+                            is AuthResult.Success -> {
+                                authToken = result.token
+                                authRoute = AuthRoute.Main
+                            }
+
+                            is AuthResult.Error -> {
+                                authError = result.message
+                            }
+                        }
+                        authLoading = false
+                    }
+                },
+                onNavigateLogin = {
+                    authError = null
+                    authRoute = AuthRoute.Login
+                }
+            )
+
+            AuthRoute.Main -> MainScaffold(
+                onLogout = {
+                    authToken = null
+                    authError = null
+                    authRoute = AuthRoute.Login
+                },
+                token = authToken.orEmpty()
+            )
         }
     }
 }
 
 @Composable
-fun MainScaffold() {
+@OptIn(ExperimentalMaterial3Api::class)
+fun MainScaffold(onLogout: () -> Unit, token: String) {
     var selectedPage by remember { mutableStateOf(AppPage.Dashboard) }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("HabitQuest") },
+                actions = {
+                    TextButton(onClick = onLogout) {
+                        Text("Logout")
+                    }
+                }
+            )
+        },
         bottomBar = {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -63,7 +144,7 @@ fun MainScaffold() {
                 .padding(innerPadding)
         ) {
             when (selectedPage) {
-                AppPage.Dashboard -> DashboardScreen()
+                AppPage.Dashboard -> DashboardScreen(token)
                 AppPage.Character -> CharacterScreen()
                 AppPage.Achievements -> AchievementsScreen()
             }
@@ -72,7 +153,7 @@ fun MainScaffold() {
 }
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(token: String) {
     var showContent by remember { mutableStateOf(true) }
     val stats = remember { StatsState() }
 
@@ -85,6 +166,13 @@ fun DashboardScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text("RPG Dashboard", style = MaterialTheme.typography.headlineSmall)
+        if (token.isNotBlank()) {
+            Text(
+                text = "Sessione attiva",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
         Spacer(Modifier.height(12.dp))
 
         Button(onClick = { showContent = !showContent }) {

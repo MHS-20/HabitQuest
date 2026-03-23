@@ -16,14 +16,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LoginScreen(
+fun RegisterScreen(
     isLoading: Boolean,
     errorMessage: String?,
-    onLogin: (email: String, password: String) -> Unit,
-    onNavigateRegister: () -> Unit,
+    onRegister: (name: String, email: String, password: String) -> Unit,
+    onNavigateLogin: () -> Unit,
 ) {
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var localError by remember { mutableStateOf<String?>(null) }
 
@@ -36,7 +38,7 @@ fun LoginScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .widthIn(max = 480.dp),
+                .widthIn(max = 520.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -50,24 +52,25 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header
                 Text(
-                    text = "⚔️ HabitQuest",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "Accedi con il tuo account",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = "🛡️ Crea il tuo account",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        localError = null
+                    },
+                    label = { Text("Nome") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
 
-                // Email field
                 OutlinedTextField(
                     value = email,
                     onValueChange = {
@@ -75,18 +78,12 @@ fun LoginScreen(
                         localError = null
                     },
                     label = { Text("Email") },
-                    leadingIcon = { Text("👤", modifier = Modifier.padding(start = 4.dp)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
+                    shape = RoundedCornerShape(12.dp)
                 )
 
-                // Password field
                 OutlinedTextField(
                     value = password,
                     onValueChange = {
@@ -94,28 +91,32 @@ fun LoginScreen(
                         localError = null
                     },
                     label = { Text("Password") },
-                    leadingIcon = { Text("🔒", modifier = Modifier.padding(start = 4.dp)) },
-                    trailingIcon = {
-                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Text(
-                                text = if (passwordVisible) "Nascondi" else "Mostra",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        localError = null
                     },
+                    label = { Text("Conferma password") },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
+                    trailingIcon = {
+                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Text(if (passwordVisible) "Nascondi" else "Mostra")
+                        }
+                    }
                 )
 
-                // Error message
                 val displayedError = localError ?: errorMessage
                 if (displayedError != null) {
                     Text(
@@ -125,74 +126,45 @@ fun LoginScreen(
                     )
                 }
 
-                Spacer(Modifier.height(4.dp))
-
-                // Login button
                 Button(
                     onClick = {
                         when {
+                            name.isBlank() -> localError = "Inserisci il tuo nome"
                             email.isBlank() -> localError = "Inserisci la tua email"
                             !email.contains("@") -> localError = "Inserisci una email valida"
-                            password.isBlank() -> localError = "Inserisci la password"
-                            else -> onLogin(email.trim(), password)
+                            password.length < 8 -> localError = "La password deve avere almeno 8 caratteri"
+                            confirmPassword != password -> localError = "Le password non coincidono"
+                            else -> onRegister(name.trim(), email.trim(), password)
                         }
                     },
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(20.dp),
                             color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text(
-                            text = "Accedi",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Text("Registrati", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
-                // Divider
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f))
-                    Text(
-                        text = "  oppure  ",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    HorizontalDivider(modifier = Modifier.weight(1f))
-                }
-
-                // Register button
                 OutlinedButton(
-                    onClick = onNavigateRegister,
+                    onClick = onNavigateLogin,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = "Crea un account",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text("Hai gia un account? Accedi")
                 }
             }
         }
     }
 }
+
