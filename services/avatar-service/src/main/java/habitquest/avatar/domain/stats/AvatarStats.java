@@ -1,15 +1,16 @@
 package habitquest.avatar.domain.stats;
 
-import common.ddd.Aggregate;
+import common.ddd.Entity;
+import common.ddd.Id;
 
-public class AvatarStats implements Aggregate<String> {
+public class AvatarStats implements Entity<Id<AvatarStats>> {
 
-  private String id;
+  private Id<AvatarStats> id;
   private Strength strength;
   private Defense defense;
   private Intelligence intelligence;
 
-  public AvatarStats(String id, Integer strength, Integer defense, Integer intelligence) {
+  public AvatarStats(Id<AvatarStats> id, Integer strength, Integer defense, Integer intelligence) {
     this.id = id;
     this.strength = new Strength(strength);
     this.defense = new Defense(defense);
@@ -17,7 +18,7 @@ public class AvatarStats implements Aggregate<String> {
   }
 
   @Override
-  public String getId() {
+  public Id<AvatarStats> getId() {
     return this.id;
   }
 

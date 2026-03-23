@@ -6,7 +6,21 @@ spring:
     name: notification-service
   config:
     import: ""
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
   cloud:
+    function:
+      definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;avatarNewSpellLearned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
     config:
       enabled: false
       uri: http://localhost:8888
@@ -18,19 +32,93 @@ spring:
         initial-interval: 1000
         max-interval: 2000
         multiplier: 1.1
-    # function:
-    #   definition: pack|label
+
     stream:
       bindings:
-        packlabel-in-0:
-          destination: payment-completed
-          group: ${spring.application.name}
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: user
-    password: password
-    connection-timeout: 5s
+        avatarLevelUpped-in-0:
+          destination: avatar.level-upped
+          group: notification-service
+        avatarDead-in-0:
+          destination: avatar.dead
+          group: notification-service
+        avatarSkillPointAssigned-in-0:
+          destination: avatar.skill-point-assigned
+          group: notification-service
+        avatarNewSpellLearned-in-0:
+          destination: avatar.new-spell-learned
+
+        guildBattleStarted-in-0:
+          destination: guild.battle-started
+          group: notification-service
+        guildBattleWon-in-0:
+          destination: guild.battle-won
+          group: notification-service
+        guildBattleLost-in-0:
+          destination: guild.battle-lost
+          group: notification-service
+
+        guildCreated-in-0:
+          destination: guild.created
+          group: notification-service
+        guildDeleted-in-0:
+          destination: guild.deleted
+          group: notification-service
+        guildJoined-in-0:
+          destination: guild.joined
+          group: notification-service
+        guildLeft-in-0:
+          destination: guild.left
+          group: notification-service
+        guildRemoved-in-0:
+          destination: guild.removed
+          group: notification-service
+        guildRoleAssigned-in-0:
+          destination: guild.role-assigned
+          group: notification-service
+        guildInviteSent-in-0:
+          destination: guild.invite-sent
+          group: notification-service
+
+        marketplaceItemBought-in-0:
+          destination: marketplace.item-bought
+          group: notification-service
+        marketplaceItemSold-in-0:
+          destination: marketplace.item-sold
+          group: notification-service
+
+        questCreated-in-0:
+          destination: quest.created
+          group: notification-service
+        questCompleted-in-0:
+          destination: quest.completed
+          group: notification-service
+        questNotCompleted-in-0:
+          destination: quest.not-completed
+          group: notification-service
+        questJoined-in-0:
+          destination: quest.joined
+          group: notification-service
+        questLeft-in-0:
+          destination: quest.left
+          group: notification-service
+
+        habitDeleted-in-0:
+          destination: habit.deleted
+          group: notification-service
+        habitAttended-in-0:
+          destination: habit.attended
+          group: notification-service
+        habitNotAttended-in-0:
+          destination: habit.not-attended
+          group: notification-service
+
+        userRegistered-in-0:
+          destination: user.registered
+          group: notification-service
+
+      kafka:
+        binder:
+          brokers: localhost:9092
 
 logging:
   pattern:

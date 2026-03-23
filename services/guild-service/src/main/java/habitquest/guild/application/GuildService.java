@@ -1,33 +1,43 @@
 package habitquest.guild.application;
 
+import common.ddd.Id;
 import common.hexagonal.InBoundPort;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
+import habitquest.guild.domain.guild.Invite;
 import java.util.List;
 
 @InBoundPort
 public interface GuildService {
-  String createGuild(String name, String creatorAvatarId, String creatorNickname);
+  // Primary API using typed Ids
+  Id<Guild> createGuild(String name, Id<GuildMember> creatorAvatarId, String creatorNickname);
 
-  Guild getGuild(String guildId) throws GuildNotFoundException;
+  Guild getGuild(Id<Guild> guildId) throws GuildNotFoundException;
 
-  void updateGuild(String guildId, Guild request) throws GuildNotFoundException;
+  void deleteGuild(Id<Guild> guildId) throws GuildNotFoundException;
 
-  void deleteGuild(String guildId) throws GuildNotFoundException;
+  List<GuildMember> getMembers(Id<Guild> guildId) throws GuildNotFoundException;
 
-  List<GuildMember> getMembers(String guildId) throws GuildNotFoundException;
+  boolean isLeader(Id<Guild> guildId, Id<GuildMember> memberId) throws GuildNotFoundException;
 
-  void leaveGuild(String guildId, String memberId) throws GuildNotFoundException;
-
-  void addMember(String guildId, GuildMember member) throws GuildNotFoundException;
-
-  void removeMember(String guildId, String memberId) throws GuildNotFoundException;
-
-  void promoteMember(String guildId, String memberId, GuildRole newRole)
+  void sendInvite(Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> targetAvatarId)
       throws GuildNotFoundException;
 
-  Integer getGlobalRank(String guildId) throws GuildNotFoundException;
+  void acceptInvite(
+      Id<Guild> guildId, Id<Invite> inviteId, Id<GuildMember> avatarId, String nickname)
+      throws GuildNotFoundException;
+
+  void leaveGuild(Id<Guild> guildId, Id<GuildMember> memberId) throws GuildNotFoundException;
+
+  void removeMember(Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> memberId)
+      throws GuildNotFoundException;
+
+  void promoteMember(
+      Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> memberId, GuildRole newRole)
+      throws GuildNotFoundException;
+
+  Integer getGlobalRank(Id<Guild> guildId) throws GuildNotFoundException;
 
   List<Guild> getGuildLeaderboard();
 }

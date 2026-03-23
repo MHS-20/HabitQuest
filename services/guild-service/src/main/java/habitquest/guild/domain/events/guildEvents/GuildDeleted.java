@@ -1,3 +1,10 @@
 package habitquest.guild.domain.events.guildEvents;
 
-public record GuildDeleted(String guildId) implements GuildEvent {}
+import common.ddd.Id;
+import habitquest.guild.domain.guild.Guild;
+
+public record GuildDeleted(Id<Guild> guildId) implements GuildEvent {
+  public GuildDeleted(String guildId) {
+    this(new Id<>(guildId));
+  }
+}

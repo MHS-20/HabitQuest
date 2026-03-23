@@ -1,3 +1,3 @@
 package habitquest.quest.domain;
 
-public record MoneyReward() implements Reward {}
+public record MoneyReward(Integer value) implements Reward {}

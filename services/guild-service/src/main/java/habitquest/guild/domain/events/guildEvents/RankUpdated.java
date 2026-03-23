@@ -1,3 +1,6 @@
 package habitquest.guild.domain.events.guildEvents;
 
-public record RankUpdated(String id) implements GuildEvent {}
+import common.ddd.Id;
+import habitquest.guild.domain.guild.Guild;
+
+public record RankUpdated(Id<Guild> guildId) implements GuildEvent {}

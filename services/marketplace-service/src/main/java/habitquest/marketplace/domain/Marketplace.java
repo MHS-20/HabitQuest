@@ -1,26 +1,30 @@
 package habitquest.marketplace.domain;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-public interface Marketplace extends Aggregate<String> {
-  List<Item> getItems();
+public interface Marketplace extends Aggregate<Id<Marketplace>> {
+  List<Item> getCatalogItems();
 
-  List<Armor> getArmors();
+  List<Item> getAvailableItemsByType(ItemType type);
 
-  List<Weapon> getWeapons();
+  List<Item> getAllAvailableItems();
 
-  List<Potion> getPotions();
+  Optional<Item> getAvailableItem(String itemName);
 
-  List<HealthPotion> getHealthPotions();
+  List<Item> getSoldItems();
 
-  List<ManaPotion> getManaPotions();
+  Set<String> getSoldItemNames();
 
-  Optional<Item> getItem(String itemName);
+  Optional<Item> getSoldItem(String itemName);
 
   Money buyItem(String itemName);
 
   Money sellItem(String itemName);
+
+  Id<Avatar> getAvatarId();
 }

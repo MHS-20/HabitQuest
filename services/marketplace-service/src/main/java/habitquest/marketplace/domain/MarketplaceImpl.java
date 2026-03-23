@@ -1,104 +1,99 @@
 package habitquest.marketplace.domain;
 
+import common.ddd.Id;
 import habitquest.marketplace.domain.items.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MarketplaceImpl implements Marketplace {
-  private final String id;
-  private List<Item> items;
-  private List<Armor> armors;
-  private List<Weapon> weapons;
-  private List<Potion> potions;
-  private List<HealthPotion> healthPotions;
-  private List<ManaPotion> manaPotions;
+  private final Id<Marketplace> id;
+  private final Id<Avatar> avatarId;
+  private final ItemCatalog catalog;
+  private final Set<String> soldItems;
 
-  public MarketplaceImpl(String id) {
-    this(
-        id,
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>());
+  public MarketplaceImpl(Id<Marketplace> id, Id<Avatar> avatarId, ItemCatalog catalog) {
+    this(id, avatarId, catalog, new HashSet<>());
   }
 
   public MarketplaceImpl(
-      String id,
-      List<Item> items,
-      List<Armor> armors,
-      List<Weapon> weapons,
-      List<Potion> potions,
-      List<HealthPotion> healthPotions,
-      List<ManaPotion> manaPotions) {
+      Id<Marketplace> id, Id<Avatar> avatarId, ItemCatalog catalog, Set<String> soldItems) {
     this.id = id;
-    this.items = items;
-    this.armors = armors;
-    this.weapons = weapons;
-    this.potions = potions;
-    this.healthPotions = healthPotions;
-    this.manaPotions = manaPotions;
+    this.avatarId = avatarId;
+    this.soldItems = new HashSet<>(soldItems);
+    this.catalog = catalog;
   }
 
   @Override
-  public String getId() {
+  public Id<Marketplace> getId() {
     return id;
   }
 
   @Override
-  public List<Weapon> getWeapons() {
-    return weapons;
+  public Id<Avatar> getAvatarId() {
+    return avatarId;
+  }
+
+  public List<Item> getCatalogItems() {
+    return this.catalog.getAllItems();
   }
 
   @Override
-  public List<Item> getItems() {
-    return items;
+  public List<Item> getAllAvailableItems() {
+    return catalog.getAllItems().stream().filter(item -> !soldItems.contains(item.name())).toList();
   }
 
   @Override
-  public List<Armor> getArmors() {
-    return armors;
+  public List<Item> getAvailableItemsByType(ItemType type) {
+    return catalog.getItemsByType(type).stream()
+        .filter(item -> !soldItems.contains(item.name()))
+        .toList();
   }
 
   @Override
-  public List<HealthPotion> getHealthPotions() {
-    return healthPotions;
+  public List<Item> getSoldItems() {
+    return soldItems.stream()
+        .map(catalog::getItem)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
   }
 
   @Override
-  public List<ManaPotion> getManaPotions() {
-    return manaPotions;
+  public Set<String> getSoldItemNames() {
+    return soldItems;
   }
 
   @Override
-  public List<Potion> getPotions() {
-    return potions;
+  public Optional<Item> getAvailableItem(String itemName) {
+    if (!catalog.contains(itemName) || soldItems.contains(itemName)) {
+      return Optional.empty();
+    }
+    return catalog.getItem(itemName);
   }
 
   @Override
-  public Optional<Item> getItem(String itemName) {
-    return items.stream().filter(item -> item.name().equals(itemName)).findFirst();
+  public Optional<Item> getSoldItem(String itemName) {
+    if (!soldItems.contains(itemName)) {
+      return Optional.empty();
+    }
+    return catalog.getItem(itemName);
   }
 
   @Override
   public Money buyItem(String itemName) {
-    Optional<Item> itemOpt = getItem(itemName);
-    if (itemOpt.isEmpty()) {
-      throw new IllegalArgumentException("Item not found: " + itemName);
+    Item item = catalog.getItem(itemName).orElseThrow(() -> new ItemNotFoundException(itemName));
+    if (soldItems.contains(itemName)) {
+      throw new IllegalStateException("Item already bought: " + itemName);
     }
-    Item item = itemOpt.get();
+    soldItems.add(itemName);
     return item.price();
   }
 
   @Override
   public Money sellItem(String itemName) {
-    Optional<Item> itemOpt = getItem(itemName);
-    if (itemOpt.isEmpty()) {
-      throw new IllegalArgumentException("Item not found: " + itemName);
+    Item item = catalog.getItem(itemName).orElseThrow(() -> new ItemNotFoundException(itemName));
+    if (!soldItems.remove(itemName)) {
+      throw new IllegalArgumentException("Item not sold: " + itemName);
     }
-    Item item = itemOpt.get();
     return item.price();
   }
 }

@@ -1,5 +1,6 @@
 package habitquest.tracking.infrastructure;
 
+import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitRepository;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class InMemoryHabitRepository implements HabitRepository {
 
-  private final Map<String, Habit> store = new HashMap<>();
+  private final Map<Id<Habit>, Habit> store = new HashMap<>();
 
   @Override
   public Habit save(Habit habit) {
@@ -23,14 +24,14 @@ public class InMemoryHabitRepository implements HabitRepository {
   }
 
   @Override
-  public Optional<Habit> findById(String id) {
+  public Optional<Habit> findById(Id<Habit> id) {
     return Optional.ofNullable(store.get(id));
   }
 
   @Override
-  public void deleteById(String id) {
+  public void deleteById(Id<Habit> id) {
     if (!store.containsKey(id)) {
-      throw new HabitNotFoundException(id);
+      throw new HabitNotFoundException(id.value());
     }
     store.remove(id);
   }

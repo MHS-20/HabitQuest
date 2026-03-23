@@ -1,7 +1,9 @@
 package habitquest.quest.application;
 
+import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.quest.domain.Habit;
+import habitquest.quest.domain.MoneyReward;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
 import habitquest.quest.domain.events.QuestCreated;
@@ -17,55 +19,58 @@ public class QuestServiceImpl implements QuestService {
 
   private final QuestRepository questRepository;
   private final QuestObserver questObserver;
+  private final QuestFactory questFactory;
 
-  public QuestServiceImpl(QuestRepository questRepository, QuestObserver questObserver) {
+  public QuestServiceImpl(
+      QuestRepository questRepository, QuestObserver questObserver, QuestFactory questFactory) {
     this.questRepository = questRepository;
     this.questObserver = questObserver;
+    this.questFactory = questFactory;
   }
 
   @Override
   public Quest createQuest(String name) {
-    Quest quest = QuestFactory.createQuest(name);
+    Quest quest = questFactory.createQuest(name);
     questRepository.save(quest);
     questObserver.notifyQuestEvent(new QuestCreated(quest));
     return quest;
   }
 
   @Override
-  public Quest getQuest(String id) throws QuestNotFoundException {
+  public Quest getQuest(Id<Quest> id) throws QuestNotFoundException {
     return questRepository.findById(id);
   }
 
   @Override
-  public Quest updateQuest(String id, Quest quest) throws QuestNotFoundException {
+  public Quest updateQuest(Id<Quest> id, Quest quest) throws QuestNotFoundException {
     questRepository.findById(id);
     return questRepository.save(quest);
   }
 
   @Override
-  public void deleteQuest(String id) throws QuestNotFoundException {
+  public void deleteQuest(Id<Quest> id) throws QuestNotFoundException {
     questRepository.deleteById(id);
   }
 
   // region getters
 
   @Override
-  public String getName(String questId) throws QuestNotFoundException {
+  public String getName(Id<Quest> questId) throws QuestNotFoundException {
     return questRepository.findById(questId).getName();
   }
 
   @Override
-  public Duration getDuration(String questId) throws QuestNotFoundException {
+  public Duration getDuration(Id<Quest> questId) throws QuestNotFoundException {
     return questRepository.findById(questId).getDuration();
   }
 
   @Override
-  public Reward getReward(String questId) throws QuestNotFoundException {
+  public Reward getReward(Id<Quest> questId) throws QuestNotFoundException {
     return questRepository.findById(questId).getReward();
   }
 
   @Override
-  public List<Habit> getHabits(String questId) throws QuestNotFoundException {
+  public List<Habit> getHabits(Id<Quest> questId) throws QuestNotFoundException {
     return questRepository.findById(questId).getHabits();
   }
 
@@ -74,35 +79,35 @@ public class QuestServiceImpl implements QuestService {
   // region updaters
 
   @Override
-  public Quest updateName(String questId, String name) throws QuestNotFoundException {
+  public Quest updateName(Id<Quest> questId, String name) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.setName(name);
     return questRepository.save(quest);
   }
 
   @Override
-  public Quest updateDuration(String questId, Duration duration) throws QuestNotFoundException {
+  public Quest updateDuration(Id<Quest> questId, Duration duration) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.setDuration(duration);
     return questRepository.save(quest);
   }
 
   @Override
-  public Quest updateReward(String questId, Reward reward) throws QuestNotFoundException {
+  public Quest updateReward(Id<Quest> questId, MoneyReward reward) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.setReward(reward);
     return questRepository.save(quest);
   }
 
   @Override
-  public Quest addHabit(String questId, Habit habit) throws QuestNotFoundException {
+  public Quest addHabit(Id<Quest> questId, Habit habit) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.addHabit(habit);
     return questRepository.save(quest);
   }
 
   @Override
-  public Quest removeHabit(String questId, Habit habit) throws QuestNotFoundException {
+  public Quest removeHabit(Id<Quest> questId, Id<Habit> habit) throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
     quest.removeHabit(habit);
     return questRepository.save(quest);

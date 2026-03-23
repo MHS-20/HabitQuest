@@ -1,9 +1,10 @@
 package habitquest.marketplace.domain;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import common.ddd.Id;
 import habitquest.marketplace.domain.items.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 class MarketplaceImplTest {
 
   private static final String MARKETPLACE_ID = "mp-1";
+  private static final String AVATAR_ID = "avatar-1";
   private static final String SWORD_NAME = "Iron Sword";
   private static final String SHIELD_NAME = "Iron Shield";
   private static final String HP_POTION_NAME = "HP Potion";
@@ -22,8 +24,6 @@ class MarketplaceImplTest {
   private static final String HP_POTION_DESC = "Restores 50 HP";
   private static final String MP_POTION_DESC = "Restores 30 MP";
   private static final String UNKNOWN_ITEM_NAME = "Legendary Axe";
-  private static final String UNKNOWN_BUY_ITEM_NAME = "Ghost Blade";
-  private static final String UNKNOWN_SELL_ITEM_NAME = "Phantom Robe";
   private static final Money SWORD_PRICE = new Money(50);
   private static final Money SHIELD_PRICE = new Money(30);
   private static final Money HP_PRICE = new Money(10);
@@ -34,6 +34,7 @@ class MarketplaceImplTest {
   private Armor shield;
   private HealthPotion hpPotion;
   private ManaPotion mpPotion;
+  private ItemCatalog catalog;
   private MarketplaceImpl marketplace;
 
   @BeforeEach
@@ -43,89 +44,162 @@ class MarketplaceImplTest {
     hpPotion = new HealthPotion(HP_POTION_NAME, HP_POTION_DESC, 50, HP_PRICE, LEVEL_1);
     mpPotion = new ManaPotion(MP_POTION_NAME, MP_POTION_DESC, 30, MP_PRICE, LEVEL_1);
 
-    marketplace =
-        new MarketplaceImpl(
-            MARKETPLACE_ID,
-            new ArrayList<>(List.of(sword, shield, hpPotion, mpPotion)),
-            new ArrayList<>(List.of(shield)),
-            new ArrayList<>(List.of(sword)),
-            new ArrayList<>(List.of(hpPotion, mpPotion)),
-            new ArrayList<>(List.of(hpPotion)),
-            new ArrayList<>(List.of(mpPotion)));
+    catalog = mock(ItemCatalog.class);
+    when(catalog.getAllItems()).thenReturn(List.of(sword, shield, hpPotion, mpPotion));
+    when(catalog.getItemsByType(ItemType.ALL))
+        .thenReturn(List.of(sword, shield, hpPotion, mpPotion));
+    when(catalog.getItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield));
+    when(catalog.getItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword));
+    when(catalog.getItemsByType(ItemType.POTION)).thenReturn(List.of(hpPotion, mpPotion));
+    when(catalog.getItemsByType(ItemType.HEALTH_POTION)).thenReturn(List.of(hpPotion));
+    when(catalog.getItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(mpPotion));
+    when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(sword));
+    when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(shield));
+    when(catalog.getItem(HP_POTION_NAME)).thenReturn(Optional.of(hpPotion));
+    when(catalog.getItem(MP_POTION_NAME)).thenReturn(Optional.of(mpPotion));
+    when(catalog.getItem(UNKNOWN_ITEM_NAME)).thenReturn(Optional.empty());
+    when(catalog.contains(SWORD_NAME)).thenReturn(true);
+    when(catalog.contains(SHIELD_NAME)).thenReturn(true);
+    when(catalog.contains(HP_POTION_NAME)).thenReturn(true);
+    when(catalog.contains(MP_POTION_NAME)).thenReturn(true);
+    when(catalog.contains(UNKNOWN_ITEM_NAME)).thenReturn(false);
+
+    marketplace = new MarketplaceImpl(new Id<>(MARKETPLACE_ID), new Id<>(AVATAR_ID), catalog);
   }
 
   // ── Identity ─────────────────────────────────────────────────────────────────
 
   @Test
   void shouldReturnCorrectId() {
-    assertThat(marketplace.getId()).isEqualTo(MARKETPLACE_ID);
+    assertThat(marketplace.getId().value()).isEqualTo(MARKETPLACE_ID);
+  }
+
+  @Test
+  void shouldReturnCorrectAvatarId() {
+    assertThat(marketplace.getAvatarId().value()).isEqualTo(AVATAR_ID);
   }
 
   // ── Empty marketplace ─────────────────────────────────────────────────────────
 
   @Test
-  void emptyMarketplaceShouldHaveNoItems() {
-    MarketplaceImpl empty = new MarketplaceImpl("empty");
-    assertThat(empty.getItems()).isEmpty();
-    assertThat(empty.getArmors()).isEmpty();
-    assertThat(empty.getWeapons()).isEmpty();
-    assertThat(empty.getPotions()).isEmpty();
-    assertThat(empty.getHealthPotions()).isEmpty();
-    assertThat(empty.getManaPotions()).isEmpty();
+  void emptyMarketplaceShouldHaveNoAvailableItems() {
+    ItemCatalog emptyCatalog = mock(ItemCatalog.class);
+    when(emptyCatalog.getAllItems()).thenReturn(List.of());
+    MarketplaceImpl empty =
+        new MarketplaceImpl(new Id<>("empty"), new Id<>(AVATAR_ID), emptyCatalog);
+    assertThat(empty.getAllAvailableItems()).isEmpty();
   }
 
-  // ── Queries ──────────────────────────────────────────────────────────────────
+  @Test
+  void emptyMarketplaceShouldHaveNoSoldItems() {
+    assertThat(marketplace.getSoldItems()).isEmpty();
+  }
+
+  // ── getAllAvailableItems / getAvailableItemsByType ────────────────────────────
 
   @Nested
-  class GetItems {
+  class GetAvailableItems {
 
     @Test
-    void shouldReturnAllItems() {
-      assertThat(marketplace.getItems())
+    void shouldReturnAllAvailableItems() {
+      assertThat(marketplace.getAllAvailableItems())
           .containsExactlyInAnyOrder(sword, shield, hpPotion, mpPotion);
     }
 
     @Test
-    void shouldReturnArmors() {
-      assertThat(marketplace.getArmors()).containsExactly(shield);
+    void shouldReturnAvailableArmors() {
+      assertThat(marketplace.getAvailableItemsByType(ItemType.ARMOR)).containsExactly(shield);
     }
 
     @Test
-    void shouldReturnWeapons() {
-      assertThat(marketplace.getWeapons()).containsExactly(sword);
+    void shouldReturnAvailableWeapons() {
+      assertThat(marketplace.getAvailableItemsByType(ItemType.WEAPON)).containsExactly(sword);
     }
 
     @Test
-    void shouldReturnAllPotions() {
-      assertThat(marketplace.getPotions()).containsExactlyInAnyOrder(hpPotion, mpPotion);
+    void shouldReturnAllAvailablePotions() {
+      assertThat(marketplace.getAvailableItemsByType(ItemType.POTION))
+          .containsExactlyInAnyOrder(hpPotion, mpPotion);
     }
 
     @Test
-    void shouldReturnHealthPotions() {
-      assertThat(marketplace.getHealthPotions()).containsExactly(hpPotion);
+    void shouldReturnAvailableHealthPotions() {
+      assertThat(marketplace.getAvailableItemsByType(ItemType.HEALTH_POTION))
+          .containsExactly(hpPotion);
     }
 
     @Test
-    void shouldReturnManaPotions() {
-      assertThat(marketplace.getManaPotions()).containsExactly(mpPotion);
+    void shouldReturnAvailableManaPotions() {
+      assertThat(marketplace.getAvailableItemsByType(ItemType.MANA_POTION))
+          .containsExactly(mpPotion);
+    }
+
+    @Test
+    void shouldExcludeBoughtItemsFromAvailableItems() {
+      marketplace.buyItem(SWORD_NAME);
+      assertThat(marketplace.getAllAvailableItems())
+          .containsExactlyInAnyOrder(shield, hpPotion, mpPotion)
+          .doesNotContain(sword);
+    }
+
+    @Test
+    void shouldExcludeBoughtItemsFromAvailableItemsByType() {
+      marketplace.buyItem(SWORD_NAME);
+      assertThat(marketplace.getAvailableItemsByType(ItemType.WEAPON)).isEmpty();
     }
   }
 
-  // ── getItem ──────────────────────────────────────────────────────────────────
+  // ── getAvailableItem ─────────────────────────────────────────────────────────
 
   @Nested
-  class GetItem {
+  class GetAvailableItem {
 
     @Test
-    void shouldFindExistingItemByName() {
-      Optional<Item> result = marketplace.getItem(SWORD_NAME);
-      assertThat(result).isPresent().contains(sword);
+    void shouldFindExistingAvailableItemByName() {
+      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isPresent().contains(sword);
     }
 
     @Test
     void shouldReturnEmptyForUnknownItemName() {
-      Optional<Item> result = marketplace.getItem(UNKNOWN_ITEM_NAME);
-      assertThat(result).isEmpty();
+      assertThat(marketplace.getAvailableItem(UNKNOWN_ITEM_NAME)).isEmpty();
+    }
+
+    @Test
+    void shouldReturnEmptyForAlreadyBoughtItem() {
+      marketplace.buyItem(SWORD_NAME);
+      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isEmpty();
+    }
+  }
+
+  // ── getSoldItem / getSoldItems ────────────────────────────────────────────────
+
+  @Nested
+  class GetSoldItems {
+
+    @Test
+    void shouldReturnEmptyForItemNotYetBought() {
+      assertThat(marketplace.getSoldItem(SWORD_NAME)).isEmpty();
+    }
+
+    @Test
+    void shouldFindSoldItemAfterBuy() {
+      marketplace.buyItem(SWORD_NAME);
+      assertThat(marketplace.getSoldItem(SWORD_NAME)).isPresent().contains(sword);
+    }
+
+    @Test
+    void shouldReturnAllSoldItems() {
+      marketplace.buyItem(SWORD_NAME);
+      marketplace.buyItem(SHIELD_NAME);
+      assertThat(marketplace.getSoldItems()).containsExactlyInAnyOrder(sword, shield);
+    }
+
+    @Test
+    void shouldRemoveItemFromSoldItemsAfterSell() {
+      marketplace.buyItem(SWORD_NAME);
+      marketplace.sellItem(SWORD_NAME);
+      assertThat(marketplace.getSoldItem(SWORD_NAME)).isEmpty();
+      assertThat(marketplace.getSoldItems()).doesNotContain(sword);
     }
   }
 
@@ -136,8 +210,7 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnItemPriceOnBuy() {
-      Money price = marketplace.buyItem(SWORD_NAME);
-      assertThat(price).isEqualTo(SWORD_PRICE);
+      assertThat(marketplace.buyItem(SWORD_NAME)).isEqualTo(SWORD_PRICE);
     }
 
     @Test
@@ -148,10 +221,24 @@ class MarketplaceImplTest {
     }
 
     @Test
+    void shouldMoveItemFromAvailableToSoldAfterBuy() {
+      marketplace.buyItem(SWORD_NAME);
+      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isEmpty();
+      assertThat(marketplace.getSoldItem(SWORD_NAME)).isPresent().contains(sword);
+    }
+
+    @Test
     void shouldThrowWhenBuyingNonExistentItem() {
-      assertThatThrownBy(() -> marketplace.buyItem(UNKNOWN_BUY_ITEM_NAME))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining(UNKNOWN_BUY_ITEM_NAME);
+      assertThatThrownBy(() -> marketplace.buyItem(UNKNOWN_ITEM_NAME))
+          .isInstanceOf(ItemNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenBuyingAlreadyBoughtItem() {
+      marketplace.buyItem(SWORD_NAME);
+      assertThatThrownBy(() -> marketplace.buyItem(SWORD_NAME))
+          .isInstanceOf(IllegalStateException.class)
+          .hasMessageContaining(SWORD_NAME);
     }
   }
 
@@ -162,22 +249,39 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnItemPriceOnSell() {
-      Money price = marketplace.sellItem(SWORD_NAME);
-      assertThat(price).isEqualTo(SWORD_PRICE);
+      marketplace.buyItem(SWORD_NAME);
+      assertThat(marketplace.sellItem(SWORD_NAME)).isEqualTo(SWORD_PRICE);
     }
 
     @Test
     void shouldReturnCorrectPriceForEachItemType() {
+      marketplace.buyItem(SHIELD_NAME);
+      marketplace.buyItem(HP_POTION_NAME);
+      marketplace.buyItem(MP_POTION_NAME);
       assertThat(marketplace.sellItem(SHIELD_NAME)).isEqualTo(SHIELD_PRICE);
       assertThat(marketplace.sellItem(HP_POTION_NAME)).isEqualTo(HP_PRICE);
       assertThat(marketplace.sellItem(MP_POTION_NAME)).isEqualTo(MP_PRICE);
     }
 
     @Test
+    void shouldMoveItemFromSoldToAvailableAfterSell() {
+      marketplace.buyItem(SWORD_NAME);
+      marketplace.sellItem(SWORD_NAME);
+      assertThat(marketplace.getSoldItem(SWORD_NAME)).isEmpty();
+      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isPresent().contains(sword);
+    }
+
+    @Test
     void shouldThrowWhenSellingNonExistentItem() {
-      assertThatThrownBy(() -> marketplace.sellItem(UNKNOWN_SELL_ITEM_NAME))
+      assertThatThrownBy(() -> marketplace.sellItem(UNKNOWN_ITEM_NAME))
+          .isInstanceOf(ItemNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenSellingItemNotYetBought() {
+      assertThatThrownBy(() -> marketplace.sellItem(SWORD_NAME))
           .isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining(UNKNOWN_SELL_ITEM_NAME);
+          .hasMessageContaining(SWORD_NAME);
     }
   }
 }

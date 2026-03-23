@@ -1,32 +1,39 @@
 package habitquest.marketplace.application;
 
+import common.ddd.Id;
 import common.hexagonal.InBoundPort;
+import habitquest.marketplace.domain.Avatar;
+import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 
 @InBoundPort
 public interface MarketplaceService {
-  Marketplace getMarketplace(String marketplaceId) throws MarketplaceNotFoundException;
+  Marketplace getMarketplace(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
-  List<Item> getItems(String marketplaceId) throws MarketplaceNotFoundException;
+  Id<Marketplace> createMarketplaceForAvatar(Id<Avatar> avatarId);
 
-  List<Armor> getArmors(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<Weapon> getWeapons(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<Potion> getPotions(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<HealthPotion> getHealthPotions(String marketplaceId) throws MarketplaceNotFoundException;
-
-  List<ManaPotion> getManaPotions(String marketplaceId) throws MarketplaceNotFoundException;
-
-  Item getItemByName(String marketplaceId, String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException;
-
-  void buyItem(String marketplaceId, String itemName, String avatarId)
+  List<Item> getAllAvailableItems(Id<Marketplace> marketplaceId)
       throws MarketplaceNotFoundException;
 
-  void sellItem(String marketplaceId, String itemName, String avatarId)
+  List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemType type)
+      throws MarketplaceNotFoundException;
+
+  Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException;
+
+  List<Item> getSoldItems(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
+
+  Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException;
+
+  Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
+
+  void buyItem(Id<Marketplace> marketplaceId, String itemName) throws MarketplaceNotFoundException;
+
+  void sellItem(Id<Marketplace> marketplaceId, String itemName) throws MarketplaceNotFoundException;
+
+  boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
       throws MarketplaceNotFoundException;
 }

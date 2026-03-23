@@ -3,12 +3,15 @@ package habitquest.quest.infrastructure;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import common.ddd.Id;
+import habitquest.quest.application.QuestLogger;
 import habitquest.quest.application.QuestNotFoundException;
 import habitquest.quest.application.QuestService;
-import habitquest.quest.domain.Habit;
-import habitquest.quest.domain.MoneyReward;
-import habitquest.quest.domain.Quest;
-import habitquest.quest.domain.Reward;
+import habitquest.quest.domain.*;
+import habitquest.quest.infrastructure.dto.HabitMapper;
+import habitquest.quest.infrastructure.dto.HabitResponse;
+import habitquest.quest.infrastructure.dto.QuestMapper;
+import habitquest.quest.infrastructure.dto.QuestResponse;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
@@ -30,38 +33,48 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuestController {
 
   private final QuestService questService;
+  private final QuestLogger log;
 
-  public QuestController(QuestService questService) {
+  public QuestController(QuestService questService, QuestLogger log) {
     this.questService = questService;
+    this.log = log;
   }
 
   @PostMapping
   public ResponseEntity<EntityModel<QuestCreatedResponse>> createQuest(
       @RequestBody CreateQuestRequest request) {
+    log.info(request, "Creating quest");
     Quest created = questService.createQuest(request.name());
-    QuestCreatedResponse body = new QuestCreatedResponse(created.getId());
+    log.info(created, "Quest created");
 
+    QuestCreatedResponse body = new QuestCreatedResponse(created.getId().value());
     EntityModel<QuestCreatedResponse> model =
         EntityModel.of(
             body,
-            selfLink(created.getId()),
-            linkTo(methodOn(QuestController.class).getQuest(created.getId())).withRel("quest"),
-            linkTo(methodOn(QuestController.class).getDuration(created.getId()))
+            selfLink(created.getId().value()),
+            linkTo(methodOn(QuestController.class).getQuest(created.getId().value()))
+                .withRel("quest"),
+            linkTo(methodOn(QuestController.class).getDuration(created.getId().value()))
                 .withRel("duration"),
-            linkTo(methodOn(QuestController.class).getReward(created.getId())).withRel("reward"),
-            linkTo(methodOn(QuestController.class).getHabits(created.getId())).withRel("habits"));
+            linkTo(methodOn(QuestController.class).getReward(created.getId().value()))
+                .withRel("reward"),
+            linkTo(methodOn(QuestController.class).getHabits(created.getId().value()))
+                .withRel("habits"));
 
-    return ResponseEntity.created(URI.create("/api/v1/quests/" + created.getId())).body(model);
+    return ResponseEntity.created(URI.create("/api/v1/quests/" + created.getId().value()))
+        .body(model);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<EntityModel<Quest>> getQuest(@PathVariable String id)
+  public ResponseEntity<EntityModel<QuestResponse>> getQuest(@PathVariable String id)
       throws QuestNotFoundException {
-    Quest quest = questService.getQuest(id);
+    Quest quest = questService.getQuest(idOfQuest(id));
+    log.info(quest, "Fetched quest");
 
-    EntityModel<Quest> model =
+    QuestResponse dto = QuestMapper.toResponse(quest);
+    EntityModel<QuestResponse> model =
         EntityModel.of(
-            quest,
+            dto,
             selfLink(id),
             linkTo(methodOn(QuestController.class).getName(id)).withRel("name"),
             linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
@@ -74,42 +87,48 @@ public class QuestController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteQuest(@PathVariable String id) throws QuestNotFoundException {
-    questService.deleteQuest(id);
+    log.info(idOfQuest(id), "Deleting quest");
+    questService.deleteQuest(idOfQuest(id));
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{id}/name")
   public ResponseEntity<EntityModel<NameResponse>> getName(@PathVariable String id)
       throws QuestNotFoundException {
+    String name = questService.getName(idOfQuest(id));
+    log.info(idOfQuest(id), "Fetched quest name");
     EntityModel<NameResponse> model =
-        EntityModel.of(new NameResponse(questService.getName(id)), selfLink(id), questLink(id));
+        EntityModel.of(new NameResponse(name), selfLink(id), questLink(id));
     return ResponseEntity.ok(model);
   }
 
   @GetMapping("/{id}/duration")
   public ResponseEntity<EntityModel<DurationResponse>> getDuration(@PathVariable String id)
       throws QuestNotFoundException {
+    Duration duration = questService.getDuration(idOfQuest(id));
+    log.info(idOfQuest(id), "Fetched quest duration");
     EntityModel<DurationResponse> model =
-        EntityModel.of(
-            new DurationResponse(questService.getDuration(id).toString()),
-            selfLink(id),
-            questLink(id));
+        EntityModel.of(new DurationResponse(duration.toString()), selfLink(id), questLink(id));
     return ResponseEntity.ok(model);
   }
 
   @GetMapping("/{id}/reward")
   public ResponseEntity<EntityModel<Reward>> getReward(@PathVariable String id)
       throws QuestNotFoundException {
-    EntityModel<Reward> model =
-        EntityModel.of(questService.getReward(id), selfLink(id), questLink(id));
+    Reward reward = questService.getReward(idOfQuest(id));
+    log.info(reward, "Fetched quest reward");
+    EntityModel<Reward> model = EntityModel.of(reward, selfLink(id), questLink(id));
     return ResponseEntity.ok(model);
   }
 
   @GetMapping("/{id}/habits")
   public ResponseEntity<EntityModel<HabitsResponse>> getHabits(@PathVariable String id)
       throws QuestNotFoundException {
+    List<Habit> habits = questService.getHabits(idOfQuest(id));
+    log.info(habits, "Fetched quest habits");
+    List<HabitResponse> habitResponses = habits.stream().map(HabitMapper::toResponse).toList();
     EntityModel<HabitsResponse> model =
-        EntityModel.of(new HabitsResponse(questService.getHabits(id)), selfLink(id), questLink(id));
+        EntityModel.of(new HabitsResponse(habitResponses), selfLink(id), questLink(id));
     return ResponseEntity.ok(model);
   }
 
@@ -117,7 +136,8 @@ public class QuestController {
   public ResponseEntity<Void> updateName(
       @PathVariable String id, @RequestBody UpdateNameRequest request)
       throws QuestNotFoundException {
-    questService.updateName(id, request.name());
+    log.info(request, "Updating quest name for quest " + id);
+    questService.updateName(idOfQuest(id), request.name());
     return ResponseEntity.noContent().build();
   }
 
@@ -125,7 +145,8 @@ public class QuestController {
   public ResponseEntity<Void> updateDuration(
       @PathVariable String id, @RequestBody UpdateDurationRequest request)
       throws QuestNotFoundException {
-    questService.updateDuration(id, Duration.parse(request.duration()));
+    log.info(request, "Updating quest duration for quest " + id);
+    questService.updateDuration(idOfQuest(id), Duration.parse(request.duration()));
     return ResponseEntity.noContent().build();
   }
 
@@ -133,21 +154,25 @@ public class QuestController {
   public ResponseEntity<Void> updateReward(
       @PathVariable String id, @RequestBody UpdateRewardRequest request)
       throws QuestNotFoundException {
-    questService.updateReward(id, new MoneyReward());
+    log.info(request, "Updating quest reward for quest " + id);
+    questService.updateReward(idOfQuest(id), new MoneyReward(request.money()));
     return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{id}/habits")
-  public ResponseEntity<Void> addHabit(@PathVariable String id, @RequestBody HabitRequest request)
-      throws QuestNotFoundException {
-    questService.addHabit(id, new Habit(request.habitId()));
+  public ResponseEntity<Void> addHabit(
+      @PathVariable String id, @RequestBody AddHabitRequest request) throws QuestNotFoundException {
+    log.info(request, "Adding habit to quest " + id);
+    questService.addHabit(idOfQuest(id), HabitMapper.toDomain(request.habitId(), request));
     return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}/habits")
   public ResponseEntity<Void> removeHabit(
-      @PathVariable String id, @RequestBody HabitRequest request) throws QuestNotFoundException {
-    questService.removeHabit(id, new Habit(request.habitId()));
+      @PathVariable String id, @RequestBody RemoveHabitRequest request)
+      throws QuestNotFoundException {
+    log.info(request, "Removing habit from quest " + id);
+    questService.removeHabit(idOfQuest(id), idOfHabit(request.habitId()));
     return ResponseEntity.noContent().build();
   }
 
@@ -158,7 +183,16 @@ public class QuestController {
 
   @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
   public ResponseEntity<ErrorResponse> handleDomainError(RuntimeException ex) {
+    log.error(ex, "Domain error", ex);
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+  }
+
+  private static Id<Quest> idOfQuest(String id) {
+    return new Id<>(id);
+  }
+
+  private static Id<Habit> idOfHabit(String id) {
+    return new Id<>(id);
   }
 
   private Link selfLink(String id) {
@@ -185,7 +219,16 @@ public class QuestController {
 
   public record UpdateRewardRequest(Integer experience, Integer money) {}
 
-  public record HabitRequest(String habitId, String title) {}
+  public record RemoveHabitRequest(String habitId, String title) {}
+
+  public record AddHabitRequest(
+      String habitId,
+      String title,
+      String description,
+      List<String> tags,
+      RecurrenceRequest recurrence) {}
+
+  public record RecurrenceRequest(String type, Integer dayOfMonth, String dayOfWeek) {}
 
   public record QuestCreatedResponse(String id) {}
 
@@ -193,7 +236,7 @@ public class QuestController {
 
   public record DurationResponse(String duration) {}
 
-  public record HabitsResponse(List<Habit> habits) {}
+  public record HabitsResponse(List<HabitResponse> habits) {}
 
   public record ErrorResponse(String message) {}
 }

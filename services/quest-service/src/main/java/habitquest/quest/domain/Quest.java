@@ -1,24 +1,25 @@
 package habitquest.quest.domain;
 
 import common.ddd.Aggregate;
+import common.ddd.Id;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Quest implements Aggregate<String> {
+public class Quest implements Aggregate<Id<Quest>> {
 
-  private final String id;
+  private final Id<Quest> id;
   private String name;
   private final List<Habit> habits;
   private Duration duration;
-  private Reward reward;
+  private MoneyReward reward;
 
-  public Quest(String id) {
+  public Quest(Id<Quest> id) {
     this.id = id;
     this.habits = new ArrayList<>();
   }
 
-  public Quest(String id, String name) {
+  public Quest(Id<Quest> id, String name) {
     this.id = id;
     this.name = name;
     this.habits = new ArrayList<>();
@@ -40,11 +41,11 @@ public class Quest implements Aggregate<String> {
     this.duration = duration;
   }
 
-  public Reward getReward() {
+  public MoneyReward getReward() {
     return reward;
   }
 
-  public void setReward(Reward reward) {
+  public void setReward(MoneyReward reward) {
     this.reward = reward;
   }
 
@@ -56,12 +57,12 @@ public class Quest implements Aggregate<String> {
     this.habits.add(habit);
   }
 
-  public void removeHabit(Habit habit) {
-    this.habits.remove(habit);
+  public void removeHabit(Id<Habit> habitId) {
+    this.habits.removeIf(h -> h.getId().equals(habitId));
   }
 
   @Override
-  public String getId() {
+  public Id<Quest> getId() {
     return this.id;
   }
 }

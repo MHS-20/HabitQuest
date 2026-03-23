@@ -1,9 +1,12 @@
 server:
   port: 9000
-  netty:
-    connection-timeout: 2s
-    idle-timeout: 15s
   shutdown: graceful
+  tomcat:
+    connection-timeout: 2s
+
+services:
+  avatar:
+    base-url: http://avatar-service:8081
 
 spring:
   application:
@@ -13,6 +16,13 @@ spring:
   config:
     import: ""
   cloud:
+    stream:
+      bindings:
+        userRegistered-out-0:
+          destination: user.registered
+      kafka:
+        binder:
+          brokers: localhost:9092
     config:
       enabled: false
       uri: http://localhost:8888
@@ -25,76 +35,37 @@ spring:
         max-interval: 2000
         multiplier: 1.1
     gateway:
-      httpclient:
-        connect-timeout: 2000
-        response-timeout: 5s
-        pool:
-          type: elastic
-          max-idle-time: 15s
-          max-life-time: 60s
-      default-filters:
-        - SaveSession
-        - TokenRelay
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter:
-              replenishRate: 10
-              burstCapacity: 20
-              requestedTokens: 1
-        - name: Retry
-          args:
-            retries: 3
-            methods: GET
-            series: SERVER_ERROR
-            exceptions: java.io.IOException, java.util.concurrent.TimeoutException
-            backoff:
-              firstBackoff: 50ms
-              maxBackOff: 500ms
-              factor: 2
-              basedOnPreviousValue: false
-      routes:
-        - id: spa-route
-          uri: ${SPA_URL:http://localhost:9004}
-          predicates:
-            - Path=/,/*.css,/*.js,/favicon.ico
-        - id: catalog-route
-          uri: ${CATALOG_SERVICE_URL:http://localhost:9001}/home
-          predicates:
-            - Path=/home/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: catalogCircuitBreaker
-                fallbackUri: forward:/catalog-fallback
-        - id: payment-route
-          uri: ${ORDER_SERVICE_URL:http://localhost:9002}/payment
-          predicates:
-            - Path=/payment/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: paymentCircuitBreaker
-  redis:
-    connect-timeout: 2s
-    host: localhost
-    port: 6379
-    timeout: 1s
-  session:
-    store-type: redis
-    timeout: 10m
-    redis:
-      namespace: habitquest:edge
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: edge-service
-            client-secret: habitquest-keycloak-secret
-            scope: openid,roles
-        provider:
-          keycloak:
-            issuer-uri: http://localhost:8080/realms/habitquest
+      mvc:
+        routes:
+          - id: avatar-service
+            uri: http://localhost:8081
+            predicates:
+              - Path=/api/v1/avatars/**
+
+          - id: guild-service
+            uri: http://localhost:8082
+            predicates:
+              - Path=/api/v1/guilds/**
+
+          - id: battle-service
+            uri: http://localhost:8082
+            predicates:
+              - Path=/api/v1/battles/**
+
+          - id: quest-service
+            uri: http://localhost:8083
+            predicates:
+              - Path=/api/v1/quests/**
+
+          - id: tracking-service
+            uri: http://localhost:8084
+            predicates:
+              - Path=/api/v1/habits/**
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:change-me-in-production-min-32-chars}
+    expiration-seconds: ${APP_JWT_EXPIRATION_SECONDS:3600}
 
 resilience4j:
   circuitbreaker:
@@ -104,10 +75,35 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 5
         failureRateThreshold: 50
         waitDurationInOpenState: 15000
+    instances:
+      avatarCircuitBreaker:
+        baseConfig: default
+      guildCircuitBreaker:
+        baseConfig: default
+      questCircuitBreaker:
+        baseConfig: default
+      habitCircuitBreaker:
+        baseConfig: default
+
   timelimiter:
     configs:
       default:
         timeoutDuration: 5s
+
+  ratelimiter:
+    instances:
+      default:
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+
+  retry:
+    instances:
+      default:
+        maxAttempts: 3
+        waitDuration: 50ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
 
 logging:
   group:
@@ -127,13 +123,11 @@ management:
         include: configprops, env, gateway, health, heapdump, info, loggers, mappings, prometheus
   endpoint:
     health:
-      show-details: always
+      show-details:
       show-components: always
       probes:
         enabled: true
-      group:
-        readiness:
-          include: readinessState,redis
+
   info:
     env:
       enabled: true

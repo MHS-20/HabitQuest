@@ -1,43 +1,55 @@
 package habitquest.tracking.application;
 
+import common.ddd.Id;
 import common.hexagonal.InBoundPort;
+import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
+import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.Recurrence;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @InBoundPort
 public interface HabitService {
-  Habit createHabit(Habit habit);
+  Habit createDailyHabit(Id<Avatar> avatarId, String title, String description);
 
-  Habit getHabitById(String habitId) throws HabitNotFoundException;
+  Habit createWeeklyHabit(
+      Id<Avatar> avatarId, String title, String description, DayOfWeek dayOfWeek);
 
-  void deleteHabitById(String habitId) throws HabitNotFoundException;
+  Habit createMonthlyHabit(
+      Id<Avatar> avatarId, String title, String description, Integer dayOfMonth);
+
+  Habit getHabitById(Id<Habit> habitId) throws HabitNotFoundException;
+
+  void deleteHabitById(Id<Habit> habitId) throws HabitNotFoundException;
 
   // region getters
-  String getTitle(String habitId) throws HabitNotFoundException;
+  String getTitle(Id<Habit> habitId) throws HabitNotFoundException;
 
-  String getDescription(String habitId) throws HabitNotFoundException;
+  String getDescription(Id<Habit> habitId) throws HabitNotFoundException;
 
-  List<Tag> getTags(String habitId) throws HabitNotFoundException;
+  List<Tag> getTags(Id<Habit> habitId) throws HabitNotFoundException;
 
-  Recurrence getRecurrence(String habitId) throws HabitNotFoundException;
+  Recurrence getRecurrence(Id<Habit> habitId) throws HabitNotFoundException;
 
-  LocalDateTime getLastAttendedDate(String habitId) throws HabitNotFoundException;
+  LocalDateTime getLastAttendedDate(Id<Habit> habitId) throws HabitNotFoundException;
+
+  List<HabitHistoryEvent> getHistory(Id<Habit> habitId);
 
   // endregion
 
   // region updaters
-  Habit updateTitle(String habitId, String title) throws HabitNotFoundException;
+  Habit updateTitle(Id<Habit> habitId, String title) throws HabitNotFoundException;
 
-  Habit updateDescription(String habitId, String description) throws HabitNotFoundException;
+  Habit updateDescription(Id<Habit> habitId, String description) throws HabitNotFoundException;
 
-  Habit updateTags(String habitId, List<Tag> tags) throws HabitNotFoundException;
+  Habit updateTags(Id<Habit> habitId, List<Tag> tags) throws HabitNotFoundException;
 
-  Habit updateRecurrence(String habitId, Recurrence recurrence) throws HabitNotFoundException;
+  Habit updateRecurrence(Id<Habit> habitId, Recurrence recurrence) throws HabitNotFoundException;
 
-  Habit attendHabit(String habitId, LocalDateTime date) throws HabitNotFoundException;
+  Habit attendHabit(Id<Habit> habitId, LocalDateTime date) throws HabitNotFoundException;
 
   void detectOverdueHabits();
   // endregion

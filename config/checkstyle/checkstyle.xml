@@ -7,6 +7,8 @@
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
 
+    <module name="SuppressWarningsFilter"/>
+
     <!-- File-level -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
@@ -21,10 +23,13 @@
     </module>
 
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder"/>
 
         <!--  Naming  -->
         <module name="TypeName"/>
-        <module name="MethodName"/>
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+        </module>
         <module name="ParameterName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>

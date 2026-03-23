@@ -1,16 +1,10 @@
 package habitquest.guild.infrastructure;
 
 import common.hexagonal.Adapter;
+import habitquest.guild.application.GuildLogger;
 import habitquest.guild.application.GuildNotifier;
-import habitquest.guild.domain.events.guildEvents.GuildCreated;
-import habitquest.guild.domain.events.guildEvents.GuildDeleted;
-import habitquest.guild.domain.events.guildEvents.GuildJoined;
-import habitquest.guild.domain.events.guildEvents.GuildLeft;
-import habitquest.guild.domain.events.guildEvents.RemovedFromGuild;
-import habitquest.guild.domain.events.guildEvents.RoleAssigned;
+import habitquest.guild.domain.events.guildEvents.*;
 import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
@@ -18,87 +12,90 @@ import org.springframework.stereotype.Component;
 @Component
 public class GuildNotifierImpl implements GuildNotifier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(GuildNotifierImpl.class);
-
-  static final String GUILD_CREATED_BINDING = "guild-created-out-0";
-  static final String GUILD_DELETED_BINDING = "guild-deleted-out-0";
-  static final String GUILD_JOINED_BINDING = "guild-joined-out-0";
-  static final String GUILD_LEFT_BINDING = "guild-left-out-0";
-  static final String REMOVED_FROM_GUILD_BINDING = "guild-removed-out-0";
-  static final String ROLE_ASSIGNED_BINDING = "guild-role-assigned-out-0";
+  static final String GUILD_CREATED_BINDING = "guild.created";
+  static final String GUILD_DELETED_BINDING = "guild.deleted";
+  static final String GUILD_JOINED_BINDING = "guild.joined";
+  static final String GUILD_LEFT_BINDING = "guild.left";
+  static final String REMOVED_FROM_GUILD_BINDING = "guild.removed";
+  static final String ROLE_ASSIGNED_BINDING = "guild.role-assigned";
+  static final String INVITE_SENT_BINDING = "guild.invite-sent";
 
   private final StreamBridge streamBridge;
+  private final GuildLogger log;
 
-  public GuildNotifierImpl(StreamBridge streamBridge) {
+  public GuildNotifierImpl(StreamBridge streamBridge, GuildLogger log) {
     this.streamBridge = streamBridge;
+    this.log = log;
   }
 
   @Override
   public void notifyGuildCreated(GuildCreated event) {
     GuildCreatedMessage message =
-        new GuildCreatedMessage(event.guildId(), event.guildName(), Instant.now());
-
-    LOG.info(
-        "Publishing GuildCreated event: guildId={}, name={}", message.guildId(), message.name());
+        new GuildCreatedMessage(
+            event.guildId().value(), event.leaderId().value(), event.guildName(), Instant.now());
+    log.info(message, "Publishing GuildCreated event");
     boolean sent = streamBridge.send(GUILD_CREATED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish GuildCreated event for guildId {}", message.guildId());
+      log.error(message, "Failed to publish GuildCreated event", null);
     }
   }
 
   @Override
   public void notifyGuildDeleted(GuildDeleted event) {
-    GuildDeletedMessage message = new GuildDeletedMessage(event.guildId(), Instant.now());
-
-    LOG.info("Publishing GuildDeleted event: guildId={}", message.guildId());
+    GuildDeletedMessage message = new GuildDeletedMessage(event.guildId().value(), Instant.now());
+    log.info(message, "Publishing GuildDeleted event");
     boolean sent = streamBridge.send(GUILD_DELETED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish GuildDeleted event for guildId {}", message.guildId());
+      log.error(message, "Failed to publish GuildDeleted event", null);
+    }
+  }
+
+  @Override
+  public void notifyInviteSent(InviteSent event) {
+    InviteSentMessage message =
+        new InviteSentMessage(
+            event.guildId().value(),
+            event.targetAvatarId().value(),
+            event.inviteId().value(),
+            Instant.now());
+    log.info(message, "Publishing InviteSent event");
+    boolean sent = streamBridge.send(INVITE_SENT_BINDING, message);
+    if (!sent) {
+      log.error(message, "Failed to publish InviteSent event", null);
     }
   }
 
   @Override
   public void notifyGuildJoined(GuildJoined event) {
     GuildJoinedMessage message =
-        new GuildJoinedMessage(event.guildId(), event.memberId(), Instant.now());
-
-    LOG.info(
-        "Publishing GuildJoined event: guildId={}, memberId={}",
-        message.guildId(),
-        message.memberId());
+        new GuildJoinedMessage(event.guildId().value(), event.memberId().value(), Instant.now());
+    log.info(message, "Publishing GuildJoined event");
     boolean sent = streamBridge.send(GUILD_JOINED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish GuildJoined event for guildId {}", message.guildId());
+      log.error(message, "Failed to publish GuildJoined event", null);
     }
   }
 
   @Override
   public void notifyGuildLeft(GuildLeft event) {
     GuildLeftMessage message =
-        new GuildLeftMessage(event.guildId(), event.memberId(), Instant.now());
-
-    LOG.info(
-        "Publishing GuildLeft event: guildId={}, memberId={}",
-        message.guildId(),
-        message.memberId());
+        new GuildLeftMessage(event.guildId().value(), event.memberId().value(), Instant.now());
+    log.info(message, "Publishing GuildLeft event");
     boolean sent = streamBridge.send(GUILD_LEFT_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish GuildLeft event for guildId {}", message.guildId());
+      log.error(message, "Failed to publish GuildLeft event", null);
     }
   }
 
   @Override
   public void notifyRemovedFromGuild(RemovedFromGuild event) {
     RemovedFromGuildMessage message =
-        new RemovedFromGuildMessage(event.guildId(), event.memberId(), Instant.now());
-
-    LOG.info(
-        "Publishing RemovedFromGuild event: guildId={}, memberId={}",
-        message.guildId(),
-        message.memberId());
+        new RemovedFromGuildMessage(
+            event.guildId().value(), event.memberId().value(), Instant.now());
+    log.info(message, "Publishing RemovedFromGuild event");
     boolean sent = streamBridge.send(REMOVED_FROM_GUILD_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish RemovedFromGuild event for guildId {}", message.guildId());
+      log.error(message, "Failed to publish RemovedFromGuild event", null);
     }
   }
 
@@ -106,20 +103,19 @@ public class GuildNotifierImpl implements GuildNotifier {
   public void notifyRoleAssigned(RoleAssigned event) {
     RoleAssignedMessage message =
         new RoleAssignedMessage(
-            event.guildId(), event.memberId(), event.newRole().roleName(), Instant.now());
-
-    LOG.info(
-        "Publishing RoleAssigned event: guildId={}, memberId={}, role={}",
-        message.guildId(),
-        message.memberId(),
-        message.roleName);
+            event.guildId().value(),
+            event.memberId().value(),
+            event.newRole().name(),
+            Instant.now());
+    log.info(message, "Publishing RoleAssigned event");
     boolean sent = streamBridge.send(ROLE_ASSIGNED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish RoleAssigned event for guildId {}", message.guildId());
+      log.error(message, "Failed to publish RoleAssigned event", null);
     }
   }
 
-  public record GuildCreatedMessage(String guildId, String name, Instant occurredOn) {}
+  public record GuildCreatedMessage(
+      String guildId, String leaderId, String name, Instant occurredOn) {}
 
   public record GuildDeletedMessage(String guildId, Instant occurredOn) {}
 
@@ -131,4 +127,7 @@ public class GuildNotifierImpl implements GuildNotifier {
 
   public record RoleAssignedMessage(
       String guildId, String memberId, String roleName, Instant occurredOn) {}
+
+  public record InviteSentMessage(
+      String guildId, String targetAvatarId, String inviteId, Instant occurredOn) {}
 }

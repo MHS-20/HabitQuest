@@ -1,5 +1,6 @@
 package habitquest.guild.application;
 
+import common.ddd.Id;
 import common.ddd.Repository;
 import common.hexagonal.OutBoundPort;
 import habitquest.guild.domain.guild.Guild;
@@ -10,9 +11,9 @@ import java.util.Optional;
 public interface GuildRepository extends Repository {
   Guild save(Guild guild);
 
-  Optional<Guild> findById(String id);
+  Optional<Guild> findById(Id<Guild> id);
 
-  void deleteById(String id);
+  void deleteById(Id<Guild> id);
 
   List<Guild> findAllSortedByRank();
 }

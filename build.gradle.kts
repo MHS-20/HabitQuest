@@ -4,7 +4,7 @@ import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.jvm.tasks.Jar
 
 plugins {
-    id("org.springframework.boot") version "3.5.0" apply false
+    id("org.springframework.boot") version "3.5.11" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     id("com.diffplug.spotless") version "8.3.0" apply false
     // id("com.github.spotbugs") version "6.4.8" apply false
@@ -17,10 +17,12 @@ group = "habitquest"
 version = "0.0.1-SNAPSHOT"
 
 val otelVersion = "2.23.0"
-val springCloudVersion = "2024.0.1"
-val testcontainersVersion = "1.21.3"
-val testcontainersKafkaVersion = "1.21.3"
-val testKeycloakVersion by extra("4.1.1")
+val springCloudVersion = "2025.0.0"
+val testcontainersVersion = "2.0.3"
+val micrometerVersion = "1.16.4"
+extra["testKeycloak"] = "4.1.1"
+extra["testArchUnit"] = "1.4.1"
+
 
 allprojects {
     repositories {
@@ -30,12 +32,15 @@ allprojects {
 
 subprojects {
     if (project.name == "services") return@subprojects
+
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "com.diffplug.spotless")
     // apply(plugin = "com.github.spotbugs")
     apply(plugin = "checkstyle")
     apply(plugin = "pmd")
+
+
 
     group = rootProject.group
     version = rootProject.version
@@ -48,9 +53,9 @@ subprojects {
 
     configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
         imports {
-            //mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
+            mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
-            mavenBom("io.micrometer:micrometer-bom:1.5.5")
+            mavenBom("io.micrometer:micrometer-bom:$micrometerVersion")
         }
     }
 
@@ -66,7 +71,6 @@ subprojects {
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.springframework.boot:spring-boot-testcontainers")
         testImplementation("org.testcontainers:junit-jupiter")
-        testImplementation("org.testcontainers:kafka")
     }
 
     tasks.withType<Test> {

@@ -2,6 +2,7 @@ package habitquest.avatar.domain;
 
 import static org.assertj.core.api.Assertions.*;
 
+import common.ddd.Id;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.domain.stats.BaseStat;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,7 @@ class AvatarStatsTest {
 
   @BeforeEach
   void setUp() {
-    stats = new AvatarStats("stats-1", 10, 10, 10);
+    stats = new AvatarStats(new Id<>("stats-1"), 10, 10, 10);
   }
 
   @Nested
