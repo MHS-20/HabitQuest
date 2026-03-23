@@ -3,19 +3,19 @@ package habitquest.tracking.infrastructure;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.hexagonal.Adapter;
-import habitquest.tracking.application.TrackingLogger;
+import habitquest.tracking.application.HabitLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
-public class TrackingJsonLogger implements TrackingLogger {
+public class HabitJsonLogger implements HabitLogger {
 
-  private final Logger log = LoggerFactory.getLogger(TrackingJsonLogger.class);
+  private final Logger log = LoggerFactory.getLogger(HabitJsonLogger.class);
   private final ObjectMapper objectMapper;
 
-  public TrackingJsonLogger(ObjectMapper objectMapper) {
+  public HabitJsonLogger(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 

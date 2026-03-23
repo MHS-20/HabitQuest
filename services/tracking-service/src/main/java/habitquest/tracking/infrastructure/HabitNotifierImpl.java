@@ -1,13 +1,12 @@
 package habitquest.tracking.infrastructure;
 
 import common.hexagonal.Adapter;
+import habitquest.tracking.application.HabitLogger;
 import habitquest.tracking.application.HabitNotifier;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;
 import habitquest.tracking.domain.events.HabitNotAttended;
 import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
@@ -15,16 +14,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class HabitNotifierImpl implements HabitNotifier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(HabitNotifierImpl.class);
-
   static final String HABIT_DELETED_BINDING = "habit.deleted";
   static final String HABIT_ATTENDED_BINDING = "habit.attended";
   static final String HABIT_NOT_ATTENDED_BINDING = "habit.not-attended-out";
 
   private final StreamBridge streamBridge;
+  private final HabitLogger log;
 
-  public HabitNotifierImpl(StreamBridge streamBridge) {
+  public HabitNotifierImpl(StreamBridge streamBridge, HabitLogger log) {
     this.streamBridge = streamBridge;
+    this.log = log;
   }
 
   @Override
@@ -32,13 +31,10 @@ public class HabitNotifierImpl implements HabitNotifier {
     HabitDeletedMessage message =
         new HabitDeletedMessage(event.habitId().value(), event.avatarId().value(), Instant.now());
 
-    LOG.info(
-        "Publishing HabitDeleted event: habitId={}, avatarId={}",
-        message.habitId(),
-        message.avatarId());
+    log.info(message, "Publishing HabitDeleted event");
     boolean sent = streamBridge.send(HABIT_DELETED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish HabitDeleted event for habitId {}", message.habitId());
+      log.error(message, "Failed to publish HabitDeleted event", null);
     }
   }
 
@@ -48,13 +44,10 @@ public class HabitNotifierImpl implements HabitNotifier {
         new HabitAttendedMessage(
             event.habit().getId().value(), event.avatarId().value(), Instant.now());
 
-    LOG.info(
-        "Publishing HabitAttended event: habitId={}, avatarId={}",
-        message.habitId(),
-        message.avatarId());
+    log.info(message, "Publishing HabitAttended event");
     boolean sent = streamBridge.send(HABIT_ATTENDED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish HabitAttended event for habitId {}", message.habitId());
+      log.error(message, "Failed to publish HabitAttended event", null);
     }
   }
 
@@ -64,13 +57,10 @@ public class HabitNotifierImpl implements HabitNotifier {
         new HabitNotAttendedMessage(
             event.habit().getId().value(), event.avatarId().value(), Instant.now());
 
-    LOG.info(
-        "Publishing HabitNotAttended event: habitId={}, avatarId={}",
-        message.habitId(),
-        message.avatarId());
+    log.info(message, "Publishing HabitNotAttended event");
     boolean sent = streamBridge.send(HABIT_NOT_ATTENDED_BINDING, message);
     if (!sent) {
-      LOG.error("Failed to publish HabitNotAttended event for habitId {}", message.habitId());
+      log.error(message, "Failed to publish HabitNotAttended event", null);
     }
   }
 
