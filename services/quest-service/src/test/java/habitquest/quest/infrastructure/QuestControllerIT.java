@@ -1,5 +1,6 @@
 package habitquest.quest.infrastructure;
 
+import static habitquest.quest.QuestFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -12,9 +13,6 @@ import habitquest.quest.application.QuestNotFoundException;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
-import habitquest.quest.domain.Quest;
-import habitquest.quest.domain.Tag;
-import habitquest.quest.domain.reminder.DailyRecurrence;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -39,38 +37,6 @@ public class QuestControllerIT {
   @MockitoBean private QuestService questService;
   @MockitoBean private QuestLogger log;
 
-  private static final Id<Quest> QUEST_ID = new Id<>("quest-1");
-  private static final String QUEST_NAME = "Morning Routine";
-  private static final Id<Quest> UNKNOWN_ID = new Id<>("ghost-99");
-  public static final Id<Habit> HABIT_1 = new Id<>("habit-1");
-  private static final String HABIT_TITLE = "Morning run";
-  private static final String HABIT_DESCRIPTION = "Run 5km every morning";
-
-  private Habit stubHabit() {
-    Habit habit =
-        new Habit(
-            HABIT_1,
-            HABIT_TITLE,
-            HABIT_DESCRIPTION,
-            List.of(new Tag("health")),
-            new DailyRecurrence());
-    return habit;
-  }
-
-  private Quest stubQuest() {
-    Quest quest = new Quest(QUEST_ID, QUEST_NAME);
-    quest.setDuration(Duration.ofHours(2));
-    quest.setReward(new MoneyReward(10));
-    quest.addHabit(
-        new Habit(
-            HABIT_1,
-            HABIT_TITLE,
-            HABIT_DESCRIPTION,
-            List.of(new Tag("health")),
-            new DailyRecurrence()));
-    return quest;
-  }
-
   @Nested
   @DisplayName("POST /api/v1/quests")
   class CreateQuest {
@@ -78,7 +44,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 201 with the new quest id")
     void shouldReturn201WithId() throws Exception {
-      when(questService.createQuest(QUEST_NAME)).thenReturn(stubQuest());
+      when(questService.createQuest(QUEST_NAME)).thenReturn(fullQuest());
 
       mockMvc
           .perform(
@@ -93,7 +59,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("delegates name to the service")
     void shouldDelegateNameToService() throws Exception {
-      when(questService.createQuest(anyString())).thenReturn(stubQuest());
+      when(questService.createQuest(anyString())).thenReturn(fullQuest());
 
       mockMvc
           .perform(
@@ -128,7 +94,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 200 with quest data when found")
     void shouldReturn200WhenFound() throws Exception {
-      when(questService.getQuest(QUEST_ID)).thenReturn(stubQuest());
+      when(questService.getQuest(QUEST_ID)).thenReturn(fullQuest());
 
       mockMvc
           .perform(get("/api/v1/quests/{id}", QUEST_ID.value()))
@@ -136,7 +102,7 @@ public class QuestControllerIT {
           .andExpect(jsonPath("$.id").value(QUEST_ID.value()))
           .andExpect(jsonPath("$.name").value(QUEST_NAME))
           .andExpect(jsonPath("$.duration").value("PT2H"))
-          .andExpect(jsonPath("$.habitIds[0]").value(HABIT_1.value()));
+          .andExpect(jsonPath("$.habitIds[0]").value(HABIT_ID_1.value()));
     }
 
     @Test
@@ -219,7 +185,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 200 with quest reward")
     void shouldReturnReward() throws Exception {
-      when(questService.getReward(QUEST_ID)).thenReturn(new MoneyReward(10));
+      when(questService.getReward(QUEST_ID)).thenReturn(DEFAULT_MONEY_REWARD);
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/reward", QUEST_ID.value()))
@@ -234,30 +200,29 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 200 with habit data")
     void shouldReturnHabits() throws Exception {
-      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(stubHabit()));
+      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(morningRunHabit()));
       mockMvc
           .perform(get("/api/v1/quests/{id}/habits", QUEST_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.habits[0].id").value(HABIT_1.value()))
+          .andExpect(jsonPath("$.habits[0].id").value(HABIT_ID_1.value()))
           .andExpect(jsonPath("$.habits[0].title").value(HABIT_TITLE))
-          .andExpect(jsonPath("$.habits[0].description").value(HABIT_DESCRIPTION))
-          .andExpect(jsonPath("$.habits[0].tags[0]").value("health"))
+          .andExpect(jsonPath("$.habits[0].description").value(HABIT_DESC))
+          .andExpect(jsonPath("$.habits[0].tags[0]").value(TAG_HEALTH))
           .andExpect(jsonPath("$.habits[0].recurrence.type").value("DAILY"));
     }
 
     @Test
     @DisplayName("returns 200 with full habit data when all fields are set")
     void shouldReturnFullHabitData() throws Exception {
-      Habit habit = stubHabit();
-      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(habit));
+      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(morningRunHabit()));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/habits", QUEST_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.habits[0].id").value(HABIT_1.value()))
+          .andExpect(jsonPath("$.habits[0].id").value(HABIT_ID_1.value()))
           .andExpect(jsonPath("$.habits[0].title").value(HABIT_TITLE))
-          .andExpect(jsonPath("$.habits[0].description").value(HABIT_DESCRIPTION))
-          .andExpect(jsonPath("$.habits[0].tags[0]").value("health"));
+          .andExpect(jsonPath("$.habits[0].description").value(HABIT_DESC))
+          .andExpect(jsonPath("$.habits[0].tags[0]").value(TAG_HEALTH));
     }
   }
 
@@ -268,7 +233,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 204 and delegates new name to service")
     void shouldReturn204AndDelegate() throws Exception {
-      when(questService.updateName(eq(QUEST_ID), anyString())).thenReturn(stubQuest());
+      when(questService.updateName(eq(QUEST_ID), anyString())).thenReturn(fullQuest());
       mockMvc
           .perform(
               patch("/api/v1/quests/{id}/name", QUEST_ID.value())
@@ -300,7 +265,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 204 and delegates parsed duration to service")
     void shouldReturn204AndDelegateDuration() throws Exception {
-      when(questService.updateDuration(eq(QUEST_ID), any(Duration.class))).thenReturn(stubQuest());
+      when(questService.updateDuration(eq(QUEST_ID), any(Duration.class))).thenReturn(fullQuest());
       mockMvc
           .perform(
               patch("/api/v1/quests/{id}/duration", QUEST_ID.value())
@@ -321,7 +286,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 204 and delegates a MoneyReward to service")
     void shouldReturn204AndDelegateMoneyReward() throws Exception {
-      when(questService.updateReward(eq(QUEST_ID), any(MoneyReward.class))).thenReturn(stubQuest());
+      when(questService.updateReward(eq(QUEST_ID), any(MoneyReward.class))).thenReturn(fullQuest());
       mockMvc
           .perform(
               patch("/api/v1/quests/{id}/reward", QUEST_ID.value())
@@ -340,7 +305,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 204 and delegates habit id to service")
     void shouldReturn204AndDelegateHabit() throws Exception {
-      when(questService.addHabit(eq(QUEST_ID), any(Habit.class))).thenReturn(stubQuest());
+      when(questService.addHabit(eq(QUEST_ID), any(Habit.class))).thenReturn(fullQuest());
       mockMvc
           .perform(
               post("/api/v1/quests/{id}/habits", QUEST_ID.value())
@@ -373,7 +338,7 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 204 and delegates habit id to service")
     void shouldReturn204AndDelegateHabit() throws Exception {
-      when(questService.removeHabit(eq(QUEST_ID), any(Id.class))).thenReturn(stubQuest());
+      when(questService.removeHabit(eq(QUEST_ID), any(Id.class))).thenReturn(fullQuest());
       mockMvc
           .perform(
               delete("/api/v1/quests/{id}/habits", QUEST_ID.value())

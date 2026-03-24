@@ -1,14 +1,13 @@
 package habitquest.marketplace.application;
 
+import static habitquest.marketplace.MarketplaceFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
-import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
-import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
 import habitquest.marketplace.domain.events.MarketplaceEvent;
@@ -36,25 +35,6 @@ class MarketplaceServiceImplTest {
 
   @InjectMocks private MarketplaceServiceImpl service;
 
-  // ── Fixtures ─────────────────────────────────────────────────────────────────
-  private static final Id<Marketplace> MARKETPLACE_ID = new Id<>("mp-1");
-  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-99");
-  private static final String SWORD_NAME = "Iron Sword";
-  private static final String SHIELD_NAME = "Iron Shield";
-  private static final String HP_POTION_NAME = "HP Potion";
-  private static final String MP_POTION_NAME = "MP Potion";
-  private static final String UNKNOWN_ITEM_NAME = "Dragon Blade";
-  private static final Id<Marketplace> MISSING_MARKETPLACE_ID = new Id<>("missing");
-  private static final Id<Marketplace> GHOST_MARKETPLACE_ID = new Id<>("ghost");
-  private static final Id<Marketplace> UNKNOWN_MARKETPLACE_ID = new Id<>("unknown");
-  private static final Money SWORD_PRICE = new Money(50);
-  private static final Money SHIELD_PRICE = new Money(30);
-  private static final Money HP_PRICE = new Money(10);
-  private static final Money MP_PRICE = new Money(12);
-  private static final Level LEVEL_1 = new Level(1);
-  private static final Level LEVEL_5 = new Level(5);
-  private static final Level LEVEL_10 = new Level(10);
-
   private Weapon sword;
   private Armor shield;
   private HealthPotion hpPotion;
@@ -62,20 +42,21 @@ class MarketplaceServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    sword = new Weapon(SWORD_NAME, "A basic sword", 10, SWORD_PRICE, LEVEL_1);
-    shield = new Armor(SHIELD_NAME, "A basic shield", 5, SHIELD_PRICE, LEVEL_1);
-    hpPotion = new HealthPotion(HP_POTION_NAME, "Restores HP", 50, HP_PRICE, LEVEL_1);
-    mpPotion = new ManaPotion(MP_POTION_NAME, "Restores MP", 30, MP_PRICE, LEVEL_1);
+    sword = sword();
+    shield = shield();
+    hpPotion = hpPotion();
+    mpPotion = mpPotion();
   }
 
   // ── Stub helpers ─────────────────────────────────────────────────────────────
+
   private void givenMarketplaceExists() {
-    when(marketplaceRepository.findById(MARKETPLACE_ID)).thenReturn(Optional.of(marketplace));
+    when(marketplaceRepository.findById(MARKETPLACE_MP_ID)).thenReturn(Optional.of(marketplace));
   }
 
   private void givenMarketplaceExistsWithAvatar() {
     givenMarketplaceExists();
-    when(marketplace.getAvatarId()).thenReturn(AVATAR_ID);
+    when(marketplace.getAvatarId()).thenReturn(AVATAR_ID_99);
   }
 
   private void givenMarketplaceNotFound(Id<Marketplace> id) {
@@ -90,7 +71,7 @@ class MarketplaceServiceImplTest {
     @Test
     void shouldReturnMarketplaceWhenFound() {
       givenMarketplaceExists();
-      assertThat(service.getMarketplace(MARKETPLACE_ID)).isSameAs(marketplace);
+      assertThat(service.getMarketplace(MARKETPLACE_MP_ID)).isSameAs(marketplace);
     }
 
     @Test
@@ -109,7 +90,7 @@ class MarketplaceServiceImplTest {
     @Test
     void shouldReturnAvatarId() {
       givenMarketplaceExistsWithAvatar();
-      assertThat(service.getAvatarId(MARKETPLACE_ID)).isEqualTo(AVATAR_ID);
+      assertThat(service.getAvatarId(MARKETPLACE_MP_ID)).isEqualTo(AVATAR_ID_99);
     }
 
     @Test
@@ -130,7 +111,7 @@ class MarketplaceServiceImplTest {
       givenMarketplaceExists();
       when(marketplace.getAllAvailableItems())
           .thenReturn(List.of(sword, shield, hpPotion, mpPotion));
-      assertThat(service.getAllAvailableItems(MARKETPLACE_ID))
+      assertThat(service.getAllAvailableItems(MARKETPLACE_MP_ID))
           .containsExactlyInAnyOrder(sword, shield, hpPotion, mpPotion);
     }
 
@@ -151,7 +132,7 @@ class MarketplaceServiceImplTest {
     void shouldReturnArmors() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_ID, ItemType.ARMOR))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.ARMOR))
           .containsExactly(shield);
     }
 
@@ -159,7 +140,7 @@ class MarketplaceServiceImplTest {
     void shouldReturnWeapons() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_ID, ItemType.WEAPON))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.WEAPON))
           .containsExactly(sword);
     }
 
@@ -168,7 +149,7 @@ class MarketplaceServiceImplTest {
       givenMarketplaceExists();
       when(marketplace.getAvailableItemsByType(ItemType.POTION))
           .thenReturn(List.of(hpPotion, mpPotion));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_ID, ItemType.POTION))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.POTION))
           .containsExactlyInAnyOrder(hpPotion, mpPotion);
     }
 
@@ -177,7 +158,7 @@ class MarketplaceServiceImplTest {
       givenMarketplaceExists();
       when(marketplace.getAvailableItemsByType(ItemType.HEALTH_POTION))
           .thenReturn(List.of(hpPotion));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_ID, ItemType.HEALTH_POTION))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.HEALTH_POTION))
           .containsExactly(hpPotion);
     }
 
@@ -185,7 +166,7 @@ class MarketplaceServiceImplTest {
     void shouldReturnManaPotions() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(mpPotion));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_ID, ItemType.MANA_POTION))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.MANA_POTION))
           .containsExactly(mpPotion);
     }
 
@@ -207,14 +188,14 @@ class MarketplaceServiceImplTest {
     void shouldReturnItemWhenFound() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItem(SWORD_NAME)).thenReturn(Optional.of(sword));
-      assertThat(service.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).isEqualTo(sword);
+      assertThat(service.getAvailableItem(MARKETPLACE_MP_ID, SWORD_NAME)).isEqualTo(sword);
     }
 
     @Test
     void shouldThrowItemNotFoundWhenNameUnknown() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItem(UNKNOWN_ITEM_NAME)).thenReturn(Optional.empty());
-      assertThatThrownBy(() -> service.getAvailableItem(MARKETPLACE_ID, UNKNOWN_ITEM_NAME))
+      assertThatThrownBy(() -> service.getAvailableItem(MARKETPLACE_MP_ID, UNKNOWN_ITEM_NAME))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
@@ -222,7 +203,7 @@ class MarketplaceServiceImplTest {
     void shouldThrowItemNotFoundWhenItemAlreadyBought() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItem(SWORD_NAME)).thenReturn(Optional.empty());
-      assertThatThrownBy(() -> service.getAvailableItem(MARKETPLACE_ID, SWORD_NAME))
+      assertThatThrownBy(() -> service.getAvailableItem(MARKETPLACE_MP_ID, SWORD_NAME))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
@@ -243,14 +224,14 @@ class MarketplaceServiceImplTest {
     void shouldReturnEmptyWhenNothingBought() {
       givenMarketplaceExists();
       when(marketplace.getSoldItems()).thenReturn(List.of());
-      assertThat(service.getSoldItems(MARKETPLACE_ID)).isEmpty();
+      assertThat(service.getSoldItems(MARKETPLACE_MP_ID)).isEmpty();
     }
 
     @Test
     void shouldReturnAllSoldItems() {
       givenMarketplaceExists();
       when(marketplace.getSoldItems()).thenReturn(List.of(sword, shield));
-      assertThat(service.getSoldItems(MARKETPLACE_ID)).containsExactlyInAnyOrder(sword, shield);
+      assertThat(service.getSoldItems(MARKETPLACE_MP_ID)).containsExactlyInAnyOrder(sword, shield);
     }
 
     @Test
@@ -270,14 +251,14 @@ class MarketplaceServiceImplTest {
     void shouldReturnItemAfterBuy() {
       givenMarketplaceExists();
       when(marketplace.getSoldItem(SWORD_NAME)).thenReturn(Optional.of(sword));
-      assertThat(service.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).isEqualTo(sword);
+      assertThat(service.getSoldItem(MARKETPLACE_MP_ID, SWORD_NAME)).isEqualTo(sword);
     }
 
     @Test
     void shouldThrowItemNotFoundWhenItemNotBoughtYet() {
       givenMarketplaceExists();
       when(marketplace.getSoldItem(SWORD_NAME)).thenReturn(Optional.empty());
-      assertThatThrownBy(() -> service.getSoldItem(MARKETPLACE_ID, SWORD_NAME))
+      assertThatThrownBy(() -> service.getSoldItem(MARKETPLACE_MP_ID, SWORD_NAME))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
@@ -285,7 +266,7 @@ class MarketplaceServiceImplTest {
     void shouldThrowItemNotFoundForUnknownName() {
       givenMarketplaceExists();
       when(marketplace.getSoldItem(UNKNOWN_ITEM_NAME)).thenReturn(Optional.empty());
-      assertThatThrownBy(() -> service.getSoldItem(MARKETPLACE_ID, UNKNOWN_ITEM_NAME))
+      assertThatThrownBy(() -> service.getSoldItem(MARKETPLACE_MP_ID, UNKNOWN_ITEM_NAME))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
@@ -305,20 +286,20 @@ class MarketplaceServiceImplTest {
     @Test
     void shouldSaveMarketplaceAfterBuy() {
       givenMarketplaceExistsWithAvatar();
-      service.buyItem(MARKETPLACE_ID, SWORD_NAME);
+      service.buyItem(MARKETPLACE_MP_ID, SWORD_NAME);
       verify(marketplaceRepository).save(marketplace);
     }
 
     @Test
     void shouldPublishItemBoughtEvent() {
       givenMarketplaceExistsWithAvatar();
-      service.buyItem(MARKETPLACE_ID, SWORD_NAME);
+      service.buyItem(MARKETPLACE_MP_ID, SWORD_NAME);
       ArgumentCaptor<ItemBought> captor = ArgumentCaptor.forClass(ItemBought.class);
       verify(marketplaceObserver).notifyMarketplaceEvent(captor.capture());
       ItemBought event = captor.getValue();
-      assertThat(event.marketplaceId()).isEqualTo(MARKETPLACE_ID);
+      assertThat(event.marketplaceId()).isEqualTo(MARKETPLACE_MP_ID);
       assertThat(event.itemName()).isEqualTo(SWORD_NAME);
-      assertThat(event.avatarId()).isEqualTo(AVATAR_ID);
+      assertThat(event.avatarId()).isEqualTo(AVATAR_ID_99);
     }
 
     @Test
@@ -344,20 +325,20 @@ class MarketplaceServiceImplTest {
     @Test
     void shouldSaveMarketplaceAfterSell() {
       givenMarketplaceExistsWithAvatar();
-      service.sellItem(MARKETPLACE_ID, SWORD_NAME);
+      service.sellItem(MARKETPLACE_MP_ID, SWORD_NAME);
       verify(marketplaceRepository).save(marketplace);
     }
 
     @Test
     void shouldPublishItemSoldEvent() {
       givenMarketplaceExistsWithAvatar();
-      service.sellItem(MARKETPLACE_ID, SWORD_NAME);
+      service.sellItem(MARKETPLACE_MP_ID, SWORD_NAME);
       ArgumentCaptor<ItemSold> captor = ArgumentCaptor.forClass(ItemSold.class);
       verify(marketplaceObserver).notifyMarketplaceEvent(captor.capture());
       ItemSold event = captor.getValue();
-      assertThat(event.marketplaceId()).isEqualTo(MARKETPLACE_ID);
+      assertThat(event.marketplaceId()).isEqualTo(MARKETPLACE_MP_ID);
       assertThat(event.itemName()).isEqualTo(SWORD_NAME);
-      assertThat(event.avatarId()).isEqualTo(AVATAR_ID);
+      assertThat(event.avatarId()).isEqualTo(AVATAR_ID_99);
     }
 
     @Test
@@ -385,7 +366,7 @@ class MarketplaceServiceImplTest {
       givenMarketplaceExists();
       // sword requires level 1, player is level 1 — exact match
       when(marketplace.getAvailableItem(SWORD_NAME)).thenReturn(Optional.of(sword));
-      assertThat(service.canBuyItem(MARKETPLACE_ID, SWORD_NAME, LEVEL_1)).isTrue();
+      assertThat(service.canBuyItem(MARKETPLACE_MP_ID, SWORD_NAME, LEVEL_1)).isTrue();
     }
 
     @Test
@@ -393,33 +374,30 @@ class MarketplaceServiceImplTest {
       givenMarketplaceExists();
       // sword requires level 1, player is level 10 — well above
       when(marketplace.getAvailableItem(SWORD_NAME)).thenReturn(Optional.of(sword));
-      assertThat(service.canBuyItem(MARKETPLACE_ID, SWORD_NAME, LEVEL_10)).isTrue();
+      assertThat(service.canBuyItem(MARKETPLACE_MP_ID, SWORD_NAME, LEVEL_10)).isTrue();
     }
 
     @Test
     void shouldReturnFalseWhenPlayerLevelBelowRequirement() {
       givenMarketplaceExists();
       // high-level item requires level 10, player is only level 1
-      Weapon eliteSword =
-          new Weapon("Elite Sword", "A powerful sword", 80, new Money(200), LEVEL_10);
-      when(marketplace.getAvailableItem("Elite Sword")).thenReturn(Optional.of(eliteSword));
-      assertThat(service.canBuyItem(MARKETPLACE_ID, "Elite Sword", LEVEL_1)).isFalse();
+      when(marketplace.getAvailableItem("Elite Sword")).thenReturn(Optional.of(eliteSword()));
+      assertThat(service.canBuyItem(MARKETPLACE_MP_ID, "Elite Sword", LEVEL_1)).isFalse();
     }
 
     @Test
     void shouldReturnFalseWhenPlayerLevelIsOneBelow() {
       givenMarketplaceExists();
       // item requires level 5, player is level 4 — boundary case
-      Weapon midSword = new Weapon("Mid Sword", "A mid sword", 40, new Money(100), LEVEL_5);
-      when(marketplace.getAvailableItem("Mid Sword")).thenReturn(Optional.of(midSword));
-      assertThat(service.canBuyItem(MARKETPLACE_ID, "Mid Sword", new Level(4))).isFalse();
+      when(marketplace.getAvailableItem("Mid Sword")).thenReturn(Optional.of(midSword()));
+      assertThat(service.canBuyItem(MARKETPLACE_MP_ID, "Mid Sword", new Level(4))).isFalse();
     }
 
     @Test
     void shouldThrowItemNotFoundWhenItemDoesNotExist() {
       givenMarketplaceExists();
       when(marketplace.getAvailableItem(UNKNOWN_ITEM_NAME)).thenReturn(Optional.empty());
-      assertThatThrownBy(() -> service.canBuyItem(MARKETPLACE_ID, UNKNOWN_ITEM_NAME, LEVEL_1))
+      assertThatThrownBy(() -> service.canBuyItem(MARKETPLACE_MP_ID, UNKNOWN_ITEM_NAME, LEVEL_1))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
@@ -439,16 +417,16 @@ class MarketplaceServiceImplTest {
     @Test
     void buyAndSellShouldEachPublishExactlyOneEvent() {
       givenMarketplaceExistsWithAvatar();
-      service.buyItem(MARKETPLACE_ID, SWORD_NAME);
-      service.sellItem(MARKETPLACE_ID, SWORD_NAME);
+      service.buyItem(MARKETPLACE_MP_ID, SWORD_NAME);
+      service.sellItem(MARKETPLACE_MP_ID, SWORD_NAME);
       verify(marketplaceObserver, times(2)).notifyMarketplaceEvent(any());
     }
 
     @Test
     void buyEventAndSellEventShouldHaveDifferentTypes() {
       givenMarketplaceExistsWithAvatar();
-      service.buyItem(MARKETPLACE_ID, SWORD_NAME);
-      service.sellItem(MARKETPLACE_ID, SWORD_NAME);
+      service.buyItem(MARKETPLACE_MP_ID, SWORD_NAME);
+      service.sellItem(MARKETPLACE_MP_ID, SWORD_NAME);
       ArgumentCaptor<MarketplaceEvent> captor = ArgumentCaptor.forClass(MarketplaceEvent.class);
       verify(marketplaceObserver, times(2)).notifyMarketplaceEvent(captor.capture());
       List<MarketplaceEvent> events = captor.getAllValues();

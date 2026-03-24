@@ -1,12 +1,10 @@
 package habitquest.marketplace.infrastructure;
 
+import static habitquest.marketplace.MarketplaceFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.ddd.Id;
 import habitquest.marketplace.application.MarketplaceRepository;
-import habitquest.marketplace.domain.events.ItemBought;
-import habitquest.marketplace.domain.events.ItemSold;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -38,12 +36,6 @@ public class MarketplaceNotifierImplIT {
   static final KafkaContainer KAFKA =
       new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
-  public static final String MARKETPLACE_FIELD = "marketplaceId";
-  public static final String ITEM_NAME = "itemName";
-  public static final String AVATAR_ID = "avatarId";
-  public static final String OCCURRED_ON = "occurredOn";
-  public static final String MARKET_1 = "market-1";
-
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.cloud.stream.kafka.binder.brokers", KAFKA::getBootstrapServers);
@@ -54,7 +46,6 @@ public class MarketplaceNotifierImplIT {
 
   private static final String TOPIC_ITEM_BOUGHT = "marketplace.item-bought";
   private static final String TOPIC_ITEM_SOLD = "marketplace.item-sold";
-
   private static final Duration POLL_TIMEOUT = Duration.ofSeconds(10);
 
   private KafkaConsumer<String, String> consumer;
@@ -106,7 +97,8 @@ public class MarketplaceNotifierImplIT {
     throw new AssertionError("No message received within timeout");
   }
 
-  // ── notifyItemBought ----------------------------------------------------
+  // ── notifyItemBought ─────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("notifyItemBought")
   class NotifyItemBought {
@@ -115,45 +107,43 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("publishes a message to marketplace.item-bought")
     void shouldPublishToItemBoughtTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_BOUGHT);
-      notifier.notifyItemBought(
-          new ItemBought(new Id<>(MARKET_1), "Iron Sword", new Id<>("avatar-42")));
+      notifier.notifyItemBought(itemBought(MARKETPLACE_ID, SWORD_NAME, AVATAR_ID));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_ITEM_BOUGHT);
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(MARKETPLACE_FIELD).asText()).isEqualTo(MARKET_1);
-      assertThat(node.get(ITEM_NAME).asText()).isEqualTo("Iron Sword");
-      assertThat(node.get(AVATAR_ID).asText()).isEqualTo("avatar-42");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_KEY_MARKETPLACE_ID).asText()).isEqualTo(MARKETPLACE_1);
+      assertThat(node.get(JSON_KEY_ITEM_NAME).asText()).isEqualTo(SWORD_NAME);
+      assertThat(node.get(JSON_KEY_AVATAR_ID).asText()).isEqualTo(AVATAR_1);
+      assertThat(node.has(JSON_KEY_OCCURRED_ON)).isTrue();
     }
 
     @Test
     @DisplayName("preserves all fields in the item-bought payload")
     void shouldPreserveAllFields() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_BOUGHT);
-      notifier.notifyItemBought(
-          new ItemBought(new Id<>("market-99"), "Dragon Shield", new Id<>("hero-7")));
+      notifier.notifyItemBought(itemBought(MARKETPLACE_MP_ID, "Dragon Shield", AVATAR_ID_99));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(MARKETPLACE_FIELD).asText()).isEqualTo("market-99");
-      assertThat(node.get(ITEM_NAME).asText()).isEqualTo("Dragon Shield");
-      assertThat(node.get(AVATAR_ID).asText()).isEqualTo("hero-7");
+      assertThat(node.get(JSON_KEY_MARKETPLACE_ID).asText()).isEqualTo(MARKETPLACE_2);
+      assertThat(node.get(JSON_KEY_ITEM_NAME).asText()).isEqualTo("Dragon Shield");
+      assertThat(node.get(JSON_KEY_AVATAR_ID).asText()).isEqualTo(AVATAR_99);
     }
 
     @Test
     @DisplayName("each purchase event has its own occurredOn timestamp")
     void shouldHaveTimestamp() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_BOUGHT);
-      notifier.notifyItemBought(
-          new ItemBought(new Id<>(MARKET_1), "Mana Potion", new Id<>("avatar-1")));
+      notifier.notifyItemBought(itemBought(MARKETPLACE_ID, "Mana Potion", AVATAR_ID));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(OCCURRED_ON).asText()).isNotBlank();
+      assertThat(node.get(JSON_KEY_OCCURRED_ON).asText()).isNotBlank();
     }
   }
 
-  // ── notifyItemSold ------------------------------------------------------
+  // ── notifyItemSold ───────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("notifyItemSold")
   class NotifyItemSold {
@@ -162,41 +152,38 @@ public class MarketplaceNotifierImplIT {
     @DisplayName("publishes a message to marketplace.item-sold")
     void shouldPublishToItemSoldTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_SOLD);
-      notifier.notifyItemSold(
-          new ItemSold(new Id<>("market-2"), "Old Armor", new Id<>("avatar-10")));
+      notifier.notifyItemSold(itemSold(UNKNOWN_MARKETPLACE_ID, SHIELD_NAME, AVATAR_ID_99));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_ITEM_SOLD);
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(MARKETPLACE_FIELD).asText()).isEqualTo("market-2");
-      assertThat(node.get(ITEM_NAME).asText()).isEqualTo("Old Armor");
-      assertThat(node.get(AVATAR_ID).asText()).isEqualTo("avatar-10");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_KEY_MARKETPLACE_ID).asText()).isEqualTo(UNKNOWN_MARKETPLACE);
+      assertThat(node.get(JSON_KEY_ITEM_NAME).asText()).isEqualTo(SHIELD_NAME);
+      assertThat(node.get(JSON_KEY_AVATAR_ID).asText()).isEqualTo(AVATAR_99);
+      assertThat(node.has(JSON_KEY_OCCURRED_ON)).isTrue();
     }
 
     @Test
     @DisplayName("preserves all fields in the item-sold payload")
     void shouldPreserveAllFields() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_SOLD);
-      notifier.notifyItemSold(
-          new ItemSold(new Id<>("market-5"), "Rusty Sword", new Id<>("warrior-3")));
+      notifier.notifyItemSold(itemSold(MISSING_MARKETPLACE_ID, "Rusty Sword", AVATAR_ID));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(MARKETPLACE_FIELD).asText()).isEqualTo("market-5");
-      assertThat(node.get(ITEM_NAME).asText()).isEqualTo("Rusty Sword");
-      assertThat(node.get(AVATAR_ID).asText()).isEqualTo("warrior-3");
+      assertThat(node.get(JSON_KEY_MARKETPLACE_ID).asText()).isEqualTo(MISSING_MARKETPLACE);
+      assertThat(node.get(JSON_KEY_ITEM_NAME).asText()).isEqualTo("Rusty Sword");
+      assertThat(node.get(JSON_KEY_AVATAR_ID).asText()).isEqualTo(AVATAR_1);
     }
 
     @Test
     @DisplayName("each sale event has its own occurredOn timestamp")
     void shouldHaveTimestamp() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ITEM_SOLD);
-      notifier.notifyItemSold(
-          new ItemSold(new Id<>(MARKET_1), "Health Potion", new Id<>("avatar-2")));
+      notifier.notifyItemSold(itemSold(MARKETPLACE_ID, "Health Potion", AVATAR_ID));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(OCCURRED_ON).asText()).isNotBlank();
+      assertThat(node.get(JSON_KEY_OCCURRED_ON).asText()).isNotBlank();
     }
   }
 }

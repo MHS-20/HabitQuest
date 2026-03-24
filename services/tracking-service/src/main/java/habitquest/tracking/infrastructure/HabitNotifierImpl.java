@@ -16,7 +16,7 @@ public class HabitNotifierImpl implements HabitNotifier {
 
   static final String HABIT_DELETED_BINDING = "habit.deleted";
   static final String HABIT_ATTENDED_BINDING = "habit.attended";
-  static final String HABIT_NOT_ATTENDED_BINDING = "habit.not-attended-out";
+  static final String HABIT_NOT_ATTENDED_BINDING = "habit.not-attended";
 
   private final StreamBridge streamBridge;
   private final HabitLogger log;

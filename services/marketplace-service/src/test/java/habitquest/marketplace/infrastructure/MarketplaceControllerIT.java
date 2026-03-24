@@ -1,21 +1,19 @@
 package habitquest.marketplace.infrastructure;
 
+import static habitquest.marketplace.MarketplaceFixtures.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.ddd.Id;
 import habitquest.marketplace.application.AvatarNotFoundException;
 import habitquest.marketplace.application.MarketplaceLogger;
 import habitquest.marketplace.application.MarketplaceNotFoundException;
 import habitquest.marketplace.application.MarketplaceService;
-import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
-import habitquest.marketplace.domain.MarketplaceImpl;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
@@ -44,39 +42,24 @@ public class MarketplaceControllerIT {
   @MockitoBean private AvatarClient avatarClient;
   @MockitoBean private MarketplaceLogger log;
 
-  // ── Fixtures ──────────────────────────────────────────────────────────────────
-
-  private static final Id<Marketplace> MARKETPLACE_ID = new Id<>("marketplace-1");
-  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
-  private static final Id<Marketplace> UNKNOWN_ID = new Id<>("ghost-99");
-
-  private static final String SWORD_NAME = "Iron Sword";
-  private static final String SHIELD_NAME = "Iron Shield";
-  private static final String HEALTH_POTION_NAME = "Health Potion";
-  private static final String MANA_POTION_NAME = "Mana Potion";
-  private static final String UNKNOWN_ITEM = "Ghost Item";
-
-  private static final Level LEVEL_1 = new Level(1);
-
   private ItemCatalog catalog;
 
   @BeforeEach
   void setUp() {
     catalog = mock(ItemCatalog.class);
     when(catalog.getAllItems())
-        .thenReturn(List.of(stubWeapon(), stubArmor(), stubHealthPotion(), stubManaPotion()));
+        .thenReturn(List.of(sword(), shield(), healthPotion(), manaPotion()));
     when(catalog.getItemsByType(ItemType.ALL))
-        .thenReturn(List.of(stubWeapon(), stubArmor(), stubHealthPotion(), stubManaPotion()));
-    when(catalog.getItemsByType(ItemType.ARMOR)).thenReturn(List.of(stubArmor()));
-    when(catalog.getItemsByType(ItemType.WEAPON)).thenReturn(List.of(stubWeapon()));
-    when(catalog.getItemsByType(ItemType.POTION))
-        .thenReturn(List.of(stubHealthPotion(), stubManaPotion()));
-    when(catalog.getItemsByType(ItemType.HEALTH_POTION)).thenReturn(List.of(stubHealthPotion()));
-    when(catalog.getItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(stubManaPotion()));
-    when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(stubWeapon()));
-    when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(stubArmor()));
-    when(catalog.getItem(HEALTH_POTION_NAME)).thenReturn(Optional.of(stubHealthPotion()));
-    when(catalog.getItem(MANA_POTION_NAME)).thenReturn(Optional.of(stubManaPotion()));
+        .thenReturn(List.of(sword(), shield(), healthPotion(), manaPotion()));
+    when(catalog.getItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield()));
+    when(catalog.getItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword()));
+    when(catalog.getItemsByType(ItemType.POTION)).thenReturn(List.of(healthPotion(), manaPotion()));
+    when(catalog.getItemsByType(ItemType.HEALTH_POTION)).thenReturn(List.of(healthPotion()));
+    when(catalog.getItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(manaPotion()));
+    when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(sword()));
+    when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(shield()));
+    when(catalog.getItem(HEALTH_POTION_NAME)).thenReturn(Optional.of(healthPotion()));
+    when(catalog.getItem(MANA_POTION_NAME)).thenReturn(Optional.of(manaPotion()));
     when(catalog.getItem(UNKNOWN_ITEM)).thenReturn(Optional.empty());
     when(catalog.contains(SWORD_NAME)).thenReturn(true);
     when(catalog.contains(SHIELD_NAME)).thenReturn(true);
@@ -86,23 +69,7 @@ public class MarketplaceControllerIT {
   }
 
   private Marketplace stubMarketplace() {
-    return new MarketplaceImpl(MARKETPLACE_ID, AVATAR_ID, catalog);
-  }
-
-  private Weapon stubWeapon() {
-    return new Weapon(SWORD_NAME, "A sturdy iron sword", 30, new Money(50), LEVEL_1);
-  }
-
-  private Armor stubArmor() {
-    return new Armor(SHIELD_NAME, "A sturdy iron shield", 20, new Money(40), LEVEL_1);
-  }
-
-  private HealthPotion stubHealthPotion() {
-    return new HealthPotion(HEALTH_POTION_NAME, "Restores health", 50, new Money(10), LEVEL_1);
-  }
-
-  private ManaPotion stubManaPotion() {
-    return new ManaPotion(MANA_POTION_NAME, "Restores mana", 50, new Money(10), LEVEL_1);
+    return marketplace(catalog);
   }
 
   // ── GET /api/v1/marketplaces/{marketplaceId} ──────────────────────────────────
@@ -124,16 +91,16 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(marketplaceService.getMarketplace(UNKNOWN_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getMarketplace(UNKNOWN_MARKETPLACE_ID))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
 
       mockMvc
-          .perform(get("/api/v1/marketplaces/{marketplaceId}", UNKNOWN_ID.value()))
+          .perform(get("/api/v1/marketplaces/{marketplaceId}", UNKNOWN_MARKETPLACE_ID.value()))
           .andExpect(status().isNotFound());
     }
   }
 
-  // ── POST /api/v1/marketplaces ───────────────────────────────────────────────
+  // ── POST /api/v1/marketplaces ─────────────────────────────────────────────────
 
   @Nested
   @DisplayName("POST /api/v1/marketplaces")
@@ -202,7 +169,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with all available items")
     void shouldReturn200WithAllItems() throws Exception {
       when(marketplaceService.getAllAvailableItems(MARKETPLACE_ID))
-          .thenReturn(List.of(stubWeapon(), stubArmor(), stubHealthPotion(), stubManaPotion()));
+          .thenReturn(List.of(sword(), shield(), healthPotion(), manaPotion()));
 
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/items", MARKETPLACE_ID.value()))
@@ -223,7 +190,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with armors when type=ARMOR")
     void shouldReturn200WithArmors() throws Exception {
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.ARMOR))
-          .thenReturn(List.of(stubArmor()));
+          .thenReturn(List.of(shield()));
 
       mockMvc
           .perform(
@@ -236,7 +203,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with weapons when type=WEAPON")
     void shouldReturn200WithWeapons() throws Exception {
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.WEAPON))
-          .thenReturn(List.of(stubWeapon()));
+          .thenReturn(List.of(sword()));
 
       mockMvc
           .perform(
@@ -249,7 +216,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with potions when type=POTION")
     void shouldReturn200WithPotions() throws Exception {
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.POTION))
-          .thenReturn(List.of(stubHealthPotion(), stubManaPotion()));
+          .thenReturn(List.of(healthPotion(), manaPotion()));
 
       mockMvc
           .perform(
@@ -262,7 +229,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with health potions when type=HEALTH_POTION")
     void shouldReturn200WithHealthPotions() throws Exception {
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.HEALTH_POTION))
-          .thenReturn(List.of(stubHealthPotion()));
+          .thenReturn(List.of(healthPotion()));
 
       mockMvc
           .perform(
@@ -275,7 +242,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with mana potions when type=MANA_POTION")
     void shouldReturn200WithManaPotions() throws Exception {
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.MANA_POTION))
-          .thenReturn(List.of(stubManaPotion()));
+          .thenReturn(List.of(manaPotion()));
 
       mockMvc
           .perform(
@@ -287,11 +254,12 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(marketplaceService.getAllAvailableItems(UNKNOWN_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getAllAvailableItems(UNKNOWN_MARKETPLACE_ID))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
 
       mockMvc
-          .perform(get("/api/v1/marketplaces/{marketplaceId}/items", UNKNOWN_ID.value()))
+          .perform(
+              get("/api/v1/marketplaces/{marketplaceId}/items", UNKNOWN_MARKETPLACE_ID.value()))
           .andExpect(status().isNotFound());
     }
   }
@@ -305,8 +273,7 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with the requested item")
     void shouldReturn200WhenItemFound() throws Exception {
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME))
-          .thenReturn(stubWeapon());
+      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
 
       mockMvc
           .perform(
@@ -335,13 +302,14 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(marketplaceService.getAvailableItem(UNKNOWN_ID, SWORD_NAME))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getAvailableItem(UNKNOWN_MARKETPLACE_ID, SWORD_NAME))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
+
       mockMvc
           .perform(
               get(
                   "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
-                  UNKNOWN_ID.value(),
+                  UNKNOWN_MARKETPLACE_ID.value(),
                   SWORD_NAME))
           .andExpect(status().isNotFound());
     }
@@ -356,8 +324,8 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with all sold items")
     void shouldReturn200WithSoldItems() throws Exception {
-      when(marketplaceService.getSoldItems(MARKETPLACE_ID))
-          .thenReturn(List.of(stubWeapon(), stubArmor()));
+      when(marketplaceService.getSoldItems(MARKETPLACE_ID)).thenReturn(List.of(sword(), shield()));
+
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/sold-items", MARKETPLACE_ID.value()))
           .andExpect(status().isOk());
@@ -367,6 +335,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with empty list when nothing has been bought")
     void shouldReturn200WithEmptyList() throws Exception {
       when(marketplaceService.getSoldItems(MARKETPLACE_ID)).thenReturn(List.of());
+
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/sold-items", MARKETPLACE_ID.value()))
           .andExpect(status().isOk());
@@ -375,10 +344,14 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(marketplaceService.getSoldItems(UNKNOWN_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getSoldItems(UNKNOWN_MARKETPLACE_ID))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
+
       mockMvc
-          .perform(get("/api/v1/marketplaces/{marketplaceId}/sold-items", UNKNOWN_ID.value()))
+          .perform(
+              get(
+                  "/api/v1/marketplaces/{marketplaceId}/sold-items",
+                  UNKNOWN_MARKETPLACE_ID.value()))
           .andExpect(status().isNotFound());
     }
   }
@@ -392,7 +365,7 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with the requested sold item")
     void shouldReturn200WhenItemFound() throws Exception {
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(stubWeapon());
+      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
 
       mockMvc
           .perform(
@@ -421,14 +394,14 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(marketplaceService.getSoldItem(UNKNOWN_ID, SWORD_NAME))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getSoldItem(UNKNOWN_MARKETPLACE_ID, SWORD_NAME))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
 
       mockMvc
           .perform(
               get(
                   "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
-                  UNKNOWN_ID.value(),
+                  UNKNOWN_MARKETPLACE_ID.value(),
                   SWORD_NAME))
           .andExpect(status().isNotFound());
     }
@@ -444,8 +417,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 204 when purchase is successful and level requirement is met")
     void shouldReturn204AndDelegateOnSuccess() throws Exception {
       when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME))
-          .thenReturn(stubWeapon());
+      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
           .thenReturn(true);
       doNothing().when(avatarClient).spendMoney(eq(AVATAR_ID.value()), any(Money.class));
@@ -513,6 +485,7 @@ public class MarketplaceControllerIT {
           .thenReturn(true);
       when(marketplaceService.getAvailableItem(MARKETPLACE_ID, UNKNOWN_ITEM))
           .thenThrow(new ItemNotFoundException(UNKNOWN_ITEM));
+
       mockMvc
           .perform(
               post(
@@ -531,8 +504,7 @@ public class MarketplaceControllerIT {
       when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
       when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
           .thenReturn(true);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME))
-          .thenReturn(stubWeapon());
+      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doThrow(new AvatarNotFoundException(AVATAR_ID.value()))
           .when(avatarClient)
           .spendMoney(eq(AVATAR_ID.value()), any(Money.class));
@@ -553,8 +525,7 @@ public class MarketplaceControllerIT {
       when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
       when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
           .thenReturn(true);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME))
-          .thenReturn(stubWeapon());
+      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doThrow(
               new AvatarCommunicationException(
                   "Avatar service unavailable", new RestClientException("timeout")))
@@ -574,14 +545,14 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(UNKNOWN_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getAvatarId(UNKNOWN_MARKETPLACE_ID))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
 
       mockMvc
           .perform(
               post(
                       "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      UNKNOWN_ID.value(),
+                      UNKNOWN_MARKETPLACE_ID.value(),
                       SWORD_NAME)
                   .param("currentLevel", "1"))
           .andExpect(status().isNotFound());
@@ -598,7 +569,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 204 and delegates to service and avatar client on successful sale")
     void shouldReturn204AndDelegateOnSuccess() throws Exception {
       when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(stubWeapon());
+      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doNothing()
           .when(avatarClient)
           .removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
@@ -640,7 +611,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenAvatarNotFound() throws Exception {
       when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(stubWeapon());
+      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doThrow(new AvatarNotFoundException(AVATAR_ID.value()))
           .when(avatarClient)
           .removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
@@ -658,12 +629,13 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 502 when avatar service is unreachable")
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
       when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(stubWeapon());
+      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doThrow(
               new AvatarCommunicationException(
                   "Avatar service unavailable", new RestClientException("timeout")))
           .when(avatarClient)
           .removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
+
       mockMvc
           .perform(
               post(
@@ -676,13 +648,14 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(UNKNOWN_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_ID.value()));
+      when(marketplaceService.getAvatarId(UNKNOWN_MARKETPLACE_ID))
+          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
+
       mockMvc
           .perform(
               post(
                   "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell",
-                  UNKNOWN_ID.value(),
+                  UNKNOWN_MARKETPLACE_ID.value(),
                   SWORD_NAME))
           .andExpect(status().isNotFound());
     }
