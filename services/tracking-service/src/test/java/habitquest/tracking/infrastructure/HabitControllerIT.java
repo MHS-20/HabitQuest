@@ -1,27 +1,23 @@
 package habitquest.tracking.infrastructure;
 
+import static habitquest.tracking.HabitFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import common.ddd.Id;
 import habitquest.tracking.application.HabitLogger;
 import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
-import habitquest.tracking.domain.Avatar;
-import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,24 +40,6 @@ public class HabitControllerIT {
   @MockitoBean private HabitService habitService;
   @MockitoBean private HabitLogger log;
 
-  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
-  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
-  private static final String TITLE = "Hydrate";
-  private static final String DESCRIPTION = "Drink 2L of water";
-  private static final Id<Habit> UNKNOWN_ID = new Id<>("ghost-99");
-
-  private Habit stubHabit() {
-    Habit habit =
-        new Habit(
-            HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.of("quest-1"));
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
-    habit.setRecurrence(new DailyRecurrence());
-    habit.setTags(List.of(new Tag("health")));
-    habit.attendHabit(LocalDateTime.of(2026, 3, 17, 8, 0));
-    return habit;
-  }
-
   @Nested
   @DisplayName("POST /api/v1/habits")
   class CreateHabit {
@@ -69,8 +47,8 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 201 with the new habit id")
     void shouldReturn201WithId() throws Exception {
-      when(habitService.createDailyHabit(any(Id.class), anyString(), anyString()))
-          .thenReturn(stubHabit());
+      when(habitService.createDailyHabit(any(), anyString(), anyString()))
+          .thenReturn(hydrateHabitWithQuest());
 
       mockMvc
           .perform(
@@ -78,13 +56,14 @@ public class HabitControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId":"avatar-1",
-                        "title":"Hydrate",
-                        "description":"Drink 2L of water",
-                        "recurrenceType":"DAILY"
-                      }
-                      """))
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"DAILY"
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isCreated())
           .andExpect(header().string("Location", "/api/v1/habits/" + HABIT_ID.value()))
           .andExpect(jsonPath("$.id").value(HABIT_ID.value()));
@@ -93,8 +72,8 @@ public class HabitControllerIT {
     @Test
     @DisplayName("delegates DAILY payload to createDailyHabit")
     void shouldDelegateDailyPayloadToService() throws Exception {
-      when(habitService.createDailyHabit(any(Id.class), anyString(), anyString()))
-          .thenReturn(stubHabit());
+      when(habitService.createDailyHabit(any(), anyString(), anyString()))
+          .thenReturn(hydrateHabitWithQuest());
 
       mockMvc
           .perform(
@@ -102,13 +81,14 @@ public class HabitControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId":"avatar-1",
-                        "title":"Hydrate",
-                        "description":"Drink 2L of water",
-                        "recurrenceType":"DAILY"
-                      }
-                      """))
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"DAILY"
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isCreated());
 
       verify(habitService).createDailyHabit(eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION));
@@ -121,8 +101,8 @@ public class HabitControllerIT {
     @Test
     @DisplayName("delegates WEEKLY payload to createWeeklyHabit")
     void shouldDelegateWeeklyPayloadToService() throws Exception {
-      when(habitService.createWeeklyHabit(any(Id.class), anyString(), anyString(), any()))
-          .thenReturn(stubHabit());
+      when(habitService.createWeeklyHabit(any(), anyString(), anyString(), any()))
+          .thenReturn(hydrateHabitWithQuest());
 
       mockMvc
           .perform(
@@ -130,24 +110,25 @@ public class HabitControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId":"avatar-1",
-                        "title":"Hydrate",
-                        "description":"Drink 2L of water",
-                        "recurrenceType":"WEEKLY",
-                        "dayOfWeek":"MONDAY"
-                      }
-                      """))
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"WEEKLY",
+                                        "dayOfWeek":"MONDAY"
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isCreated());
 
-      verify(habitService).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
+      verify(habitService).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK);
     }
 
     @Test
     @DisplayName("delegates MONTHLY payload to createMonthlyHabit")
     void shouldDelegateMonthlyPayloadToService() throws Exception {
-      when(habitService.createMonthlyHabit(any(Id.class), anyString(), anyString(), anyInt()))
-          .thenReturn(stubHabit());
+      when(habitService.createMonthlyHabit(any(), anyString(), anyString(), anyInt()))
+          .thenReturn(hydrateHabitWithQuest());
 
       mockMvc
           .perform(
@@ -155,17 +136,18 @@ public class HabitControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId":"avatar-1",
-                        "title":"Hydrate",
-                        "description":"Drink 2L of water",
-                        "recurrenceType":"MONTHLY",
-                        "dayOfMonth":15
-                      }
-                      """))
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"MONTHLY",
+                                        "dayOfMonth":%d
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH)))
           .andExpect(status().isCreated());
 
-      verify(habitService).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
+      verify(habitService).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH);
     }
 
     @Test
@@ -177,13 +159,14 @@ public class HabitControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId":"avatar-1",
-                        "title":"Hydrate",
-                        "description":"Drink 2L of water",
-                        "recurrenceType":"YEARLY"
-                      }
-                      """))
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"YEARLY"
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Unknown recurrence type: YEARLY"));
 
@@ -202,7 +185,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with habit data when found")
     void shouldReturn200WhenFound() throws Exception {
-      when(habitService.getHabitById(HABIT_ID)).thenReturn(stubHabit());
+      when(habitService.getHabitById(HABIT_ID)).thenReturn(hydrateHabitWithQuest());
 
       mockMvc
           .perform(get("/api/v1/habits/{id}", HABIT_ID.value()))
@@ -211,19 +194,19 @@ public class HabitControllerIT {
           .andExpect(jsonPath("$.avatarId").value(AVATAR_ID.value()))
           .andExpect(jsonPath("$.title").value(TITLE))
           .andExpect(jsonPath("$.description").value(DESCRIPTION))
-          .andExpect(jsonPath("$.tags[0]").value("health"))
+          .andExpect(jsonPath("$.tags[0]").value(TAG_HEALTH))
           .andExpect(jsonPath("$.recurrence.type").value("DAILY"))
-          .andExpect(jsonPath("$.associatedQuestId").value("quest-1"));
+          .andExpect(jsonPath("$.associatedQuestId").value(QUEST_1));
     }
 
     @Test
     @DisplayName("returns 404 when habit does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(habitService.getHabitById(UNKNOWN_ID))
-          .thenThrow(new HabitNotFoundException(UNKNOWN_ID.value()));
+      when(habitService.getHabitById(GHOST_ID))
+          .thenThrow(new HabitNotFoundException(GHOST_ID.value()));
 
       mockMvc
-          .perform(get("/api/v1/habits/{id}", UNKNOWN_ID.value()))
+          .perform(get("/api/v1/habits/{id}", GHOST_ID.value()))
           .andExpect(status().isNotFound());
     }
   }
@@ -247,12 +230,12 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 404 when habit does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      doThrow(new HabitNotFoundException(UNKNOWN_ID.value()))
+      doThrow(new HabitNotFoundException(GHOST_ID.value()))
           .when(habitService)
-          .deleteHabitById(UNKNOWN_ID);
+          .deleteHabitById(GHOST_ID);
 
       mockMvc
-          .perform(delete("/api/v1/habits/{id}", UNKNOWN_ID.value()))
+          .perform(delete("/api/v1/habits/{id}", GHOST_ID.value()))
           .andExpect(status().isNotFound());
     }
   }
@@ -297,12 +280,12 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with habit tags")
     void shouldReturnTags() throws Exception {
       when(habitService.getTags(HABIT_ID))
-          .thenReturn(List.of(new Tag("health"), new Tag("fitness")));
+          .thenReturn(List.of(new Tag(TAG_HEALTH), new Tag("fitness")));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/tags", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.tags[0]").value("health"))
+          .andExpect(jsonPath("$.tags[0]").value(TAG_HEALTH))
           .andExpect(jsonPath("$.tags[1]").value("fitness"));
     }
   }
@@ -314,13 +297,13 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with recurrence payload")
     void shouldReturnRecurrence() throws Exception {
-      when(habitService.getRecurrence(HABIT_ID)).thenReturn(new WeeklyRecurrence(DayOfWeek.MONDAY));
+      when(habitService.getRecurrence(HABIT_ID)).thenReturn(WEEKLY_RECURRENCE);
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/recurrence", HABIT_ID.value()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.type").value("WEEKLY"))
-          .andExpect(jsonPath("$.dayOfWeek").value("MONDAY"));
+          .andExpect(jsonPath("$.dayOfWeek").value(DEFAULT_DAY_OF_WEEK.name()));
     }
   }
 
@@ -331,13 +314,12 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with last attended date")
     void shouldReturnLastAttendedDate() throws Exception {
-      LocalDateTime attendedAt = LocalDateTime.of(2026, 3, 16, 10, 15);
-      when(habitService.getLastAttendedDate(HABIT_ID)).thenReturn(attendedAt);
+      when(habitService.getLastAttendedDate(HABIT_ID)).thenReturn(ATTENDED_AT);
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/last-attended-date", HABIT_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.date").value("2026-03-16T10:15:00"));
+          .andExpect(jsonPath("$.date").value("2026-03-16T10:00:00"));
     }
   }
 
@@ -348,13 +330,14 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with habit event history")
     void shouldReturnHistory() throws Exception {
+      var habit = hydrateHabitWithQuest();
       when(habitService.getHistory(HABIT_ID))
           .thenReturn(
               List.of(
                   new HabitHistoryEvent(
-                      new HabitAttended(stubHabit(), AVATAR_ID),
-                      LocalDateTime.of(2026, 3, 17, 9, 30),
-                      "attendedAt=2026-03-17T09:30")));
+                      new HabitAttended(habit, AVATAR_ID),
+                      NEXT_ATTENDED_AT,
+                      "attendedAt=" + NEXT_ATTENDED_AT)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/history", HABIT_ID.value()))
@@ -374,7 +357,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and delegates title to service")
     void shouldReturn204AndDelegateTitle() throws Exception {
-      when(habitService.updateTitle(eq(HABIT_ID), anyString())).thenReturn(stubHabit());
+      when(habitService.updateTitle(eq(HABIT_ID), anyString())).thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
@@ -394,7 +377,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and delegates description to service")
     void shouldReturn204AndDelegateDescription() throws Exception {
-      when(habitService.updateDescription(eq(HABIT_ID), anyString())).thenReturn(stubHabit());
+      when(habitService.updateDescription(eq(HABIT_ID), anyString())).thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
@@ -414,19 +397,19 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and maps tags to value objects")
     void shouldReturn204AndMapTags() throws Exception {
-      when(habitService.updateTags(eq(HABIT_ID), anyList())).thenReturn(stubHabit());
+      when(habitService.updateTags(eq(HABIT_ID), anyList())).thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
               patch("/api/v1/habits/{id}/tags", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"tags\":[\"health\",\"mindset\"]}"))
+                  .content("{\"tags\":[\"%s\",\"%s\"]}".formatted(TAG_HEALTH, TAG_MINDSET)))
           .andExpect(status().isNoContent());
 
       verify(habitService)
           .updateTags(
               eq(HABIT_ID),
-              argThat(tags -> tags.equals(List.of(new Tag("health"), new Tag("mindset")))));
+              argThat(tags -> tags.equals(List.of(new Tag(TAG_HEALTH), new Tag(TAG_MINDSET)))));
     }
   }
 
@@ -438,7 +421,7 @@ public class HabitControllerIT {
     @DisplayName("returns 204 for DAILY recurrence")
     void shouldReturn204ForDaily() throws Exception {
       when(habitService.updateRecurrence(eq(HABIT_ID), any(DailyRecurrence.class)))
-          .thenReturn(stubHabit());
+          .thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
@@ -454,38 +437,41 @@ public class HabitControllerIT {
     @DisplayName("returns 204 for WEEKLY recurrence")
     void shouldReturn204ForWeekly() throws Exception {
       when(habitService.updateRecurrence(eq(HABIT_ID), any(WeeklyRecurrence.class)))
-          .thenReturn(stubHabit());
+          .thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
               patch("/api/v1/habits/{id}/recurrence", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"type\":\"WEEKLY\",\"dayOfWeek\":\"MONDAY\"}"))
+                  .content(
+                      "{\"type\":\"WEEKLY\",\"dayOfWeek\":\"%s\"}"
+                          .formatted(DEFAULT_DAY_OF_WEEK.name())))
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<habitquest.tracking.domain.reminder.Recurrence> captor =
           ArgumentCaptor.forClass(habitquest.tracking.domain.reminder.Recurrence.class);
       verify(habitService).updateRecurrence(eq(HABIT_ID), captor.capture());
-      assertThat(captor.getValue()).isEqualTo(new WeeklyRecurrence(DayOfWeek.MONDAY));
+      assertThat(captor.getValue()).isEqualTo(WEEKLY_RECURRENCE);
     }
 
     @Test
     @DisplayName("returns 204 for MONTHLY recurrence")
     void shouldReturn204ForMonthly() throws Exception {
       when(habitService.updateRecurrence(eq(HABIT_ID), any(MonthlyRecurrence.class)))
-          .thenReturn(stubHabit());
+          .thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
               patch("/api/v1/habits/{id}/recurrence", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"type\":\"MONTHLY\",\"dayOfMonth\":15}"))
+                  .content(
+                      "{\"type\":\"MONTHLY\",\"dayOfMonth\":%d}".formatted(DEFAULT_DAY_OF_MONTH)))
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<habitquest.tracking.domain.reminder.Recurrence> captor =
           ArgumentCaptor.forClass(habitquest.tracking.domain.reminder.Recurrence.class);
       verify(habitService).updateRecurrence(eq(HABIT_ID), captor.capture());
-      assertThat(captor.getValue()).isEqualTo(new MonthlyRecurrence(15));
+      assertThat(captor.getValue()).isEqualTo(MONTHLY_RECURRENCE);
     }
 
     @Test
@@ -511,18 +497,18 @@ public class HabitControllerIT {
     @DisplayName("returns 204 and delegates attend date")
     void shouldReturn204AndDelegateAttendDate() throws Exception {
       when(habitService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
-          .thenReturn(stubHabit());
+          .thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
               post("/api/v1/habits/{id}/attend", HABIT_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"date\":\"2026-03-17T09:30:00\"}"))
+                  .content("{\"date\":\"%s\"}".formatted(NEXT_ATTENDED_AT)))
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
       verify(habitService).attendHabit(eq(HABIT_ID), captor.capture());
-      assertThat(captor.getValue()).isEqualTo(LocalDateTime.of(2026, 3, 17, 9, 30));
+      assertThat(captor.getValue()).isEqualTo(NEXT_ATTENDED_AT);
     }
 
     @Test

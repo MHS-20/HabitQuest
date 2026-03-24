@@ -1,12 +1,10 @@
 package habitquest.tracking.application;
 
+import static habitquest.tracking.HabitFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import common.ddd.Id;
-import habitquest.tracking.domain.Avatar;
-import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;
@@ -15,11 +13,6 @@ import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.events.HabitNotAttended;
 import habitquest.tracking.domain.events.HabitObserver;
 import habitquest.tracking.domain.factory.HabitFactory;
-import habitquest.tracking.domain.reminder.DailyRecurrence;
-import habitquest.tracking.domain.reminder.MonthlyRecurrence;
-import habitquest.tracking.domain.reminder.Recurrence;
-import habitquest.tracking.domain.reminder.WeeklyRecurrence;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,30 +29,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("HabitServiceImpl")
 class HabitServiceImplTest {
 
-  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
-  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
-  private static final String TITLE = "Hydrate";
-  private static final String DESCRIPTION = "Drink 2L of water";
-  private static final Id<Habit> UNKNOWN_ID = new Id<>("missing");
-  private static final Id<Habit> OVERDUE_HABIT_ID = new Id<>("habit-overdue");
-
   @Mock private HabitRepository habitRepository;
   @Mock private HabitHistoryRepository historyRepository;
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
 
   private HabitServiceImpl service;
-
-  private Habit stubHabit() {
-    Habit habit =
-        new Habit(HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.empty());
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
-    habit.setTags(List.of(new Tag("health"), new Tag("wellness")));
-    habit.setRecurrence(new DailyRecurrence());
-    habit.attendHabit(LocalDateTime.of(2026, 3, 16, 10, 0));
-    return habit;
-  }
 
   @BeforeEach
   void setUp() {
@@ -73,11 +48,11 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("createDailyHabit delegates to factory, saves, and returns habit")
     void createsDaily() {
-      Habit habit = stubHabit();
+      var habit = hydrateHabit();
       when(habitFactory.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION)).thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
-      Habit created = service.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
+      var created = service.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
 
       assertThat(created).isSameAs(habit);
       verify(habitFactory).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
@@ -88,15 +63,15 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("createWeeklyHabit delegates to factory, saves, and returns habit")
     void createsWeekly() {
-      Habit habit = stubHabit();
-      when(habitFactory.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY))
+      var habit = hydrateHabit();
+      when(habitFactory.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK))
           .thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
-      Habit created = service.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
+      var created = service.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK);
 
       assertThat(created).isSameAs(habit);
-      verify(habitFactory).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DayOfWeek.MONDAY);
+      verify(habitFactory).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK);
       verify(habitRepository).save(habit);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
@@ -104,14 +79,15 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("createMonthlyHabit delegates to factory, saves, and returns habit")
     void createsMonthly() {
-      Habit habit = stubHabit();
-      when(habitFactory.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15)).thenReturn(habit);
+      var habit = hydrateHabit();
+      when(habitFactory.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH))
+          .thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
-      Habit created = service.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
+      var created = service.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH);
 
       assertThat(created).isSameAs(habit);
-      verify(habitFactory).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, 15);
+      verify(habitFactory).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH);
       verify(habitRepository).save(habit);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
@@ -124,7 +100,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("returns the habit when found")
     void found() {
-      Habit habit = stubHabit();
+      var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
       assertThat(service.getHabitById(HABIT_ID)).isSameAs(habit);
@@ -148,7 +124,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("deletes and emits HabitDeleted event")
     void deletesAndEmitsEvent() {
-      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(stubHabit()));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
       service.deleteHabitById(HABIT_ID);
 
@@ -169,8 +145,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("getTitle delegates to habit.getTitle()")
     void getTitle() {
-      Habit habit = stubHabit();
-      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
       assertThat(service.getTitle(HABIT_ID)).isEqualTo(TITLE);
     }
@@ -178,8 +153,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("getDescription delegates to habit.getDescription()")
     void getDescription() {
-      Habit habit = stubHabit();
-      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
       assertThat(service.getDescription(HABIT_ID)).isEqualTo(DESCRIPTION);
     }
@@ -187,29 +161,26 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("getTags delegates to habit.getTags()")
     void getTags() {
-      Habit habit = stubHabit();
-      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getTags(HABIT_ID)).containsExactly(new Tag("health"), new Tag("wellness"));
+      assertThat(service.getTags(HABIT_ID))
+          .containsExactly(new Tag(TAG_HEALTH), new Tag(TAG_WELLNESS));
     }
 
     @Test
     @DisplayName("getRecurrence delegates to habit.getRecurrence()")
     void getRecurrence() {
-      Habit habit = stubHabit();
-      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getRecurrence(HABIT_ID)).isEqualTo(new DailyRecurrence());
+      assertThat(service.getRecurrence(HABIT_ID)).isEqualTo(DAILY_RECURRENCE);
     }
 
     @Test
     @DisplayName("getLastAttendedDate delegates to habit.getLastAttendedDate()")
     void getLastAttendedDate() {
-      Habit habit = stubHabit();
-      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getLastAttendedDate(HABIT_ID))
-          .isEqualTo(LocalDateTime.of(2026, 3, 16, 10, 0));
+      assertThat(service.getLastAttendedDate(HABIT_ID)).isEqualTo(ATTENDED_AT);
     }
 
     @Test
@@ -230,10 +201,10 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("updates title and saves")
     void updates() {
-      Habit habit = stubHabit();
+      var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      Habit updated = service.updateTitle(HABIT_ID, "Read");
+      var updated = service.updateTitle(HABIT_ID, "Read");
 
       assertThat(updated.getTitle()).isEqualTo("Read");
       verify(habitRepository).save(habit);
@@ -247,10 +218,10 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("updates description and saves")
     void updates() {
-      Habit habit = stubHabit();
+      var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      Habit updated = service.updateDescription(HABIT_ID, "Read 20 pages");
+      var updated = service.updateDescription(HABIT_ID, "Read 20 pages");
 
       assertThat(updated.getDescription()).isEqualTo("Read 20 pages");
       verify(habitRepository).save(habit);
@@ -264,13 +235,13 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("updates tags and saves")
     void updates() {
-      Habit habit = stubHabit();
-      List<Tag> tags = List.of(new Tag("mindset"));
+      var habit = hydrateHabit();
+      var tags = List.of(new Tag(TAG_MINDSET));
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      Habit updated = service.updateTags(HABIT_ID, tags);
+      var updated = service.updateTags(HABIT_ID, tags);
 
-      assertThat(updated.getTags()).containsExactly(new Tag("mindset"));
+      assertThat(updated.getTags()).containsExactly(new Tag(TAG_MINDSET));
       verify(habitRepository).save(habit);
     }
   }
@@ -282,13 +253,12 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("updates recurrence and saves")
     void updates() {
-      Habit habit = stubHabit();
-      Recurrence recurrence = new WeeklyRecurrence(DayOfWeek.MONDAY);
+      var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      Habit updated = service.updateRecurrence(HABIT_ID, recurrence);
+      var updated = service.updateRecurrence(HABIT_ID, WEEKLY_RECURRENCE);
 
-      assertThat(updated.getRecurrence()).isEqualTo(new WeeklyRecurrence(DayOfWeek.MONDAY));
+      assertThat(updated.getRecurrence()).isEqualTo(WEEKLY_RECURRENCE);
       verify(habitRepository).save(habit);
     }
   }
@@ -300,13 +270,12 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("updates last attended date, saves, and emits HabitAttended")
     void attendsAndEmitsEvent() {
-      Habit habit = stubHabit();
-      LocalDateTime attendedAt = LocalDateTime.of(2026, 3, 17, 9, 30);
+      var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      Habit attended = service.attendHabit(HABIT_ID, attendedAt);
+      var attended = service.attendHabit(HABIT_ID, NEXT_ATTENDED_AT);
 
-      assertThat(attended.getLastAttendedDate()).isEqualTo(attendedAt);
+      assertThat(attended.getLastAttendedDate()).isEqualTo(NEXT_ATTENDED_AT);
       verify(habitRepository).save(habit);
 
       ArgumentCaptor<HabitEvent> captor = ArgumentCaptor.forClass(HabitEvent.class);
@@ -335,20 +304,9 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("emits HabitNotAttended when last attended is null")
     void emitsForNeverAttended() {
-      Habit neverAttended =
-          new Habit(
-              new Id<>("habit-null"),
-              AVATAR_ID,
-              TITLE,
-              DESCRIPTION,
-              new DailyRecurrence(),
-              Optional.empty());
-      neverAttended.setTitle(TITLE);
-      neverAttended.setDescription(DESCRIPTION);
-      neverAttended.setRecurrence(new DailyRecurrence());
-
+      var neverAttended = neverAttendedHabit();
       when(habitRepository.findAll()).thenReturn(List.of(neverAttended));
-      when(historyRepository.findByHabitId(new Id<>("habit-null"))).thenReturn(List.of());
+      when(historyRepository.findByHabitId(neverAttended.getId())).thenReturn(List.of());
 
       service.detectOverdueHabits();
 
@@ -362,19 +320,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("emits HabitNotAttended when next expected date is in the past")
     void emitsForOverdueHabit() {
-      Habit overdue =
-          new Habit(
-              OVERDUE_HABIT_ID,
-              AVATAR_ID,
-              TITLE,
-              DESCRIPTION,
-              new DailyRecurrence(),
-              Optional.empty());
-      overdue.setTitle(TITLE);
-      overdue.setDescription(DESCRIPTION);
-      overdue.setRecurrence(new DailyRecurrence());
-      overdue.attendHabit(LocalDateTime.now().minusDays(2));
-
+      var overdue = overdueHabit();
       when(habitRepository.findAll()).thenReturn(List.of(overdue));
       when(historyRepository.findByHabitId(OVERDUE_HABIT_ID)).thenReturn(List.of());
 
@@ -390,19 +336,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("does not emit event when habit is not overdue")
     void doesNotEmitForUpToDateHabit() {
-      Habit upToDate =
-          new Habit(
-              new Id<>("habit-ok"),
-              AVATAR_ID,
-              TITLE,
-              DESCRIPTION,
-              new MonthlyRecurrence(20),
-              Optional.empty());
-      upToDate.setTitle(TITLE);
-      upToDate.setDescription(DESCRIPTION);
-      upToDate.setRecurrence(new MonthlyRecurrence(20));
-      upToDate.attendHabit(LocalDateTime.now());
-
+      var upToDate = upToDateMonthlyHabit();
       when(habitRepository.findAll()).thenReturn(List.of(upToDate));
 
       service.detectOverdueHabits();
@@ -413,16 +347,7 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("does not append duplicate NOT_ATTENDED marker for same overdue slot")
     void deduplicatesNotAttendedHistory() {
-      Habit overdue =
-          new Habit(
-              OVERDUE_HABIT_ID,
-              AVATAR_ID,
-              TITLE,
-              DESCRIPTION,
-              new DailyRecurrence(),
-              Optional.empty());
-      overdue.setRecurrence(new DailyRecurrence());
-      overdue.attendHabit(LocalDateTime.now().minusDays(2));
+      var overdue = overdueHabit();
       String expectedMarker =
           "expectedAt=" + overdue.getRecurrence().nextAfter(overdue.getLastAttendedDate());
 
@@ -449,17 +374,15 @@ class HabitServiceImplTest {
     @Test
     @DisplayName("returns stored history for an existing habit")
     void returnsHistory() {
-      Habit habit = stubHabit();
-      List<HabitHistoryEvent> history =
+      var habit = hydrateHabit();
+      var history =
           List.of(
               new HabitHistoryEvent(
                   new HabitAttended(habit, habit.getAvatarId()), LocalDateTime.now(), "attended"));
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
       when(historyRepository.findByHabitId(HABIT_ID)).thenReturn(history);
 
-      List<HabitHistoryEvent> result = service.getHistory(HABIT_ID);
-
-      assertThat(result).isEqualTo(history);
+      assertThat(service.getHistory(HABIT_ID)).isEqualTo(history);
     }
   }
 }
