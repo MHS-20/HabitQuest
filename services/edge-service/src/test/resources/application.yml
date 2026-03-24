@@ -8,6 +8,8 @@ spring:
         binder:
           brokers: ${KAFKA_BROKERS:localhost:9092}
     gateway:
+      function:
+        enabled: false
       mvc:
         routes:
           - id: avatar-service

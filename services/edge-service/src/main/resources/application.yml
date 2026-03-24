@@ -35,6 +35,8 @@ spring:
         max-interval: 2000
         multiplier: 1.1
     gateway:
+      function:
+        enabled: false
       mvc:
         routes:
           - id: avatar-service

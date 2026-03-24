@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import common.ddd.Id;
+import habitquest.edge.application.UserNotifier;
 import habitquest.edge.domain.User;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +21,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestClient;
@@ -110,6 +113,10 @@ class GatewayRoutingTest {
   }
 
   @Autowired MockMvc mockMvc;
+
+  @MockitoBean UserNotifier userNotifier;
+
+  @MockitoBean AvatarClient avatarClient;
 
   // Must match app.jwt.secret property above
   private final JwtService jwtService = new JwtService("test-secret-key-minimum-32-chars!!", 3600L);
@@ -208,5 +215,28 @@ class GatewayRoutingTest {
 
     avatarService.verify(
         getRequestedFor(urlPathEqualTo(AVATAR_PATH)).withHeader(AUTH_HEADER, equalTo(authHeader)));
+  }
+
+  @Test
+  @DisplayName("POST /auth/register → AuthController (non function router)")
+  void authRegister_routedToAuthController_notFunctionRouter() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"name\":\"Test User\",\"email\":\"test@example.com\",\"password\":\"password123\"}"))
+        .andExpect(status().isCreated());
+  }
+
+  @Test
+  @DisplayName("POST /auth/login → AuthController (non function router)")
+  void authLogin_routedToAuthController_notFunctionRouter() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"nonexistent@example.com\",\"password\":\"wrongpass\"}"))
+        .andExpect(status().isUnauthorized());
   }
 }
