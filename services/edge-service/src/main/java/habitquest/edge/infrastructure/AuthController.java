@@ -13,6 +13,8 @@ import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,32 +31,49 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-    try {
-      AuthResponse response =
-          authService.register(request.name, request.email(), request.password());
-      avatarClient.createAvatar(response.userId().value(), request.name());
-      log.info(response, "User registered successfully");
-      return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    } catch (UserAlreadyExistsException e) {
-      log.warn(e, "Registration failed: user already exists");
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    } catch (AvatarCreationException e) {
-      log.error(e, "Registration failed: avatar creation error", e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+  public Mono<ResponseEntity<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+    return Mono.fromCallable(
+            () -> authService.register(request.name, request.email(), request.password()))
+        .subscribeOn(Schedulers.boundedElastic())
+        .flatMap(
+            response ->
+                avatarClient
+                    .createAvatar(response.userId().value(), request.name())
+                    .thenReturn(response))
+        .map(
+            response -> {
+              log.info(response, "User registered successfully");
+              return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            })
+        .onErrorResume(
+            UserAlreadyExistsException.class,
+            e -> {
+              log.warn(e, "Registration failed: user already exists");
+              return Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).build());
+            })
+        .onErrorResume(
+            AvatarCreationException.class,
+            e -> {
+              log.error(e, "Registration failed: avatar creation error", e);
+              return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            });
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-    try {
-      AuthResponse response = authService.login(request.email(), request.password());
-      log.info(response, "User logged in successfully");
-      return ResponseEntity.ok(response);
-    } catch (UserNotFoundException | InvalidCredentialsException e) {
-      log.warn(e, "Login failed: invalid credentials or user not found");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+  public Mono<ResponseEntity<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+    return Mono.fromCallable(() -> authService.login(request.email(), request.password()))
+        .subscribeOn(Schedulers.boundedElastic())
+        .map(
+            response -> {
+              log.info(response, "User logged in successfully");
+              return ResponseEntity.ok(response);
+            })
+        .onErrorResume(
+            e -> e instanceof UserNotFoundException || e instanceof InvalidCredentialsException,
+            e -> {
+              log.warn(e, "Login failed: invalid credentials or user not found");
+              return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+            });
   }
 
   @PostMapping("/validate")

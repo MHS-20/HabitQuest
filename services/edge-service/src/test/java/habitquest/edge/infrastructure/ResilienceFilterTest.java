@@ -1,6 +1,8 @@
 package habitquest.edge.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 import habitquest.edge.application.EdgeLogger;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -8,9 +10,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 @SuppressWarnings({"checkstyle:VisibilityModifier"})
 @ExtendWith(MockitoExtension.class)
@@ -27,9 +31,7 @@ class ResilienceFilterTest {
   @Mock CircuitBreakerRegistry circuitBreakerRegistry;
   @Mock RateLimiterRegistry rateLimiterRegistry;
   @Mock EdgeLogger log;
-  @Mock HttpServletRequest request;
-  @Mock HttpServletResponse response;
-  @Mock FilterChain chain;
+  @Mock WebFilterChain chain;
 
   ResilienceFilter resilienceFilter;
 
@@ -41,8 +43,15 @@ class ResilienceFilterTest {
     resilienceFilter = new ResilienceFilter(circuitBreakerRegistry, rateLimiterRegistry, log);
     defaultRateLimiter = RateLimiter.ofDefaults("test");
     defaultCircuitBreaker = CircuitBreaker.ofDefaults("test");
-    when(rateLimiterRegistry.rateLimiter(anyString())).thenReturn(defaultRateLimiter);
-    when(circuitBreakerRegistry.circuitBreaker(anyString())).thenReturn(defaultCircuitBreaker);
+    lenient().when(rateLimiterRegistry.rateLimiter(anyString())).thenReturn(defaultRateLimiter);
+    lenient()
+        .when(circuitBreakerRegistry.circuitBreaker(anyString()))
+        .thenReturn(defaultCircuitBreaker);
+    lenient().when(chain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+  }
+
+  private MockServerWebExchange exchangeForPath(String path) {
+    return MockServerWebExchange.from(MockServerHttpRequest.get(path).build());
   }
 
   // ── happy path ────────────────────────────────────────────────────────────
@@ -50,12 +59,12 @@ class ResilienceFilterTest {
   @Test
   @DisplayName("richiesta normale passa attraverso il filtro senza errori")
   void doFilter_normalRequest_chainsThrough() throws Exception {
-    when(request.getRequestURI()).thenReturn("/api/v1/avatars/1");
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/avatars/1");
 
-    resilienceFilter.doFilter(request, response, chain);
+    resilienceFilter.filter(exchange, chain).block();
 
-    verify(chain).doFilter(request, response);
-    verify(response, never()).setStatus(anyInt());
+    verify(chain).filter(exchange);
+    assertNull(exchange.getResponse().getStatusCode());
   }
 
   // ── rate limiter ──────────────────────────────────────────────────────────
@@ -72,9 +81,10 @@ class ResilienceFilterTest {
     RateLimiter exhausted = RateLimiter.of("exhausted", config);
     exhausted.acquirePermission();
     when(rateLimiterRegistry.rateLimiter(anyString())).thenReturn(exhausted);
-    when(request.getRequestURI()).thenReturn("/api/v1/avatars/1");
-    resilienceFilter.doFilter(request, response, chain);
-    verify(response).setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/avatars/1");
+
+    resilienceFilter.filter(exchange, chain).block();
+    assertEquals(HttpStatus.TOO_MANY_REQUESTS, exchange.getResponse().getStatusCode());
   }
 
   // ── circuit breaker ───────────────────────────────────────────────────────
@@ -85,12 +95,11 @@ class ResilienceFilterTest {
     CircuitBreaker openCb = CircuitBreaker.ofDefaults("open-test");
     openCb.transitionToOpenState();
     when(circuitBreakerRegistry.circuitBreaker(anyString())).thenReturn(openCb);
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/guilds/1");
 
-    when(request.getRequestURI()).thenReturn("/api/v1/guilds/1");
+    resilienceFilter.filter(exchange, chain).block();
 
-    resilienceFilter.doFilter(request, response, chain);
-
-    verify(response).setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+    assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exchange.getResponse().getStatusCode());
   }
 
   // ── service name resolution ───────────────────────────────────────────────
@@ -98,9 +107,9 @@ class ResilienceFilterTest {
   @Test
   @DisplayName("/api/v1/battles → guildCircuitBreaker (stesso servizio)")
   void doFilter_battlesPath_usesGuildCircuitBreaker() throws Exception {
-    when(request.getRequestURI()).thenReturn("/api/v1/battles/42");
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/battles/42");
 
-    resilienceFilter.doFilter(request, response, chain);
+    resilienceFilter.filter(exchange, chain).block();
 
     verify(circuitBreakerRegistry).circuitBreaker("guildCircuitBreaker");
   }
@@ -108,9 +117,9 @@ class ResilienceFilterTest {
   @Test
   @DisplayName("/api/v1/guilds → guildCircuitBreaker")
   void doFilter_guildsPath_usesGuildCircuitBreaker() throws Exception {
-    when(request.getRequestURI()).thenReturn("/api/v1/guilds/1");
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/guilds/1");
 
-    resilienceFilter.doFilter(request, response, chain);
+    resilienceFilter.filter(exchange, chain).block();
 
     verify(circuitBreakerRegistry).circuitBreaker("guildCircuitBreaker");
   }
@@ -118,9 +127,9 @@ class ResilienceFilterTest {
   @Test
   @DisplayName("/api/v1/quests → questCircuitBreaker")
   void doFilter_questsPath_usesQuestCircuitBreaker() throws Exception {
-    when(request.getRequestURI()).thenReturn("/api/v1/quests/1");
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/quests/1");
 
-    resilienceFilter.doFilter(request, response, chain);
+    resilienceFilter.filter(exchange, chain).block();
 
     verify(circuitBreakerRegistry).circuitBreaker("questCircuitBreaker");
   }
@@ -128,9 +137,9 @@ class ResilienceFilterTest {
   @Test
   @DisplayName("/api/v1/habits → habitCircuitBreaker")
   void doFilter_habitsPath_usesHabitCircuitBreaker() throws Exception {
-    when(request.getRequestURI()).thenReturn("/api/v1/habits/1");
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/habits/1");
 
-    resilienceFilter.doFilter(request, response, chain);
+    resilienceFilter.filter(exchange, chain).block();
 
     verify(circuitBreakerRegistry).circuitBreaker("habitCircuitBreaker");
   }
@@ -138,9 +147,9 @@ class ResilienceFilterTest {
   @Test
   @DisplayName("path sconosciuto → default circuit breaker")
   void doFilter_unknownPath_usesDefaultCircuitBreaker() throws Exception {
-    when(request.getRequestURI()).thenReturn("/api/v1/unknown/1");
+    MockServerWebExchange exchange = exchangeForPath("/api/v1/unknown/1");
 
-    resilienceFilter.doFilter(request, response, chain);
+    resilienceFilter.filter(exchange, chain).block();
 
     verify(circuitBreakerRegistry).circuitBreaker("default");
   }
