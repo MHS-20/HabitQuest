@@ -6,13 +6,14 @@ import habitquest.edge.application.UserNotifier;
 import habitquest.edge.domain.User;
 import java.time.Instant;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
 @Adapter
 @Component
 public class UserNotifierImpl implements UserNotifier {
 
-  static final String USER_REGISTERED_BINDING = "user.registered";
+  static final String USER_REGISTERED_BINDING = "userRegistered-out-0";
 
   private final StreamBridge streamBridge;
   private final EdgeLogger log;
@@ -27,9 +28,14 @@ public class UserNotifierImpl implements UserNotifier {
     UserRegisteredMessage message =
         new UserRegisteredMessage(user.getId().value(), user.getEmail(), Instant.now());
     log.info(message, "Publishing UserRegistered event");
-    boolean sent = streamBridge.send(USER_REGISTERED_BINDING, message);
-    if (!sent) {
-      log.error(message, "Failed to publish UserRegistered event", null);
+    try {
+      boolean sent = streamBridge.send(USER_REGISTERED_BINDING, message);
+      if (!sent) {
+        log.error(message, "Failed to publish UserRegistered event", null);
+      }
+    } catch (MessagingException e) {
+      // Registration should not fail when the event broker is temporarily unavailable.
+      log.error(message, "UserRegistered publish error", e);
     }
   }
 

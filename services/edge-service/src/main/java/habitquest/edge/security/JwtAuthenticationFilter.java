@@ -3,22 +3,20 @@ package habitquest.edge.security;
 import habitquest.edge.infrastructure.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter implements WebFilter {
 
   private static final List<String> PUBLIC_PATHS =
       List.of("/auth/register", "/auth/login", "/actuator");
@@ -29,21 +27,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     this.jwtService = jwtService;
   }
 
-  @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
-    String path = request.getRequestURI();
+  private boolean isPublicPath(String path) {
     return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
   }
 
   @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-      throws ServletException, IOException {
+  public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    String path = exchange.getRequest().getPath().value();
+    if (isPublicPath(path)) {
+      return chain.filter(exchange);
+    }
 
-    String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+    String header = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
     if (header == null || !header.startsWith("Bearer ")) {
-      chain.doFilter(request, response); // SecurityConfig decide se bloccare
-      return;
+      return chain.filter(exchange);
     }
 
     String token = header.substring(7);
@@ -52,16 +49,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       Claims claims = jwtService.validateAndExtract(token);
       String userId = claims.getSubject();
       String role = claims.get("role", String.class);
+      if (role == null || role.isBlank()) {
+        role = "USER";
+      }
 
       var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
       var auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
-      SecurityContextHolder.getContext().setAuthentication(auth);
-      chain.doFilter(request, response);
+      return chain
+          .filter(exchange)
+          .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
 
     } catch (JwtException | IllegalArgumentException e) {
-      SecurityContextHolder.clearContext();
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+      return exchange.getResponse().setComplete();
     }
   }
 }

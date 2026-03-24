@@ -7,21 +7,18 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 @Component
 @Order(1)
-public class ResilienceFilter implements Filter {
+public class ResilienceFilter implements WebFilter {
 
   private final CircuitBreakerRegistry circuitBreakerRegistry;
   private final RateLimiterRegistry rateLimiterRegistry;
@@ -37,12 +34,8 @@ public class ResilienceFilter implements Filter {
   }
 
   @Override
-  public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-      throws IOException, ServletException {
-
-    HttpServletRequest httpReq = (HttpServletRequest) req;
-    HttpServletResponse httpRes = (HttpServletResponse) res;
-    String uri = httpReq.getRequestURI();
+  public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    String uri = exchange.getRequest().getPath().value();
     String serviceName = resolveServiceName(uri);
 
     RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter("default");
@@ -50,28 +43,33 @@ public class ResilienceFilter implements Filter {
 
     log.info(new FilterRequest(uri, serviceName), "Incoming request");
 
-    try {
-      Runnable decorated =
-          RateLimiter.decorateRunnable(
-              rateLimiter,
-              CircuitBreaker.decorateRunnable(
-                  circuitBreaker,
-                  () -> {
-                    try {
-                      chain.doFilter(req, res);
-                    } catch (IOException | ServletException ex) {
-                      throw new RuntimeException(ex);
-                    }
-                  }));
+    if (!rateLimiter.acquirePermission()) {
+      log.warn(new FilterRequest(uri, serviceName), "Rate limit exceeded");
+      exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+      return exchange.getResponse().setComplete();
+    }
 
-      decorated.run();
+    if (!circuitBreaker.tryAcquirePermission()) {
+      log.warn(
+          new FilterRequest(uri, serviceName), "Circuit breaker open for service: " + serviceName);
+      exchange.getResponse().setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+      return exchange.getResponse().setComplete();
+    }
+
+    try {
+      return chain
+          .filter(exchange)
+          .doOnSuccess(ignored -> circuitBreaker.onSuccess(0, TimeUnit.NANOSECONDS))
+          .doOnError(error -> circuitBreaker.onError(0, TimeUnit.NANOSECONDS, error));
     } catch (RequestNotPermitted e) {
       log.warn(new FilterRequest(uri, serviceName), "Rate limit exceeded");
-      httpRes.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+      exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+      return exchange.getResponse().setComplete();
     } catch (CallNotPermittedException e) {
       log.warn(
           new FilterRequest(uri, serviceName), "Circuit breaker open for service: " + serviceName);
-      httpRes.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+      exchange.getResponse().setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+      return exchange.getResponse().setComplete();
     }
   }
 
