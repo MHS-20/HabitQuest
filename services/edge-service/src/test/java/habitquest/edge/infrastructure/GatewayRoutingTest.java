@@ -98,7 +98,6 @@ class GatewayRoutingTest {
 
   @BeforeEach
   void setUp() {
-    // Il RestClient punta all'istanza del Gateway in esecuzione sulla porta random
     restClient = restClientBuilder.baseUrl("http://localhost:" + port).build();
     User user = new User(new Id<>("user-1"), "mario rossi", "mario@example.com", "hash");
     authHeader = "Bearer " + jwtService.generateToken(user);
