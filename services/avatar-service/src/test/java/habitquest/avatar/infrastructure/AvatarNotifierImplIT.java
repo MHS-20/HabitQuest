@@ -46,7 +46,7 @@ public class AvatarNotifierImplIT {
 
   @Container
   static final KafkaContainer KAFKA =
-          new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
+      new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -75,18 +75,18 @@ public class AvatarNotifierImplIT {
   @BeforeEach
   void createConsumer() {
     consumer =
-            new KafkaConsumer<>(
-                    Map.of(
-                            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                            KAFKA.getBootstrapServers(),
-                            ConsumerConfig.GROUP_ID_CONFIG,
-                            "test-group-" + System.nanoTime(),
-                            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-                            "earliest",
-                            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                            StringDeserializer.class.getName(),
-                            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                            StringDeserializer.class.getName()));
+        new KafkaConsumer<>(
+            Map.of(
+                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                KAFKA.getBootstrapServers(),
+                ConsumerConfig.GROUP_ID_CONFIG,
+                "test-group-" + System.nanoTime(),
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                "earliest",
+                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class.getName(),
+                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class.getName()));
   }
 
   @AfterEach

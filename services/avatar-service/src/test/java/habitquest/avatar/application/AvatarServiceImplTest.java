@@ -9,12 +9,7 @@ import common.ddd.Id;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
-import habitquest.avatar.domain.items.EquippedItems;
-import habitquest.avatar.domain.items.Inventory;
-import habitquest.avatar.domain.items.Item;
-import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.domain.spells.Spell;
-import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,7 +86,7 @@ class AvatarServiceImplTest {
       when(avatarRepository.findById(UNKNOWN_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> service.getAvatarById(UNKNOWN_ID))
-              .isInstanceOf(AvatarNotFoundException.class);
+          .isInstanceOf(AvatarNotFoundException.class);
     }
   }
 
@@ -117,7 +112,7 @@ class AvatarServiceImplTest {
       when(avatarRepository.findById(new Id<>(BAD_ID))).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> service.deleteAvatar(new Id<>(BAD_ID)))
-              .isInstanceOf(AvatarNotFoundException.class);
+          .isInstanceOf(AvatarNotFoundException.class);
     }
   }
 
@@ -318,11 +313,11 @@ class AvatarServiceImplTest {
       List<AvatarEvent> events = captor.getAllValues();
       assertThat(events).anySatisfy(e -> assertThat(e).isInstanceOf(LevelUpped.class));
       assertThat(events)
-              .anySatisfy(
-                      e -> {
-                        assertThat(e).isInstanceOf(NewSpellLearned.class);
-                        assertThat(((NewSpellLearned) e).spell()).isEqualTo(Spell.FIREBALL);
-                      });
+          .anySatisfy(
+              e -> {
+                assertThat(e).isInstanceOf(NewSpellLearned.class);
+                assertThat(((NewSpellLearned) e).spell()).isEqualTo(Spell.FIREBALL);
+              });
     }
 
     @Test

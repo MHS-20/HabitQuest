@@ -57,12 +57,12 @@ public class AvatarControllerIT {
       when(avatarService.createAvatar(AVATAR_ID, AVATAR_NAME)).thenReturn(AVATAR_ID);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars")
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"id\":\"" + AVATAR_1 + "\",\"name\": \"" + AVATAR_NAME + "\"}"))
-              .andExpect(status().isCreated())
-              .andExpect(jsonPath("$.id").value(AVATAR_1));
+          .perform(
+              post("/api/v1/avatars")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"id\":\"" + AVATAR_1 + "\",\"name\": \"" + AVATAR_NAME + "\"}"))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.id").value(AVATAR_1));
     }
 
     @Test
@@ -71,11 +71,11 @@ public class AvatarControllerIT {
       when(avatarService.createAvatar(any(Id.class), anyString())).thenReturn(AVATAR_ID);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars")
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"id\":\"" + AVATAR_1 + "\",\"name\": \"" + AVATAR_NAME + "\"}"))
-              .andExpect(status().isCreated());
+          .perform(
+              post("/api/v1/avatars")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"id\":\"" + AVATAR_1 + "\",\"name\": \"" + AVATAR_NAME + "\"}"))
+          .andExpect(status().isCreated());
 
       verify(avatarService).createAvatar(AVATAR_ID, AVATAR_NAME);
     }
@@ -93,16 +93,16 @@ public class AvatarControllerIT {
       when(avatarService.getAvatarById(AVATAR_ID)).thenReturn(readOnlyAvatar());
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.name").value(AVATAR_NAME));
+          .perform(get("/api/v1/avatars/{id}", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.name").value(AVATAR_NAME));
     }
 
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       when(avatarService.getAvatarById(UNKNOWN_ID))
-              .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
 
       mockMvc.perform(get("/api/v1/avatars/{id}", UNKNOWN_AVATAR)).andExpect(status().isNotFound());
     }
@@ -119,14 +119,15 @@ public class AvatarControllerIT {
         when(avatarService.searchAvatars(any())).thenReturn(List.of(readOnlyAvatar()));
 
         mockMvc
-                .perform(
-                        get("/api/v1/avatars/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
                         {"name":"Hero","minLevel":null,"maxLevel":null}
                         """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.avatarResponseList[0].name").value(AVATAR_NAME));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.avatarResponseList[0].name").value(AVATAR_NAME));
       }
 
       @Test
@@ -135,13 +136,14 @@ public class AvatarControllerIT {
         when(avatarService.searchAvatars(any())).thenReturn(List.of());
 
         mockMvc
-                .perform(
-                        get("/api/v1/avatars/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
                         {"name":"unknown","minLevel":null,"maxLevel":null}
                         """))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
       }
 
       @Test
@@ -150,13 +152,14 @@ public class AvatarControllerIT {
         when(avatarService.searchAvatars(any())).thenReturn(List.of());
 
         mockMvc
-                .perform(
-                        get("/api/v1/avatars/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
                         {"name":"Hero","minLevel":1,"maxLevel":10}
                         """))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         verify(avatarService).searchAvatars(any());
       }
@@ -165,17 +168,18 @@ public class AvatarControllerIT {
       @DisplayName("returns 400 when domain rejects the search criteria")
       void shouldReturn400OnInvalidCriteria() throws Exception {
         when(avatarService.searchAvatars(any()))
-                .thenThrow(new IllegalArgumentException("minLevel cannot be greater than maxLevel"));
+            .thenThrow(new IllegalArgumentException("minLevel cannot be greater than maxLevel"));
 
         mockMvc
-                .perform(
-                        get("/api/v1/avatars/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
+            .perform(
+                get("/api/v1/avatars/search")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
                         {"name":null,"minLevel":10,"maxLevel":1}
                         """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("minLevel cannot be greater than maxLevel"));
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("minLevel cannot be greater than maxLevel"));
       }
     }
   }
@@ -200,12 +204,12 @@ public class AvatarControllerIT {
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_AVATAR))
-              .when(avatarService)
-              .deleteAvatar(UNKNOWN_ID);
+          .when(avatarService)
+          .deleteAvatar(UNKNOWN_ID);
 
       mockMvc
-              .perform(delete("/api/v1/avatars/{id}", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(delete("/api/v1/avatars/{id}", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -221,11 +225,11 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).updateName(eq(AVATAR_ID), anyString());
 
       mockMvc
-              .perform(
-                      patch("/api/v1/avatars/{id}/name", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"name\": \"NewHero\"}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              patch("/api/v1/avatars/{id}/name", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"name\": \"NewHero\"}"))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).updateName(AVATAR_ID, "NewHero");
     }
@@ -234,16 +238,16 @@ public class AvatarControllerIT {
     @DisplayName("returns 400 when domain rejects blank name")
     void shouldReturn400OnBlankName() throws Exception {
       doThrow(new IllegalArgumentException("Name cannot be null or blank"))
-              .when(avatarService)
-              .updateName(eq(AVATAR_ID), eq(""));
+          .when(avatarService)
+          .updateName(eq(AVATAR_ID), eq(""));
 
       mockMvc
-              .perform(
-                      patch("/api/v1/avatars/{id}/name", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"name\": \"\"}"))
-              .andExpect(status().isBadRequest())
-              .andExpect(jsonPath("$.message").value("Name cannot be null or blank"));
+          .perform(
+              patch("/api/v1/avatars/{id}/name", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"name\": \"\"}"))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Name cannot be null or blank"));
     }
   }
 
@@ -259,9 +263,9 @@ public class AvatarControllerIT {
       when(avatarService.getMoney(AVATAR_ID)).thenReturn(new Money(250));
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/money", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.amount").value(250));
+          .perform(get("/api/v1/avatars/{id}/money", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.amount").value(250));
     }
   }
 
@@ -277,11 +281,11 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).earnMoney(AVATAR_ID, 100);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/money/earn", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 100}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              post("/api/v1/avatars/{id}/money/earn", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 100}"))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).earnMoney(AVATAR_ID, 100);
     }
@@ -290,15 +294,15 @@ public class AvatarControllerIT {
     @DisplayName("returns 400 when amount is not positive")
     void shouldReturn400OnNonPositiveAmount() throws Exception {
       doThrow(new IllegalArgumentException("Amount must be positive"))
-              .when(avatarService)
-              .earnMoney(AVATAR_ID, 0);
+          .when(avatarService)
+          .earnMoney(AVATAR_ID, 0);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/money/earn", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 0}"))
-              .andExpect(status().isBadRequest());
+          .perform(
+              post("/api/v1/avatars/{id}/money/earn", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 0}"))
+          .andExpect(status().isBadRequest());
     }
   }
 
@@ -314,11 +318,11 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).spendMoney(AVATAR_ID, 50);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/money/spend", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 50}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              post("/api/v1/avatars/{id}/money/spend", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 50}"))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).spendMoney(AVATAR_ID, 50);
     }
@@ -327,16 +331,16 @@ public class AvatarControllerIT {
     @DisplayName("returns 400 when avatar has insufficient funds")
     void shouldReturn400OnInsufficientFunds() throws Exception {
       doThrow(new IllegalStateException("Not enough money"))
-              .when(avatarService)
-              .spendMoney(AVATAR_ID, 9999);
+          .when(avatarService)
+          .spendMoney(AVATAR_ID, 9999);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/money/spend", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 9999}"))
-              .andExpect(status().isBadRequest())
-              .andExpect(jsonPath("$.message").value("Not enough money"));
+          .perform(
+              post("/api/v1/avatars/{id}/money/spend", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 9999}"))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Not enough money"));
     }
   }
 
@@ -354,11 +358,11 @@ public class AvatarControllerIT {
       when(avatarService.getLevel(AVATAR_ID)).thenReturn(level);
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/level", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.levelNumber").value(3))
-              .andExpect(jsonPath("$.currentExperience").value(50))
-              .andExpect(jsonPath("$.experienceRequired").value(200));
+          .perform(get("/api/v1/avatars/{id}/level", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.levelNumber").value(3))
+          .andExpect(jsonPath("$.currentExperience").value(50))
+          .andExpect(jsonPath("$.experienceRequired").value(200));
     }
   }
 
@@ -376,10 +380,10 @@ public class AvatarControllerIT {
       when(avatarService.getHealth(AVATAR_ID)).thenReturn(health);
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/health", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.current").value(75))
-              .andExpect(jsonPath("$.max").value(100));
+          .perform(get("/api/v1/avatars/{id}/health", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.current").value(75))
+          .andExpect(jsonPath("$.max").value(100));
     }
   }
 
@@ -395,11 +399,11 @@ public class AvatarControllerIT {
       when(avatarService.applyDamage(AVATAR_ID, 30)).thenReturn(false);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/health/damage", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 30}"))
-              .andExpect(status().is2xxSuccessful());
+          .perform(
+              post("/api/v1/avatars/{id}/health/damage", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 30}"))
+          .andExpect(status().is2xxSuccessful());
 
       verify(avatarService).applyDamage(AVATAR_ID, 30);
     }
@@ -417,11 +421,11 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).healAvatar(AVATAR_ID, 20);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/health/heal", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 20}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              post("/api/v1/avatars/{id}/health/heal", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 20}"))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).healAvatar(AVATAR_ID, 20);
     }
@@ -441,10 +445,10 @@ public class AvatarControllerIT {
       when(avatarService.getMana(AVATAR_ID)).thenReturn(mana);
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/mana", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.amount").value(30))
-              .andExpect(jsonPath("$.max").value(50));
+          .perform(get("/api/v1/avatars/{id}/mana", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.amount").value(30))
+          .andExpect(jsonPath("$.max").value(50));
     }
   }
 
@@ -460,26 +464,26 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).spendMana(AVATAR_ID, 10);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/mana/spend", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 10}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              post("/api/v1/avatars/{id}/mana/spend", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 10}"))
+          .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("returns 400 when mana is insufficient")
     void shouldReturn400OnInsufficientMana() throws Exception {
       doThrow(new IllegalArgumentException("Cannot subtract more mana than available"))
-              .when(avatarService)
-              .spendMana(AVATAR_ID, 999);
+          .when(avatarService)
+          .spendMana(AVATAR_ID, 999);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/mana/spend", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 999}"))
-              .andExpect(status().isBadRequest());
+          .perform(
+              post("/api/v1/avatars/{id}/mana/spend", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 999}"))
+          .andExpect(status().isBadRequest());
     }
   }
 
@@ -495,11 +499,11 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).restoreMana(AVATAR_ID, 15);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/mana/restore", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 15}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              post("/api/v1/avatars/{id}/mana/restore", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 15}"))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).restoreMana(AVATAR_ID, 15);
     }
@@ -517,11 +521,11 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).grantExperience(AVATAR_ID, 500);
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/experience/grant", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("{\"amount\": 500}"))
-              .andExpect(status().isNoContent());
+          .perform(
+              post("/api/v1/avatars/{id}/experience/grant", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"amount\": 500}"))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).grantExperience(AVATAR_ID, 500);
     }
@@ -539,20 +543,20 @@ public class AvatarControllerIT {
       when(avatarService.getExperience(AVATAR_ID)).thenReturn(new Experience(350));
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/experience", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.amount").value(350));
+          .perform(get("/api/v1/avatars/{id}/experience", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.amount").value(350));
     }
 
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       when(avatarService.getExperience(UNKNOWN_ID))
-              .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/experience", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(get("/api/v1/avatars/{id}/experience", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -568,13 +572,14 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).addToInventory(eq(AVATAR_ID), any(Item.class));
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/inventory/items", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("""
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
                       {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
                       """))
-              .andExpect(status().isNoContent());
+          .andExpect(status().isNoContent());
 
       verify(avatarService).addToInventory(eq(AVATAR_ID), any(Weapon.class));
     }
@@ -583,13 +588,14 @@ public class AvatarControllerIT {
     @DisplayName("returns 400 for unknown item type")
     void shouldReturn400ForUnknownItemType() throws Exception {
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/inventory/items", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("""
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
                       {"type":"UNKNOWN","name":"???","description":"???","power":0}
                       """))
-              .andExpect(status().isBadRequest());
+          .andExpect(status().isBadRequest());
     }
   }
 
@@ -605,13 +611,14 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).removeItem(eq(AVATAR_ID), any(Item.class));
 
       mockMvc
-              .perform(
-                      delete("/api/v1/avatars/{id}/inventory/items", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("""
+          .perform(
+              delete("/api/v1/avatars/{id}/inventory/items", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
                       {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
                       """))
-              .andExpect(status().isNoContent());
+          .andExpect(status().isNoContent());
     }
   }
 
@@ -645,19 +652,19 @@ public class AvatarControllerIT {
       when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems);
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_1))
-              .andExpect(status().isOk());
+          .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_1))
+          .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       when(avatarService.getEquippedItems(UNKNOWN_ID))
-              .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/equipped-items", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(get("/api/v1/avatars/{id}/equipped-items", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -673,13 +680,14 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/inventory/items/equip", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("""
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items/equip", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
                       {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
                       """))
-              .andExpect(status().isNoContent());
+          .andExpect(status().isNoContent());
 
       verify(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
     }
@@ -688,18 +696,19 @@ public class AvatarControllerIT {
     @DisplayName("returns 400 when item is not in inventory")
     void shouldReturn400WhenItemNotInInventory() throws Exception {
       doThrow(new IllegalStateException("Item not in inventory"))
-              .when(avatarService)
-              .equipItem(eq(AVATAR_ID), any(Item.class));
+          .when(avatarService)
+          .equipItem(eq(AVATAR_ID), any(Item.class));
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/inventory/items/equip", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("""
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items/equip", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
                       {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
                       """))
-              .andExpect(status().isBadRequest())
-              .andExpect(jsonPath("$.message").value("Item not in inventory"));
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Item not in inventory"));
     }
   }
 
@@ -715,13 +724,14 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
 
       mockMvc
-              .perform(
-                      post("/api/v1/avatars/{id}/inventory/items/unequip", AVATAR_1)
-                              .contentType(MediaType.APPLICATION_JSON)
-                              .content("""
+          .perform(
+              post("/api/v1/avatars/{id}/inventory/items/unequip", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
                       {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
                       """))
-              .andExpect(status().isNoContent());
+          .andExpect(status().isNoContent());
 
       verify(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
     }
@@ -739,8 +749,8 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).increaseStrength(AVATAR_ID);
 
       mockMvc
-              .perform(post("/api/v1/avatars/{id}/stats/strength", AVATAR_1))
-              .andExpect(status().isNoContent());
+          .perform(post("/api/v1/avatars/{id}/stats/strength", AVATAR_1))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).increaseStrength(AVATAR_ID);
     }
@@ -749,12 +759,12 @@ public class AvatarControllerIT {
     @DisplayName("returns 404 when avatar not found")
     void shouldReturn404WhenAvatarMissing() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_AVATAR))
-              .when(avatarService)
-              .increaseStrength(UNKNOWN_ID);
+          .when(avatarService)
+          .increaseStrength(UNKNOWN_ID);
 
       mockMvc
-              .perform(post("/api/v1/avatars/{id}/stats/strength", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(post("/api/v1/avatars/{id}/stats/strength", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -770,8 +780,8 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).increaseDefense(AVATAR_ID);
 
       mockMvc
-              .perform(post("/api/v1/avatars/{id}/stats/defense", AVATAR_1))
-              .andExpect(status().isNoContent());
+          .perform(post("/api/v1/avatars/{id}/stats/defense", AVATAR_1))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).increaseDefense(AVATAR_ID);
     }
@@ -780,12 +790,12 @@ public class AvatarControllerIT {
     @DisplayName("returns 404 when avatar not found")
     void shouldReturn404WhenAvatarMissing() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_AVATAR))
-              .when(avatarService)
-              .increaseDefense(UNKNOWN_ID);
+          .when(avatarService)
+          .increaseDefense(UNKNOWN_ID);
 
       mockMvc
-              .perform(post("/api/v1/avatars/{id}/stats/defense", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(post("/api/v1/avatars/{id}/stats/defense", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -801,8 +811,8 @@ public class AvatarControllerIT {
       doNothing().when(avatarService).increaseIntelligence(AVATAR_ID);
 
       mockMvc
-              .perform(post("/api/v1/avatars/{id}/stats/intelligence", AVATAR_1))
-              .andExpect(status().isNoContent());
+          .perform(post("/api/v1/avatars/{id}/stats/intelligence", AVATAR_1))
+          .andExpect(status().isNoContent());
 
       verify(avatarService).increaseIntelligence(AVATAR_ID);
     }
@@ -811,12 +821,12 @@ public class AvatarControllerIT {
     @DisplayName("returns 404 when avatar not found")
     void shouldReturn404WhenAvatarMissing() throws Exception {
       doThrow(new AvatarNotFoundException(UNKNOWN_AVATAR))
-              .when(avatarService)
-              .increaseIntelligence(UNKNOWN_ID);
+          .when(avatarService)
+          .increaseIntelligence(UNKNOWN_ID);
 
       mockMvc
-              .perform(post("/api/v1/avatars/{id}/stats/intelligence", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(post("/api/v1/avatars/{id}/stats/intelligence", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -834,22 +844,22 @@ public class AvatarControllerIT {
       when(avatarService.getAvatarStats(AVATAR_ID)).thenReturn(stats);
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/stats", AVATAR_1))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.strength").value(10))
-              .andExpect(jsonPath("$.defense").value(8))
-              .andExpect(jsonPath("$.intelligence").value(12));
+          .perform(get("/api/v1/avatars/{id}/stats", AVATAR_1))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.strength").value(10))
+          .andExpect(jsonPath("$.defense").value(8))
+          .andExpect(jsonPath("$.intelligence").value(12));
     }
 
     @Test
     @DisplayName("returns 404 when avatar does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       when(avatarService.getAvatarStats(UNKNOWN_ID))
-              .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
+          .thenThrow(new AvatarNotFoundException(UNKNOWN_AVATAR));
 
       mockMvc
-              .perform(get("/api/v1/avatars/{id}/stats", UNKNOWN_AVATAR))
-              .andExpect(status().isNotFound());
+          .perform(get("/api/v1/avatars/{id}/stats", UNKNOWN_AVATAR))
+          .andExpect(status().isNotFound());
     }
   }
 }

@@ -41,11 +41,11 @@ public final class AvatarFixtures {
   public static final String FIELD_SPELL_NAME = "spellName";
   public static final String FIELD_DESCRIPTION = "description";
 
-  public static final Id<Avatar> AVATAR_ID   = new Id<>(AVATAR_1);
-  public static final Id<Avatar> UNKNOWN_ID  = new Id<>(UNKNOWN_AVATAR);
+  public static final Id<Avatar> AVATAR_ID = new Id<>(AVATAR_1);
+  public static final Id<Avatar> UNKNOWN_ID = new Id<>(UNKNOWN_AVATAR);
   public static final Id<Inventory> INVENTORY_ID = new Id<>(INVENTORY_1);
   public static final Id<EquippedItems> EQUIPPED_ID = new Id<>(EQUIP_1);
-  public static final Id<AvatarStats>  STATS_ID    = new Id<>(STATS_1);
+  public static final Id<AvatarStats> STATS_ID = new Id<>(STATS_1);
 
   public static final Weapon SWORD = new Weapon("Iron Sword", "A basic sword", 15);
   public static final Armor SHIELD = new Armor("Iron Shield", "A basic shield", 5);
@@ -61,8 +61,7 @@ public final class AvatarFixtures {
         new Level(1, new Experience(0), new Experience(DEFAULT_XP_TO_NEXT)),
         new AvatarHealth(new Health(DEFAULT_HEALTH), new Health(DEFAULT_HEALTH)),
         new AvatarMana(new Mana(DEFAULT_MANA), new Mana(DEFAULT_MANA)),
-        new AvatarStats(
-            new Id<>(STATS_1), DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
+        new AvatarStats(new Id<>(STATS_1), DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
         new ArrayList<>());
   }
 
@@ -76,8 +75,7 @@ public final class AvatarFixtures {
         new Level(1, new Experience(0), new Experience(DEFAULT_XP_TO_NEXT)),
         new AvatarHealth(new Health(DEFAULT_HEALTH), new Health(DEFAULT_HEALTH)),
         new AvatarMana(new Mana(DEFAULT_MANA), new Mana(DEFAULT_MANA)),
-        new AvatarStats(
-            new Id<>(STATS_1), DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
+        new AvatarStats(new Id<>(STATS_1), DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
         List.of());
   }
 
@@ -91,8 +89,7 @@ public final class AvatarFixtures {
         new Level(level, new Experience(0), new Experience(xpToNext)),
         new AvatarHealth(new Health(DEFAULT_HEALTH), new Health(DEFAULT_HEALTH)),
         new AvatarMana(new Mana(DEFAULT_MANA), new Mana(DEFAULT_MANA)),
-        new AvatarStats(
-            new Id<>(STATS_1), DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
+        new AvatarStats(new Id<>(STATS_1), DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
         new ArrayList<>());
   }
 
