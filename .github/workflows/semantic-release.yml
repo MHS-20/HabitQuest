@@ -40,7 +40,7 @@ jobs:
 
       - name: Install semantic-release
         run: |
-          npm install --save-dev semantic-release \
+          npm install -g --save-dev semantic-release \
             @semantic-release/git \
             @semantic-release/changelog \
             @semantic-release/github \
