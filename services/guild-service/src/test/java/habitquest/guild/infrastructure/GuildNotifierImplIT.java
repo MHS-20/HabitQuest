@@ -1,5 +1,6 @@
 package habitquest.guild.infrastructure;
 
+import static habitquest.guild.GuildFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,9 +8,6 @@ import common.ddd.Id;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.application.GuildRepository;
 import habitquest.guild.domain.events.guildEvents.*;
-import habitquest.guild.domain.guild.Guild;
-import habitquest.guild.domain.guild.GuildMember;
-import habitquest.guild.domain.guild.GuildRole;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -41,10 +39,9 @@ public class GuildNotifierImplIT {
   static final KafkaContainer KAFKA =
       new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
-  public static final String GUILD_ID = "guildId";
-  public static final String MEMBER_ID = "memberId";
-  public static final String OCCURRED_ON = "occurredOn";
-  public static final String LEADER_ID = "leaderId";
+  public static final String JSON_GUILD_ID = "guildId";
+  public static final String JSON_MEMBER_ID = "memberId";
+  public static final String JSON_OCCURRED_ON = "occurredOn";
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -57,7 +54,7 @@ public class GuildNotifierImplIT {
 
   @MockitoBean private BattleRepository battleRepository;
 
-  // ── Topic names (must match application.yml destinations) ───────────────────
+  // ── Topic names ───────────────────
   private static final String TOPIC_GUILD_CREATED = "guild.created";
   private static final String TOPIC_GUILD_DELETED = "guild.deleted";
   private static final String TOPIC_GUILD_JOINED = "guild.joined";
@@ -92,7 +89,6 @@ public class GuildNotifierImplIT {
     consumer.close();
   }
 
-  // Subscribe and force partition assignment to complete BEFORE publishing
   private void subscribeAndSeekToEnd(String topic) {
     consumer.subscribe(Collections.singletonList(topic));
     long deadline = System.currentTimeMillis() + POLL_TIMEOUT.toMillis();
@@ -124,26 +120,26 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.created")
     void shouldPublishToGuildCreatedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_CREATED);
-      notifier.notifyGuildCreated(new GuildCreated("guild-42", LEADER_ID, "The Brave"));
+      notifier.notifyGuildCreated(new GuildCreated(GUILD_1, LEADER_1, GUILD_NAME));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_GUILD_CREATED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-42");
-      assertThat(node.get("name").asText()).isEqualTo("The Brave");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo(GUILD_1);
+      assertThat(node.get("name").asText()).isEqualTo(GUILD_NAME);
+      assertThat(node.has(JSON_OCCURRED_ON)).isTrue();
     }
 
     @Test
     @DisplayName("preserves guildId and name in the payload")
     void shouldPreserveGuildIdAndName() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_CREATED);
-      notifier.notifyGuildCreated(new GuildCreated("my-guild", LEADER_ID, "Legends"));
+      notifier.notifyGuildCreated(new GuildCreated("my-guild", LEADER_1, "Legends"));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("my-guild");
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo("my-guild");
       assertThat(node.get("name").asText()).isEqualTo("Legends");
     }
   }
@@ -157,14 +153,14 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.deleted")
     void shouldPublishToGuildDeletedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_DELETED);
-      notifier.notifyGuildDeleted(new GuildDeleted("guild-99"));
+      notifier.notifyGuildDeleted(new GuildDeleted(GUILD_1));
 
       ConsumerRecord<String, String> record = pollOne();
       assertThat(record.topic()).isEqualTo(TOPIC_GUILD_DELETED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-99");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo(GUILD_1);
+      assertThat(node.has(JSON_OCCURRED_ON)).isTrue();
     }
 
     @Test
@@ -174,7 +170,7 @@ public class GuildNotifierImplIT {
       notifier.notifyGuildDeleted(new GuildDeleted("deleted-guild"));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("deleted-guild");
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo("deleted-guild");
     }
   }
 
@@ -187,29 +183,27 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.joined")
     void shouldPublishToGuildJoinedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_JOINED);
-      notifier.notifyGuildJoined(
-          new GuildJoined(new Id<Guild>("guild-1"), new Id<GuildMember>("avatar-5")));
+      notifier.notifyGuildJoined(new GuildJoined(GUILD_ID, MEMBER_ID));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_GUILD_JOINED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-1");
-      assertThat(node.get(MEMBER_ID).asText()).isEqualTo("avatar-5");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo(GUILD_1);
+      assertThat(node.get(JSON_MEMBER_ID).asText()).isEqualTo(MEMBER_1);
+      assertThat(node.has(JSON_OCCURRED_ON)).isTrue();
     }
 
     @Test
     @DisplayName("preserves both guildId and memberId in the payload")
     void shouldPreserveGuildIdAndMemberId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_JOINED);
-      notifier.notifyGuildJoined(
-          new GuildJoined(new Id<Guild>("g-10"), new Id<GuildMember>("m-20")));
+      notifier.notifyGuildJoined(new GuildJoined(new Id<>("g-10"), new Id<>("m-20")));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("g-10");
-      assertThat(node.get(MEMBER_ID).asText()).isEqualTo("m-20");
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo("g-10");
+      assertThat(node.get(JSON_MEMBER_ID).asText()).isEqualTo("m-20");
     }
   }
 
@@ -222,17 +216,16 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.left")
     void shouldPublishToGuildLeftTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_GUILD_LEFT);
-      notifier.notifyGuildLeft(
-          new GuildLeft(new Id<Guild>("guild-3"), new Id<GuildMember>("avatar-7")));
+      notifier.notifyGuildLeft(new GuildLeft(GUILD_ID, MEMBER_ID));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_GUILD_LEFT);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-3");
-      assertThat(node.get(MEMBER_ID).asText()).isEqualTo("avatar-7");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo(GUILD_1);
+      assertThat(node.get(JSON_MEMBER_ID).asText()).isEqualTo(MEMBER_1);
+      assertThat(node.has(JSON_OCCURRED_ON)).isTrue();
     }
   }
 
@@ -245,17 +238,16 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.member-removed")
     void shouldPublishToMemberRemovedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_MEMBER_REMOVED);
-      notifier.notifyRemovedFromGuild(
-          new RemovedFromGuild(new Id<Guild>("guild-4"), new Id<GuildMember>("avatar-9")));
+      notifier.notifyRemovedFromGuild(new RemovedFromGuild(GUILD_ID, MEMBER_ID));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_MEMBER_REMOVED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-4");
-      assertThat(node.get(MEMBER_ID).asText()).isEqualTo("avatar-9");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo(GUILD_1);
+      assertThat(node.get(JSON_MEMBER_ID).asText()).isEqualTo(MEMBER_1);
+      assertThat(node.has(JSON_OCCURRED_ON)).isTrue();
     }
   }
 
@@ -268,27 +260,23 @@ public class GuildNotifierImplIT {
     @DisplayName("publishes a message to guild.role-assigned with correct role name")
     void shouldPublishToRoleAssignedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ROLE_ASSIGNED);
-      notifier.notifyRoleAssigned(
-          new RoleAssigned(
-              new Id<Guild>("guild-5"), new Id<GuildMember>("avatar-11"), GuildRole.OFFICER));
+      notifier.notifyRoleAssigned(new RoleAssigned(GUILD_ID, MEMBER_ID, OFFICER_ROLE));
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_ROLE_ASSIGNED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-5");
-      assertThat(node.get(MEMBER_ID).asText()).isEqualTo("avatar-11");
+      assertThat(node.get(JSON_GUILD_ID).asText()).isEqualTo(GUILD_1);
+      assertThat(node.get(JSON_MEMBER_ID).asText()).isEqualTo(MEMBER_1);
       assertThat(node.get("roleName").asText()).isEqualTo("OFFICER");
-      assertThat(node.has(OCCURRED_ON)).isTrue();
+      assertThat(node.has(JSON_OCCURRED_ON)).isTrue();
     }
 
     @Test
     @DisplayName("preserves the role name for a LEADER role assignment")
     void shouldPreserveLeaderRole() throws Exception {
       subscribeAndSeekToEnd(TOPIC_ROLE_ASSIGNED);
-      notifier.notifyRoleAssigned(
-          new RoleAssigned(
-              new Id<Guild>("guild-6"), new Id<GuildMember>("avatar-12"), GuildRole.LEADER));
+      notifier.notifyRoleAssigned(new RoleAssigned(GUILD_ID, MEMBER_ID, LEADER_ROLE));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get("roleName").asText()).isEqualTo("LEADER");

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
+import habitquest.guild.GuildFixtures;
 import habitquest.guild.application.BattleRepository;
 import habitquest.guild.application.GuildRepository;
 import habitquest.guild.domain.battle.Battle;
@@ -42,9 +43,6 @@ public class BattleNotifierImplIT {
   static final KafkaContainer KAFKA =
       new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
-  public static final String BATTLE_ID = "battleId";
-  public static final String GUILD_ID = "guildId";
-
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.cloud.stream.kafka.binder.brokers", KAFKA::getBootstrapServers);
@@ -53,10 +51,9 @@ public class BattleNotifierImplIT {
   @Autowired private BattleNotifierImpl notifier;
 
   @MockitoBean private GuildRepository guildRepository;
-
   @MockitoBean private BattleRepository battleRepository;
 
-  // ── Topic names (must match application.yml destinations) ───────────────────
+  // ── Topic names (must match application.yml destinations) ────────────────────
   private static final String TOPIC_BATTLE_STARTED = "guild.battle-started";
   private static final String TOPIC_BATTLE_WON = "guild.battle-won";
   private static final String TOPIC_BATTLE_LOST = "guild.battle-lost";
@@ -109,24 +106,29 @@ public class BattleNotifierImplIT {
     throw new AssertionError("No message received within timeout");
   }
 
-  // ── notifyBattleStarted ---------------------------------------------------
+  // ── notifyBattleStarted ───────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("notifyBattleStarted")
   class NotifyBattleStarted {
+
     @Test
     @DisplayName("publishes a message to guild.battle-started")
     void shouldPublishToBattleStartedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_STARTED);
       notifier.notifyBattleStarted(
-          new BattleStarted(new Id<Battle>("battle-1"), new Id<Guild>("guild-1")));
+          new BattleStarted(
+              new Id<Battle>(GuildFixtures.BATTLE_1), new Id<Guild>(GuildFixtures.GUILD_1)));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_BATTLE_STARTED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(BATTLE_ID).asText()).isEqualTo("battle-1");
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-1");
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText())
+          .isEqualTo(GuildFixtures.BATTLE_1);
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText())
+          .isEqualTo(GuildFixtures.GUILD_1);
       assertThat(node.has("occurredOn")).isTrue();
     }
 
@@ -138,20 +140,21 @@ public class BattleNotifierImplIT {
           new BattleStarted(new Id<Battle>("battle-42"), new Id<Guild>("guild-99")));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(BATTLE_ID).asText()).isEqualTo("battle-42");
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-99");
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("battle-42");
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText()).isEqualTo("guild-99");
     }
   }
 
-  // ── notifyBattleWon ------------------------------------------------------
+  // ── notifyBattleWon ───────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("notifyBattleWon")
   class NotifyBattleWon {
+
     @Test
     @DisplayName("publishes a message to guild.battle-won")
     void shouldPublishToBattleWonTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_WON);
-
       notifier.notifyBattleWon(
           new BattleWon(new Id<Battle>("battle-2"), new Id<Guild>("guild-2"), 200, 100));
 
@@ -160,8 +163,8 @@ public class BattleNotifierImplIT {
       assertThat(record.topic()).isEqualTo(TOPIC_BATTLE_WON);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(BATTLE_ID).asText()).isEqualTo("battle-2");
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-2");
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("battle-2");
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText()).isEqualTo("guild-2");
       assertThat(node.has("occurredOn")).isTrue();
     }
 
@@ -173,15 +176,17 @@ public class BattleNotifierImplIT {
           new BattleWon(new Id<Battle>("epic-battle"), new Id<Guild>("champion-guild"), 500, 250));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(BATTLE_ID).asText()).isEqualTo("epic-battle");
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("champion-guild");
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("epic-battle");
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText()).isEqualTo("champion-guild");
     }
   }
 
-  // ── notifyBattleLost -----------------------------------------------------
+  // ── notifyBattleLost ──────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("notifyBattleLost")
   class NotifyBattleLost {
+
     @Test
     @DisplayName("publishes a message to guild.battle-lost")
     void shouldPublishToBattleLostTopic() throws Exception {
@@ -194,8 +199,8 @@ public class BattleNotifierImplIT {
       assertThat(record.topic()).isEqualTo(TOPIC_BATTLE_LOST);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(BATTLE_ID).asText()).isEqualTo("battle-3");
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("guild-3");
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("battle-3");
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText()).isEqualTo("guild-3");
       assertThat(node.has("occurredOn")).isTrue();
     }
 
@@ -207,8 +212,8 @@ public class BattleNotifierImplIT {
           new BattleLost(new Id<Battle>("lost-battle"), new Id<Guild>("defeated-guild"), 100));
 
       var node = objectMapper.readTree(pollOne().value());
-      assertThat(node.get(BATTLE_ID).asText()).isEqualTo("lost-battle");
-      assertThat(node.get(GUILD_ID).asText()).isEqualTo("defeated-guild");
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("lost-battle");
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText()).isEqualTo("defeated-guild");
     }
   }
 }

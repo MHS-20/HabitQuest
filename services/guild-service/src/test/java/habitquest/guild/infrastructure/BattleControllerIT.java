@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
+import habitquest.guild.GuildFixtures;
 import habitquest.guild.application.*;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
@@ -15,7 +16,6 @@ import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
-import habitquest.guild.domain.guild.GuildRole;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -45,26 +45,24 @@ public class BattleControllerIT {
   // ── Fixtures ──────────────────────────────────────────────────────────────────
 
   // Typed ids — used for Mockito when()/verify() calls only
-  private static final Id<Battle> ID_BATTLE = new Id<>("battle-1");
-  private static final Id<Guild> ID_GUILD = new Id<>("guild-1");
-  private static final Id<GuildMember> ID_AVATAR = new Id<>("avatar-1");
-  private static final Id<GuildMember> ID_LEADER = new Id<>("leader-1");
-  private static final Id<Guild> ID_UNKNOWN_GUILD = new Id<>("ghost-99");
-  private static final Id<Battle> ID_UNKNOWN_BATTLE = new Id<>("ghost-99");
+  private static final Id<Battle> ID_BATTLE = GuildFixtures.BATTLE_ID;
+  private static final Id<Guild> ID_GUILD = GuildFixtures.GUILD_ID;
+  private static final Id<GuildMember> ID_AVATAR = GuildFixtures.LEADER_ID; // "avatar-1"
+  private static final Id<GuildMember> ID_LEADER = GuildFixtures.LEADER_HTTP; // "leader-1"
+  private static final Id<Guild> ID_UNKNOWN_GUILD = GuildFixtures.UNKNOWN_GUILD_ID;
+  private static final Id<Battle> ID_UNKNOWN_BATTLE = GuildFixtures.UNKNOWN_BATTLE_ID;
 
-  private static final int EXP_REWARD = BossType.MINOTAUR.experienceReward().amount();
-  private static final int MONEY_REWARD = BossType.MINOTAUR.moneyReward().amount();
-  private static final int PENALTY = BossType.MINOTAUR.penalty().amount();
+  private static final int EXP_REWARD = GuildFixtures.EXP_REWARD;
+  private static final int MONEY_REWARD = GuildFixtures.MONEY_REWARD;
+  private static final int PENALTY = GuildFixtures.PENALTY;
 
   /** Battle con un solo membro (ID_AVATAR) al turno 0. */
   private Battle stubBattle() {
-    Battle b = new Battle(ID_BATTLE, ID_GUILD, BossType.MINOTAUR, 0);
-    b.increaseNumOfTurns(ID_AVATAR);
-    return b;
+    return GuildFixtures.battle();
   }
 
   private GuildMember stubMember() {
-    return new GuildMember(ID_AVATAR, "Hero", GuildRole.MEMBER);
+    return GuildFixtures.avatarMember();
   }
 
   // ── POST /api/v1/battles ──────────────────────────────────────────────────────

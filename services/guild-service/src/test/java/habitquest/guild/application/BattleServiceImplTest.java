@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
+import habitquest.guild.GuildFixtures;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossType;
@@ -31,14 +32,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BattleServiceImplTest {
 
-  private static final Id<Battle> BATTLE_ID = new Id<>("battle-1");
-  private static final Id<Guild> GUILD_ID = new Id<>("guild-1");
-  private static final Id<GuildMember> MEMBER_1 = new Id<>("member-1");
-  private static final Id<GuildMember> MEMBER_2 = new Id<>("member-2");
-  private static final int BOSS_HEALTH = BossType.MINOTAUR.stats().health().value();
-  private static final int EXP_REWARD = BossType.MINOTAUR.experienceReward().amount();
-  private static final int MONEY_REWARD = BossType.MINOTAUR.moneyReward().amount();
-  private static final int PENALTY = BossType.MINOTAUR.penalty().amount();
+  private static final Id<Battle> BATTLE_ID = GuildFixtures.BATTLE_ID;
+  private static final Id<Guild> GUILD_ID = GuildFixtures.GUILD_ID;
+  private static final Id<GuildMember> MEMBER_1 = GuildFixtures.BATTLE_MEMBER_ID_1;
+  private static final Id<GuildMember> MEMBER_2 = GuildFixtures.BATTLE_MEMBER_ID_2;
+  private static final int BOSS_HEALTH = GuildFixtures.BOSS_HEALTH;
+  private static final int EXP_REWARD = GuildFixtures.EXP_REWARD;
+  private static final int MONEY_REWARD = GuildFixtures.MONEY_REWARD;
+  private static final int PENALTY = GuildFixtures.PENALTY;
 
   @Mock private BattleRepository battleRepository;
   @Mock private BattleObserver battleObserver;
@@ -52,14 +53,11 @@ class BattleServiceImplTest {
   void setUp() {
     // numOfTurns parte da 0, i due increaseNumOfTurns lo portano a 2.
     // numOfTurns == memberIds.size() == 2 → Lost si scatena al 2° counterattack.
-    battle = new Battle(BATTLE_ID, GUILD_ID, BossType.MINOTAUR, 0);
-    battle.increaseNumOfTurns(MEMBER_1);
-    battle.increaseNumOfTurns(MEMBER_2);
+    battle = GuildFixtures.battleWithTwoMembers();
   }
 
-  // -------------------------------------------------------------------------
-  // createBattle
-  // -------------------------------------------------------------------------
+  // ── createBattle ─────────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("createBattle")
   class CreateBattle {
@@ -90,9 +88,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // getBattleById
-  // -------------------------------------------------------------------------
+  // ── getBattleById ─────────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("getBattleById")
   class GetBattleById {
@@ -115,9 +112,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // deleteBattle
-  // -------------------------------------------------------------------------
+  // ── deleteBattle ─────────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("deleteBattle")
   class DeleteBattle {
@@ -130,9 +126,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // getBattleByGuild
-  // -------------------------------------------------------------------------
+  // ── getBattleByGuild ─────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("getBattleByGuild")
   class GetBattleByGuild {
@@ -154,9 +149,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // hasBattleInProgress
-  // -------------------------------------------------------------------------
+  // ── hasBattleInProgress ───────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("hasBattleInProgress")
   class HasBattleInProgress {
@@ -189,9 +183,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // turn management
-  // -------------------------------------------------------------------------
+  // ── turn management ───────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("turn management")
   class TurnManagement {
@@ -220,9 +213,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // dealDamageOnBoss
-  // -------------------------------------------------------------------------
+  // ── dealDamageOnBoss ──────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("dealDamageOnBoss")
   class DealDamageOnBoss {
@@ -275,9 +267,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // applyCounterattack
-  // -------------------------------------------------------------------------
+  // ── applyCounterattack ────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("applyCounterattack")
   class ApplyCounterattack {
@@ -327,9 +318,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // markAsFallen
-  // -------------------------------------------------------------------------
+  // ── markAsFallen ─────────────────────────────────────────────────────────────
+
   @Nested
   @DisplayName("markAsFallen")
   class MarkAsFallen {
@@ -362,9 +352,8 @@ class BattleServiceImplTest {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // isBattleOver / isBattleWon / getBattleStatus
-  // -------------------------------------------------------------------------
+  // ── isBattleOver / isBattleWon / getBattleStatus ─────────────────────────────
+
   @Nested
   @DisplayName("battle status helpers")
   class BattleStatusHelpers {
