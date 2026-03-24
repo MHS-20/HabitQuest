@@ -32,18 +32,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BattleServiceImplTest {
 
-  private static final Id<Battle>      BATTLE_ID    = GuildFixtures.BATTLE_ID;
-  private static final Id<Guild>       GUILD_ID     = GuildFixtures.GUILD_ID;
-  private static final Id<GuildMember> MEMBER_1     = GuildFixtures.BATTLE_MEMBER_ID_1;
-  private static final Id<GuildMember> MEMBER_2     = GuildFixtures.BATTLE_MEMBER_ID_2;
-  private static final int             BOSS_HEALTH  = GuildFixtures.BOSS_HEALTH;
-  private static final int             EXP_REWARD   = GuildFixtures.EXP_REWARD;
-  private static final int             MONEY_REWARD = GuildFixtures.MONEY_REWARD;
-  private static final int             PENALTY      = GuildFixtures.PENALTY;
+  private static final Id<Battle> BATTLE_ID = GuildFixtures.BATTLE_ID;
+  private static final Id<Guild> GUILD_ID = GuildFixtures.GUILD_ID;
+  private static final Id<GuildMember> MEMBER_1 = GuildFixtures.BATTLE_MEMBER_ID_1;
+  private static final Id<GuildMember> MEMBER_2 = GuildFixtures.BATTLE_MEMBER_ID_2;
+  private static final int BOSS_HEALTH = GuildFixtures.BOSS_HEALTH;
+  private static final int EXP_REWARD = GuildFixtures.EXP_REWARD;
+  private static final int MONEY_REWARD = GuildFixtures.MONEY_REWARD;
+  private static final int PENALTY = GuildFixtures.PENALTY;
 
   @Mock private BattleRepository battleRepository;
-  @Mock private BattleObserver   battleObserver;
-  @Mock private BattleFactory    battleFactory;
+  @Mock private BattleObserver battleObserver;
+  @Mock private BattleFactory battleFactory;
 
   @InjectMocks private BattleServiceImpl battleService;
 
@@ -84,7 +84,7 @@ class BattleServiceImplTest {
       verify(battleObserver).notifyBattleEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(BattleStarted.class);
       assertThat(((BattleStarted) captor.getValue()).battleId().value())
-              .isEqualTo(BATTLE_ID.value());
+          .isEqualTo(BATTLE_ID.value());
     }
   }
 
@@ -108,7 +108,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> battleService.getBattleById(BATTLE_ID))
-              .isInstanceOf(BattleNotFoundException.class);
+          .isInstanceOf(BattleNotFoundException.class);
     }
   }
 
@@ -263,7 +263,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> battleService.dealDamageOnBoss(BATTLE_ID, MEMBER_1, 10))
-              .isInstanceOf(BattleNotFoundException.class);
+          .isInstanceOf(BattleNotFoundException.class);
     }
   }
 
@@ -314,7 +314,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> battleService.applyCounterattack(BATTLE_ID, MEMBER_1))
-              .isInstanceOf(BattleNotFoundException.class);
+          .isInstanceOf(BattleNotFoundException.class);
     }
   }
 
@@ -418,7 +418,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
       assertThat(battleService.getBattleStatus(BATTLE_ID))
-              .isInstanceOf(BattleOutcome.Ongoing.class);
+          .isInstanceOf(BattleOutcome.Ongoing.class);
     }
 
     @Test

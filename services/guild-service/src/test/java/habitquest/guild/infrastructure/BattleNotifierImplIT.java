@@ -41,7 +41,7 @@ public class BattleNotifierImplIT {
 
   @Container
   static final KafkaContainer KAFKA =
-          new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
+      new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
 
   @DynamicPropertySource
   static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -55,8 +55,8 @@ public class BattleNotifierImplIT {
 
   // ── Topic names (must match application.yml destinations) ────────────────────
   private static final String TOPIC_BATTLE_STARTED = "guild.battle-started";
-  private static final String TOPIC_BATTLE_WON     = "guild.battle-won";
-  private static final String TOPIC_BATTLE_LOST    = "guild.battle-lost";
+  private static final String TOPIC_BATTLE_WON = "guild.battle-won";
+  private static final String TOPIC_BATTLE_LOST = "guild.battle-lost";
 
   private static final Duration POLL_TIMEOUT = Duration.ofSeconds(10);
 
@@ -66,13 +66,14 @@ public class BattleNotifierImplIT {
   @BeforeEach
   void createConsumer() {
     consumer =
-            new KafkaConsumer<>(
-                    Map.of(
-                            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,    KAFKA.getBootstrapServers(),
-                            ConsumerConfig.GROUP_ID_CONFIG,             "test-group-" + System.nanoTime(),
-                            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,    "earliest",
-                            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,   StringDeserializer.class.getName(),
-                            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()));
+        new KafkaConsumer<>(
+            Map.of(
+                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA.getBootstrapServers(),
+                ConsumerConfig.GROUP_ID_CONFIG, "test-group-" + System.nanoTime(),
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
+                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName(),
+                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                    StringDeserializer.class.getName()));
   }
 
   @AfterEach
@@ -116,15 +117,18 @@ public class BattleNotifierImplIT {
     void shouldPublishToBattleStartedTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_STARTED);
       notifier.notifyBattleStarted(
-              new BattleStarted(new Id<Battle>(GuildFixtures.BATTLE_1), new Id<Guild>(GuildFixtures.GUILD_1)));
+          new BattleStarted(
+              new Id<Battle>(GuildFixtures.BATTLE_1), new Id<Guild>(GuildFixtures.GUILD_1)));
 
       ConsumerRecord<String, String> record = pollOne();
 
       assertThat(record.topic()).isEqualTo(TOPIC_BATTLE_STARTED);
 
       var node = objectMapper.readTree(record.value());
-      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo(GuildFixtures.BATTLE_1);
-      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText()).isEqualTo(GuildFixtures.GUILD_1);
+      assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText())
+          .isEqualTo(GuildFixtures.BATTLE_1);
+      assertThat(node.get(GuildFixtures.JSON_KEY_GUILD_ID).asText())
+          .isEqualTo(GuildFixtures.GUILD_1);
       assertThat(node.has("occurredOn")).isTrue();
     }
 
@@ -133,7 +137,7 @@ public class BattleNotifierImplIT {
     void shouldPreserveBattleIdAndGuildId() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_STARTED);
       notifier.notifyBattleStarted(
-              new BattleStarted(new Id<Battle>("battle-42"), new Id<Guild>("guild-99")));
+          new BattleStarted(new Id<Battle>("battle-42"), new Id<Guild>("guild-99")));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("battle-42");
@@ -152,7 +156,7 @@ public class BattleNotifierImplIT {
     void shouldPublishToBattleWonTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_WON);
       notifier.notifyBattleWon(
-              new BattleWon(new Id<Battle>("battle-2"), new Id<Guild>("guild-2"), 200, 100));
+          new BattleWon(new Id<Battle>("battle-2"), new Id<Guild>("guild-2"), 200, 100));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -169,7 +173,7 @@ public class BattleNotifierImplIT {
     void shouldPreserveIdsInWonPayload() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_WON);
       notifier.notifyBattleWon(
-              new BattleWon(new Id<Battle>("epic-battle"), new Id<Guild>("champion-guild"), 500, 250));
+          new BattleWon(new Id<Battle>("epic-battle"), new Id<Guild>("champion-guild"), 500, 250));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("epic-battle");
@@ -188,7 +192,7 @@ public class BattleNotifierImplIT {
     void shouldPublishToBattleLostTopic() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_LOST);
       notifier.notifyBattleLost(
-              new BattleLost(new Id<Battle>("battle-3"), new Id<Guild>("guild-3"), 50));
+          new BattleLost(new Id<Battle>("battle-3"), new Id<Guild>("guild-3"), 50));
 
       ConsumerRecord<String, String> record = pollOne();
 
@@ -205,7 +209,7 @@ public class BattleNotifierImplIT {
     void shouldPreserveIdsInLostPayload() throws Exception {
       subscribeAndSeekToEnd(TOPIC_BATTLE_LOST);
       notifier.notifyBattleLost(
-              new BattleLost(new Id<Battle>("lost-battle"), new Id<Guild>("defeated-guild"), 100));
+          new BattleLost(new Id<Battle>("lost-battle"), new Id<Guild>("defeated-guild"), 100));
 
       var node = objectMapper.readTree(pollOne().value());
       assertThat(node.get(GuildFixtures.JSON_KEY_BATTLE_ID).asText()).isEqualTo("lost-battle");

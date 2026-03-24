@@ -1,11 +1,9 @@
 package habitquest.marketplace.application;
 
+import static habitquest.marketplace.MarketplaceFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import common.ddd.Id;
-import habitquest.marketplace.domain.events.ItemBought;
-import habitquest.marketplace.domain.events.ItemSold;
 import habitquest.marketplace.domain.events.MarketplaceEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,11 +17,6 @@ class MarketplaceObserverImplTest {
   @Mock private MarketplaceNotifier notifier;
   @Mock private MarketplaceLogger log;
   @InjectMocks private MarketplaceObserverImpl observer;
-
-  private static final ItemBought ITEM_BOUGHT =
-      new ItemBought(new Id<>("mp-1"), "Iron Sword", new Id<>("avatar-1"));
-  private static final ItemSold ITEM_SOLD =
-      new ItemSold(new Id<>("mp-1"), "Iron Sword", new Id<>("avatar-1"));
 
   @Test
   void shouldDelegateItemBoughtToNotifier() {
