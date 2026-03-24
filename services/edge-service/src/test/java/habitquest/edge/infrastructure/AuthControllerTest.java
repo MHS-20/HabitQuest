@@ -2,8 +2,6 @@ package habitquest.edge.infrastructure;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import common.ddd.Id;
 import habitquest.edge.application.AuthService;
@@ -25,18 +23,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
-@WebMvcTest(AuthController.class)
+@WebFluxTest(AuthController.class)
 @SuppressWarnings({"checkstyle:MethodName", "checkstyle:VisibilityModifier"})
 @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
 class AuthControllerTest {
 
-  @Autowired MockMvc mockMvc;
+  @Autowired WebTestClient webTestClient;
 
   @MockitoBean AvatarClient avatarClient;
   @MockitoBean AuthService authService;
@@ -76,6 +75,7 @@ class AuthControllerTest {
     RateLimiter rl = RateLimiter.ofDefaults("test");
     when(circuitBreakerRegistry.circuitBreaker(anyString())).thenReturn(cb);
     when(rateLimiterRegistry.rateLimiter(anyString())).thenReturn(rl);
+    when(avatarClient.createAvatar(anyString(), anyString())).thenReturn(Mono.empty());
   }
 
   // ── POST /auth/register ───────────────────────────────────────────────────
@@ -90,14 +90,19 @@ class AuthControllerTest {
       when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
           .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
 
-      mockMvc
-          .perform(
-              post(REGISTER_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
-          .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.token").value(JWT_TOKEN))
-          .andExpect(jsonPath("$.userId.value").value(USER_ID));
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isCreated()
+          .expectBody()
+          .jsonPath("$.token")
+          .isEqualTo(JWT_TOKEN)
+          .jsonPath("$.userId.value")
+          .isEqualTo(USER_ID);
     }
 
     @Test
@@ -106,10 +111,14 @@ class AuthControllerTest {
       when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
           .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
 
-      mockMvc.perform(
-          post(REGISTER_PATH)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)));
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isCreated();
 
       verify(avatarClient).createAvatar(USER_ID, NAME);
     }
@@ -120,10 +129,14 @@ class AuthControllerTest {
       when(authService.register(anyString(), anyString(), anyString()))
           .thenThrow(new UserAlreadyExistsException(TEST_EMAIL));
 
-      mockMvc.perform(
-          post(REGISTER_PATH)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)));
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isEqualTo(409);
 
       verify(avatarClient, never()).createAvatar(anyString(), anyString());
     }
@@ -133,16 +146,17 @@ class AuthControllerTest {
     void register_avatarClientFails_returns500() throws Exception {
       when(authService.register(NAME, TEST_EMAIL, TEST_PASSWORD))
           .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
-      doThrow(new AvatarCreationException("avatar-service unreachable"))
-          .when(avatarClient)
-          .createAvatar(anyString(), anyString());
+      when(avatarClient.createAvatar(anyString(), anyString()))
+          .thenReturn(Mono.error(new AvatarCreationException("avatar-service unreachable")));
 
-      mockMvc
-          .perform(
-              post(REGISTER_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
-          .andExpect(status().isInternalServerError());
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .is5xxServerError();
     }
 
     @Test
@@ -151,34 +165,40 @@ class AuthControllerTest {
       when(authService.register(anyString(), anyString(), anyString()))
           .thenThrow(new UserAlreadyExistsException(TEST_EMAIL));
 
-      mockMvc
-          .perform(
-              post(REGISTER_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
-          .andExpect(status().isConflict());
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isEqualTo(409);
     }
 
     @Test
     @DisplayName("400 se email non valida")
     void register_invalidEmail_returns400() throws Exception {
-      mockMvc
-          .perform(
-              post(REGISTER_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, "not-an-email", TEST_PASSWORD)))
-          .andExpect(status().isBadRequest());
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, "not-an-email", TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isBadRequest();
     }
 
     @Test
     @DisplayName("400 se password troppo corta")
     void register_shortPassword_returns400() throws Exception {
-      mockMvc
-          .perform(
-              post(REGISTER_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, "short")))
-          .andExpect(status().isBadRequest());
+      webTestClient
+          .post()
+          .uri(REGISTER_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, "short"))
+          .exchange()
+          .expectStatus()
+          .isBadRequest();
     }
   }
 
@@ -194,13 +214,17 @@ class AuthControllerTest {
       when(authService.login(TEST_EMAIL, TEST_PASSWORD))
           .thenReturn(new AuthResponse(JWT_TOKEN, USER_ID_TYPE));
 
-      mockMvc
-          .perform(
-              post(LOGIN_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.token").value(JWT_TOKEN));
+      webTestClient
+          .post()
+          .uri(LOGIN_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.token")
+          .isEqualTo(JWT_TOKEN);
     }
 
     @Test
@@ -209,12 +233,14 @@ class AuthControllerTest {
       when(authService.login(anyString(), anyString()))
           .thenThrow(new UserNotFoundException(TEST_EMAIL));
 
-      mockMvc
-          .perform(
-              post(LOGIN_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD)))
-          .andExpect(status().isUnauthorized());
+      webTestClient
+          .post()
+          .uri(LOGIN_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, TEST_PASSWORD))
+          .exchange()
+          .expectStatus()
+          .isUnauthorized();
     }
 
     @Test
@@ -223,12 +249,14 @@ class AuthControllerTest {
       when(authService.login(anyString(), anyString()))
           .thenThrow(new InvalidCredentialsException());
 
-      mockMvc
-          .perform(
-              post(LOGIN_PATH)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(credentialsJson(NAME, TEST_EMAIL, "wrongpass")))
-          .andExpect(status().isUnauthorized());
+      webTestClient
+          .post()
+          .uri(LOGIN_PATH)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(credentialsJson(NAME, TEST_EMAIL, "wrongpass"))
+          .exchange()
+          .expectStatus()
+          .isUnauthorized();
     }
   }
 
@@ -244,10 +272,16 @@ class AuthControllerTest {
       when(jwtService.validateAndExtract(JWT_TOKEN)).thenReturn(fakeClaims());
       when(authService.validateToken(JWT_TOKEN)).thenReturn(true);
 
-      mockMvc
-          .perform(post("/auth/validate").header("Authorization", "Bearer " + JWT_TOKEN))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.valid").value(true));
+      webTestClient
+          .post()
+          .uri("/auth/validate")
+          .header("Authorization", "Bearer " + JWT_TOKEN)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.valid")
+          .isEqualTo(true);
     }
 
     @Test
@@ -257,15 +291,19 @@ class AuthControllerTest {
           .thenThrow(new io.jsonwebtoken.MalformedJwtException("token non valido"));
       when(authService.validateToken("bad.token")).thenReturn(false);
 
-      mockMvc
-          .perform(post("/auth/validate").header("Authorization", "Bearer bad.token"))
-          .andExpect(status().isUnauthorized());
+      webTestClient
+          .post()
+          .uri("/auth/validate")
+          .header("Authorization", "Bearer bad.token")
+          .exchange()
+          .expectStatus()
+          .isUnauthorized();
     }
 
     @Test
     @DisplayName("400 se header Authorization mancante")
     void validate_missingHeader_returns400() throws Exception {
-      mockMvc.perform(post("/auth/validate")).andExpect(status().isBadRequest());
+      webTestClient.post().uri("/auth/validate").exchange().expectStatus().isBadRequest();
     }
   }
 }
