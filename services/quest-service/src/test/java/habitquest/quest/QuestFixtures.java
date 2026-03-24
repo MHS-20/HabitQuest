@@ -1,19 +1,16 @@
 package habitquest.quest;
 
 import common.ddd.Id;
-import habitquest.quest.domain.Habit;
-import habitquest.quest.domain.MoneyReward;
-import habitquest.quest.domain.Quest;
-import habitquest.quest.domain.Tag;
+import habitquest.quest.domain.*;
 import habitquest.quest.domain.reminder.DailyRecurrence;
 import java.time.Duration;
 import java.util.List;
 
 public final class QuestFixtures {
-  // String literals
   public static final String QUEST_1 = "quest-1";
   public static final String QUEST_NAME = "Morning Routine";
   public static final String UNKNOWN_QUEST = "ghost-99";
+  public static final String AVATAR_1 = "avatar-1";
   public static final String HABIT_1 = "habit-1";
   public static final String HABIT_2 = "habit-2";
   public static final String HABIT_TITLE = "Morning run";
@@ -26,15 +23,20 @@ public final class QuestFixtures {
   // Default values
   public static final Duration DEFAULT_DURATION = Duration.ofHours(2);
   public static final int DEFAULT_REWARD = 10;
+  public static final MoneyReward DEFAULT_MONEY_REWARD = new MoneyReward(DEFAULT_REWARD);
 
   // Typed ids
   public static final Id<Quest> QUEST_ID = new Id<>(QUEST_1);
   public static final Id<Quest> UNKNOWN_ID = new Id<>(UNKNOWN_QUEST);
   public static final Id<Habit> HABIT_ID_1 = new Id<>(HABIT_1);
   public static final Id<Habit> HABIT_ID_2 = new Id<>(HABIT_2);
+  public static final Id<Avatar> AVATAR_ID_1 = new Id<>(AVATAR_1);
 
-  // Reward instance
-  public static final MoneyReward DEFAULT_MONEY_REWARD = new MoneyReward(DEFAULT_REWARD);
+  // Notifier
+  public static final String FIELD_QUEST_ID = "questId";
+  public static final String FIELD_AVATAR_ID = "avatarId";
+  public static final String FIELD_QUEST_NAME = "name";
+  public static final String FIELD_OCCURRED_ON = "occurredOn";
 
   // Habit factories
   public static Habit morningRunHabit() {

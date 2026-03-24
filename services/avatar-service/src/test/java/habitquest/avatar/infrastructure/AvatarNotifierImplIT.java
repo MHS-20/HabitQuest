@@ -61,9 +61,6 @@ public class AvatarNotifierImplIT {
   private static final String TOPIC_SKILL_POINT = "avatar.skill-point-assigned";
   private static final String TOPIC_NEW_SPELL = "avatar.new-spell-learned";
 
-  // AVATAR_ID (Id<Avatar>) e AVATAR_1 (String) vengono da AvatarFixtures.*.
-  // I due ID qui sotto sono intenzionalmente diversi: il loro scopo è verificare che il notifier
-  // preservi esattamente l'ID ricevuto — usare AVATAR_ID li renderebbe indistinguibili.
   private static final String DEAD_AVATAR_ID = "avatar-42";
   private static final String SPECIAL_AVATAR_ID = "special-avatar-id";
 

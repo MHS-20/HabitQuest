@@ -40,6 +40,13 @@ public final class HabitFixtures {
   public static final Id<Habit> GHOST_ID = new Id<>(GHOST_HABIT);
   public static final Id<Avatar> AVATAR_ID = new Id<>(AVATAR_1);
 
+  // Notifier
+  public static final String FIELD_HABIT_ID = "habitId";
+  public static final String FIELD_AVATAR_ID = "avatarId";
+  public static final String FIELD_OCCURRED_ON = "occurredOn";
+  public static final String SPECIAL_HABIT_ID = "special-habit-99";
+  public static final String SPECIAL_AVATAR_ID = "special-avatar-123";
+
   // Recurrence instances
   public static final DailyRecurrence DAILY_RECURRENCE = new DailyRecurrence();
   public static final WeeklyRecurrence WEEKLY_RECURRENCE =
