@@ -2,6 +2,8 @@ package habitquest.avatar.infrastructure;
 
 import common.hexagonal.Adapter;
 import habitquest.avatar.application.AvatarLogger;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -18,6 +20,8 @@ public class MarketplaceClient {
     this.log = log;
   }
 
+  @CircuitBreaker(name = "marketplaceClient", fallbackMethod = "createMarketplaceFallback")
+  @Retry(name = "marketplaceClient")
   public void createMarketplace(String avatarId) {
     CreateMarketplaceRequest request = new CreateMarketplaceRequest(avatarId);
     log.info(request, "Creating marketplace");
@@ -29,6 +33,15 @@ public class MarketplaceClient {
       throw new MarketplaceCommunicationException(
           "Could not create marketplace for avatar " + avatarId, ex);
     }
+  }
+
+  private void createMarketplaceFallback(String avatarId, Exception ex) {
+    log.error(
+        new CreateMarketplaceRequest(avatarId),
+        "Circuit breaker OPEN o retry esauriti per marketplace creation. avatarId=" + avatarId,
+        ex);
+    throw new MarketplaceCommunicationException(
+        "Marketplace service non disponibile per avatar " + avatarId, ex);
   }
 
   record CreateMarketplaceRequest(String avatarId) {}

@@ -1,25 +1,25 @@
 server:
-  port: 9002
+  port: 8084
   shutdown: graceful
   netty:
     connection-timeout: 2s
     idle-timeout: 15s
+
+info:
+  system: HabitQuest
+habit:
+  service-uri: "http://localhost:8085"
+avatar:
+  service-uri: "http://localhost:8081"
 
 spring:
   application:
     name: quest-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
-  r2dbc:
-    username: user
-    password: password
-    url: r2dbc:postgresql://localhost:5432/habitquestdb_quest
-    pool:
-      max-create-connection-time: 2s
-      initial-size: 5
-      max-size: 10
   config:
     import: ""
+
   cloud:
     config:
       enabled: false
@@ -61,30 +61,45 @@ spring:
             acks: all
             retries: 3
             enable.idempotence: true
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: user
-    password: password
-    connection-timeout: 5s
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/HabitQuest
 
 logging:
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
-info:
-  system: HabitQuest
+resilience4j:
+  retry:
+    default-config: default
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+
+  circuit-breaker:
+    default-config: default
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 3s
+        wait-duration-in-open-state: 10s
+        permitted-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+        record-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
 
 management:
   endpoints:
     web:
       exposure:
-        include: bindings, configprops, env, flyway, functions, health, heapdump, info, loggers, mappings, prometheus
+        include: health, metrics, circuitbreakers, retries, bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
   endpoint:
     health:
       show-details: always
@@ -101,6 +116,6 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
-
-polar:
-  catalog-service-uri: "http://localhost:9001"
+  health:
+    circuitbreakers:
+      enabled: true
