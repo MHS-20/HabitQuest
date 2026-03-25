@@ -35,6 +35,7 @@ fun App() {
         var authLoading by remember { mutableStateOf(false) }
         var authError by remember { mutableStateOf<String?>(null) }
         var authToken by remember { mutableStateOf<String?>(null) }
+        var authUserId by remember { mutableStateOf<String?>(null) }
 
         when (authRoute) {
             AuthRoute.Login -> LoginScreen(
@@ -47,6 +48,7 @@ fun App() {
                         when (val result = authRepository.login(email, password)) {
                             is AuthResult.Success -> {
                                 authToken = result.token
+                                authUserId = result.userId
                                 authRoute = AuthRoute.Main
                             }
 
@@ -73,6 +75,7 @@ fun App() {
                         when (val result = authRepository.register(name, email, password)) {
                             is AuthResult.Success -> {
                                 authToken = result.token
+                                authUserId = result.userId
                                 authRoute = AuthRoute.Main
                             }
 
@@ -92,10 +95,12 @@ fun App() {
             AuthRoute.Main -> MainScaffold(
                 onLogout = {
                     authToken = null
+                    authUserId = null
                     authError = null
                     authRoute = AuthRoute.Login
                 },
-                token = authToken.orEmpty()
+                token = authToken.orEmpty(),
+                userId = authUserId.orEmpty()
             )
         }
     }
@@ -103,7 +108,7 @@ fun App() {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MainScaffold(onLogout: () -> Unit, token: String) {
+fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
     var selectedPage by remember { mutableStateOf(AppPage.Dashboard) }
 
     Scaffold(
@@ -144,7 +149,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String) {
                 .padding(innerPadding)
         ) {
             when (selectedPage) {
-                AppPage.Dashboard -> DashboardScreen(token)
+                AppPage.Dashboard -> DashboardScreen(token = token, userId = userId)
                 AppPage.Character -> CharacterScreen()
                 AppPage.Achievements -> AchievementsScreen()
             }
@@ -153,9 +158,22 @@ fun MainScaffold(onLogout: () -> Unit, token: String) {
 }
 
 @Composable
-fun DashboardScreen(token: String) {
+fun DashboardScreen(token: String, userId: String) {
     var showContent by remember { mutableStateOf(true) }
-    val stats = remember { StatsState() }
+    val avatarRepository = remember { AvatarRepository() }
+    var avatarState by remember { mutableStateOf<AvatarUiState>(AvatarUiState.Loading) }
+
+    LaunchedEffect(token, userId) {
+        avatarState = AvatarUiState.Loading
+        avatarState = when {
+            token.isBlank() -> AvatarUiState.Error("Sessione non valida")
+            userId.isBlank() -> AvatarUiState.Error("Utente non disponibile nella sessione")
+            else -> when (val result = avatarRepository.fetchAvatar(avatarId = userId, token = token)) {
+                is AvatarResult.Success -> AvatarUiState.Ready(result.avatar)
+                is AvatarResult.Error -> AvatarUiState.Error(result.message)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -185,12 +203,26 @@ fun DashboardScreen(token: String) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(Modifier.height(12.dp))
-                CharacterCard(name = "Aria", stats = stats)
+                when (val state = avatarState) {
+                    AvatarUiState.Loading -> Text("Caricamento avatar in corso...")
+                    is AvatarUiState.Error -> Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
+
+                    is AvatarUiState.Ready -> AvatarCard(avatar = state.avatar)
+                }
                 Spacer(Modifier.height(24.dp))
-                Text("Suggerimento: usa i pulsanti per cambiare le statistiche.")
+                Text("Dati avatar aggiornati da avatar-service")
             }
         }
     }
+}
+
+private sealed interface AvatarUiState {
+    data object Loading : AvatarUiState
+    data class Ready(val avatar: AvatarData) : AvatarUiState
+    data class Error(val message: String) : AvatarUiState
 }
 
 @Composable
