@@ -10,4 +10,13 @@ nav:
   - Event Storming: eventStorming/event_storming.md
   - Event Flows: eventFlows/event_flows.md
   - Interactions: interactions/interactions.md
+  - API:
+    - Overview: api/overview.md
+    - Authentication: api/auth.md
+    - Avatar: api/avatar.md
+    - Habits (Tracking): api/tracking.md
+    - Quests: api/quest.md
+    - Guilds & Battles: api/guild.md
+    - Marketplace: api/marketplace.md
+    - Notifications: api/notification.md
 theme: readthedocs
