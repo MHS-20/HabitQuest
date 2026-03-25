@@ -1,5 +1,6 @@
 package habitquest.quest.application;
 
+import static habitquest.quest.QuestFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -10,9 +11,7 @@ import habitquest.quest.domain.events.QuestCreated;
 import habitquest.quest.domain.events.QuestEvent;
 import habitquest.quest.domain.events.QuestObserver;
 import habitquest.quest.domain.factory.QuestFactory;
-import habitquest.quest.domain.reminder.DailyRecurrence;
 import java.time.Duration;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,40 +30,6 @@ class QuestServiceImplTest {
   @Mock private QuestFactory questFactory;
   private QuestServiceImpl service;
 
-  private static final Id<Quest> QUEST_ID = new Id<>("quest-1");
-  private static final String QUEST_NAME = "Morning Routine";
-  private static final Id<Quest> UNKNOWN_ID = new Id<>("missing");
-  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
-  public static final Id<Habit> HABIT_2 = new Id<>("habit-2");
-  private static final String HABIT_TITLE = "Morning run";
-  private static final String HABIT_DESCRIPTION = "Run 5km every morning";
-
-  private Habit stubHabit() {
-    return new Habit(
-        HABIT_ID,
-        HABIT_TITLE,
-        HABIT_DESCRIPTION,
-        List.of(new Tag("health")),
-        new DailyRecurrence());
-  }
-
-  private Habit stubHabitNew() {
-    return new Habit(
-        HABIT_2,
-        "Meditation",
-        "Meditate for 10 minutes",
-        List.of(new Tag("mindfulness")),
-        new DailyRecurrence());
-  }
-
-  private Quest stubQuest() {
-    Quest quest = new Quest(QUEST_ID, QUEST_NAME);
-    quest.setDuration(Duration.ofHours(2));
-    quest.setReward(new MoneyReward(10));
-    quest.addHabit(stubHabit());
-    return quest;
-  }
-
   @BeforeEach
   void setUp() {
     service = new QuestServiceImpl(questRepository, questObserver, questFactory);
@@ -77,7 +42,7 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("saves and emits QuestCreated event")
     void createsAndEmitsEvent() {
-      Quest quest = stubQuest();
+      Quest quest = fullQuest();
       when(questFactory.createQuest(QUEST_NAME)).thenReturn(quest);
       when(questRepository.save(any(Quest.class)))
           .thenAnswer(invocation -> invocation.getArgument(0));
@@ -102,7 +67,7 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("returns quest when found")
     void found() {
-      Quest quest = stubQuest();
+      Quest quest = fullQuest();
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       assertThat(service.getQuest(QUEST_ID)).isSameAs(quest);
     }
@@ -125,7 +90,7 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("checks existence and saves the provided quest")
     void updates() {
-      Quest existing = stubQuest();
+      Quest existing = fullQuest();
       Quest replacement = new Quest(new Id<>("quest-2"), "Evening Routine");
       when(questRepository.findById(QUEST_ID)).thenReturn(existing);
       when(questRepository.save(replacement)).thenReturn(replacement);
@@ -157,34 +122,30 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("getName returns quest name")
     void getName() {
-      Quest quest = stubQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
       assertThat(service.getName(QUEST_ID)).isEqualTo(QUEST_NAME);
     }
 
     @Test
     @DisplayName("getDuration returns quest duration")
     void getDuration() {
-      Quest quest = stubQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      assertThat(service.getDuration(QUEST_ID)).isEqualTo(Duration.ofHours(2));
+      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
+      assertThat(service.getDuration(QUEST_ID)).isEqualTo(DEFAULT_DURATION);
     }
 
     @Test
     @DisplayName("getReward returns quest reward")
     void getReward() {
-      Quest quest = stubQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      assertThat(service.getReward(QUEST_ID)).isEqualTo(new MoneyReward(10));
+      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
+      assertThat(service.getReward(QUEST_ID)).isEqualTo(DEFAULT_MONEY_REWARD);
     }
 
     @Test
     @DisplayName("getHabits returns quest habits")
     void getHabits() {
-      Quest quest = stubQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
       assertThat(service.getHabits(QUEST_ID)).hasSize(1);
-      assertThat(service.getHabits(QUEST_ID).getFirst().getId()).isEqualTo(HABIT_ID);
+      assertThat(service.getHabits(QUEST_ID).getFirst().getId()).isEqualTo(HABIT_ID_1);
     }
 
     @Test
@@ -205,7 +166,7 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("updates name and saves")
     void updates() {
-      Quest quest = stubQuest();
+      Quest quest = fullQuest();
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
       Quest updated = service.updateName(QUEST_ID, "Evening Routine");
@@ -221,7 +182,7 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("updates duration and saves")
     void updates() {
-      Quest quest = stubQuest();
+      Quest quest = fullQuest();
       Duration newDuration = Duration.ofMinutes(45);
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
@@ -238,12 +199,11 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("updates reward and saves")
     void updates() {
-      Quest quest = stubQuest();
-      MoneyReward reward = new MoneyReward(10);
+      Quest quest = fullQuest();
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.updateReward(QUEST_ID, reward);
-      assertThat(updated.getReward()).isEqualTo(reward);
+      Quest updated = service.updateReward(QUEST_ID, DEFAULT_MONEY_REWARD);
+      assertThat(updated.getReward()).isEqualTo(DEFAULT_MONEY_REWARD);
       verify(questRepository).save(quest);
     }
   }
@@ -255,13 +215,11 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("adds habit and saves")
     void adds() {
-      Quest quest = stubQuest();
+      Quest quest = fullQuest();
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.addHabit(QUEST_ID, stubHabitNew());
-      assertThat(updated.getHabits())
-          .extracting(Habit::getId)
-          .contains(HABIT_ID, new Id<>("habit-2"));
+      Quest updated = service.addHabit(QUEST_ID, meditationHabit());
+      assertThat(updated.getHabits()).extracting(Habit::getId).contains(HABIT_ID_1, HABIT_ID_2);
       verify(questRepository).save(quest);
     }
   }
@@ -273,11 +231,10 @@ class QuestServiceImplTest {
     @Test
     @DisplayName("removes habit and saves")
     void removes() {
-      Quest quest = new Quest(QUEST_ID, QUEST_NAME);
-      quest.addHabit(stubHabitNew());
+      Quest quest = questWithMeditationHabit();
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.removeHabit(QUEST_ID, HABIT_2);
+      Quest updated = service.removeHabit(QUEST_ID, HABIT_ID_2);
       assertThat(updated.getHabits()).isEmpty();
       verify(questRepository).save(quest);
     }

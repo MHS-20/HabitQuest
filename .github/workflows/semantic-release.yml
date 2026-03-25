@@ -45,7 +45,8 @@ jobs:
             @semantic-release/changelog \
             @semantic-release/github \
             @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator
+            @semantic-release/release-notes-generator \
+            semantic-release-monorepo
 
       - name: Run Semantic Release
         id: semantic
@@ -53,14 +54,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SERVICE: ${{ env.SERVICE }}
         run: |
-          # Run semantic-release, capture output, don't fail if no release
           cd services/$SERVICE
-          OUTPUT=$(npx semantic-release 2>&1 || true)
-          echo "$OUTPUT"
-          
-          if echo "$OUTPUT" | grep -q "Created tag"; then
-            VERSION=$(echo "$OUTPUT" | grep -oP '(?<=Created tag ).*')
+          npx semantic-release-monorepo --tag-format "${SERVICE}-v\${version}" 2>&1 | tee release_output.log
+          if grep -q "Created tag" release_output.log; then
+            VERSION=$(grep -oP "${SERVICE}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
             echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Detected Version: $VERSION"
           else
             echo "No release created"
             echo "version=" >> $GITHUB_OUTPUT
