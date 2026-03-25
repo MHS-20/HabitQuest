@@ -33,19 +33,9 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("RPG Dashboard", style = MaterialTheme.typography.headlineSmall)
-        if (token.isNotBlank()) {
-            Text(
-                text = "Sessione attiva",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-
-        Button(onClick = { showContent = !showContent }) {
-            Text(if (showContent) "Nascondi" else "Mostra")
-        }
+//        Button(onClick = { showContent = !showContent }) {
+//            Text(if (showContent) "Nascondi" else "Mostra")
+//        }
 
         AnimatedVisibility(showContent) {
             Column(
