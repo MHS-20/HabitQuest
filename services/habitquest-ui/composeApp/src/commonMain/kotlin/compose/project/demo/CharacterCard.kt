@@ -1,5 +1,6 @@
 package compose.project.demo
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,10 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CharacterCard(name: String, stats: StatsState) {
+fun AvatarCard(avatar: AvatarData) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -54,24 +57,24 @@ fun CharacterCard(name: String, stats: StatsState) {
                         color = Color.Gray
                     ) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(name.take(2).uppercase(), color = Color.White)
+                            Text(avatar.name.take(2).uppercase(), color = Color.White)
                         }
                     }
 
                     Spacer(Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(name, style = nameStyle)
+                        Text(avatar.name, style = nameStyle)
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "Lv ${stats.level}",
+                            "Lv ${avatar.level}",
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(4.dp)
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            stats.charClass,
+                            avatar.charClass,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.padding(4.dp)
@@ -80,34 +83,20 @@ fun CharacterCard(name: String, stats: StatsState) {
 
                     Spacer(Modifier.height(8.dp))
 
-                    // Stats stacked
-                    StatRow(
-                        label = "HP",
-                        value = stats.hp,
-                        max = stats.maxHp,
-                        onDecrease = { stats.takeDamage(10) },
-                        onIncrease = { stats.heal(10) },
-                        decreaseLabel = "-10",
-                        increaseLabel = "+10",
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    MeterRow(label = "HP", value = avatar.hp, max = avatar.maxHp, color = MaterialTheme.colorScheme.error)
 
                     Spacer(Modifier.height(8.dp))
 
-                    StatRow(
-                        label = "Mana",
-                        value = stats.mana,
-                        max = stats.maxMana,
-                        onDecrease = { stats.useMana(15) },
-                        onIncrease = { stats.restoreMana(15) },
-                        decreaseLabel = "-15",
-                        increaseLabel = "+15",
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
+                    MeterRow(label = "Mana", value = avatar.mana, max = avatar.maxMana, color = MaterialTheme.colorScheme.tertiary)
 
                     Spacer(Modifier.height(8.dp))
 
-                    XpRow(stats = stats)
+                    MeterRow(
+                        label = "XP",
+                        value = avatar.currentXp,
+                        max = avatar.nextLevelXp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 }
             } else {
                 // Wide layout: avatar left, stats right
@@ -119,7 +108,7 @@ fun CharacterCard(name: String, stats: StatsState) {
                         color = Color.Gray
                     ) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(name.take(2).uppercase(), color = Color.White)
+                            Text(avatar.name.take(2).uppercase(), color = Color.White)
                         }
                     }
 
@@ -127,17 +116,17 @@ fun CharacterCard(name: String, stats: StatsState) {
 
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(name, style = nameStyle)
+                            Text(avatar.name, style = nameStyle)
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "Lv ${stats.level}",
+                                "Lv ${avatar.level}",
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.padding(4.dp)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                stats.charClass,
+                                avatar.charClass,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier.padding(4.dp)
@@ -146,33 +135,20 @@ fun CharacterCard(name: String, stats: StatsState) {
 
                         Spacer(Modifier.height(8.dp))
 
-                        StatRow(
-                            label = "HP",
-                            value = stats.hp,
-                            max = stats.maxHp,
-                            onDecrease = { stats.takeDamage(10) },
-                            onIncrease = { stats.heal(10) },
-                            decreaseLabel = "-10",
-                            increaseLabel = "+10",
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        MeterRow(label = "HP", value = avatar.hp, max = avatar.maxHp, color = MaterialTheme.colorScheme.error)
 
                         Spacer(Modifier.height(8.dp))
 
-                        StatRow(
-                            label = "Mana",
-                            value = stats.mana,
-                            max = stats.maxMana,
-                            onDecrease = { stats.useMana(15) },
-                            onIncrease = { stats.restoreMana(15) },
-                            decreaseLabel = "-15",
-                            increaseLabel = "+15",
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
+                        MeterRow(label = "Mana", value = avatar.mana, max = avatar.maxMana, color = MaterialTheme.colorScheme.tertiary)
 
                         Spacer(Modifier.height(8.dp))
 
-                        XpRow(stats = stats)
+                        MeterRow(
+                            label = "XP",
+                            value = avatar.currentXp,
+                            max = avatar.nextLevelXp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
             }
@@ -180,10 +156,40 @@ fun CharacterCard(name: String, stats: StatsState) {
     }
 }
 
+@Composable
+private fun MeterRow(label: String, value: Int, max: Int, color: Color) {
+    val normalizedMax = max.coerceAtLeast(1)
+    val progressTarget = (value.coerceAtLeast(0).toFloat() / normalizedMax).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(targetValue = progressTarget)
+
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("$label: $value / $normalizedMax")
+        LinearProgressIndicator(
+            progress = { animatedProgress },
+            color = color,
+            trackColor = color.copy(alpha = 0.25f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun CharacterCardPreview() {
-    val stats = StatsState()
-    stats.setClass("Mage")
-    CharacterCard(name = "Aria", stats = stats)
+fun AvatarCardPreview() {
+    AvatarCard(
+        avatar = AvatarData(
+            id = "user-1",
+            name = "Aria",
+            level = 5,
+            currentXp = 120,
+            nextLevelXp = 300,
+            hp = 82,
+            maxHp = 100,
+            mana = 44,
+            maxMana = 60,
+            charClass = "Mage"
+        )
+    )
 }
