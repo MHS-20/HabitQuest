@@ -31,7 +31,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9093 || exit 1"]
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1"]
       interval: 5s
       timeout: 10s
       retries: 5
@@ -141,6 +141,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: user
       SPRING_RABBITMQ_PASSWORD: password
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
     ports:
       - "8084:8084"
 
@@ -188,6 +189,9 @@ services:
     environment:
       SERVER_PORT: 9000
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
       SERVICES_AVATAR_BASE_URL: http://avatar-service:8081
       SPRING_CLOUD_GATEWAY_ROUTES_0_ID: avatar-service
       SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://avatar-service:8081
