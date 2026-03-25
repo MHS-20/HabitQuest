@@ -4,6 +4,8 @@ server:
   tomcat:
     connection-timeout: 2s
 
+info:
+  system: habitquest
 services:
   avatar:
     base-url: http://avatar-service:8081
@@ -13,8 +15,13 @@ spring:
     name: edge-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
-  config:
-    import: ""
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:change-me-in-production-min-32-chars}
+    expiration-seconds: ${APP_JWT_EXPIRATION_SECONDS:3600}
+
+################## KAFKA ##################
   cloud:
     stream:
       bindings:
@@ -22,51 +29,40 @@ spring:
           destination: user.registered
       kafka:
         binder:
-          brokers: localhost:9092
-    config:
-      enabled: false
-      uri: http://localhost:8888
-      request-connect-timeout: 5000
-      request-read-timeout: 5000
-      fail-fast: false
-      retry:
-        max-attempts: 6
-        initial-interval: 1000
-        max-interval: 2000
-        multiplier: 1.1
+          brokers: ${KAFKA_BROKER:localhost:9092}
+
+
+################## GATEWAY ##################
     gateway:
       mvc:
         routes:
           - id: avatar-service
-            uri: http://localhost:8081
+            uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
             predicates:
               - Path=/api/v1/avatars/**
-
           - id: guild-service
-            uri: http://localhost:8082
+            uri: ${GUILD_SERVICE_URI:http://localhost:8082}
             predicates:
               - Path=/api/v1/guilds/**
-
           - id: battle-service
-            uri: http://localhost:8082
+            uri: ${BATTLE_SERVICE_URI:http://localhost:8082}
             predicates:
               - Path=/api/v1/battles/**
-
+          - id: marketplace-service
+            uri: ${MARKETPLACE_SERVICE_URI:http://localhost:8083}
+            predicates:
+              - Path=/api/v1/battles/**
           - id: quest-service
-            uri: http://localhost:8083
+            uri: ${QUEST_SERVICE_URI:http://localhost:8084}
             predicates:
               - Path=/api/v1/quests/**
-
           - id: tracking-service
-            uri: http://localhost:8084
+            uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
             predicates:
               - Path=/api/v1/habits/**
 
-app:
-  jwt:
-    secret: ${APP_JWT_SECRET:change-me-in-production-min-32-chars}
-    expiration-seconds: ${APP_JWT_EXPIRATION_SECONDS:3600}
 
+################## RESILIENCY ##################
 resilience4j:
   circuitbreaker:
     configs:
@@ -105,6 +101,8 @@ resilience4j:
         enableExponentialBackoff: true
         exponentialBackoffMultiplier: 2
 
+
+############ OBSERVABILITY #############
 logging:
   group:
     circuitbreaker: io.github.resilience4j, org.springframework.cloud.circuitbreaker
@@ -112,21 +110,33 @@ logging:
     circuitbreaker: info
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
-
-info:
-  system: habitquest
+  structured:
+    format:
+      console: ecs
 
 management:
   endpoints:
     web:
       exposure:
-        include: configprops, env, gateway, health, heapdump, info, loggers, mappings, prometheus
+        include: health, metrics, circuitbreakers, retries, bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
   endpoint:
     health:
-      show-details:
+      show-details: always
       show-components: always
       probes:
         enabled: true
+
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      type: W3C
+  otlp:
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/metrics
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/traces
 
   info:
     env:
@@ -135,6 +145,17 @@ management:
       enabled: true
     os:
       enabled: true
+
   metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        resilience4j.circuitbreaker: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
     tags:
       application: ${spring.application.name}
+
+  health:
+    circuitbreakers:
+      enabled: true
