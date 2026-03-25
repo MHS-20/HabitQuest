@@ -1,6 +1,22 @@
+server:
+  port: 8081
+  shutdown: graceful
+  netty:
+    connection-timeout: 2s
+    idle-timeout: 15s
+
+info:
+  system: HabitQuest
+marketplace:
+  service-uri: "http://localhost:8083"
+
 spring:
   application:
     name: avatar-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+  config:
+    import: ""
 
   cloud:
     stream:
@@ -8,22 +24,18 @@ spring:
         avatar-level-upped-out-0:
           destination: avatar.level-upped
           content-type: application/json
-
         avatar-dead-out-0:
           destination: avatar.dead
           content-type: application/json
-
         avatar-skill-point-out-0:
           destination: avatar.skill-point-assigned
           content-type: application/json
-
         avatar-new-spell-out-0:
           destination: avatar.new-spell-learned
           content-type: application/json
-
       kafka:
         binder:
-          brokers: localhost:9092          # override in production via env var
+          brokers: localhost:9092
           auto-create-topics: true
           producer-properties:
             key.serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -32,9 +44,62 @@ spring:
             retries: 3
             enable.idempotence: true
 
-server:
-  port: 8080
-
 logging:
-  level:
-    habitquest.avatar: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+resilience4j:
+  # RETRY
+  retry:
+    instances:
+      marketplaceClient:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+        ignore-exceptions:
+          - habitquest.avatar.infrastructure.MarketplaceCommunicationException
+
+  # CIRCUIT BREAKER
+  circuit-breaker:
+    instances:
+      marketplaceClient:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 3s
+        wait-duration-in-open-state: 10s
+        permitted-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+        record-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, circuitbreakers, retries, bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  health:
+    circuitbreakers:
+      enabled: true
