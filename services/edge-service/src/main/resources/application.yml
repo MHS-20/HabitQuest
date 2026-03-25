@@ -8,7 +8,7 @@ info:
   system: habitquest
 services:
   avatar:
-    base-url: http://avatar-service:8081
+    base-url: ${AVATAR_SERVICE_URI:http://localhost:8081}
 
 spring:
   application:
@@ -31,7 +31,6 @@ app:
         binder:
           brokers: ${KAFKA_BROKER:localhost:9092}
 
-
 ################## GATEWAY ##################
     gateway:
       mvc:
@@ -45,7 +44,7 @@ app:
             predicates:
               - Path=/api/v1/guilds/**
           - id: battle-service
-            uri: ${BATTLE_SERVICE_URI:http://localhost:8082}
+            uri: ${GUILD_SERVICE_URI:http://localhost:8082}
             predicates:
               - Path=/api/v1/battles/**
           - id: marketplace-service

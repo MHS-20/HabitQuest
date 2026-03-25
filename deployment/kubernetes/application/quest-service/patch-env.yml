@@ -10,3 +10,11 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+            - name: AVATAR_SERVICE_URI
+              value: http://avatar-service:8081
+            - name: TRACKING_SERVICE_URI
+              value: http://tracking-service:8085
+            - name: KAFKA_BROKER
+              value: kafka-service:9092
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4318

@@ -10,3 +10,29 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+
+            # JWT
+            - name: APP_JWT_SECRET
+              value: "change-me-in-production-min-32-chars"
+            - name: APP_JWT_EXPIRATION_SECONDS
+              value: "3600"
+
+            # Kafka
+            - name: KAFKA_BROKER
+              value: kafka-service:9092
+
+            # Gateway routes
+            - name: AVATAR_SERVICE_URI
+              value: http://avatar-service:8081
+            - name: GUILD_SERVICE_URI
+              value: http://guild-service:8082
+            - name: MARKETPLACE_SERVICE_URI
+              value: http://marketplace-service:8083
+            - name: QUEST_SERVICE_URI
+              value: http://quest-service:8084
+            - name: TRACKING_SERVICE_URI
+              value: http://tracking-service:8085
+
+            # Observability
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4318

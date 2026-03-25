@@ -4,11 +4,3 @@ kind: Kustomization
 resources:
   - deployment.yml
   - service.yml
-
-configMapGenerator:
-  - name: quest-config
-    files:
-      - application.yml
-    options:
-      labels:
-        app: quest-service
