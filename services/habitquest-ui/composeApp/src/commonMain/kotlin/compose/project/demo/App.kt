@@ -110,6 +110,20 @@ fun App() {
 @OptIn(ExperimentalMaterial3Api::class)
 fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
     var selectedPage by remember { mutableStateOf(AppPage.Dashboard) }
+    val avatarRepository = remember { AvatarRepository() }
+    var avatarState by remember { mutableStateOf<AvatarUiState>(AvatarUiState.Loading) }
+
+    LaunchedEffect(token, userId) {
+        avatarState = AvatarUiState.Loading
+        avatarState = when {
+            token.isBlank() -> AvatarUiState.Error("Sessione non valida")
+            userId.isBlank() -> AvatarUiState.Error("Utente non disponibile nella sessione")
+            else -> when (val result = avatarRepository.fetchAvatar(avatarId = userId, token = token)) {
+                is AvatarResult.Success -> AvatarUiState.Ready(result.avatar)
+                is AvatarResult.Error -> AvatarUiState.Error(result.message)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -149,8 +163,8 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                 .padding(innerPadding)
         ) {
             when (selectedPage) {
-                AppPage.Dashboard -> DashboardScreen(token = token, userId = userId)
-                AppPage.Character -> CharacterScreen()
+                AppPage.Dashboard -> DashboardScreen(token = token, avatarState = avatarState)
+                AppPage.Character -> CharacterScreen(avatarState = avatarState)
                 AppPage.Achievements -> AchievementsScreen()
             }
         }
@@ -158,22 +172,8 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
 }
 
 @Composable
-fun DashboardScreen(token: String, userId: String) {
+fun DashboardScreen(token: String, avatarState: AvatarUiState) {
     var showContent by remember { mutableStateOf(true) }
-    val avatarRepository = remember { AvatarRepository() }
-    var avatarState by remember { mutableStateOf<AvatarUiState>(AvatarUiState.Loading) }
-
-    LaunchedEffect(token, userId) {
-        avatarState = AvatarUiState.Loading
-        avatarState = when {
-            token.isBlank() -> AvatarUiState.Error("Sessione non valida")
-            userId.isBlank() -> AvatarUiState.Error("Utente non disponibile nella sessione")
-            else -> when (val result = avatarRepository.fetchAvatar(avatarId = userId, token = token)) {
-                is AvatarResult.Success -> AvatarUiState.Ready(result.avatar)
-                is AvatarResult.Error -> AvatarUiState.Error(result.message)
-            }
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -219,25 +219,53 @@ fun DashboardScreen(token: String, userId: String) {
     }
 }
 
-private sealed interface AvatarUiState {
+sealed interface AvatarUiState {
     data object Loading : AvatarUiState
     data class Ready(val avatar: AvatarData) : AvatarUiState
     data class Error(val message: String) : AvatarUiState
 }
 
 @Composable
-fun CharacterScreen() {
+fun CharacterScreen(avatarState: AvatarUiState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        Text(
-            text = "👤 Pagina Personaggio",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        when (val state = avatarState) {
+            AvatarUiState.Loading -> Text(
+                text = "Caricamento personaggio...",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
+
+            is AvatarUiState.Error -> Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
+
+            is AvatarUiState.Ready -> Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("👤 ${state.avatar.name}", style = MaterialTheme.typography.headlineSmall)
+                Text("ID: ${state.avatar.id}")
+                Text("Livello: ${state.avatar.level}")
+                Text("XP: ${state.avatar.currentXp} / ${state.avatar.nextLevelXp}")
+                Text("HP: ${state.avatar.hp} / ${state.avatar.maxHp}")
+                Text("Mana: ${state.avatar.mana} / ${state.avatar.maxMana}")
+                Text("Gold: ${state.avatar.money}")
+                Spacer(Modifier.height(8.dp))
+                Text("Statistiche", style = MaterialTheme.typography.titleMedium)
+                Text("Strength: ${state.avatar.strength}")
+                Text("Defense: ${state.avatar.defense}")
+                Text("Intelligence: ${state.avatar.intelligence}")
+            }
+        }
     }
 }
 
