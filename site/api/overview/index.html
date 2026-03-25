@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Event Flows - HabitQuest</title>
+    <title>Overview - HabitQuest</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Event Flows";
-        var mkdocs_page_input_path = "eventFlows/event_flows.md";
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "api/overview.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -71,20 +71,8 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">Event Flows</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#tracking-service">Tracking Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#quest-service">Quest Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#avatar-service">Avatar Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#guild-service">Guild Service</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#marketplace-service">Marketplace Service</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../eventFlows/event_flows/">Event Flows</a>
                 </li>
               </ul>
               <ul>
@@ -92,22 +80,34 @@
                 </li>
               </ul>
               <p class="caption"><span class="caption-text">API</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#base-urls">Base URLs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#content-type">Content Type</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#hateoas">HATEOAS</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#error-responses">Error Responses</a>
+    </li>
+    </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../auth/">Authentication</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../avatar/">Avatar</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../tracking/">Habits (Tracking)</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quests</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guilds & Battles</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../notification/">Notifications</a>
                   </li>
               </ul>
       </div>
@@ -124,7 +124,8 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Event Flows</li>
+          <li class="breadcrumb-item">API</li>
+      <li class="breadcrumb-item active">Overview</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -133,23 +134,96 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="event-flows">Event Flows</h1>
-<h2 id="tracking-service">Tracking Service</h2>
-<p><img alt="Tracking Service Event Flow" src="../01_tracking-service.drawio.png" /></p>
-<h2 id="quest-service">Quest Service</h2>
-<p><img alt="Quest Service Event Flow" src="../02_quest-service.drawio.png" /></p>
-<h2 id="avatar-service">Avatar Service</h2>
-<p><img alt="Avatar Service Event Flow" src="../03_avatar-service.drawio.png" /></p>
-<h2 id="guild-service">Guild Service</h2>
-<p><img alt="Guild Service Event Flow" src="../04_guild-service.drawio.png" /></p>
-<h2 id="marketplace-service">Marketplace Service</h2>
-<p><img alt="Marketplace Service Event Flow" src="../05_marketplace-service.drawio.png" /></p>
+                <h1 id="api-overview">API Overview</h1>
+<p>HabitQuest exposes a RESTful HTTP API distributed across multiple microservices. All services are fronted by the <strong>Edge Service</strong>, which handles authentication and routes requests to the appropriate backend service.</p>
+<h2 id="base-urls">Base URLs</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Base Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication (Edge Service)</td>
+<td><code>/auth</code></td>
+</tr>
+<tr>
+<td>Avatar Service</td>
+<td><code>/api/v1/avatars</code></td>
+</tr>
+<tr>
+<td>Tracking Service (Habits)</td>
+<td><code>/api/v1/habits</code></td>
+</tr>
+<tr>
+<td>Quest Service</td>
+<td><code>/api/v1/quests</code></td>
+</tr>
+<tr>
+<td>Guild Service</td>
+<td><code>/api/v1/guilds</code></td>
+</tr>
+<tr>
+<td>Battle Service</td>
+<td><code>/api/v1/battles</code></td>
+</tr>
+<tr>
+<td>Marketplace Service</td>
+<td><code>/api/v1/marketplaces</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="authentication">Authentication</h2>
+<p>Protected endpoints require a Bearer token obtained from the <code>/auth/login</code> or <code>/auth/register</code> endpoints.</p>
+<pre><code>Authorization: Bearer &lt;token&gt;
+</code></pre>
+<h2 id="content-type">Content Type</h2>
+<p>All request and response bodies use JSON:</p>
+<pre><code>Content-Type: application/json
+</code></pre>
+<h2 id="hateoas">HATEOAS</h2>
+<p>Responses are wrapped in Spring HATEOAS <code>EntityModel</code> or <code>CollectionModel</code> objects, which include <code>_links</code> fields with hypermedia navigation links to related resources.</p>
+<h2 id="error-responses">Error Responses</h2>
+<p>All services follow a consistent error format:</p>
+<table>
+<thead>
+<tr>
+<th>HTTP Status</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>400 Bad Request</code></td>
+<td>Invalid input or business rule violation</td>
+</tr>
+<tr>
+<td><code>403 Forbidden</code></td>
+<td>Caller lacks permission for the operation</td>
+</tr>
+<tr>
+<td><code>404 Not Found</code></td>
+<td>Requested resource does not exist</td>
+</tr>
+<tr>
+<td><code>502 Bad Gateway</code></td>
+<td>Downstream service communication failure</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Error response body:</strong></p>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;Description of the error&quot;
+}
+</code></pre>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../eventStorming/event_storming/" class="btn btn-neutral float-left" title="Event Storming"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../interactions/interactions/" class="btn btn-neutral float-right" title="Interactions">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../interactions/interactions/" class="btn btn-neutral float-left" title="Interactions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../auth/" class="btn btn-neutral float-right" title="Authentication">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -172,10 +246,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../eventStorming/event_storming/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../interactions/interactions/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../interactions/interactions/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../auth/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
