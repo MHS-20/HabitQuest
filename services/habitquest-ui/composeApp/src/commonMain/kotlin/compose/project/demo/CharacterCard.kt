@@ -31,6 +31,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AvatarCard(avatar: AvatarData) {
+    val avatarClass = when {
+        avatar.intelligence >= avatar.strength && avatar.intelligence >= avatar.defense -> "Mage"
+        avatar.defense >= avatar.strength && avatar.defense >= avatar.intelligence -> "Guardian"
+        else -> "Warrior"
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -74,12 +80,18 @@ fun AvatarCard(avatar: AvatarData) {
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            avatar.charClass,
+                            avatarClass,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.padding(4.dp)
                         )
                     }
+
+                    Text(
+                        "Gold: ${avatar.money}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
 
                     Spacer(Modifier.height(8.dp))
 
@@ -126,12 +138,18 @@ fun AvatarCard(avatar: AvatarData) {
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                avatar.charClass,
+                                avatarClass,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier.padding(4.dp)
                             )
                         }
+
+                        Text(
+                            "Gold: ${avatar.money}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
                         Spacer(Modifier.height(8.dp))
 
@@ -182,6 +200,7 @@ fun AvatarCardPreview() {
         avatar = AvatarData(
             id = "user-1",
             name = "Aria",
+            money = 150,
             level = 5,
             currentXp = 120,
             nextLevelXp = 300,
@@ -189,7 +208,9 @@ fun AvatarCardPreview() {
             maxHp = 100,
             mana = 44,
             maxMana = 60,
-            charClass = "Mage"
+            strength = 14,
+            defense = 11,
+            intelligence = 19
         )
     )
 }

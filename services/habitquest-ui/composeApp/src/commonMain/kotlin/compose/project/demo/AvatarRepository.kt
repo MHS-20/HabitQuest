@@ -26,6 +26,7 @@ sealed interface AvatarResult {
 data class AvatarData(
     val id: String,
     val name: String,
+    val money: Int,
     val level: Int,
     val currentXp: Int,
     val nextLevelXp: Int,
@@ -33,7 +34,9 @@ data class AvatarData(
     val maxHp: Int,
     val mana: Int,
     val maxMana: Int,
-    val charClass: String,
+    val strength: Int,
+    val defense: Int,
+    val intelligence: Int,
 )
 
 class AvatarRepository {
@@ -78,6 +81,7 @@ class AvatarRepository {
         val data = AvatarData(
             id = id,
             name = name,
+            money = source["money"]?.jsonObject?.intValue("amount") ?: 0,
             level = level.intValue("levelNumber"),
             currentXp = level.intValue("currentExperience"),
             nextLevelXp = level.intValue("experienceRequired").coerceAtLeast(1),
@@ -85,23 +89,11 @@ class AvatarRepository {
             maxHp = health.intValue("max").coerceAtLeast(1),
             mana = mana.intValue("amount"),
             maxMana = mana.intValue("max").coerceAtLeast(1),
-            charClass = classFromStats(stats)
+            strength = stats.intValue("strength"),
+            defense = stats.intValue("defense"),
+            intelligence = stats.intValue("intelligence"),
         )
         return AvatarResult.Success(data)
-    }
-
-    private fun classFromStats(stats: JsonObject): String {
-        val strength = stats.intValue("strength")
-        val defense = stats.intValue("defense")
-        val intelligence = stats.intValue("intelligence")
-        val max = maxOf(strength, defense, intelligence)
-
-        return when (max) {
-            intelligence -> "Mage"
-            defense -> "Guardian"
-            strength -> "Warrior"
-            else -> "Adventurer"
-        }
     }
 }
 
