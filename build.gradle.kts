@@ -60,6 +60,8 @@ subprojects {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
         implementation("org.springframework.cloud:spring-cloud-stream")
         implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+        implementation("io.github.resilience4j:resilience4j-spring-boot3")
+        implementation("org.springframework.boot:spring-boot-starter-aop")
 
         runtimeOnly("io.micrometer:micrometer-registry-prometheus")
         runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
