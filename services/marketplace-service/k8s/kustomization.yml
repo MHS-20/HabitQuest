@@ -4,11 +4,3 @@ kind: Kustomization
 resources:
   - deployment.yml
   - service.yml
-
-configMapGenerator:
-  - name: marketplace-config
-    files:
-      - application.yml
-    options:
-      labels:
-        app: marketplace-service

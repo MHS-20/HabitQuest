@@ -4,11 +4,3 @@ kind: Kustomization
 resources:
   - deployment.yml
   - service.yml
-
-configMapGenerator:
-  - name: guild-config
-    files:
-      - application.yml
-    options:
-      labels:
-        app: guild-service

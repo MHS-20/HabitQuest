@@ -4,11 +4,3 @@ kind: Kustomization
 resources:
   - deployment.yml
   - service.yml
-
-configMapGenerator:
-  - name: notification-config
-    files:
-      - application.yml
-    options:
-      labels:
-        app: notification-service
