@@ -65,7 +65,7 @@ subprojects {
 
         runtimeOnly("io.micrometer:micrometer-registry-prometheus")
         runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
-        runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelVersion")
+        //runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelVersion")
         runtimeOnly("io.github.resilience4j:resilience4j-micrometer")
 
         testImplementation("org.springframework.boot:spring-boot-starter-test")

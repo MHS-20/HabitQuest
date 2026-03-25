@@ -8,6 +8,6 @@ config:
     [OUTPUT]
         Name        loki
         Match       *
-        Host        loki
+        Host        loki.logging.svc.cluster.local
         Port        3100
         Labels      job=fluent-bit

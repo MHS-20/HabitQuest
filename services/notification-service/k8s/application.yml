@@ -1,8 +1,0 @@
-# spring:
-#   rabbitmq:
-#     host: payment-rabbitmq
-# app:
-#   rabbit:
-#     queue: notification-queue
-#     exchange: payment.exchange
-#     exchange-type: fanout

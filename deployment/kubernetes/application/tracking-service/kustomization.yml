@@ -7,13 +7,6 @@ resources:
 patches:
 - path: patch-env.yml
 - path: patch-resources.yml
-- path: patch-volumes.yml
-
-configMapGenerator:
-- behavior: merge
-  files:
-  - application.yml
-  name: tracking-config
 
 images:
 - name: tracking-service
