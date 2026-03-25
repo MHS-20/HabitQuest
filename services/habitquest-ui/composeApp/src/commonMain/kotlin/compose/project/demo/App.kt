@@ -1,11 +1,10 @@
 package compose.project.demo
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -171,116 +170,8 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
     }
 }
 
-@Composable
-fun DashboardScreen(token: String, avatarState: AvatarUiState) {
-    var showContent by remember { mutableStateOf(true) }
-
-    Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .safeContentPadding()
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text("RPG Dashboard", style = MaterialTheme.typography.headlineSmall)
-        if (token.isNotBlank()) {
-            Text(
-                text = "Sessione attiva",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-
-        Button(onClick = { showContent = !showContent }) {
-            Text(if (showContent) "Nascondi" else "Mostra")
-        }
-
-        AnimatedVisibility(showContent) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Spacer(Modifier.height(12.dp))
-                when (val state = avatarState) {
-                    AvatarUiState.Loading -> Text("Caricamento avatar in corso...")
-                    is AvatarUiState.Error -> Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error
-                    )
-
-                    is AvatarUiState.Ready -> AvatarCard(avatar = state.avatar)
-                }
-                Spacer(Modifier.height(24.dp))
-                Text("Dati avatar aggiornati da avatar-service")
-            }
-        }
-    }
-}
-
 sealed interface AvatarUiState {
     data object Loading : AvatarUiState
     data class Ready(val avatar: AvatarData) : AvatarUiState
     data class Error(val message: String) : AvatarUiState
-}
-
-@Composable
-fun CharacterScreen(avatarState: AvatarUiState) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        when (val state = avatarState) {
-            AvatarUiState.Loading -> Text(
-                text = "Caricamento personaggio...",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
-            is AvatarUiState.Error -> Text(
-                text = state.message,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
-            is AvatarUiState.Ready -> Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("👤 ${state.avatar.name}", style = MaterialTheme.typography.headlineSmall)
-                Text("ID: ${state.avatar.id}")
-                Text("Livello: ${state.avatar.level}")
-                Text("XP: ${state.avatar.currentXp} / ${state.avatar.nextLevelXp}")
-                Text("HP: ${state.avatar.hp} / ${state.avatar.maxHp}")
-                Text("Mana: ${state.avatar.mana} / ${state.avatar.maxMana}")
-                Text("Gold: ${state.avatar.money}")
-                Spacer(Modifier.height(8.dp))
-                Text("Statistiche", style = MaterialTheme.typography.titleMedium)
-                Text("Strength: ${state.avatar.strength}")
-                Text("Defense: ${state.avatar.defense}")
-                Text("Intelligence: ${state.avatar.intelligence}")
-            }
-        }
-    }
-}
-
-@Composable
-fun AchievementsScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "⭐ Pagina Traguardi",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
 }
