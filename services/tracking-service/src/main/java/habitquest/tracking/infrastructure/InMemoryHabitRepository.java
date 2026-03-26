@@ -4,6 +4,7 @@ import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitRepository;
+import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import java.util.HashMap;
 import java.util.List;
@@ -39,5 +40,10 @@ public class InMemoryHabitRepository implements HabitRepository {
   @Override
   public List<Habit> findAll() {
     return List.copyOf(store.values());
+  }
+
+  @Override
+  public List<Habit> findByAvatarId(Id<Avatar> avatarId) {
+    return store.values().stream().filter(habit -> habit.getAvatarId().equals(avatarId)).toList();
   }
 }
