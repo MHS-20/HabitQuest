@@ -23,6 +23,8 @@ public interface HabitService {
 
   Habit getHabitById(Id<Habit> habitId) throws HabitNotFoundException;
 
+  List<Habit> getHabitsByAvatarId(Id<Avatar> avatarId);
+
   void deleteHabitById(Id<Habit> habitId) throws HabitNotFoundException;
 
   // region getters

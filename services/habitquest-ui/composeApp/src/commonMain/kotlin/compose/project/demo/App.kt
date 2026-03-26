@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 // Pagine disponibili nella nav bar
 enum class AppPage(val label: String, val emoji: String) {
     Dashboard("Dashboard", "🏠"),
+    Habits("Abitudini", "📝"),
     Character("Personaggio", "👤"),
     Achievements("Traguardi", "⭐"),
 }
@@ -163,6 +164,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
         ) {
             when (selectedPage) {
                 AppPage.Dashboard -> DashboardScreen(token = token, avatarState = avatarState)
+                AppPage.Habits -> HabitsScreen(token = token, avatarState = avatarState)
                 AppPage.Character -> CharacterScreen(avatarState = avatarState)
                 AppPage.Achievements -> AchievementsScreen()
             }
