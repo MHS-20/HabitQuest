@@ -212,6 +212,25 @@ public class HabitControllerIT {
   }
 
   @Nested
+  @DisplayName("GET /api/v1/habits/avatar/{avatarId}")
+  class GetHabitsByAvatar {
+
+    @Test
+    @DisplayName("returns 200 with the avatar habits list")
+    void shouldReturnHabitsForAvatar() throws Exception {
+      when(habitService.getHabitsByAvatarId(AVATAR_ID))
+          .thenReturn(List.of(hydrateHabitWithQuest(), hydrateHabit()));
+
+      mockMvc
+          .perform(get("/api/v1/habits/avatar/{avatarId}", AVATAR_ID.value()))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].avatarId").value(AVATAR_ID.value()))
+          .andExpect(jsonPath("$[0].title").value(TITLE))
+          .andExpect(jsonPath("$[1].avatarId").value(AVATAR_ID.value()));
+    }
+  }
+
+  @Nested
   @DisplayName("DELETE /api/v1/habits/{id}")
   class DeleteHabit {
 

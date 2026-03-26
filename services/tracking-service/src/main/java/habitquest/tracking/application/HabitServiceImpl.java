@@ -77,6 +77,11 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
+  public List<Habit> getHabitsByAvatarId(Id<Avatar> avatarId) {
+    return habitRepository.findByAvatarId(avatarId);
+  }
+
+  @Override
   public void deleteHabitById(Id<Habit> habitId) throws HabitNotFoundException {
     Habit habit = getHabitById(habitId);
     habitRepository.deleteById(habitId);
