@@ -20,6 +20,6 @@ RUN groupadd --system appgroup \
     && useradd --system --gid appgroup --no-create-home appuser \
     && chown -R appuser:appgroup /workspace /otel
 USER appuser
-EXPOSE 8080
+EXPOSE 9000
 
 ENTRYPOINT ["java", "-javaagent:/otel/opentelemetry-javaagent.jar", "org.springframework.boot.loader.launch.JarLauncher"]
