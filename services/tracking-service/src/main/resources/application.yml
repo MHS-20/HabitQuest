@@ -1,9 +1,8 @@
 server:
   port: 8085
   shutdown: graceful
-  netty:
+  tomcat:
     connection-timeout: 2s
-    idle-timeout: 15s
 
 info:
   system: HabitQuest

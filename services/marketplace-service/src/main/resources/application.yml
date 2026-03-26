@@ -1,9 +1,8 @@
 server:
   port: 8083
   shutdown: graceful
-  netty:
+  tomcat:
     connection-timeout: 2s
-    idle-timeout: 15s
 
 spring:
   application:
@@ -51,7 +50,7 @@ resilience4j:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
         ignore-exceptions:
-          - habitquest.avatar.infrastructure.MarketplaceCommunicationException
+          - habitquest.marketplace.infrastructure.AvatarCommunicationException
 
   # CIRCUIT BREAKER
   circuit-breaker:

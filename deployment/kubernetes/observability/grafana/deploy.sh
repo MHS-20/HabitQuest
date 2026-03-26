@@ -8,7 +8,9 @@ if ! kubectl -n grafana get configmap grafana-dashboards >/dev/null 2>&1; then
   kubectl -n grafana create configmap grafana-dashboards \
     --from-file=jvm.json=./resources/jvm.json \
     --from-file=circuit-breaker.json=./resources/circuit-breaker.json \
-    --from-file=spring-cloud-gateway.json=./resources/spring-cloud-gateway.json
+    --from-file=spring-cloud-gateway.json=./resources/spring-cloud-gateway.json \
+    --from-file=rest-and-kafka.json=./resources/rest-and-kafka.json
+
 fi
 
 # create namespace
