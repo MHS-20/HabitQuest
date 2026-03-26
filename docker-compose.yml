@@ -1,0 +1,220 @@
+
+name: habitquest
+
+networks:
+  default:
+    name: habitquest-network
+    driver: bridge
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+  guild-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: habitquestdb_guild
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - guild-db-data:/var/lib/postgresql/data
+
+  quest-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: habitquestdb_quest
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - quest-db-data:/var/lib/postgresql/data
+
+  tracking-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: habitquestdb_tracking
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - tracking-db-data:/var/lib/postgresql/data
+
+  marketplace-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: habitquestdb_marketplace
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - marketplace-db-data:/var/lib/postgresql/data
+
+  avatar-service:
+    build:
+      context: ./services/avatar-service
+    depends_on:
+      - kafka
+      - marketplace-service
+    environment:
+      SERVER_PORT: 8081
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      MARKETPLACE_SERVICE_URI: http://marketplace-service:8085
+    ports:
+      - "8081:8081"
+
+  guild-service:
+    build:
+      context: ./services/guild-service
+    depends_on:
+      - kafka
+      - guild-db
+    environment:
+      SERVER_PORT: 8082
+      SPRING_R2DBC_URL: r2dbc:postgresql://guild-db:5432/habitquestdb_guild
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+    ports:
+      - "8082:8082"
+
+  quest-service:
+    build:
+      context: ./services/quest-service
+    depends_on:
+      - kafka
+      - quest-db
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8083
+      SPRING_R2DBC_URL: r2dbc:postgresql://quest-db:5432/habitquestdb_quest
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: user
+      SPRING_RABBITMQ_PASSWORD: password
+    ports:
+      - "8083:8083"
+
+  tracking-service:
+    build:
+      context: ./services/tracking-service
+    depends_on:
+      - kafka
+      - tracking-db
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8084
+      SPRING_R2DBC_URL: r2dbc:postgresql://tracking-db:5432/habitquestdb_tracking
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: user
+      SPRING_RABBITMQ_PASSWORD: password
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+    ports:
+      - "8084:8084"
+
+  marketplace-service:
+    build:
+      context: ./services/marketplace-service
+    depends_on:
+      - kafka
+      - marketplace-db
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8085
+      SPRING_R2DBC_URL: r2dbc:postgresql://marketplace-db:5432/habitquestdb_marketplace
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: user
+      SPRING_RABBITMQ_PASSWORD: password
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+    ports:
+      - "8085:8085"
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    depends_on:
+      - kafka
+    environment:
+      SERVER_PORT: 8086
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+    ports:
+      - "8086:8086"
+
+  edge-service:
+    build:
+      context: ./services/edge-service
+    depends_on:
+      - kafka
+      - avatar-service
+      - guild-service
+      - quest-service
+      - tracking-service
+      - marketplace-service
+      - notification-service
+    environment:
+      SERVER_PORT: 9000
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      SERVICES_AVATAR_BASE_URL: http://avatar-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: avatar-service
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://avatar-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/v1/avatars/**
+      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: guild-service
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://guild-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/v1/guilds/**
+      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: battle-service
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://guild-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/v1/battles/**
+      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: quest-service
+      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://quest-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/v1/quests/**
+      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: tracking-service
+      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://tracking-service:8084
+      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/v1/habits/**
+      APP_EVENTS_USER_REGISTERED_ENABLED: "false"
+    ports:
+      - "9000:9000"
+
+volumes:
+  guild-db-data:
+  quest-db-data:
+  tracking-db-data:
+  marketplace-db-data:
+

@@ -13,6 +13,8 @@ services:
 spring:
   application:
     name: edge-service
+  main:
+    web-application-type: reactive
   lifecycle:
     timeout-per-shutdown-phase: 15s
 
@@ -23,7 +25,15 @@ app:
 
 ################## KAFKA ##################
   cloud:
+    function:
+      web:
+        export:
+          enabled: false
+        path: /_functions
     stream:
+      function:
+        autodetect: false
+      output-bindings: userRegistered-out-0
       bindings:
         userRegistered-out-0:
           destination: user.registered
@@ -72,7 +82,6 @@ app:
             uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
             predicates:
               - Path=/api/v1/habits/**
-
 
 ################## RESILIENCY ##################
 resilience4j:
