@@ -34,5 +34,5 @@ spec:
               value: http://tracking-service:8085
 
             # Observability
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: http://otel-collector:4318
