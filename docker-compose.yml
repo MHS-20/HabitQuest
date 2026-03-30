@@ -1,4 +1,3 @@
-
 name: habitquest
 
 networks:
@@ -36,51 +35,6 @@ services:
       timeout: 10s
       retries: 5
 
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-
-  guild-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: habitquestdb_guild
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - guild-db-data:/var/lib/postgresql/data
-
-  quest-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: habitquestdb_quest
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - quest-db-data:/var/lib/postgresql/data
-
-  tracking-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: habitquestdb_tracking
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - tracking-db-data:/var/lib/postgresql/data
-
-  marketplace-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: habitquestdb_marketplace
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - marketplace-db-data:/var/lib/postgresql/data
-
   avatar-service:
     build:
       context: ./services/avatar-service
@@ -92,6 +46,9 @@ services:
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
       SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       MARKETPLACE_SERVICE_URI: http://marketplace-service:8085
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: avatar-service
     ports:
       - "8081:8081"
 
@@ -100,11 +57,12 @@ services:
       context: ./services/guild-service
     depends_on:
       - kafka
-      - guild-db
     environment:
       SERVER_PORT: 8082
-      SPRING_R2DBC_URL: r2dbc:postgresql://guild-db:5432/habitquestdb_guild
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: guild-service
     ports:
       - "8082:8082"
 
@@ -113,16 +71,12 @@ services:
       context: ./services/quest-service
     depends_on:
       - kafka
-      - quest-db
-      - rabbitmq
     environment:
       SERVER_PORT: 8083
-      SPRING_R2DBC_URL: r2dbc:postgresql://quest-db:5432/habitquestdb_quest
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: user
-      SPRING_RABBITMQ_PASSWORD: password
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: quest-service
     ports:
       - "8083:8083"
 
@@ -131,17 +85,13 @@ services:
       context: ./services/tracking-service
     depends_on:
       - kafka
-      - tracking-db
-      - rabbitmq
     environment:
       SERVER_PORT: 8084
-      SPRING_R2DBC_URL: r2dbc:postgresql://tracking-db:5432/habitquestdb_tracking
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: user
-      SPRING_RABBITMQ_PASSWORD: password
       SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: tracking-service
     ports:
       - "8084:8084"
 
@@ -150,17 +100,13 @@ services:
       context: ./services/marketplace-service
     depends_on:
       - kafka
-      - marketplace-db
-      - rabbitmq
     environment:
       SERVER_PORT: 8085
-      SPRING_R2DBC_URL: r2dbc:postgresql://marketplace-db:5432/habitquestdb_marketplace
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: user
-      SPRING_RABBITMQ_PASSWORD: password
       SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: marketplace-service
     ports:
       - "8085:8085"
 
@@ -172,6 +118,9 @@ services:
     environment:
       SERVER_PORT: 8086
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: notification-service
     ports:
       - "8086:8086"
 
@@ -189,9 +138,6 @@ services:
     environment:
       SERVER_PORT: 9000
       SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      OTEL_TRACES_EXPORTER: none
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: none
       SERVICES_AVATAR_BASE_URL: http://avatar-service:8081
       SPRING_CLOUD_GATEWAY_ROUTES_0_ID: avatar-service
       SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://avatar-service:8081
@@ -209,12 +155,8 @@ services:
       SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://tracking-service:8084
       SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/v1/habits/**
       APP_EVENTS_USER_REGISTERED_ENABLED: "false"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      OTEL_SERVICE_NAME: edge-service
     ports:
       - "9000:9000"
-
-volumes:
-  guild-db-data:
-  quest-db-data:
-  tracking-db-data:
-  marketplace-db-data:
-
