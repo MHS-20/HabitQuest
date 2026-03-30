@@ -22,5 +22,5 @@ spec:
 
             - name: KAFKA_BROKER
               value: kafka-service:9092
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: http://otel-collector:4318
