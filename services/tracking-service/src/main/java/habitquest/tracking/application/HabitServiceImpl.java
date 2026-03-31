@@ -215,7 +215,7 @@ public class HabitServiceImpl implements HabitService {
         habitObserver.notifyHabitEvent(event);
         continue;
       }
-      LocalDateTime nextExpected = habit.getRecurrence().nextAfter(lastAttendedDate);
+      LocalDateTime nextExpected = habit.nextRecurrence();
       if (nextExpected.isBefore(now)) {
         HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
         appendNotAttendedHistoryIfNew(habit, "expectedAt=" + nextExpected, event);
