@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/MHS-20/habitquest/quest-service/k8s?ref=main
+- ../../../../services/quest-service/k8s
 
 patches:
 - path: patch-env.yml
@@ -10,9 +10,11 @@ patches:
 
 images:
 - name: quest-service
-  newName: ghcr.io/MHS-20/quest-service
-  newTag: b0e526ffefcbe501118caaced29b87203a8187f7
+  # newName: ghcr.io/mhs-20/quest-service
+  # newTag: b0e526ffefcbe501118caaced29b87203a8187f7
+  newName: quest-service
+  newTag: latest
 
 replicas:
-- count: 2
+- count: 1
   name: quest-service

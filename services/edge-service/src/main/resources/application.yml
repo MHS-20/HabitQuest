@@ -41,44 +41,46 @@ spring:
 
 ################## GATEWAY ##################
     gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "http://localhost:3000"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
 
-        routes:
-          - id: avatar-service
-            uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
-            predicates:
-              - Path=/api/v1/avatars/**
-          - id: guild-service
-            uri: ${GUILD_SERVICE_URI:http://localhost:8082}
-            predicates:
-              - Path=/api/v1/guilds/**
-          - id: battle-service
-            uri: ${GUILD_SERVICE_URI:http://localhost:8082}
-            predicates:
-              - Path=/api/v1/battles/**
-          - id: marketplace-service
-            uri: ${MARKETPLACE_SERVICE_URI:http://localhost:8083}
-            predicates:
-              - Path=/api/v1/battles/**
-          - id: quest-service
-            uri: ${QUEST_SERVICE_URI:http://localhost:8084}
-            predicates:
-              - Path=/api/v1/quests/**
-          - id: tracking-service
-            uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
-            predicates:
-              - Path=/api/v1/habits/**
+          routes:
+            - id: avatar-service
+              uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/avatars/**
+            - id: guild-service
+              uri: ${GUILD_SERVICE_URI:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/guilds/**
+            - id: battle-service
+              uri: ${GUILD_SERVICE_URI:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/battles/**
+            - id: marketplace-service
+              uri: ${MARKETPLACE_SERVICE_URI:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/battles/**
+            - id: quest-service
+              uri: ${QUEST_SERVICE_URI:http://localhost:8084}
+              predicates:
+                - Path=/api/v1/quests/**
+            - id: tracking-service
+              uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
+              predicates:
+                - Path=/api/v1/habits/**
 
 ################## RESILIENCY ##################
 resilience4j:

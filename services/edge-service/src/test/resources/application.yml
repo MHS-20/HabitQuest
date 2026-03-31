@@ -10,7 +10,8 @@ spring:
     stream:
       function:
         autodetect: false
-      output-bindings: userRegistered-out-0
+#        definition: userRegistered
+#      output-bindings: userRegistered-out-0
       bindings:
         userRegistered-out-0:
           destination: user.registered
@@ -43,7 +44,6 @@ spring:
           uri: http://localhost:8084
           predicates:
             - Path=/api/v1/habits/**
-
 
 app:
   jwt:

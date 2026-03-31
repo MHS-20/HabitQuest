@@ -16,12 +16,11 @@ helm repo add prometheus-community "https://prometheus-community.github.io/helm-
 helm repo update
 
 # install or upgrade the chart
-helm upgrade --install "habitquest-prometheus" "prometheus-community/prometheus" \
+helm upgrade --install "prometheus" "prometheus-community/prometheus" \
   --namespace "prometheus-system" \
-  -f "resources/values.yml" \
-  --wait --timeout "600s"
+  -f "resources/values.yml"
 
-echo "Prometheus helm release 'habitquest-prometheus' installed in namespace 'prometheus-system'."
+echo "Prometheus helm release 'prometheus' installed in namespace 'prometheus-system'."
 echo "Pods:"
 kubectl get pods -n "prometheus-system" -o wide
 

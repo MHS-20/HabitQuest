@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/MHS-20/habitquest/guild-service/k8s?ref=main
+- ../../../../services/guild-service/k8s
 
 patches:
 - path: patch-env.yml
@@ -10,9 +10,11 @@ patches:
 
 images:
 - name: guild-service
-  newName: ghcr.io/MHS-20/guild-service
-  newTag: 302d9b022193793b486db08f9ef1492946dbdef9
+  # newName: ghcr.io/mhs-20/guild-service
+  # newTag: 302d9b022193793b486db08f9ef1492946dbdef9
+  newName: guild-service
+  newTag: latest
 
 replicas:
-- count: 2
+- count: 1
   name: guild-service
