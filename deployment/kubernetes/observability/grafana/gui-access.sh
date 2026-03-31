@@ -1,1 +1,1 @@
-kubectl -n grafana port-forward svc/habitquest-grafana 3000:80
+kubectl -n logging port-forward svc/grafana 3000:80

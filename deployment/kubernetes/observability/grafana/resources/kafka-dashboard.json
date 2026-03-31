@@ -11,22 +11,15 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
-        "target": {
-          "limit": 100,
-          "matchAny": false,
-          "tags": [],
-          "type": "dashboard"
-        },
         "type": "dashboard"
       }
     ]
   },
-  "description": "",
+  "description": "Kafka Consumer/Producer metrics from Spring Boot Micrometer + kafka.consumer.* / kafka.producer.*",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": 11506,
-  "graphTooltip": 0,
-  "id": 2,
+  "graphTooltip": 1,
+  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -42,8 +35,10 @@
         "x": 0,
         "y": 0
       },
-      "id": 50,
+      "id": 1,
       "panels": [],
+      "title": "Consumer Summary",
+      "type": "row",
       "targets": [
         {
           "datasource": {
@@ -52,15 +47,14 @@
           },
           "refId": "A"
         }
-      ],
-      "title": "Total Throughput",
-      "type": "row"
+      ]
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -75,25 +69,30 @@
                 "value": null
               },
               {
+                "color": "orange",
+                "value": 100
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 1000
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 1
       },
-      "id": 81,
+      "id": 2,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -102,8 +101,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "auto"
       },
       "pluginVersion": "10.2.2",
       "targets": [
@@ -112,14 +110,12 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "sum(spring_cloud_gateway_requests_seconds_count{job=~\"$gatewayService\"})",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "max(kafka_consumer_records_lag{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\",client_id=~\"$client_id\"})",
+          "legendFormat": "{{service}}",
           "refId": "A"
         }
       ],
-      "title": "Total Request Served",
+      "title": "Max consumer lag",
       "type": "stat"
     },
     {
@@ -127,6 +123,7 @@
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -145,21 +142,22 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 1
       },
-      "id": 82,
+      "id": 3,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -168,8 +166,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "auto"
       },
       "pluginVersion": "10.2.2",
       "targets": [
@@ -178,14 +175,12 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "sum(spring_cloud_gateway_requests_seconds_count{outcome=\"SUCCESSFUL\", job=~\"$gatewayService\"})",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "sum(rate(kafka_consumer_records_consumed_total{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\"}[1m]))",
+          "legendFormat": "{{service}}",
           "refId": "A"
         }
       ],
-      "title": "Total Successful Request Served",
+      "title": "Total records consumed/s",
       "type": "stat"
     },
     {
@@ -193,13 +188,13 @@
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -209,24 +204,25 @@
               },
               {
                 "color": "red",
-                "value": 1
+                "value": 80
               }
             ]
-          }
+          },
+          "unit": "Bps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 12,
         "y": 1
       },
-      "id": 83,
+      "id": 4,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -235,8 +231,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "auto"
       },
       "pluginVersion": "10.2.2",
       "targets": [
@@ -245,14 +240,77 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "sum(spring_cloud_gateway_requests_seconds_count{outcome!=\"SUCCESSFUL\", job=~\"$gatewayService\"})",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "sum(rate(kafka_consumer_bytes_consumed_total{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\"}[1m]))",
+          "legendFormat": "{{service}}",
           "refId": "A"
         }
       ],
-      "title": "Total Unsuccessful Request Served",
+      "title": "Total bytes consumed/s",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-habitquest"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-habitquest"
+          },
+          "expr": "sum(rate(kafka_consumer_fetch_total{application=\"$application\",instance=~\"$instance\"}[1m]))",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Fetch rate",
       "type": "stat"
     },
     {
@@ -267,8 +325,10 @@
         "x": 0,
         "y": 5
       },
-      "id": 51,
+      "id": 10,
       "panels": [],
+      "title": "Consumer Lag",
+      "type": "row",
       "targets": [
         {
           "datasource": {
@@ -277,15 +337,14 @@
           },
           "refId": "A"
         }
-      ],
-      "title": "Request Processing Time",
-      "type": "row"
+      ]
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "Numero di messaggi non ancora consumati per partizione",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -324,6 +383,7 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -337,77 +397,48 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 8,
+        "h": 8,
+        "w": 24,
         "x": 0,
         "y": 6
       },
-      "id": 49,
+      "id": 11,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
       "pluginVersion": "10.2.2",
-      "repeat": "routeId",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "spring_cloud_gateway_requests_seconds_sum{routeId=~\"$routeId\", job=~\"$gatewayService\"}/spring_cloud_gateway_requests_seconds_count{routeId=~\"$routeId\", job=~\"$gatewayService\"}",
+          "expr": "kafka_consumer_records_lag{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\",client_id=~\"$client_id\"}",
           "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{ status }}",
-          "metric": "gateway_api_time_seconds_sum",
-          "refId": "A",
-          "step": 240
-        }
-      ],
-      "title": "$routeId",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "id": 52,
-      "panels": [],
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
+          "intervalFactor": 1,
+          "legendFormat": "{{client_id}} {{topic}} p{{partition}}",
           "refId": "A"
         }
       ],
-      "title": "Successful API Calls",
-      "type": "row"
+      "title": "Records lag by topic/partition",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -446,13 +477,14 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "normal"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -472,45 +504,142 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 14
       },
-      "id": 2,
+      "id": 12,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
       "pluginVersion": "10.2.2",
-      "repeat": "routeId",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "spring_cloud_gateway_requests_seconds_count{outcome=\"SUCCESSFUL\", routeId=~\"$routeId\", job=~\"$gatewayService\"}",
+          "expr": "max(kafka_consumer_records_lag{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\"}) by (topic)",
           "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{ job }} / {{ routeUri }}",
-          "metric": "gateway_requests_seconds_count",
-          "refId": "A",
-          "step": 240
+          "intervalFactor": 1,
+          "legendFormat": "{{topic}}",
+          "refId": "A"
         }
       ],
-      "title": "$routeId Success API Gateway Calls",
+      "title": "Max lag by topic",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-habitquest"
+      },
+      "description": "Positivo = lag cresce, negativo = consumer recupera",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 13,
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-habitquest"
+          },
+          "expr": "sum(rate(kafka_consumer_records_lag{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\"}[2m])) by (topic)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Lag rate (growing/shrinking)",
       "type": "timeseries"
     },
     {
@@ -525,8 +654,10 @@
         "x": 0,
         "y": 21
       },
-      "id": 53,
+      "id": 20,
       "panels": [],
+      "title": "Consumer Throughput",
+      "type": "row",
       "targets": [
         {
           "datasource": {
@@ -535,9 +666,7 @@
           },
           "refId": "A"
         }
-      ],
-      "title": "Unsuccessful API Calls",
-      "type": "row"
+      ]
     },
     {
       "datasource": {
@@ -576,18 +705,20 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "normal"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -595,77 +726,48 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "ops"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 22
       },
-      "id": 3,
+      "id": 21,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
       "pluginVersion": "10.2.2",
-      "repeat": "routeId",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "spring_cloud_gateway_requests_seconds_count{outcome!=\"SUCCESSFUL\", routeId=~\"$routeId\", job=~\"$gatewayService\"}",
+          "expr": "sum(rate(kafka_consumer_records_consumed_total{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\"}[1m])) by (topic)",
           "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{ job }} / {{ routeUri }}",
-          "metric": "gateway_requests_seconds_count",
-          "refId": "A",
-          "step": 240
-        }
-      ],
-      "title": "$routeId Unsuccessful GW Calls",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 29
-      },
-      "id": 54,
-      "panels": [],
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
+          "intervalFactor": 1,
+          "legendFormat": "{{topic}}",
           "refId": "A"
         }
       ],
-      "title": "API / HTTP Status",
-      "type": "row"
+      "title": "Records consumed/s by topic",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -711,11 +813,13 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -723,50 +827,249 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "Bps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
-        "x": 0,
-        "y": 30
+        "w": 12,
+        "x": 12,
+        "y": 22
       },
-      "id": 35,
+      "id": 22,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
       "pluginVersion": "10.2.2",
-      "repeat": "routeId",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "sum(spring_cloud_gateway_requests_seconds_count{routeId=~\"$routeId\", job=~\"$gatewayService\"}) by (job, status)",
+          "expr": "sum(rate(kafka_consumer_bytes_consumed_total{application=\"$application\",instance=~\"$instance\",topic=~\"$topic\"}[1m])) by (topic)",
           "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{ job }} / {{ status }}",
-          "metric": "gateway_requests_seconds_count",
-          "refId": "A",
-          "step": 240
+          "intervalFactor": 1,
+          "legendFormat": "{{topic}}",
+          "refId": "A"
         }
       ],
-      "title": "$routeId",
+      "title": "Bytes consumed/s by topic",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-habitquest"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "id": 23,
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-habitquest"
+          },
+          "expr": "kafka_consumer_fetch_latency_avg{application=\"$application\",instance=~\"$instance\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{client_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Fetch latency avg",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-habitquest"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "id": 24,
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-habitquest"
+          },
+          "expr": "sum(rate(kafka_consumer_commit_total{application=\"$application\",instance=~\"$instance\"}[1m])) by (client_id)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{client_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Commit rate",
       "type": "timeseries"
     },
     {
@@ -779,10 +1082,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 36
       },
-      "id": 64,
+      "id": 30,
       "panels": [],
+      "title": "Producer",
+      "type": "row",
       "targets": [
         {
           "datasource": {
@@ -791,15 +1096,14 @@
           },
           "refId": "A"
         }
-      ],
-      "title": "JVM",
-      "type": "row"
+      ]
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -838,11 +1142,13 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -850,27 +1156,29 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "ops"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 6,
+        "h": 7,
+        "w": 12,
         "x": 0,
-        "y": 38
+        "y": 37
       },
-      "id": 62,
+      "id": 31,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -881,16 +1189,14 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "process_cpu_usage{job=~\"$gatewayService\"}",
+          "expr": "sum(rate(kafka_producer_record_send_total{application=\"$application\",instance=~\"$instance\"}[1m])) by (topic)",
           "format": "time_series",
-          "hide": false,
-          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ instance }}",
+          "legendFormat": "{{topic}}",
           "refId": "A"
         }
       ],
-      "title": "CPU Usage",
+      "title": "Records sent/s by topic",
       "type": "timeseries"
     },
     {
@@ -898,6 +1204,7 @@
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "Errori di produzione \u2014 serializzazione, broker non raggiungibile, timeout",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -936,11 +1243,13 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -948,125 +1257,29 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "ops"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 6,
-        "x": 6,
-        "y": 38
-      },
-      "id": 69,
-      "links": [],
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.2.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-habitquest"
-          },
-          "expr": "sum(jvm_memory_used_bytes{job=~\"$gatewayService\"}) by (job, instance)",
-          "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{ instance }}",
-          "refId": "A"
-        }
-      ],
-      "title": "Memory Used",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-habitquest"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 6,
+        "h": 7,
+        "w": 12,
         "x": 12,
-        "y": 38
+        "y": 37
       },
-      "id": 77,
+      "id": 32,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -1077,57 +1290,22 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "exemplar": true,
-          "expr": "jvm_threads_live_threads{job=~\"$gatewayService\"}",
+          "expr": "sum(rate(kafka_producer_record_error_total{application=\"$application\",instance=~\"$instance\"}[1m])) by (topic)",
           "format": "time_series",
-          "hide": false,
-          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ instance }}",
+          "legendFormat": "{{topic}}",
           "refId": "A"
         }
       ],
-      "title": "Live Threads",
+      "title": "Producer error rate",
       "type": "timeseries"
     },
     {
-      "alert": {
-        "conditions": [
-          {
-            "evaluator": {
-              "params": [
-                0.3
-              ],
-              "type": "gt"
-            },
-            "operator": {
-              "type": "and"
-            },
-            "query": {
-              "params": [
-                "A",
-                "5m",
-                "now"
-              ]
-            },
-            "reducer": {
-              "params": [],
-              "type": "avg"
-            },
-            "type": "query"
-          }
-        ],
-        "executionErrorState": "alerting",
-        "frequency": "60s",
-        "handler": 1,
-        "name": "Memory Saturation alert",
-        "noDataState": "no_data",
-        "notifications": []
-      },
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-habitquest"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1162,43 +1340,47 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "line+area"
+              "mode": "off"
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
-                "value": 0.3
+                "value": 80
               }
             ]
           },
-          "unit": "short"
+          "unit": "bytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 6,
-        "x": 18,
-        "y": 38
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 44
       },
-      "id": 79,
+      "id": 33,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -1209,121 +1391,286 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "jvm_gc_memory_promoted_bytes_total/jvm_gc_memory_allocated_bytes_total",
+          "expr": "kafka_producer_batch_size_avg{application=\"$application\",instance=~\"$instance\"}",
           "format": "time_series",
-          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ instance }}",
+          "legendFormat": "{{client_id}}",
           "refId": "A"
         }
       ],
-      "title": "Memory Saturation",
+      "title": "Producer batch size avg",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-habitquest"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 44
+      },
+      "id": 34,
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-habitquest"
+          },
+          "expr": "kafka_producer_request_latency_avg{application=\"$application\",instance=~\"$instance\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{client_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Producer request latency avg",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-habitquest"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "id": 40,
+      "panels": [],
+      "title": "Logs",
+      "type": "row",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-habitquest"
+          },
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-habitquest"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "id": 41,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-habitquest"
+          },
+          "expr": "{application=\"$application\"} |= \"\" | json | level=~\"WARN|ERROR\" | line_format \"{{.message}}\"",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Kafka WARN/ERROR logs \u2014 $application",
+      "type": "logs"
     }
   ],
-  "refresh": "1m",
+  "refresh": "10s",
   "schemaVersion": 38,
-  "tags": [],
+  "tags": [
+    "kafka",
+    "spring",
+    "messaging"
+  ],
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": true,
-          "text": [
-            "edge-service"
-          ],
-          "value": [
-            "edge-service"
-          ]
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus-habitquest"
         },
-        "definition": "label_values(spring_cloud_gateway_requests_seconds_count,job)",
+        "definition": "label_values(kafka_consumer_records_lag, app)",
         "hide": 0,
         "includeAll": true,
-        "label": "Gateway Service",
+        "label": "Application",
         "multi": true,
-        "name": "gatewayService",
+        "name": "application",
         "options": [],
         "query": {
-          "query": "label_values(spring_cloud_gateway_requests_seconds_count,job)",
-          "refId": "StandardVariableQuery"
+          "query": "label_values(kafka_consumer_records_lag, app)",
+          "refId": "Prometheus-application-Variable"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus-habitquest"
         },
-        "definition": "label_values(spring_cloud_gateway_requests_seconds_count,routeId)",
+        "definition": "label_values(kafka_consumer_records_lag{app=\"$application\"}, instance)",
         "hide": 0,
         "includeAll": true,
-        "label": "Route Id",
+        "label": "Instance",
         "multi": true,
-        "name": "routeId",
+        "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(spring_cloud_gateway_requests_seconds_count,routeId)",
-          "refId": "StandardVariableQuery"
+          "query": "label_values(kafka_consumer_records_lag{app=\"$application\"}, instance)",
+          "refId": "Prometheus-instance-Variable"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus-habitquest"
+        },
+        "definition": "label_values(kafka_consumer_records_lag{app=\"$application\"}, topic)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Topic",
+        "multi": true,
+        "name": "topic",
+        "options": [],
+        "query": {
+          "query": "label_values(kafka_consumer_records_lag{app=\"$application\"}, topic)",
+          "refId": "Prometheus-topic-Variable"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus-habitquest"
+        },
+        "definition": "label_values(kafka_consumer_records_lag{app=\"$application\"}, client_id)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Consumer Group / Client",
+        "multi": true,
+        "name": "client_id",
+        "options": [],
+        "query": {
+          "query": "label_values(kafka_consumer_records_lag{app=\"$application\"}, client_id)",
+          "refId": "Prometheus-client_id-Variable"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
-    ]
-  },
-  "timezone": "",
-  "title": "Spring Cloud Gateway",
-  "uid": "spring-cloud-gateway-dashboard",
-  "version": 1,
-  "weekStart": ""
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Kafka Consumers & Producers",
+  "uid": "kafka-spring-dashboard",
+  "version": 1
 }

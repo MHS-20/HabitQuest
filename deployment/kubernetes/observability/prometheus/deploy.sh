@@ -1,9 +1,6 @@
 #!/bin/sh
-
 set -euo pipefail
-
 cd "$(dirname "$0")"
-
 echo "Installing Prometheus ..."
 
 # create namespace if missing

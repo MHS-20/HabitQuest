@@ -1,0 +1,528 @@
+{
+  "dashboard": {
+    "title": "Distributed Tracing Overview",
+    "tags": ["traces", "tempo", "microservices"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "query": "tempo",
+          "current": {
+            "value": "Tempo",
+            "text": "Tempo"
+          }
+        },
+        {
+          "name": "service",
+          "type": "query",
+          "label": "Service",
+          "datasource": "tempo-habitquest",
+          "query": {
+            "queryType": "serviceMap",
+            "refId": "services"
+          },
+          "multi": true,
+          "includeAll": true,
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          }
+        },
+        {
+          "name": "status",
+          "type": "custom",
+          "label": "Status",
+          "query": "ok,error",
+          "multi": true,
+          "includeAll": true,
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          }
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Map - Request Flow",
+        "type": "nodeGraph",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 24,
+          "h": 10
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "serviceMap",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "nodes": {
+            "mainStatUnit": "short",
+            "secondaryStatUnit": "short",
+            "arcs": [
+              {
+                "field": "success",
+                "color": "green"
+              },
+              {
+                "field": "errors",
+                "color": "red"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Request Rate by Service",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 10,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" } | rate()",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "axisPlacement": "auto"
+            },
+            "unit": "reqps"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "multi"
+          },
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "max"]
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Rate by Service",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 10,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" && status = error } | rate()",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                },
+                {
+                  "value": 1,
+                  "color": "yellow"
+                },
+                {
+                  "value": 5,
+                  "color": "red"
+                }
+              ]
+            },
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "P95 Latency by Service",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 18,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" } | quantile_over_time(duration, 0.95) by (.service.name)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            },
+            "unit": "ms"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "multi"
+          },
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "max", "last"]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Avg Duration by Service",
+        "type": "bargauge",
+        "gridPos": {
+          "x": 12,
+          "y": 18,
+          "w": 6,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" } | avg(duration) by (.service.name)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                },
+                {
+                  "value": 100,
+                  "color": "yellow"
+                },
+                {
+                  "value": 500,
+                  "color": "red"
+                }
+              ]
+            },
+            "unit": "ms",
+            "min": 0
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        }
+      },
+      {
+        "id": 6,
+        "title": "Span Count by Service",
+        "type": "piechart",
+        "gridPos": {
+          "x": 18,
+          "y": 18,
+          "w": 6,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" } | count() by (.service.name)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["name", "percent"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["value", "percent"]
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Recent Traces",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 26,
+          "w": 24,
+          "h": 10
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" && status = ${status} }",
+            "refId": "A",
+            "limit": 50
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Duration"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "ms"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 100
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Trace ID"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "title": "View Trace",
+                      "url": "/explore?left=[\"now-1h\",\"now\",\"Tempo\",{\"query\":\"${__value.raw}\",\"queryType\":\"traceID\"}]"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "displayName": "Start time",
+              "desc": true
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {
+                "traceID": 0,
+                "traceName": 1,
+                "startTime": 2,
+                "duration": 3,
+                "spanCount": 4,
+                "service.name": 5,
+                "status": 6
+              },
+              "renameByName": {
+                "traceID": "Trace ID",
+                "traceName": "Name",
+                "startTime": "Start Time",
+                "duration": "Duration",
+                "spanCount": "Spans",
+                "service.name": "Root Service",
+                "status": "Status"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Slowest Operations",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 36,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" } | by(span.name) | max(duration) > 100ms",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "sortBy": [
+            {
+              "displayName": "Duration",
+              "desc": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Error Traces",
+        "type": "table",
+        "gridPos": {
+          "x": 12,
+          "y": 36,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" && status = error }",
+            "refId": "A",
+            "limit": 20
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Trace ID"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "title": "View Error Trace",
+                      "url": "/explore?left=[\"now-1h\",\"now\",\"Tempo\",{\"query\":\"${__value.raw}\",\"queryType\":\"traceID\"}]"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 10,
+        "title": "Top 10 Endpoints by Request Count",
+        "type": "barchart",
+        "gridPos": {
+          "x": 0,
+          "y": 44,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ .service.name = \"${service}\" } | count() by (http.target)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "xTickLabelRotation": 0,
+          "legend": {
+            "displayMode": "hidden"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Database Query Performance",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 44,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": "tempo-habitquest",
+            "queryType": "traceql",
+            "query": "{ span.kind = \"client\" && span.db.system != nil } | avg(duration) by (span.db.system)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
