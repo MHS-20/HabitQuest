@@ -4,6 +4,8 @@ import common.hexagonal.Adapter;
 import habitquest.marketplace.application.MarketplaceLogger;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.Item;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -12,6 +14,7 @@ import org.springframework.web.client.RestClientException;
 @Component
 public class AvatarClient {
 
+  public static final String AVATAR_CLIENT = "avatarClient";
   private final RestClient restClient;
   private final MarketplaceLogger log;
 
@@ -22,6 +25,8 @@ public class AvatarClient {
 
   // ─── Money ──────────────────────────────────────────────────────────────────
 
+  @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "spendMoneyFallback")
+  @Retry(name = AVATAR_CLIENT)
   public void spendMoney(String avatarId, Money price) {
     AmountRequest request = new AmountRequest(price.amount());
     log.info(request, "Spending money for avatar " + avatarId);
@@ -38,6 +43,8 @@ public class AvatarClient {
     }
   }
 
+  @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "earnMoneyFallback")
+  @Retry(name = AVATAR_CLIENT)
   public void earnMoney(String avatarId, Money price) {
     AmountRequest request = new AmountRequest(price.amount());
     log.info(request, "Crediting money to avatar " + avatarId);
@@ -56,6 +63,8 @@ public class AvatarClient {
 
   // ─── Inventory ──────────────────────────────────────────────────────────────
 
+  @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "addItemToInventoryFallback")
+  @Retry(name = AVATAR_CLIENT)
   public void addItemToInventory(String avatarId, Item item) {
     ItemRequest request = ItemRequest.from(item);
     log.info(request, "Adding item to inventory of avatar " + avatarId);
@@ -73,6 +82,8 @@ public class AvatarClient {
     }
   }
 
+  @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "removeItemFromInventoryFallback")
+  @Retry(name = AVATAR_CLIENT)
   public void removeItemFromInventory(String avatarId, Item item) {
     ItemRequest request = ItemRequest.from(item);
     log.info(request, "Removing item from inventory of avatar " + avatarId);
@@ -88,6 +99,44 @@ public class AvatarClient {
       throw new AvatarCommunicationException(
           "Could not remove item from inventory of avatar " + avatarId, ex);
     }
+  }
+
+  // ─── Fallback methods ────────────────────────────────────────────────────────
+
+  private void spendMoneyFallback(String avatarId, Money price, Exception ex) {
+    log.error(
+        new AmountRequest(price.amount()),
+        "Circuit breaker OPEN per spendMoney, avatarId=" + avatarId,
+        ex);
+    throw new AvatarCommunicationException(
+        "Avatar service non disponibile (spendMoney) per " + avatarId, ex);
+  }
+
+  private void earnMoneyFallback(String avatarId, Money price, Exception ex) {
+    log.error(
+        new AmountRequest(price.amount()),
+        "Circuit breaker OPEN per earnMoney, avatarId=" + avatarId,
+        ex);
+    throw new AvatarCommunicationException(
+        "Avatar service non disponibile (earnMoney) per " + avatarId, ex);
+  }
+
+  private void addItemToInventoryFallback(String avatarId, Item item, Exception ex) {
+    log.error(
+        ItemRequest.from(item),
+        "Circuit breaker OPEN per addItemToInventory, avatarId=" + avatarId,
+        ex);
+    throw new AvatarCommunicationException(
+        "Avatar service non disponibile (addItem) per " + avatarId, ex);
+  }
+
+  private void removeItemFromInventoryFallback(String avatarId, Item item, Exception ex) {
+    log.error(
+        ItemRequest.from(item),
+        "Circuit breaker OPEN per removeItemFromInventory, avatarId=" + avatarId,
+        ex);
+    throw new AvatarCommunicationException(
+        "Avatar service non disponibile (removeItem) per " + avatarId, ex);
   }
 
   // ─── Request records ────────────────────────────────────────────────────────

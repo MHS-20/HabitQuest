@@ -1,39 +1,24 @@
 server:
-  port: 9002
+  port: 8084
   shutdown: graceful
-  netty:
+  tomcat:
     connection-timeout: 2s
-    idle-timeout: 15s
+
+info:
+  system: HabitQuest
+tracking:
+  service-uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
+avatar:
+  service-uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
 
 spring:
   application:
     name: quest-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
-  r2dbc:
-    username: user
-    password: password
-    url: r2dbc:postgresql://localhost:5432/habitquestdb_quest
-    pool:
-      max-create-connection-time: 2s
-      initial-size: 5
-      max-size: 10
-  config:
-    import: ""
+
+################## KAFKA ##################
   cloud:
-    config:
-      enabled: false
-      uri: http://localhost:8888
-      request-connect-timeout: 5000
-      request-read-timeout: 5000
-      fail-fast: false
-      retry:
-        max-attempts: 6
-        initial-interval: 1000
-        max-interval: 2000
-        multiplier: 1.1
-    function:
-      definition: quest
     stream:
       bindings:
         quest-created-out-0:
@@ -53,7 +38,7 @@ spring:
           content-type: application/json
       kafka:
         binder:
-          brokers: localhost:9092
+          brokers: ${KAFKA_BROKER:localhost:9092}
           auto-create-topics: true
           producer-properties:
             key.serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -61,36 +46,69 @@ spring:
             acks: all
             retries: 3
             enable.idempotence: true
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: user
-    password: password
-    connection-timeout: 5s
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/HabitQuest
 
+################## RESILIENCY ##################
+resilience4j:
+  retry:
+    default-config: default
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+
+  circuit-breaker:
+    default-config: default
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 3s
+        wait-duration-in-open-state: 10s
+        permitted-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+        record-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+
+############ OBSERVABILITY #############
 logging:
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
-
-info:
-  system: HabitQuest
+  structured:
+    format:
+      console: ecs
 
 management:
   endpoints:
     web:
       exposure:
-        include: bindings, configprops, env, flyway, functions, health, heapdump, info, loggers, mappings, prometheus
+        include: health, metrics, circuitbreakers, retries, bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
   endpoint:
     health:
       show-details: always
       show-components: always
       probes:
         enabled: true
+
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      type: W3C
+  otlp:
+    metrics:
+      export:
+        url: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318}/v1/metrics
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318}/v1/traces
+
   info:
     env:
       enabled: true
@@ -98,9 +116,17 @@ management:
       enabled: true
     os:
       enabled: true
+
   metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        resilience4j.circuitbreaker: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
     tags:
       application: ${spring.application.name}
 
-polar:
-  catalog-service-uri: "http://localhost:9001"
+  health:
+    circuitbreakers:
+      enabled: true

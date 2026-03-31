@@ -20,9 +20,7 @@ val otelVersion = "2.26.0"
 val springCloudVersion = "2025.0.0"
 val testcontainersVersion = "2.0.3"
 val micrometerVersion = "1.16.4"
-extra["testKeycloak"] = "4.1.1"
 extra["testArchUnit"] = "1.4.1"
-
 
 allprojects {
     repositories {
@@ -39,8 +37,6 @@ subprojects {
     // apply(plugin = "com.github.spotbugs")
     apply(plugin = "checkstyle")
     apply(plugin = "pmd")
-
-
 
     group = rootProject.group
     version = rootProject.version
@@ -62,15 +58,22 @@ subprojects {
     dependencies {
         implementation("io.micrometer:micrometer-tracing-bridge-otel")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
+        implementation("org.springframework.cloud:spring-cloud-stream")
+        implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+        implementation("io.github.resilience4j:resilience4j-spring-boot3")
+        implementation("org.springframework.boot:spring-boot-starter-aop")
 
         runtimeOnly("io.micrometer:micrometer-registry-prometheus")
         runtimeOnly("io.opentelemetry:opentelemetry-exporter-otlp")
-        runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelVersion")
+        //runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:$otelVersion")
         runtimeOnly("io.github.resilience4j:resilience4j-micrometer")
 
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.springframework.boot:spring-boot-testcontainers")
+        testImplementation("org.springframework.cloud:spring-cloud-stream-test-binder")
+        testImplementation("org.springframework.kafka:spring-kafka-test")
         testImplementation("org.testcontainers:junit-jupiter")
+        testImplementation("org.testcontainers:kafka")
     }
 
     tasks.withType<Test> {

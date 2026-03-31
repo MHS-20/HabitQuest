@@ -1,11 +1,12 @@
 server:
-  port: 9003
+  port: 8086
+
+info:
+  system: habitquest
 
 spring:
   application:
     name: notification-service
-  config:
-    import: ""
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -18,21 +19,11 @@ spring:
           starttls:
             enable: true
             required: true
+
+################## KAFKA ##################
   cloud:
     function:
       definition: avatarLevelUpped;avatarDead;avatarSkillPointAssigned;avatarNewSpellLearned;guildBattleStarted;guildBattleWon;guildBattleLost;guildCreated;guildDeleted;guildJoined;guildLeft;guildRemoved;guildRoleAssigned;guildInviteSent;marketplaceItemBought;marketplaceItemSold;questCreated;questCompleted;questNotCompleted;questJoined;questLeft;habitDeleted;habitAttended;habitNotAttended;userRegistered
-    config:
-      enabled: false
-      uri: http://localhost:8888
-      request-connect-timeout: 5000
-      request-read-timeout: 5000
-      fail-fast: false
-      retry:
-        max-attempts: 6
-        initial-interval: 1000
-        max-interval: 2000
-        multiplier: 1.1
-
     stream:
       bindings:
         avatarLevelUpped-in-0:
@@ -115,29 +106,42 @@ spring:
         userRegistered-in-0:
           destination: user.registered
           group: notification-service
-
       kafka:
         binder:
-          brokers: localhost:9092
+          brokers: ${KAFKA_BROKER:localhost:9092}
 
+############ OBSERVABILITY #############
 logging:
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
-
-info:
-  system: habitquest
+  structured:
+    format:
+      console: ecs
 
 management:
   endpoints:
     web:
       exposure:
-        include: bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
+        include: health, metrics, circuitbreakers, retries, bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
   endpoint:
     health:
       show-details: always
       show-components: always
       probes:
         enabled: true
+
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      type: W3C
+  otlp:
+    metrics:
+      export:
+        url: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318}/v1/metrics
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318}/v1/traces
+
   info:
     env:
       enabled: true
@@ -145,6 +149,17 @@ management:
       enabled: true
     os:
       enabled: true
+
   metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        resilience4j.circuitbreaker: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
     tags:
       application: ${spring.application.name}
+
+  health:
+    kafka:
+      enabled: true

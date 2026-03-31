@@ -1,13 +1,34 @@
-loki:
-  serviceName: loki
-  servicePort: 3100
-  serviceScheme: http
-
 config:
+  inputs: |
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        multiline.parser  docker, cri
+        Tag               kube.*
+        Mem_Buf_Limit     5MB
+        Skip_Long_Lines   On
+
+  filters: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+        Merge_Log           On
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+
   outputs: |
     [OUTPUT]
-        Name        loki
-        Match       *
-        Host        loki
-        Port        3100
-        Labels      job=fluent-bit
+        Name            loki
+        Match           *
+        Host            loki
+        Port            3100
+        Labels          job=fluent-bit, namespace=$kubernetes['namespace_name'], pod=$kubernetes['pod_name'], container=$kubernetes['container_name']
+        Auto_Kubernetes_Labels On
+        http_user       ""
+        http_passwd     ""
+        tls             Off
+        tls.verify      Off
