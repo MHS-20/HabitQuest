@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import common.ddd.Id;
+import habitquest.tracking.application.AvatarClientPort;
 import habitquest.tracking.application.HabitHistoryRepository;
 import habitquest.tracking.application.HabitRepository;
 import habitquest.tracking.application.HabitService;
@@ -36,6 +37,7 @@ class HabitCheckerJobTest {
   @Mock private HabitHistoryRepository historyRepository;
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
+  @Mock private AvatarClientPort avatarClient;
 
   private HabitCheckerJob job;
 
@@ -68,7 +70,8 @@ class HabitCheckerJobTest {
     when(historyRepository.findByHabitId(new Id<>("habit-1"))).thenReturn(List.of());
 
     HabitService realService =
-        new HabitServiceImpl(habitRepository, historyRepository, habitFactory, habitObserver);
+        new HabitServiceImpl(
+            habitRepository, historyRepository, habitFactory, habitObserver, avatarClient);
     HabitCheckerJob realJob = new HabitCheckerJob(realService);
 
     realJob.run();
