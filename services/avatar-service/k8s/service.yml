@@ -10,5 +10,5 @@ spec:
     app: avatar-service
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 9003
+      port: 8081
+      targetPort: 8081

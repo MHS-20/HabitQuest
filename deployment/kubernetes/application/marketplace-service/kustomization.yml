@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/MHS-20/habitquest/marketplace-service/k8s?ref=main
+- ../../../../services/marketplace-service/k8s
 
 patches:
 - path: patch-env.yml
@@ -10,8 +10,10 @@ patches:
 
 images:
 - name: marketplace-service
-  newName: ghcr.io/ghcr.io/mhs-20/habitquest/marketplace-service/marketplace-service
-  newTag: marketplace-v1.0.1
+  # newName: ghcr.io/mhs-20/marketplace-service
+  # newTag: marketplace-v1.0.1
+  newName: marketplace-service
+  newTag: latest
 
 replicas:
 - count: 1

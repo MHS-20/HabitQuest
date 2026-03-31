@@ -2,29 +2,21 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TIMEOUT=120s
 
 # Helper functions
 deploy() {
   local SERVICE=$1
   echo -e "\n─── Deploying $SERVICE..."
-  kubectl apply -k "$SCRIPT_DIR/$SERVICE"
+  kustomize build "$SCRIPT_DIR/$SERVICE" | kubectl apply -f -
 }
 
 wait_ready() {
   local SERVICE=$1
-  echo "    Waiting for $SERVICE to be ready (timeout: $TIMEOUT)..."
-  if kubectl wait \
-      --for=condition=ready pod \
-      --selector=app="$SERVICE" \
-      --timeout="$TIMEOUT" 2>/dev/null; then
-    echo "    ✓ $SERVICE is ready"
-  else
-    echo "    ✗ $SERVICE did not become ready in time"
-    echo "    → Logs:"
-    kubectl logs -l app="$SERVICE" --tail=20 2>/dev/null || true
-    exit 1
-  fi
+  echo -e "\nWaiting for $SERVICE to be ready..."
+  while [ $(kubectl get pods -l app="$SERVICE" --no-headers 2>/dev/null | grep -c "Running") -eq 0 ]; do
+    sleep 5
+  done
+  echo "$SERVICE is ready"
 }
 
 # Core services (no outbound REST dependencies)
@@ -55,11 +47,11 @@ wait_ready edge-service
 
 # Summary
 echo -e "\n"
-echo   "  All services deployed successfully!"
-echo   ""
+echo "All services deployed successfully!"
 echo ""
-echo "  Pods:"
+echo ""
+echo "Pods:"
 kubectl get pods -o wide
 echo ""
-echo "  Services:"
+echo "Services:"
 kubectl get services

@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/MHS-20/habitquest/edge-service/k8s?ref=main
+- ../../../../services/edge-service/k8s
 
 patches:
 - path: patch-env.yml
@@ -11,8 +11,10 @@ patches:
 
 images:
 - name: edge-service
-  newName: ghcr.io/mhs-20/habitquest/edge-service
-  newTag: 21f5d4d46da941ffb5cd46bc8b917665a4ef4351
+  # newName: ghcr.io/mhs-20/habitquest/edge-service
+  # newTag: 21f5d4d46da941ffb5cd46bc8b917665a4ef4351
+  newName: edge-service
+  newTag: latest
 
 replicas:
 - count: 1

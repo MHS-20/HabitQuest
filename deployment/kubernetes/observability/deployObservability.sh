@@ -10,6 +10,9 @@ helm repo update
 echo -e "\nDeploying Prometheus..."
 sh ./prometheus/deploy.sh
 
+echo -e "\nDeploying Tempo..."
+sh ./tempo/deploy.sh
+
 echo -e "\nDeploying Loki..."
 sh ./loki/deploy.sh
 
@@ -18,9 +21,6 @@ sh ./fluent-bit/deploy.sh
 
 echo -e "\nDeploying Grafana..."
 sh ./grafana/deploy.sh
-
-echo -e "\nDeploying Tempo..."
-sh ./tempo/deploy.sh
 
 echo -e "\nWaiting for core pods to be Ready (prometheus, loki, grafana, fluent-bit, tempo)..."
 
