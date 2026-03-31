@@ -5,6 +5,7 @@ import common.ddd.Id;
 import habitquest.tracking.domain.reminder.Recurrence;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Habit implements Aggregate<Id<Habit>> {
@@ -16,6 +17,7 @@ public class Habit implements Aggregate<Id<Habit>> {
   private LocalDateTime lastAttendedDate;
   private final Id<Avatar> avatarId;
   private final Optional<String> associatedQuestId;
+  private final LocalDateTime createdAt = LocalDateTime.now();
 
   public Habit(
       Id<Habit> id,
@@ -37,11 +39,8 @@ public class Habit implements Aggregate<Id<Habit>> {
   }
 
   public LocalDateTime nextRecurrence() {
-    if (this.lastAttendedDate == null) {
-      return null;
-    } else {
-      return this.recurrence.nextAfter(this.lastAttendedDate);
-    }
+    return this.recurrence.nextAfter(
+        Objects.requireNonNullElse(this.lastAttendedDate, this.createdAt));
   }
 
   public LocalDateTime nextRecurrence(LocalDateTime date) {
