@@ -10,5 +10,5 @@ spec:
     app: quest-service
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 9003
+      port: 8084
+      targetPort: 8084

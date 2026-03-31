@@ -1,3 +1,5 @@
+deploymentMode: SingleBinary
+
 loki:
   auth_enabled: false
   commonConfig:
@@ -5,12 +7,14 @@ loki:
     replication_factor: 1
   server:
     http_listen_port: 3100
+
   storage:
     type: filesystem
     bucketNames:
       chunks: loki-chunks
       ruler: loki-ruler
       admin: loki-admin
+
   schemaConfig:
     configs:
       - from: 2020-10-24
@@ -20,10 +24,11 @@ loki:
         index:
           prefix: index_
           period: 24h
+
   compactor:
     working_directory: /var/loki/compactor
-    shared_store: filesystem
     retention_enabled: true
+    delete_request_store: filesystem
   limits_config:
     retention_period: 7d
   ruler:
@@ -31,12 +36,13 @@ loki:
       type: local
       local:
         directory: /var/loki/rules
-  chunk_store_config:
-    chunk_cache_config:
-      embedded_cache:
-        enabled: true
-        max_size_mb: 100
-        ttl: 1h
+
+#  chunk_store_config:
+#    chunk_cache_config:
+#      embedded_cache:
+#        enabled: true
+#        max_size_mb: 100
+#        ttl: 1h
   query_range:
     results_cache:
       cache:
@@ -44,23 +50,27 @@ loki:
           enabled: true
           max_size_mb: 50
           ttl: 24h
+
 persistence:
   enabled: true
   accessModes: ["ReadWriteOnce"]
   size: 1Gi
   storageClassName: standard
+
 service:
   type: ClusterIP
   port: 3100
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 256Mi
 
-# Disable individual components (used in distributed mode)
+singleBinary:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
 write:
   replicas: 0
 read:
@@ -69,6 +79,12 @@ backend:
   replicas: 0
 
 gateway:
+  enabled: false
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+lokiCanary:
   enabled: false
 
 monitoring:

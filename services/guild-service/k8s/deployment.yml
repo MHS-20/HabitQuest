@@ -16,7 +16,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: /actuator/prometheus
-        prometheus.io/port: "9003"
+        prometheus.io/port: "8082"
     spec:
       containers:
         - name: guild-service
@@ -27,23 +27,16 @@ spec:
               exec:
                 command: [ "sh", "-c", "sleep 5" ]
           ports:
-            - containerPort: 9003
+            - containerPort: 8082
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 9003
+              port: 8082
             initialDelaySeconds: 10
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 9003
+              port: 8082
             initialDelaySeconds: 5
             periodSeconds: 15
-          volumeMounts:
-            - name: guild-config-volume
-              mountPath: /workspace/config
-      volumes:
-        - name: guild-config-volume
-          configMap:
-            name: guild-config
