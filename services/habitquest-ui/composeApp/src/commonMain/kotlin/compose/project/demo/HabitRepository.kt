@@ -11,6 +11,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -45,6 +48,11 @@ data class HabitListItem(
 sealed interface HabitListResult {
     data class Success(val habits: List<HabitListItem>) : HabitListResult
     data class Error(val message: String) : HabitListResult
+}
+
+sealed interface AttendHabitResult {
+    data object Success : AttendHabitResult
+    data class Error(val message: String) : AttendHabitResult
 }
 
 class HabitsApiRepository {
@@ -141,5 +149,30 @@ class HabitsApiRepository {
             else -> HabitListResult.Error("Errore lettura habits (${response.status.value})")
         }
     }
-}
 
+    suspend fun attendHabit(token: String, habitId: String): AttendHabitResult {
+        val now = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .toString()
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/habits/$habitId/attend") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("date", JsonPrimitive(now))
+                    }
+                )
+            }
+        }.getOrElse {
+            return AttendHabitResult.Error("Impossibile contattare habit-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> AttendHabitResult.Success
+            HttpStatusCode.Unauthorized -> AttendHabitResult.Error("Sessione scaduta, rifai il login")
+            HttpStatusCode.NotFound -> AttendHabitResult.Error("Habit non trovata")
+            else -> AttendHabitResult.Error("Errore attend habit (${response.status.value})")
+        }
+    }
+}
