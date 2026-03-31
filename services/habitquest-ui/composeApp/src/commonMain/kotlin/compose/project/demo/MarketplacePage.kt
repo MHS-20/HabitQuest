@@ -29,7 +29,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun MarketplaceScreen(token: String, avatarState: AvatarUiState) {
+fun MarketplaceScreen(
+    token: String,
+    avatarState: AvatarUiState,
+    onItemBought: () -> Unit = {},
+) {
     val repository = remember { MarketplaceRepository() }
     val scope = rememberCoroutineScope()
     var uiState by remember { mutableStateOf<MarketplaceUiState>(MarketplaceUiState.Loading) }
@@ -134,6 +138,7 @@ fun MarketplaceScreen(token: String, avatarState: AvatarUiState) {
                                         ) {
                                             MarketplaceBuyResult.Success -> {
                                                 actionMessage = "Acquisto completato: ${item.name}"
+                                                onItemBought()
                                                 loadMarketplace(showLoading = false)
                                             }
 

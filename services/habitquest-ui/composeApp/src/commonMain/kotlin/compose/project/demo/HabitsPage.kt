@@ -29,7 +29,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun HabitsScreen(token: String, avatarState: AvatarUiState) {
+fun HabitsScreen(
+    token: String,
+    avatarState: AvatarUiState,
+    onHabitAttended: () -> Unit = {},
+) {
     val habitRepository = remember { HabitsApiRepository() }
     val scope = rememberCoroutineScope()
     var uiState by remember { mutableStateOf<HabitsUiState>(HabitsUiState.Loading) }
@@ -94,6 +98,7 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState) {
                                         when (val result = habitRepository.attendHabit(token, habit.id)) {
                                             AttendHabitResult.Success -> {
                                                 actionMessage = "Habit completata: ${habit.title}"
+                                                onHabitAttended()
                                                 loadHabits(showLoading = false)
                                             }
 
