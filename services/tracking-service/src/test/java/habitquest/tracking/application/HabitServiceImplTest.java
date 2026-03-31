@@ -33,12 +33,15 @@ class HabitServiceImplTest {
   @Mock private HabitHistoryRepository historyRepository;
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
+  @Mock private AvatarClientPort avatarClient;
 
   private HabitServiceImpl service;
 
   @BeforeEach
   void setUp() {
-    service = new HabitServiceImpl(habitRepository, historyRepository, habitFactory, habitObserver);
+    service =
+        new HabitServiceImpl(
+            habitRepository, historyRepository, habitFactory, habitObserver, avatarClient);
   }
 
   @Nested
@@ -268,7 +271,7 @@ class HabitServiceImplTest {
   class AttendHabit {
 
     @Test
-    @DisplayName("updates last attended date, saves, and emits HabitAttended")
+    @DisplayName("updates last attended date, saves, grants XP, and emits HabitAttended")
     void attendsAndEmitsEvent() {
       var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
@@ -277,6 +280,7 @@ class HabitServiceImplTest {
 
       assertThat(attended.getLastAttendedDate()).isEqualTo(NEXT_ATTENDED_AT);
       verify(habitRepository).save(habit);
+      verify(avatarClient).grantExperience(AVATAR_ID, 10);
 
       ArgumentCaptor<HabitEvent> captor = ArgumentCaptor.forClass(HabitEvent.class);
       verify(habitObserver).notifyHabitEvent(captor.capture());
