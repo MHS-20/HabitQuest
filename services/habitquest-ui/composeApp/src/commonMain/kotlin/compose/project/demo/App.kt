@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 enum class AppPage(val label: String, val emoji: String) {
     Dashboard("Dashboard", "🏠"),
     Habits("Abitudini", "📝"),
+    Marketplace("Marketplace", "🛒"),
     Character("Personaggio", "👤"),
     Achievements("Traguardi", "⭐"),
 }
@@ -165,6 +166,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
             when (selectedPage) {
                 AppPage.Dashboard -> DashboardScreen(token = token, avatarState = avatarState)
                 AppPage.Habits -> HabitsScreen(token = token, avatarState = avatarState)
+                AppPage.Marketplace -> MarketplaceScreen(token = token, avatarState = avatarState)
                 AppPage.Character -> CharacterScreen(avatarState = avatarState)
                 AppPage.Achievements -> AchievementsScreen()
             }
