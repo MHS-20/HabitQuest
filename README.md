@@ -11,7 +11,6 @@ https://mhs-20.github.io/HabitQuest/
 </p>
 
 ## Features
-
 ### Habit Management
 - Create, edit, and delete habits
 - Configure difficulty, frequency, and tags
@@ -46,7 +45,6 @@ https://mhs-20.github.io/HabitQuest/
 - Damage calculated from stats and equipment
 
 ---
-
 ## Architecture
 - **Microservices**: Identity, Tracking, Notification, Avatar, Shop, Guild, Quest
 - **Databases**: one per service
@@ -65,3 +63,30 @@ https://mhs-20.github.io/HabitQuest/
 - UI: Kotlin multiplatform 
 - Testing: Gherkin
 - Deployment: Kubernetes
+
+# Deployment
+## Option 1: Docker Compose
+Run these commands: 
+```bash
+docker-compose build
+docker-compose up -d
+cd ./services/habitquest-ui
+./gradlew composeApp:run
+```
+NOTE: the observability stack is not deployed with docker compose, use minikube for that.
+
+## Option 2: Minikube
+NOTE: this tools needs to be installed on the system:
+- kubectl
+- minikube
+- helm
+- kustomize
+
+Just run these commands:
+```bash
+./deploy.sh
+cd ./services/habitquest-ui
+./gradlew composeApp:run
+```
+
+

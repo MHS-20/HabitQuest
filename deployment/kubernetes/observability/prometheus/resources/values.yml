@@ -23,7 +23,7 @@ server:
 serverFiles:
   prometheus.yml:
     scrape_configs:
-      - job_name: 'habitquest-pods'
+      - job_name: 'habitquest -pods'
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:

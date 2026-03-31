@@ -6,7 +6,7 @@ resources:
 
 patches:
 - path: patch-env.yml
-# - path: patch-ingress.yml
+#- path: patch-ingress.yml
 - path: patch-resources.yml
 
 images:
