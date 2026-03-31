@@ -33,12 +33,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun DashboardScreen(token: String, avatarState: AvatarUiState) {
     var showContent by remember { mutableStateOf(true) }
-    val habitRepository = remember { HabitRepository() }
+    val habitRepository = remember { HabitsApiRepository() }
     val scope = rememberCoroutineScope()
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var recurrenceType by remember { mutableStateOf(HabitRecurrenceType.DAILY) }
+    var recurrenceType by remember { mutableStateOf(CreateHabitRecurrenceType.DAILY) }
     var dayOfWeek by remember { mutableStateOf("MONDAY") }
     var dayOfMonth by remember { mutableStateOf("1") }
     var isCreatingHabit by remember { mutableStateOf(false) }
@@ -105,7 +105,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = {
-                            recurrenceType = HabitRecurrenceType.DAILY
+                            recurrenceType = CreateHabitRecurrenceType.DAILY
                             habitMessage = null
                         },
                         modifier = Modifier.weight(1f)
@@ -113,7 +113,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     Spacer(Modifier.width(8.dp))
                     OutlinedButton(
                         onClick = {
-                            recurrenceType = HabitRecurrenceType.WEEKLY
+                            recurrenceType = CreateHabitRecurrenceType.WEEKLY
                             habitMessage = null
                         },
                         modifier = Modifier.weight(1f)
@@ -121,7 +121,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     Spacer(Modifier.width(8.dp))
                     OutlinedButton(
                         onClick = {
-                            recurrenceType = HabitRecurrenceType.MONTHLY
+                            recurrenceType = CreateHabitRecurrenceType.MONTHLY
                             habitMessage = null
                         },
                         modifier = Modifier.weight(1f)
@@ -130,7 +130,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
 
                 Text("Recurrence: ${recurrenceType.name}")
 
-                if (recurrenceType == HabitRecurrenceType.WEEKLY) {
+                if (recurrenceType == CreateHabitRecurrenceType.WEEKLY) {
                     OutlinedTextField(
                         value = dayOfWeek,
                         onValueChange = {
@@ -143,7 +143,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     )
                 }
 
-                if (recurrenceType == HabitRecurrenceType.MONTHLY) {
+                if (recurrenceType == CreateHabitRecurrenceType.MONTHLY) {
                     OutlinedTextField(
                         value = dayOfMonth,
                         onValueChange = {
@@ -173,18 +173,18 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                         }
 
                         val normalizedDayOfWeek =
-                            if (recurrenceType == HabitRecurrenceType.WEEKLY) dayOfWeek.trim().uppercase()
+                            if (recurrenceType == CreateHabitRecurrenceType.WEEKLY) dayOfWeek.trim().uppercase()
                             else null
                         val normalizedDayOfMonth =
-                            if (recurrenceType == HabitRecurrenceType.MONTHLY) dayOfMonth.toIntOrNull()
+                            if (recurrenceType == CreateHabitRecurrenceType.MONTHLY) dayOfMonth.toIntOrNull()
                             else null
 
-                        if (recurrenceType == HabitRecurrenceType.WEEKLY && normalizedDayOfWeek !in allowedDaysOfWeek) {
+                        if (recurrenceType == CreateHabitRecurrenceType.WEEKLY && normalizedDayOfWeek !in allowedDaysOfWeek) {
                             habitMessage = "Day Of Week non valido"
                             return@Button
                         }
 
-                        if (recurrenceType == HabitRecurrenceType.MONTHLY && (normalizedDayOfMonth == null || normalizedDayOfMonth !in 1..31)) {
+                        if (recurrenceType == CreateHabitRecurrenceType.MONTHLY && (normalizedDayOfMonth == null || normalizedDayOfMonth !in 1..31)) {
                             habitMessage = "Day Of Month deve essere tra 1 e 31"
                             return@Button
                         }
@@ -203,13 +203,13 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                     dayOfMonth = normalizedDayOfMonth
                                 )
                             ) {
-                                is HabitCreateResult.Success -> {
+                                is CreateHabitResult.Success -> {
                                     habitMessage = "Habit creata (id: ${result.habitId})"
                                     title = ""
                                     description = ""
                                 }
 
-                                is HabitCreateResult.Error -> {
+                                is CreateHabitResult.Error -> {
                                     habitMessage = result.message
                                 }
                             }

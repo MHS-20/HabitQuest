@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun HabitsScreen(token: String, avatarState: AvatarUiState) {
-    val habitRepository = remember { HabitRepository() }
+    val habitRepository = remember { HabitsApiRepository() }
     var uiState by remember { mutableStateOf<HabitsUiState>(HabitsUiState.Loading) }
 
     LaunchedEffect(token, avatarState) {
@@ -69,6 +69,10 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState) {
 
 @Composable
 private fun HabitRow(habit: HabitListItem) {
+    val tagsText = habit.tags.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nessun tag"
+    val lastAttendedText = habit.lastAttendedDate ?: "Non disponibile"
+    val nextRecurrenceText = habit.nextRecurrenceDate ?: "Non disponibile"
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -79,6 +83,9 @@ private fun HabitRow(habit: HabitListItem) {
             Text(habit.description, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(6.dp))
             Text("Recurrence: ${habit.recurrenceType}", style = MaterialTheme.typography.bodySmall)
+            Text("Tags: $tagsText", style = MaterialTheme.typography.bodySmall)
+            Text("Last attended: $lastAttendedText", style = MaterialTheme.typography.bodySmall)
+            Text("Next recurrence: $nextRecurrenceText", style = MaterialTheme.typography.bodySmall)
             Text("ID: ${habit.id}", style = MaterialTheme.typography.labelSmall)
         }
     }

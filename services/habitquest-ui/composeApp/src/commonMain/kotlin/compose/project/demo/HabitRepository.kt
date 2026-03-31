@@ -17,18 +17,19 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-enum class HabitRecurrenceType {
+enum class CreateHabitRecurrenceType {
     DAILY,
     WEEKLY,
     MONTHLY,
 }
 
-sealed interface HabitCreateResult {
-    data class Success(val habitId: String) : HabitCreateResult
-    data class Error(val message: String) : HabitCreateResult
+sealed interface CreateHabitResult {
+    data class Success(val habitId: String) : CreateHabitResult
+    data class Error(val message: String) : CreateHabitResult
 }
 
 data class HabitListItem(
@@ -36,6 +37,9 @@ data class HabitListItem(
     val title: String,
     val description: String,
     val recurrenceType: String,
+    val tags : List<String> = emptyList(),
+    val lastAttendedDate: String? = null,
+    val nextRecurrenceDate: String? = null,
 )
 
 sealed interface HabitListResult {
@@ -43,7 +47,7 @@ sealed interface HabitListResult {
     data class Error(val message: String) : HabitListResult
 }
 
-class HabitRepository {
+class HabitsApiRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
@@ -55,10 +59,10 @@ class HabitRepository {
         avatarId: String,
         title: String,
         description: String,
-        recurrenceType: HabitRecurrenceType,
+        recurrenceType: CreateHabitRecurrenceType,
         dayOfWeek: String?,
         dayOfMonth: Int?,
-    ): HabitCreateResult {
+    ): CreateHabitResult {
         val response = runCatching {
             client.post("${edgeServiceBaseUrl()}/api/v1/habits") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -79,7 +83,7 @@ class HabitRepository {
                 )
             }
         }.getOrElse {
-            return HabitCreateResult.Error("Impossibile contattare habit-service")
+            return CreateHabitResult.Error("Impossibile contattare habit-service")
         }
 
         return when (response.status) {
@@ -87,19 +91,19 @@ class HabitRepository {
                 val body = response.body<JsonObject>()
                 val source = body["content"]?.jsonObject ?: body
                 val id = source["id"]?.jsonPrimitive?.contentOrNull
-                    ?: return HabitCreateResult.Error("Risposta create habit senza id")
-                HabitCreateResult.Success(id)
+                    ?: return CreateHabitResult.Error("Risposta create habit senza id")
+                CreateHabitResult.Success(id)
             }
 
             HttpStatusCode.BadRequest -> {
                 val body = response.body<JsonObject>()
                 val message = body["message"]?.jsonPrimitive?.contentOrNull
                     ?: "Dati habit non validi"
-                HabitCreateResult.Error(message)
+                CreateHabitResult.Error(message)
             }
 
-            HttpStatusCode.Unauthorized -> HabitCreateResult.Error("Sessione scaduta, rifai il login")
-            else -> HabitCreateResult.Error("Errore create habit (${response.status.value})")
+            HttpStatusCode.Unauthorized -> CreateHabitResult.Error("Sessione scaduta, rifai il login")
+            else -> CreateHabitResult.Error("Errore create habit (${response.status.value})")
         }
     }
 
@@ -122,8 +126,12 @@ class HabitRepository {
                         id = obj["id"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null,
                         title = obj["title"]?.jsonPrimitive?.contentOrNull.orEmpty(),
                         description = obj["description"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+                        tags = obj["tags"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull } ?: emptyList(),
                         recurrenceType = recurrence?.get("type")?.jsonPrimitive?.contentOrNull
-                            ?: "UNKNOWN"
+                            ?: "UNKNOWN",
+                        lastAttendedDate = obj["lastAttendedDate"]?.jsonPrimitive?.contentOrNull,
+                        nextRecurrenceDate = obj["nextRecurrenceDate"]?.jsonPrimitive?.contentOrNull,
+
                     )
                 }
                 HabitListResult.Success(items)
