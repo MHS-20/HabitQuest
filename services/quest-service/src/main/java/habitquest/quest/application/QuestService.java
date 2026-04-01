@@ -13,6 +13,8 @@ import java.util.List;
 public interface QuestService {
   Quest createQuest(String name);
 
+  List<Quest> getAllQuests();
+
   Quest getQuest(Id<Quest> id) throws QuestNotFoundException;
 
   Quest updateQuest(Id<Quest> id, Quest quest) throws QuestNotFoundException;

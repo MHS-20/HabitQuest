@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 enum class AppPage(val label: String, val emoji: String) {
     Dashboard("Dashboard", "🏠"),
     Habits("Abitudini", "📝"),
+    Quest("Quest", "🎯"),
+    Marketplace("Marketplace", "🛒"),
     Character("Personaggio", "👤"),
     Achievements("Traguardi", "⭐"),
 }
@@ -112,8 +114,13 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
     var selectedPage by remember { mutableStateOf(AppPage.Dashboard) }
     val avatarRepository = remember { AvatarRepository() }
     var avatarState by remember { mutableStateOf<AvatarUiState>(AvatarUiState.Loading) }
+    var avatarRefreshTick by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(token, userId) {
+    fun requestAvatarRefresh() {
+        avatarRefreshTick += 1
+    }
+
+    LaunchedEffect(token, userId, avatarRefreshTick) {
         avatarState = AvatarUiState.Loading
         avatarState = when {
             token.isBlank() -> AvatarUiState.Error("Sessione non valida")
@@ -164,7 +171,17 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
         ) {
             when (selectedPage) {
                 AppPage.Dashboard -> DashboardScreen(token = token, avatarState = avatarState)
-                AppPage.Habits -> HabitsScreen(token = token, avatarState = avatarState)
+                AppPage.Habits -> HabitsScreen(
+                    token = token,
+                    avatarState = avatarState,
+                    onHabitAttended = ::requestAvatarRefresh,
+                )
+                AppPage.Quest -> QuestScreen(token = token, avatarState = avatarState)
+                AppPage.Marketplace -> MarketplaceScreen(
+                    token = token,
+                    avatarState = avatarState,
+                    onItemBought = ::requestAvatarRefresh,
+                )
                 AppPage.Character -> CharacterScreen(avatarState = avatarState)
                 AppPage.Achievements -> AchievementsScreen()
             }

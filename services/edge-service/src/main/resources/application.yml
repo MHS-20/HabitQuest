@@ -44,9 +44,11 @@ spring:
       server:
         webflux:
           globalcors:
+            add-to-simple-url-handler-mapping: true
             cors-configurations:
               '[/**]':
-                allowedOrigins: "http://localhost:3000"
+                allowedOriginPatterns:
+                  - "http://localhost:*"
                 allowedMethods:
                   - GET
                   - POST
@@ -72,11 +74,11 @@ spring:
             - id: marketplace-service
               uri: ${MARKETPLACE_SERVICE_URI:http://localhost:8083}
               predicates:
-                - Path=/api/v1/battles/**
+                - Path=/api/v1/marketplaces/**
             - id: quest-service
               uri: ${QUEST_SERVICE_URI:http://localhost:8084}
               predicates:
-                - Path=/api/v1/quests/**
+                - Path=/api/v1/quests,/api/v1/quests/**
             - id: tracking-service
               uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
               predicates:

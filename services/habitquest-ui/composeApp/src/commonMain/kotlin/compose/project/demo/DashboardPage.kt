@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,16 +35,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun DashboardScreen(token: String, avatarState: AvatarUiState) {
     var showContent by remember { mutableStateOf(true) }
-    val habitRepository = remember { HabitRepository() }
+    val habitRepository = remember { HabitsApiRepository() }
     val scope = rememberCoroutineScope()
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var recurrenceType by remember { mutableStateOf(HabitRecurrenceType.DAILY) }
+    var recurrenceType by remember { mutableStateOf(CreateHabitRecurrenceType.DAILY) }
     var dayOfWeek by remember { mutableStateOf("MONDAY") }
     var dayOfMonth by remember { mutableStateOf("1") }
     var isCreatingHabit by remember { mutableStateOf(false) }
     var habitMessage by remember { mutableStateOf<String?>(null) }
+    var showCreateHabitDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -75,155 +78,177 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                 Text("Dati avatar aggiornati da avatar-service")
 
                 Spacer(Modifier.height(16.dp))
-                Text("Nuova Habit", style = MaterialTheme.typography.titleMedium)
-
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = {
-                        title = it
-                        habitMessage = null
-                    },
-                    label = { Text("Titolo") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = {
-                        description = it
-                        habitMessage = null
-                    },
-                    label = { Text("Descrizione") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedButton(
-                        onClick = {
-                            recurrenceType = HabitRecurrenceType.DAILY
-                            habitMessage = null
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Daily") }
-                    Spacer(Modifier.width(8.dp))
-                    OutlinedButton(
-                        onClick = {
-                            recurrenceType = HabitRecurrenceType.WEEKLY
-                            habitMessage = null
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Weekly") }
-                    Spacer(Modifier.width(8.dp))
-                    OutlinedButton(
-                        onClick = {
-                            recurrenceType = HabitRecurrenceType.MONTHLY
-                            habitMessage = null
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Monthly") }
-                }
-
-                Text("Recurrence: ${recurrenceType.name}")
-
-                if (recurrenceType == HabitRecurrenceType.WEEKLY) {
-                    OutlinedTextField(
-                        value = dayOfWeek,
-                        onValueChange = {
-                            dayOfWeek = it.uppercase()
-                            habitMessage = null
-                        },
-                        label = { Text("Day Of Week (es. MONDAY)") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                if (recurrenceType == HabitRecurrenceType.MONTHLY) {
-                    OutlinedTextField(
-                        value = dayOfMonth,
-                        onValueChange = {
-                            dayOfMonth = it
-                            habitMessage = null
-                        },
-                        label = { Text("Day Of Month (1-31)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
                 Button(
                     onClick = {
-                        val readyAvatar = (avatarState as? AvatarUiState.Ready)?.avatar
-                        if (readyAvatar == null) {
-                            habitMessage = "Avatar non disponibile"
-                            return@Button
-                        }
-
-                        if (title.isBlank()) {
-                            habitMessage = "Inserisci un titolo"
-                            return@Button
-                        }
-
-                        val normalizedDayOfWeek =
-                            if (recurrenceType == HabitRecurrenceType.WEEKLY) dayOfWeek.trim().uppercase()
-                            else null
-                        val normalizedDayOfMonth =
-                            if (recurrenceType == HabitRecurrenceType.MONTHLY) dayOfMonth.toIntOrNull()
-                            else null
-
-                        if (recurrenceType == HabitRecurrenceType.WEEKLY && normalizedDayOfWeek !in allowedDaysOfWeek) {
-                            habitMessage = "Day Of Week non valido"
-                            return@Button
-                        }
-
-                        if (recurrenceType == HabitRecurrenceType.MONTHLY && (normalizedDayOfMonth == null || normalizedDayOfMonth !in 1..31)) {
-                            habitMessage = "Day Of Month deve essere tra 1 e 31"
-                            return@Button
-                        }
-
-                        scope.launch {
-                            isCreatingHabit = true
-                            habitMessage = null
-                            when (
-                                val result = habitRepository.createHabit(
-                                    token = token,
-                                    avatarId = readyAvatar.id,
-                                    title = title.trim(),
-                                    description = description.trim(),
-                                    recurrenceType = recurrenceType,
-                                    dayOfWeek = normalizedDayOfWeek,
-                                    dayOfMonth = normalizedDayOfMonth
-                                )
-                            ) {
-                                is HabitCreateResult.Success -> {
-                                    habitMessage = "Habit creata (id: ${result.habitId})"
-                                    title = ""
-                                    description = ""
-                                }
-
-                                is HabitCreateResult.Error -> {
-                                    habitMessage = result.message
-                                }
-                            }
-                            isCreatingHabit = false
-                        }
+                        habitMessage = null
+                        showCreateHabitDialog = true
                     },
-                    enabled = !isCreatingHabit,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (isCreatingHabit) {
-                        CircularProgressIndicator(strokeWidth = 2.dp)
-                    } else {
-                        Text("Crea Habit")
-                    }
+                    Text("Nuova Habit")
+                }
+
+                if (showCreateHabitDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showCreateHabitDialog = false },
+                        title = { Text("Nuova Habit") },
+                        text = {
+                            Column {
+                                OutlinedTextField(
+                                    value = title,
+                                    onValueChange = {
+                                        title = it
+                                        habitMessage = null
+                                    },
+                                    label = { Text("Titolo") },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Spacer(Modifier.height(8.dp))
+
+                                OutlinedTextField(
+                                    value = description,
+                                    onValueChange = {
+                                        description = it
+                                        habitMessage = null
+                                    },
+                                    label = { Text("Descrizione") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Spacer(Modifier.height(8.dp))
+
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            recurrenceType = CreateHabitRecurrenceType.DAILY
+                                            habitMessage = null
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    ) { Text("Daily") }
+                                    Spacer(Modifier.width(8.dp))
+                                    OutlinedButton(
+                                        onClick = {
+                                            recurrenceType = CreateHabitRecurrenceType.WEEKLY
+                                            habitMessage = null
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    ) { Text("Weekly") }
+                                    Spacer(Modifier.width(8.dp))
+                                    OutlinedButton(
+                                        onClick = {
+                                            recurrenceType = CreateHabitRecurrenceType.MONTHLY
+                                            habitMessage = null
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    ) { Text("Monthly") }
+                                }
+
+                                Text("Recurrence: ${recurrenceType.name}")
+
+                                if (recurrenceType == CreateHabitRecurrenceType.WEEKLY) {
+                                    OutlinedTextField(
+                                        value = dayOfWeek,
+                                        onValueChange = {
+                                            dayOfWeek = it.uppercase()
+                                            habitMessage = null
+                                        },
+                                        label = { Text("Day Of Week (es. MONDAY)") },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+
+                                if (recurrenceType == CreateHabitRecurrenceType.MONTHLY) {
+                                    OutlinedTextField(
+                                        value = dayOfMonth,
+                                        onValueChange = {
+                                            dayOfMonth = it
+                                            habitMessage = null
+                                        },
+                                        label = { Text("Day Of Month (1-31)") },
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    val readyAvatar = (avatarState as? AvatarUiState.Ready)?.avatar
+                                    if (readyAvatar == null) {
+                                        habitMessage = "Avatar non disponibile"
+                                        return@TextButton
+                                    }
+
+                                    if (title.isBlank()) {
+                                        habitMessage = "Inserisci un titolo"
+                                        return@TextButton
+                                    }
+
+                                    val normalizedDayOfWeek =
+                                        if (recurrenceType == CreateHabitRecurrenceType.WEEKLY) dayOfWeek.trim().uppercase()
+                                        else null
+                                    val normalizedDayOfMonth =
+                                        if (recurrenceType == CreateHabitRecurrenceType.MONTHLY) dayOfMonth.toIntOrNull()
+                                        else null
+
+                                    if (recurrenceType == CreateHabitRecurrenceType.WEEKLY && normalizedDayOfWeek !in allowedDaysOfWeek) {
+                                        habitMessage = "Day Of Week non valido"
+                                        return@TextButton
+                                    }
+
+                                    if (recurrenceType == CreateHabitRecurrenceType.MONTHLY && (normalizedDayOfMonth == null || normalizedDayOfMonth !in 1..31)) {
+                                        habitMessage = "Day Of Month deve essere tra 1 e 31"
+                                        return@TextButton
+                                    }
+
+                                    scope.launch {
+                                        isCreatingHabit = true
+                                        habitMessage = null
+                                        when (
+                                            val result = habitRepository.createHabit(
+                                                token = token,
+                                                avatarId = readyAvatar.id,
+                                                title = title.trim(),
+                                                description = description.trim(),
+                                                recurrenceType = recurrenceType,
+                                                dayOfWeek = normalizedDayOfWeek,
+                                                dayOfMonth = normalizedDayOfMonth
+                                            )
+                                        ) {
+                                            is CreateHabitResult.Success -> {
+                                                habitMessage = "Habit creata (id: ${result.habitId})"
+                                                title = ""
+                                                description = ""
+                                                showCreateHabitDialog = false
+                                            }
+
+                                            is CreateHabitResult.Error -> {
+                                                habitMessage = result.message
+                                            }
+                                        }
+                                        isCreatingHabit = false
+                                    }
+                                },
+                                enabled = !isCreatingHabit
+                            ) {
+                                if (isCreatingHabit) {
+                                    CircularProgressIndicator(strokeWidth = 2.dp)
+                                } else {
+                                    Text("Crea")
+                                }
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showCreateHabitDialog = false }) {
+                                Text("Annulla")
+                            }
+                        }
+                    )
                 }
 
                 if (habitMessage != null) {

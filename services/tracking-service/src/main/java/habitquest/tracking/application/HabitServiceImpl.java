@@ -25,20 +25,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class HabitServiceImpl implements HabitService {
 
+  private static final int ATTEND_HABIT_XP_REWARD = 10;
+
   private final HabitRepository habitRepository;
   private final HabitHistoryRepository historyRepository;
   private final HabitFactory habitFactory;
   private final HabitObserver habitObserver;
+  private final AvatarClientPort avatarClient;
 
   public HabitServiceImpl(
       HabitRepository habitRepository,
       HabitHistoryRepository historyRepository,
       HabitFactory habitFactory,
-      HabitObserver habitObserver) {
+      HabitObserver habitObserver,
+      AvatarClientPort avatarClient) {
     this.habitRepository = habitRepository;
     this.historyRepository = historyRepository;
     this.habitFactory = habitFactory;
     this.habitObserver = habitObserver;
+    this.avatarClient = avatarClient;
   }
 
   @Override
@@ -197,6 +202,7 @@ public class HabitServiceImpl implements HabitService {
             .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
     habit.attendHabit(date);
     habitRepository.save(habit);
+    avatarClient.grantExperience(habit.getAvatarId(), ATTEND_HABIT_XP_REWARD);
     HabitAttended event = new HabitAttended(habit, habit.getAvatarId());
     appendHistory(event, "attendedAt=" + date);
     habitObserver.notifyHabitEvent(event);
@@ -215,7 +221,7 @@ public class HabitServiceImpl implements HabitService {
         habitObserver.notifyHabitEvent(event);
         continue;
       }
-      LocalDateTime nextExpected = habit.getRecurrence().nextAfter(lastAttendedDate);
+      LocalDateTime nextExpected = habit.nextRecurrence();
       if (nextExpected.isBefore(now)) {
         HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
         appendNotAttendedHistoryIfNew(habit, "expectedAt=" + nextExpected, event);
