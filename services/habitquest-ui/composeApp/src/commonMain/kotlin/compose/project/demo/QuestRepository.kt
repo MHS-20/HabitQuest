@@ -5,6 +5,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -14,6 +15,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
@@ -147,5 +150,76 @@ class QuestRepository {
             habitIds = source["habitIds"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull }
                 ?: emptyList(),
         )
+    }
+
+    suspend fun createQuestWithDetails(
+        token: String,
+        name: String,
+        duration: String,
+        habits: List<HabitListItem>,
+    ): CreateQuestResult {
+        val created = createQuest(token, name)
+        if (created is CreateQuestResult.Error) {
+            return created
+        }
+
+        val questId = (created as CreateQuestResult.Success).questId
+
+        if (duration.isNotBlank()) {
+            val durationUpdated = updateQuestDuration(token, questId, duration)
+            if (!durationUpdated) {
+                return CreateQuestResult.Error("Quest creata ma durata non aggiornata")
+            }
+        }
+
+        for (habit in habits) {
+            val habitAdded = addHabitToQuest(token, questId, habit)
+            if (!habitAdded) {
+                return CreateQuestResult.Error("Quest creata ma non tutte le habits sono state aggiunte")
+            }
+        }
+
+        return CreateQuestResult.Success(questId)
+    }
+
+    private suspend fun updateQuestDuration(token: String, questId: String, duration: String): Boolean {
+        val response = runCatching {
+            client.patch("${edgeServiceBaseUrl()}/api/v1/quests/$questId/duration") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("duration", JsonPrimitive(duration))
+                    }
+                )
+            }
+        }.getOrNull() ?: return false
+
+        return response.status == HttpStatusCode.NoContent || response.status == HttpStatusCode.OK
+    }
+
+    private suspend fun addHabitToQuest(token: String, questId: String, habit: HabitListItem): Boolean {
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/quests/$questId/habits") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("habitId", JsonPrimitive(habit.id))
+                        put("title", JsonPrimitive(habit.title))
+                        put("description", JsonPrimitive(habit.description))
+                        put(
+                            "tags",
+                            buildJsonArray {
+                                habit.tags.forEach { tag -> add(JsonPrimitive(tag)) }
+                            }
+                        )
+                        put("recurrence", JsonNull)
+                    }
+                )
+            }
+        }.getOrNull() ?: return false
+
+        return response.status == HttpStatusCode.NoContent || response.status == HttpStatusCode.OK
     }
 }

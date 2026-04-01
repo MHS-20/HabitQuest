@@ -73,7 +73,9 @@ class GatewayRoutingTest {
     registry.add("spring.cloud.gateway.routes[3].id", () -> "quest-service");
     registry.add(
         "spring.cloud.gateway.routes[3].uri", () -> LOCALHOST_PREFIX + questService.getPort());
-    registry.add("spring.cloud.gateway.routes[3].predicates[0]", () -> "Path=/api/v1/quests/**");
+    registry.add(
+        "spring.cloud.gateway.routes[3].predicates[0]",
+        () -> "Path=/api/v1/quests,/api/v1/quests/**");
 
     registry.add("spring.cloud.gateway.routes[4].id", () -> "tracking-service");
     registry.add(
@@ -177,6 +179,23 @@ class GatewayRoutingTest {
         .isEqualTo("Slay the dragon");
 
     questService.verify(getRequestedFor(urlPathEqualTo("/api/v1/quests/7")));
+  }
+
+  @Test
+  @DisplayName("GET /api/v1/quests → quest-service")
+  void route_questsCollection_forwardsToQuestService() {
+    questService.stubFor(
+        get(urlPathEqualTo("/api/v1/quests")).willReturn(okJson("{\"_embedded\":{}}")));
+
+    webTestClient
+        .get()
+        .uri("/api/v1/quests")
+        .header(AUTH_HEADER, authHeader)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    questService.verify(getRequestedFor(urlPathEqualTo("/api/v1/quests")));
   }
 
   @Test

@@ -176,7 +176,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     avatarState = avatarState,
                     onHabitAttended = ::requestAvatarRefresh,
                 )
-                AppPage.Quest -> QuestScreen(token = token)
+                AppPage.Quest -> QuestScreen(token = token, avatarState = avatarState)
                 AppPage.Marketplace -> MarketplaceScreen(
                     token = token,
                     avatarState = avatarState,
