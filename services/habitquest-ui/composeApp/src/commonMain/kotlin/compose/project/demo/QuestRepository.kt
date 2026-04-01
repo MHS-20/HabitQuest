@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -23,6 +24,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.JsonElement
 
 data class QuestData(
     val id: String,
@@ -121,17 +123,7 @@ class QuestRepository {
         return when (response.status) {
             HttpStatusCode.OK -> {
                 val body = response.body<JsonObject>()
-                val embedded = body["_embedded"]?.jsonObject
-                val quests = embedded
-                    ?.values
-                    ?.flatMap { value ->
-                        value.jsonArray.mapNotNull { element ->
-                            val item = element as? JsonObject ?: return@mapNotNull null
-                            val source = item["content"]?.jsonObject ?: item
-                            parseQuest(source)
-                        }
-                    }
-                    .orEmpty()
+                val quests = parseQuestCollection(body)
                 QuestListResult.Success(quests)
             }
 
@@ -144,12 +136,59 @@ class QuestRepository {
         val id = source["id"]?.jsonPrimitive?.contentOrNull ?: return null
         return QuestData(
             id = id,
-            name = source["name"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            name = source["name"]?.jsonPrimitive?.contentOrNull
+                ?: source["title"]?.jsonPrimitive?.contentOrNull
+                ?: "",
             duration = source["duration"]?.jsonPrimitive?.contentOrNull ?: "PT0S",
             reward = source["reward"]?.jsonPrimitive?.intOrNull ?: 0,
             habitIds = source["habitIds"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull }
                 ?: emptyList(),
         )
+    }
+
+    private fun parseQuestCollection(body: JsonObject): List<QuestData> {
+        val directArray = body["quests"] as? JsonArray
+        if (directArray != null) {
+            return parseQuestArray(directArray)
+        }
+
+        val embedded = body["_embedded"]?.jsonObject
+        val embeddedList = embedded
+            ?.values
+            ?.flatMap { parseQuestElements(it) }
+            .orEmpty()
+        if (embeddedList.isNotEmpty()) {
+            return embeddedList
+        }
+
+        val contentArray = body["content"] as? JsonArray
+        if (contentArray != null) {
+            return parseQuestArray(contentArray)
+        }
+
+        // Fallback for non-HAL responses that return a single quest object.
+        return parseQuest(body)?.let(::listOf).orEmpty()
+    }
+
+    private fun parseQuestElements(element: JsonElement): List<QuestData> {
+        val objectValue = element as? JsonObject
+        if (objectValue != null) {
+            val maybeContentArray = objectValue["content"] as? JsonArray
+            if (maybeContentArray != null) {
+                return parseQuestArray(maybeContentArray)
+            }
+        }
+
+        val arrayValue = element as? JsonArray
+        return if (arrayValue != null) parseQuestArray(arrayValue) else emptyList()
+    }
+
+    private fun parseQuestArray(array: JsonArray): List<QuestData> {
+        return array.mapNotNull { element ->
+            val item = element as? JsonObject ?: return@mapNotNull null
+            val source = item["content"]?.jsonObject ?: item
+            parseQuest(source)
+        }
     }
 
     suspend fun createQuestWithDetails(
