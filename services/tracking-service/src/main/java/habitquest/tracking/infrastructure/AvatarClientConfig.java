@@ -12,7 +12,7 @@ public class AvatarClientConfig {
   @Bean
   RestClient avatarRestClient(
       RestClient.Builder builder,
-      @Value("${avatar.service-uri:http://localhost:8081}") String avatarServiceUri) {
+      @Value("${avatar.service-uri:http://avatar-service:8081}") String avatarServiceUri) {
     return builder
         .baseUrl(avatarServiceUri)
         .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
