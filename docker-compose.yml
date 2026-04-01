@@ -151,7 +151,7 @@ services:
       SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/v1/battles/**
       SPRING_CLOUD_GATEWAY_ROUTES_3_ID: quest-service
       SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://quest-service:8083
-      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/v1/quests/**
+      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/v1/quests,/api/v1/quests/**
       SPRING_CLOUD_GATEWAY_ROUTES_4_ID: tracking-service
       SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://tracking-service:8084
       SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/v1/habits/**
