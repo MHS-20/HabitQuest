@@ -15,6 +15,7 @@ import habitquest.quest.infrastructure.dto.QuestResponse;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,31 @@ public class QuestController {
 
     return ResponseEntity.created(URI.create("/api/v1/quests/" + created.getId().value()))
         .body(model);
+  }
+
+  @GetMapping
+  public ResponseEntity<CollectionModel<EntityModel<QuestResponse>>> getAllQuests() {
+    List<EntityModel<QuestResponse>> questModels =
+        questService.getAllQuests().stream()
+            .map(
+                quest ->
+                    EntityModel.of(
+                        QuestMapper.toResponse(quest),
+                        selfLink(quest.getId().value()),
+                        linkTo(methodOn(QuestController.class).getName(quest.getId().value()))
+                            .withRel("name"),
+                        linkTo(methodOn(QuestController.class).getDuration(quest.getId().value()))
+                            .withRel("duration"),
+                        linkTo(methodOn(QuestController.class).getReward(quest.getId().value()))
+                            .withRel("reward"),
+                        linkTo(methodOn(QuestController.class).getHabits(quest.getId().value()))
+                            .withRel("habits")))
+            .toList();
+
+    CollectionModel<EntityModel<QuestResponse>> model =
+        CollectionModel.of(
+            questModels, linkTo(methodOn(QuestController.class).getAllQuests()).withSelfRel());
+    return ResponseEntity.ok(model);
   }
 
   @GetMapping("/{id}")

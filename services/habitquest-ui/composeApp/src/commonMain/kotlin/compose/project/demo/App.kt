@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 enum class AppPage(val label: String, val emoji: String) {
     Dashboard("Dashboard", "🏠"),
     Habits("Abitudini", "📝"),
+    Quest("Quest", "🎯"),
     Marketplace("Marketplace", "🛒"),
     Character("Personaggio", "👤"),
     Achievements("Traguardi", "⭐"),
@@ -175,6 +176,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     avatarState = avatarState,
                     onHabitAttended = ::requestAvatarRefresh,
                 )
+                AppPage.Quest -> QuestScreen(token = token)
                 AppPage.Marketplace -> MarketplaceScreen(
                     token = token,
                     avatarState = avatarState,
