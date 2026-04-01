@@ -11,7 +11,7 @@ public class AvatarClientConfig {
   @Bean
   RestClient avatarRestClient(
       RestClient.Builder builder,
-      @Value("${habitquest.avatar-service-uri:http://localhost:8080}") String avatarServiceUri) {
+      @Value("${habitquest.avatar-service-uri:http://localhost:8081}") String avatarServiceUri) {
 
     return builder
         .baseUrl(avatarServiceUri)

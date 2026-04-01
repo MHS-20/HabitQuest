@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class AvatarClientConfig {
 
-  @Value("${avatar.service-uri:http://avatar-service:8081}")
+  @Value("${avatar.service-uri:http://localhost:8081}")
   private String avatarServiceUri;
 
   @Bean

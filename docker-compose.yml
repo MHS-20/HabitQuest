@@ -35,20 +35,33 @@ services:
       timeout: 10s
       retries: 5
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+
   avatar-service:
     build:
       context: ./services/avatar-service
     depends_on:
       - kafka
       - marketplace-service
+      - otel-collector
     environment:
       SERVER_PORT: 8081
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      KAFKA_BROKER: kafka:9092
+      # SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      #SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       MARKETPLACE_SERVICE_URI: http://marketplace-service:8083
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: avatar-service
+      #MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      #OTEL_SERVICE_NAME: avatar-service
     ports:
       - "8081:8081"
 
@@ -57,12 +70,15 @@ services:
       context: ./services/guild-service
     depends_on:
       - kafka
+      - otel-collector
     environment:
       SERVER_PORT: 8082
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      KAFKA_BROKER: kafka:9092
+      AVATAR_SERVICE_URI: http://avatar-service:8081
+      #SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: guild-service
+      #MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      #OTEL_SERVICE_NAME: guild-service
     ports:
       - "8082:8082"
 
@@ -71,58 +87,66 @@ services:
       context: ./services/marketplace-service
     depends_on:
       - kafka
+      - otel-collector
     environment:
       SERVER_PORT: 8083
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+      KAFKA_BROKER: kafka:9092
+      #SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      #SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: marketplace-service
+      #MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      #OTEL_SERVICE_NAME: marketplace-service
     ports:
-      - "8085:8085"
+      - "8083:8083"
 
   quest-service:
     build:
       context: ./services/quest-service
     depends_on:
       - kafka
+      - otel-collector
     environment:
       SERVER_PORT: 8084
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      KAFKA_BROKER: kafka:9092
       AVATAR_SERVICE_URI: http://avatar-service:8081
-      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+      #SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: quest-service
+#      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+#      OTEL_SERVICE_NAME: quest-service
     ports:
-      - "8083:8083"
+      - "8084:8084"
 
   tracking-service:
     build:
       context: ./services/tracking-service
     depends_on:
       - kafka
+      - otel-collector
     environment:
       SERVER_PORT: 8085
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+      KAFKA_BROKER: kafka:9092
+      AVATAR_SERVICE_URI: http://avatar-service:8081
+      #SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      #SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: tracking-service
+       #MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      #OTEL_SERVICE_NAME: tracking-service
     ports:
-      - "8084:8084"
+      - "8085:8085"
 
   notification-service:
     build:
       context: ./services/notification-service
     depends_on:
       - kafka
+      - otel-collector
     environment:
       SERVER_PORT: 8086
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+      KAFKA_BROKER: kafka:9092
+      #SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: notification-service
+      #MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+      #OTEL_SERVICE_NAME: notification-service
     ports:
       - "8086:8086"
 
@@ -131,6 +155,7 @@ services:
       context: ./services/edge-service
     depends_on:
       - kafka
+      - otel-collector
       - avatar-service
       - guild-service
       - quest-service
@@ -139,29 +164,35 @@ services:
       - notification-service
     environment:
       SERVER_PORT: 9000
-      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
-      SERVICES_AVATAR_BASE_URL: http://avatar-service:8081
-      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: avatar-service
-      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://avatar-service:8081
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/v1/avatars/**
-      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: guild-service
-      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://guild-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/v1/guilds/**
-      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: battle-service
-      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://guild-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/v1/battles/**
-      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: marketplace-service
-      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://marketplace-service:8083
-      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/v1/marketplace/**
-      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: quest-service
-      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://quest-service:8084
-      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/v1/quests,/api/v1/quests/**
-      SPRING_CLOUD_GATEWAY_ROUTES_5_ID: tracking-service
-      SPRING_CLOUD_GATEWAY_ROUTES_5_URI: http://tracking-service:8085
-      SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: Path=/api/v1/habits/**
-      APP_EVENTS_USER_REGISTERED_ENABLED: "false"
+      KAFKA_BROKER: kafka:9092
+      AVATAR_SERVICE_URI: http://avatar-service:8081
+      GUILD_SERVICE_URI: http://guild-service:8082
+      MARKETPLACE_SERVICE_URI: http://marketplace-service:8083
+      QUEST_SERVICE_URI: http://quest-service:8084
+      TRACKING_SERVICE_URI: http://tracking-service:8085
+      # SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
+#      SERVICES_AVATAR_BASE_URL: http://avatar-service:8081
+#      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: avatar-service
+#      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://avatar-service:8081
+#      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/v1/avatars/**
+#      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: guild-service
+#      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://guild-service:8082
+#      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/api/v1/guilds/**
+#      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: battle-service
+#      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://guild-service:8082
+#      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/api/v1/battles/**
+#      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: marketplace-service
+#      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://marketplace-service:8083
+#      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/api/v1/marketplace/**
+#      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: quest-service
+#      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://quest-service:8084
+#      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/api/v1/quests,/api/v1/quests/**
+#      SPRING_CLOUD_GATEWAY_ROUTES_5_ID: tracking-service
+#      SPRING_CLOUD_GATEWAY_ROUTES_5_URI: http://tracking-service:8085
+#      SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: Path=/api/v1/habits/**
+#      APP_EVENTS_USER_REGISTERED_ENABLED: "false"
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
-      OTEL_SERVICE_NAME: edge-service
+#      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+#      OTEL_SERVICE_NAME: edge-service
     ports:
       - "9000:9000"

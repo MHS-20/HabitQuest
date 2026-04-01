@@ -52,10 +52,8 @@ public class MarketplaceController {
   @GetMapping("/{marketplaceId}")
   public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplace(
       @PathVariable String marketplaceId) {
-
     Marketplace marketplace = marketplaceService.getMarketplace(idOfMarketplace(marketplaceId));
     log.info(marketplace, "Fetched marketplace");
-
     MarketplaceResponse dto = MarketplaceResponse.from(marketplace);
     EntityModel<MarketplaceResponse> model =
         EntityModel.of(
@@ -68,6 +66,14 @@ public class MarketplaceController {
             linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
                 .withRel("sold-items"));
     return ResponseEntity.ok(model);
+  }
+
+  @GetMapping("/by-avatar/{avatarId}")
+  public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplaceByAvatarId(
+      @PathVariable String avatarId) {
+    Id<Avatar> avatarIdObj = idOfAvatar(avatarId);
+    Id<Marketplace> marketplaceId = marketplaceService.getMarketplaceIdByAvatarId(avatarIdObj);
+    return getMarketplace(marketplaceId.value());
   }
 
   @PostMapping
