@@ -231,6 +231,32 @@ public class HabitControllerIT {
   }
 
   @Nested
+  @DisplayName("GET /api/v1/habits/avatar/{avatarId}/history")
+  class GetHistoryByAvatar {
+
+    @Test
+    @DisplayName("returns 200 with merged avatar history")
+    void shouldReturnHistoryForAvatar() throws Exception {
+      var habit = hydrateHabitWithQuest();
+      when(habitService.getHistoryByAvatarId(AVATAR_ID))
+          .thenReturn(
+              List.of(
+                  new HabitHistoryEvent(
+                      new HabitAttended(habit, AVATAR_ID),
+                      NEXT_ATTENDED_AT,
+                      "attendedAt=" + NEXT_ATTENDED_AT)));
+
+      mockMvc
+          .perform(get("/api/v1/habits/avatar/{avatarId}/history", AVATAR_ID.value()))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].eventType").value("HabitAttended"))
+          .andExpect(jsonPath("$[0].habitId").value(HABIT_ID.value()))
+          .andExpect(jsonPath("$[0].avatarId").value(AVATAR_ID.value()))
+          .andExpect(jsonPath("$[0].occurredAt").value("2026-03-17T09:30:00"));
+    }
+  }
+
+  @Nested
   @DisplayName("DELETE /api/v1/habits/{id}")
   class DeleteHabit {
 
