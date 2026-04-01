@@ -2,7 +2,7 @@
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-echo -e "\n─── Building service images inside Minikube...\n"
+echo -e "\nBuilding service images inside Minikube...\n"
 eval $(minikube -p habitquest docker-env)
 
 SERVICES=(
@@ -16,10 +16,10 @@ SERVICES=(
 )
 
 for SERVICE in "${SERVICES[@]}"; do
-    echo "─── Building $SERVICE..."
+    echo "Building $SERVICE..."
     ./gradlew ":services:$SERVICE:bootJar" -q
     docker build -t "$SERVICE:latest" "$REPO_ROOT/services/$SERVICE"
-    echo "    ✓ $SERVICE built"
+    echo "$SERVICE built"
 done
 
-echo -e "\n✓ All images built\n"
+echo -e "\nAll images built\n"

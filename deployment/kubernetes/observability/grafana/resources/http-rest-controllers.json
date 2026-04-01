@@ -106,7 +106,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\"}[1m]))",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\"}[10m]))",
           "legendFormat": "{{service}}",
           "refId": "A"
         }
@@ -175,7 +175,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",status=~\"5..\"}[1m])) / sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\"}[1m])) * 100",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",status=~\"5..\"}[10m])) / sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\"}[10m])) * 100",
           "legendFormat": "{{service}}",
           "refId": "A"
         }
@@ -244,7 +244,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\"}[1m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(increase(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\"}[10m])) by (le))",
           "legendFormat": "{{service}}",
           "refId": "A"
         }
@@ -434,7 +434,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",method=~\"$method\"}[1m])) by (uri, method)",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",method=~\"$method\"}[10m])) by (uri, method)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{method}} {{uri}}",
@@ -535,7 +535,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\"}[1m])) by (status)",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\"}[10m])) by (status)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "HTTP {{status}}",
@@ -662,7 +662,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status!~\"5..\"}[1m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(increase(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status!~\"5..\"}[10m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "p50",
@@ -673,7 +673,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status!~\"5..\"}[1m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(increase(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status!~\"5..\"}[10m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "p95",
@@ -684,7 +684,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status!~\"5..\"}[1m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(increase(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status!~\"5..\"}[10m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "p99",
@@ -785,7 +785,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",method=~\"$method\",status!~\"5..\"}[1m])) by (le, uri, method))",
+          "expr": "histogram_quantile(0.95, sum(increase(http_server_requests_seconds_bucket{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",method=~\"$method\",status!~\"5..\"}[10m])) by (le, uri, method))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "p95 {{method}} {{uri}}",
@@ -1013,7 +1013,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status=~\"5..\"}[1m])) by (uri, status)",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status=~\"5..\"}[10m])) by (uri, status)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{status}} {{uri}}",
@@ -1114,7 +1114,7 @@
             "type": "prometheus",
             "uid": "prometheus-habitquest"
           },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status=~\"4..\"}[1m])) by (uri, status)",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"$application\",instance=~\"$instance\",uri=~\"$uri\",status=~\"4..\"}[10m])) by (uri, status)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{status}} {{uri}}",
@@ -1202,7 +1202,7 @@
           "type": "prometheus",
           "uid": "prometheus-habitquest"
         },
-        "definition": "label_values(http_server_requests_seconds_count, app)",
+        "definition": "label_values(http_server_requests_seconds_count, application)",
         "hide": 0,
         "includeAll": true,
         "label": "Application",
@@ -1210,7 +1210,7 @@
         "name": "application",
         "options": [],
         "query": {
-          "query": "label_values(http_server_requests_seconds_count, app)",
+          "query": "label_values(http_server_requests_seconds_count, application)",
           "refId": "Prometheus-application-Variable"
         },
         "refresh": 2,
@@ -1224,7 +1224,7 @@
           "type": "prometheus",
           "uid": "prometheus-habitquest"
         },
-        "definition": "label_values(http_server_requests_seconds_count{app=\"$application\"}, instance)",
+        "definition": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, instance)",
         "hide": 0,
         "includeAll": true,
         "label": "Instance",
@@ -1232,7 +1232,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(http_server_requests_seconds_count{app=\"$application\"}, instance)",
+          "query": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, instance)",
           "refId": "Prometheus-instance-Variable"
         },
         "refresh": 2,
@@ -1246,7 +1246,7 @@
           "type": "prometheus",
           "uid": "prometheus-habitquest"
         },
-        "definition": "label_values(http_server_requests_seconds_count{app=\"$application\"}, uri)",
+        "definition": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, uri)",
         "hide": 0,
         "includeAll": true,
         "label": "URI",
@@ -1254,7 +1254,7 @@
         "name": "uri",
         "options": [],
         "query": {
-          "query": "label_values(http_server_requests_seconds_count{app=\"$application\"}, uri)",
+          "query": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, uri)",
           "refId": "Prometheus-uri-Variable"
         },
         "refresh": 2,
@@ -1268,7 +1268,7 @@
           "type": "prometheus",
           "uid": "prometheus-habitquest"
         },
-        "definition": "label_values(http_server_requests_seconds_count{app=\"$application\"}, method)",
+        "definition": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, method)",
         "hide": 0,
         "includeAll": true,
         "label": "Method",
@@ -1276,7 +1276,7 @@
         "name": "method",
         "options": [],
         "query": {
-          "query": "label_values(http_server_requests_seconds_count{app=\"$application\"}, method)",
+          "query": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, method)",
           "refId": "Prometheus-method-Variable"
         },
         "refresh": 2,
@@ -1292,7 +1292,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "HTTP REST Controllers",
+  "title": "HTTP Traffic",
   "uid": "http-rest-controllers-dashboard",
   "version": 1
 }

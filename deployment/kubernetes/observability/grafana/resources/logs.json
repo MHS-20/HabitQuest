@@ -1154,7 +1154,7 @@
           "refId": "A"
         }
       ],
-      "title": "🔥 ALL SERVICES - ERRORS COMBINED",
+      "title": "ALL SERVICES - ERRORS COMBINED",
       "type": "logs"
     }
   ],
@@ -1310,7 +1310,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Microservices Logs Dashboard",
+  "title": "Aggregate Logs",
   "uid": "microservices-logs-v1",
   "version": 1,
   "weekStart": ""
