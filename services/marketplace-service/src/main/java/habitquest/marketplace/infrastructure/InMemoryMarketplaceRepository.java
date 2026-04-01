@@ -42,6 +42,14 @@ public class InMemoryMarketplaceRepository implements MarketplaceRepository {
   }
 
   @Override
+  public Optional<Marketplace> findByAvatarId(Id<Avatar> avatarId) {
+    return store.values().stream()
+        .filter(s -> s.avatarId().equals(avatarId))
+        .findFirst()
+        .map(s -> new MarketplaceImpl(s.id(), s.avatarId(), catalog, s.soldItems()));
+  }
+
+  @Override
   public void deleteById(Id<Marketplace> id) {
     store.remove(id);
   }
