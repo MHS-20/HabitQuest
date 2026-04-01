@@ -268,8 +268,13 @@ public class HabitController {
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
   }
 
-  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
+  @ExceptionHandler({AvatarCommunicationException.class})
+  public ResponseEntity<ErrorResponse> handleAvatarException(RuntimeException ex) {
+    log.error(ex, "Domain error", ex);
+    return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+  }
 
+  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
   private Link selfLink(String id) {
     try {
       return linkTo(methodOn(HabitController.class).getHabit(id)).withSelfRel();

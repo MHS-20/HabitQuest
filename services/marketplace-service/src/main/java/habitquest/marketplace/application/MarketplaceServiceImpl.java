@@ -39,6 +39,18 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
+  public Id<Marketplace> getMarketplaceIdByAvatarId(Id<Avatar> avatarId)
+      throws MarketplaceNotFoundException {
+    return marketplaceRepository
+        .findByAvatarId(avatarId)
+        .map(Marketplace::getId)
+        .orElseThrow(
+            () ->
+                new MarketplaceNotFoundException(
+                    "No marketplace found for avatar ID: " + avatarId.value()));
+  }
+
+  @Override
   public Id<Marketplace> createMarketplaceForAvatar(Id<Avatar> avatarId) {
     Marketplace marketplace = marketplaceFactory.create(avatarId);
     marketplaceRepository.save(marketplace);
