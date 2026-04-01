@@ -9,40 +9,6 @@ spec:
   resources:
     requests:
       storage: 2Gi
-#---
-## Servizio Zookeeper
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: zookeeper
-#spec:
-#  ports:
-#    - port: 2181
-#  selector:
-#    app: zookeeper
-#---
-## Deployment Zookeeper
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: zookeeper
-#spec:
-#  selector:
-#    matchLabels:
-#      app: zookeeper
-#  template:
-#    metadata:
-#      labels:
-#        app: zookeeper
-#    spec:
-#      containers:
-#        - name: zookeeper
-#          image: zookeeper:3.9
-#          env:
-#            - name: ALLOW_ANONYMOUS_LOGIN
-#              value: "yes"
-#          ports:
-#            - containerPort: 2181
 ---
 # Servizio Kafka
 apiVersion: v1
@@ -56,8 +22,8 @@ spec:
       port: 9092
       targetPort: 9092
     - name: ui
-      port: 9093
-      targetPort: 9093
+      port: 8080
+      targetPort: 8080
   selector:
     app: kafka
 ---
@@ -108,7 +74,7 @@ spec:
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
               value: "localhost:9092"
           ports:
-            - containerPort: 9093
+            - containerPort: 8080
       volumes:
         - name: kafka-data
           persistentVolumeClaim:
