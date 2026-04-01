@@ -161,18 +161,18 @@ jobs:
           grype db update
 
       - name: Scan Docker image
+        id: run_scan
         run: |
           grype \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}:${{ env.VERSION }} \
             --output sarif \
-            --file results.sarif \
-            --fail-on high || true 
+            --file results.sarif
 
       - name: Upload vulnerability report
         uses: github/codeql-action/upload-sarif@v4
-        if: always() && hashFiles(steps.scan.outputs.sarif) != ''
+        if: steps.run_scan.outcome == 'success'
         with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
+          sarif_file: results.sarif
 
       - name: Push image (SHA tag)
         run: |

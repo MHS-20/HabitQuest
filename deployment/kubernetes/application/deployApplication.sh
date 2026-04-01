@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Helper functions
 deploy() {
   local SERVICE=$1
-  echo -e "\n─── Deploying $SERVICE..."
+  echo -e "\nDeploying $SERVICE..."
   kustomize build "$SCRIPT_DIR/$SERVICE" | kubectl apply -f -
 }
 
@@ -20,14 +20,12 @@ wait_ready() {
 }
 
 # Core services (no outbound REST dependencies)
-echo -e "\n Wave 1: core services "
 deploy avatar-service
 deploy tracking-service
 wait_ready avatar-service
 wait_ready tracking-service
 
 # Services that call avatar
-echo -e "\n Wave 2: services depending on avatar "
 deploy guild-service
 deploy marketplace-service
 deploy quest-service
@@ -36,12 +34,10 @@ wait_ready marketplace-service
 wait_ready quest-service
 
 # Kafka consumer service
-echo -e "\n Wave 3: kafka consumers "
 deploy notification-service
 wait_ready notification-service
 
 # Gateway/edge service
-echo -e "\n Wave 4: edge service "
 deploy edge-service
 wait_ready edge-service
 
