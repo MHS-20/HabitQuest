@@ -88,6 +88,23 @@ public class QuestControllerIT {
   }
 
   @Nested
+  @DisplayName("GET /api/v1/quests")
+  class GetAllQuests {
+
+    @Test
+    @DisplayName("returns 200 with all quests")
+    void shouldReturn200WithAllQuests() throws Exception {
+      when(questService.getAllQuests()).thenReturn(List.of(fullQuest()));
+
+      mockMvc
+          .perform(get("/api/v1/quests"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$._embedded.*[0].id").value(QUEST_ID.value()))
+          .andExpect(jsonPath("$._embedded.*[0].name").value(QUEST_NAME));
+    }
+  }
+
+  @Nested
   @DisplayName("GET /api/v1/quests/{id}")
   class GetQuest {
 

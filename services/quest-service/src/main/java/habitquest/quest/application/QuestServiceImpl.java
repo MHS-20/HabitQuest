@@ -37,6 +37,11 @@ public class QuestServiceImpl implements QuestService {
   }
 
   @Override
+  public List<Quest> getAllQuests() {
+    return questRepository.findAll();
+  }
+
+  @Override
   public Quest getQuest(Id<Quest> id) throws QuestNotFoundException {
     return questRepository.findById(id);
   }

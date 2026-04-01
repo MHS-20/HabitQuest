@@ -6,6 +6,7 @@ import habitquest.quest.application.QuestNotFoundException;
 import habitquest.quest.application.QuestRepository;
 import habitquest.quest.domain.Quest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +20,11 @@ public class InMemoryQuestRepository implements QuestRepository {
   public Quest save(Quest quest) {
     store.put(quest.getId(), quest);
     return quest;
+  }
+
+  @Override
+  public List<Quest> findAll() {
+    return List.copyOf(store.values());
   }
 
   @Override
