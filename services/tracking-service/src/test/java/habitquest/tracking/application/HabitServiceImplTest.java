@@ -388,5 +388,25 @@ class HabitServiceImplTest {
 
       assertThat(service.getHistory(HABIT_ID)).isEqualTo(history);
     }
+
+    @Test
+    @DisplayName("returns avatar history merged and sorted by occurredAt desc")
+    void returnsHistoryByAvatar() {
+      var habit1 = hydrateHabit();
+      var habit2 = neverAttendedHabit();
+
+      var olderEvent =
+          new HabitHistoryEvent(
+              new HabitAttended(habit1, AVATAR_ID), LocalDateTime.now().minusHours(2), "older");
+      var newerEvent =
+          new HabitHistoryEvent(
+              new HabitAttended(habit2, AVATAR_ID), LocalDateTime.now().minusMinutes(10), "newer");
+
+      when(habitRepository.findByAvatarId(AVATAR_ID)).thenReturn(List.of(habit1, habit2));
+      when(historyRepository.findByHabitId(habit1.getId())).thenReturn(List.of(olderEvent));
+      when(historyRepository.findByHabitId(habit2.getId())).thenReturn(List.of(newerEvent));
+
+      assertThat(service.getHistoryByAvatarId(AVATAR_ID)).containsExactly(newerEvent, olderEvent);
+    }
   }
 }

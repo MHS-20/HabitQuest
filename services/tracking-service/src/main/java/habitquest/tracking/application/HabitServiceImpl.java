@@ -17,6 +17,7 @@ import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
@@ -139,6 +140,14 @@ public class HabitServiceImpl implements HabitService {
   public List<HabitHistoryEvent> getHistory(Id<Habit> habitId) {
     getHabitById(habitId);
     return historyRepository.findByHabitId(habitId);
+  }
+
+  @Override
+  public List<HabitHistoryEvent> getHistoryByAvatarId(Id<Avatar> avatarId) {
+    return habitRepository.findByAvatarId(avatarId).stream()
+        .flatMap(habit -> historyRepository.findByHabitId(habit.getId()).stream())
+        .sorted(Comparator.comparing(HabitHistoryEvent::occurredAt).reversed())
+        .toList();
   }
 
   @Override
