@@ -12,6 +12,7 @@ import habitquest.quest.domain.events.QuestEvent;
 import habitquest.quest.domain.events.QuestObserver;
 import habitquest.quest.domain.factory.QuestFactory;
 import java.time.Duration;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("QuestServiceImpl")
 class QuestServiceImplTest {
+
+  private static final String EVENING_ROUTINE = "Evening Routine";
 
   @Mock private QuestRepository questRepository;
   @Mock private QuestObserver questObserver;
@@ -61,6 +64,24 @@ class QuestServiceImplTest {
   }
 
   @Nested
+  @DisplayName("getAllQuests")
+  class GetAllQuests {
+
+    @Test
+    @DisplayName("returns all quests from repository")
+    void returnsAll() {
+      Quest first = fullQuest();
+      Quest second = new Quest(new Id<>("quest-2"), EVENING_ROUTINE);
+      when(questRepository.findAll()).thenReturn(List.of(first, second));
+
+      List<Quest> quests = service.getAllQuests();
+
+      assertThat(quests).hasSize(2);
+      verify(questRepository).findAll();
+    }
+  }
+
+  @Nested
   @DisplayName("getQuest")
   class GetQuest {
 
@@ -91,7 +112,7 @@ class QuestServiceImplTest {
     @DisplayName("checks existence and saves the provided quest")
     void updates() {
       Quest existing = fullQuest();
-      Quest replacement = new Quest(new Id<>("quest-2"), "Evening Routine");
+      Quest replacement = new Quest(new Id<>("quest-2"), EVENING_ROUTINE);
       when(questRepository.findById(QUEST_ID)).thenReturn(existing);
       when(questRepository.save(replacement)).thenReturn(replacement);
       Quest updated = service.updateQuest(QUEST_ID, replacement);
@@ -169,8 +190,8 @@ class QuestServiceImplTest {
       Quest quest = fullQuest();
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.updateName(QUEST_ID, "Evening Routine");
-      assertThat(updated.getName()).isEqualTo("Evening Routine");
+      Quest updated = service.updateName(QUEST_ID, EVENING_ROUTINE);
+      assertThat(updated.getName()).isEqualTo(EVENING_ROUTINE);
       verify(questRepository).save(quest);
     }
   }
