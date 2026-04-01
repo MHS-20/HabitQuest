@@ -125,6 +125,17 @@ public class HabitController {
     return ResponseEntity.ok(habits);
   }
 
+  @GetMapping("/avatar/{avatarId}/history")
+  public ResponseEntity<List<HabitHistoryEventResponse>> getHabitHistoryByAvatar(
+      @PathVariable String avatarId) {
+    List<HabitHistoryEventResponse> history =
+        habitService.getHistoryByAvatarId(idOfAvatar(avatarId)).stream()
+            .map(HabitMapper::toResponse)
+            .toList();
+    log.info(history, "Fetched habit history for avatar " + avatarId);
+    return ResponseEntity.ok(history);
+  }
+
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteHabit(@PathVariable String id) throws HabitNotFoundException {
     log.info(idOfHabit(id), "Deleting habit");

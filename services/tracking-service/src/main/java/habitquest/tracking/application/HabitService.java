@@ -40,6 +40,8 @@ public interface HabitService {
 
   List<HabitHistoryEvent> getHistory(Id<Habit> habitId);
 
+  List<HabitHistoryEvent> getHistoryByAvatarId(Id<Avatar> avatarId);
+
   // endregion
 
   // region updaters

@@ -45,6 +45,14 @@ data class HabitListItem(
     val nextRecurrenceDate: String? = null,
 )
 
+data class HabitHistoryItem(
+    val eventType: String,
+    val habitId: String,
+    val avatarId: String,
+    val occurredAt: String,
+    val details: String,
+)
+
 sealed interface HabitListResult {
     data class Success(val habits: List<HabitListItem>) : HabitListResult
     data class Error(val message: String) : HabitListResult
@@ -53,6 +61,11 @@ sealed interface HabitListResult {
 sealed interface AttendHabitResult {
     data object Success : AttendHabitResult
     data class Error(val message: String) : AttendHabitResult
+}
+
+sealed interface HabitHistoryResult {
+    data class Success(val items: List<HabitHistoryItem>) : HabitHistoryResult
+    data class Error(val message: String) : HabitHistoryResult
 }
 
 class HabitsApiRepository {
@@ -173,6 +186,36 @@ class HabitsApiRepository {
             HttpStatusCode.Unauthorized -> AttendHabitResult.Error("Sessione scaduta, rifai il login")
             HttpStatusCode.NotFound -> AttendHabitResult.Error("Habit non trovata")
             else -> AttendHabitResult.Error("Errore attend habit (${response.status.value})")
+        }
+    }
+
+    suspend fun fetchHistoryByAvatar(token: String, avatarId: String): HabitHistoryResult {
+        val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/habits/avatar/$avatarId/history") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return HabitHistoryResult.Error("Impossibile contattare habit-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val items = response.body<JsonArray>().mapNotNull { element ->
+                    val obj = element as? JsonObject ?: return@mapNotNull null
+                    HabitHistoryItem(
+                        eventType = obj["eventType"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null,
+                        habitId = obj["habitId"]?.jsonPrimitive?.contentOrNull ?: "",
+                        avatarId = obj["avatarId"]?.jsonPrimitive?.contentOrNull ?: "",
+                        occurredAt = obj["occurredAt"]?.jsonPrimitive?.contentOrNull ?: "",
+                        details = obj["details"]?.jsonPrimitive?.contentOrNull ?: "",
+                    )
+                }
+                HabitHistoryResult.Success(items)
+            }
+
+            HttpStatusCode.Unauthorized -> HabitHistoryResult.Error("Sessione scaduta, rifai il login")
+            else -> HabitHistoryResult.Error("Errore lettura storico habits (${response.status.value})")
         }
     }
 }

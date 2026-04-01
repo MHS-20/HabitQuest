@@ -17,7 +17,7 @@ enum class AppPage(val label: String, val emoji: String) {
     Quest("Quest", "🎯"),
     Marketplace("Marketplace", "🛒"),
     Character("Personaggio", "👤"),
-    Achievements("Traguardi", "⭐"),
+    HabitHistory("Storico", "🕒"),
 }
 
 private enum class AuthRoute {
@@ -183,7 +183,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     onItemBought = ::requestAvatarRefresh,
                 )
                 AppPage.Character -> CharacterScreen(avatarState = avatarState)
-                AppPage.Achievements -> AchievementsScreen()
+                AppPage.HabitHistory -> HabitHistoryScreen(token = token, avatarState = avatarState)
             }
         }
     }
