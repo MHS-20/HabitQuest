@@ -9,7 +9,6 @@ if ! kubectl -n logging get configmap grafana-dashboards >/dev/null 2>&1; then
     --from-file=circuit-breaker.json=./resources/circuit-breaker.json \
     --from-file=spring-cloud-gateway.json=./resources/spring-cloud-gateway.json \
     --from-file=http-rest-controllers.json=./resources/http-rest-controllers.json \
-    --from-file=kafka-dashboard.json=./resources/kafka-dashboard.json \
     --from-file=logs.json=./resources/logs.json \
     --from-file=traces.json=./resources/traces.json
 fi
