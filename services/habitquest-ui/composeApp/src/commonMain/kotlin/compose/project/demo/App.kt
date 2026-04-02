@@ -120,6 +120,16 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
         avatarRefreshTick += 1
     }
 
+    fun applySpentMoney(spentAmount: Int) {
+        if (spentAmount <= 0) return
+        val readyState = avatarState as? AvatarUiState.Ready ?: return
+        avatarState = readyState.copy(
+            avatar = readyState.avatar.copy(
+                money = (readyState.avatar.money - spentAmount).coerceAtLeast(0)
+            )
+        )
+    }
+
     LaunchedEffect(token, userId, avatarRefreshTick) {
         avatarState = AvatarUiState.Loading
         avatarState = when {
@@ -180,7 +190,10 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                 AppPage.Marketplace -> MarketplaceScreen(
                     token = token,
                     avatarState = avatarState,
-                    onItemBought = ::requestAvatarRefresh,
+                    onItemBought = { spentAmount ->
+                        applySpentMoney(spentAmount)
+                        requestAvatarRefresh()
+                    },
                 )
                 AppPage.Character -> CharacterScreen(token = token, avatarState = avatarState)
                 AppPage.HabitHistory -> HabitHistoryScreen(token = token, avatarState = avatarState)
