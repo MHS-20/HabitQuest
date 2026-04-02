@@ -30,7 +30,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
       Id<AvatarStats> avatarStatsId) {
     this.id = id;
     this.name = name;
-    this.money = new Money(0);
+    this.money = new Money(100);
     this.inventory = new Inventory(invetoryId);
     this.equippedItems = new EquippedItems(equippedItemsId);
     this.level = new Level(1, new Experience(0), new Experience(100));
