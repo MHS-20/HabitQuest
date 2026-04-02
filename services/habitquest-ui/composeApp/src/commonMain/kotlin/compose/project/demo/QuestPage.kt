@@ -112,17 +112,17 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
             enabled = !isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Crea quest")
+            Text("Create quest")
         }
 
-        Text("Elenco quest", style = MaterialTheme.typography.titleMedium)
+        Text("Quest list", style = MaterialTheme.typography.titleMedium)
 
         OutlinedTextField(
             value = searchText,
             onValueChange = {
                 searchText = it
             },
-            label = { Text("Cerca quest per nome o id") },
+            label = { Text("Search quest by name or id") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -142,9 +142,9 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
         if (!isLoading) {
             if (filteredQuests.isEmpty()) {
                 if (quests.isEmpty()) {
-                    Text("Nessuna quest disponibile")
+                    Text("No quests available")
                 } else {
-                    Text("Nessuna quest trovata per '${normalizedSearch}'")
+                    Text("No quests found for '${normalizedSearch}'")
                 }
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -158,7 +158,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
         if (showCreateDialog) {
             AlertDialog(
                 onDismissRequest = { showCreateDialog = false },
-                title = { Text("Crea nuova quest") },
+                title = { Text("Create new quest") },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
@@ -167,7 +167,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                 questName = it
                                 message = null
                             },
-                            label = { Text("Nome nuova quest") },
+                            label = { Text("New quest name") },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -178,15 +178,15 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                 questDuration = it
                                 message = null
                             },
-                            label = { Text("Durata (es. PT30M, PT2H)") },
+                            label = { Text("Duration (e.g. PT30M, PT2H)") },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        Text("Seleziona habits da includere", style = MaterialTheme.typography.bodyMedium)
+                        Text("Select habits to include", style = MaterialTheme.typography.bodyMedium)
 
                         if (availableHabits.isEmpty()) {
-                            Text("Nessuna habit disponibile per l'avatar corrente")
+                            Text("No habits available for the current avatar")
                         } else {
                             LazyColumn(
                                 modifier = Modifier.height(140.dp),
@@ -215,11 +215,11 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                     TextButton(
                         onClick = {
                             if (questName.isBlank()) {
-                                message = "Inserisci il nome della quest"
+                                message = "Enter the quest name"
                                 return@TextButton
                             }
                             if (questDuration.isBlank()) {
-                                message = "Inserisci una durata valida (es. PT30M)"
+                                message = "Enter a valid duration (e.g. PT30M)"
                                 return@TextButton
                             }
                             scope.launch {
@@ -234,7 +234,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                     )
                                 ) {
                                     is CreateQuestResult.Success -> {
-                                        message = "Quest creata: ${result.questId}"
+                                        message = "Quest created: ${result.questId}"
                                         questName = ""
                                         selectedHabitIds = emptySet()
                                         loadQuests()
@@ -250,12 +250,12 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                         },
                         enabled = !isLoading,
                     ) {
-                        Text("Crea")
+                        Text("Create")
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showCreateDialog = false }) {
-                        Text("Annulla")
+                        Text("Cancel")
                     }
                 }
             )
@@ -273,10 +273,10 @@ private fun QuestRow(quest: QuestData) {
             Text(quest.name, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text("ID: ${quest.id}", style = MaterialTheme.typography.bodySmall)
-            Text("Durata: ${quest.duration}", style = MaterialTheme.typography.bodySmall)
+            Text("Duration: ${quest.duration}", style = MaterialTheme.typography.bodySmall)
             Text("Reward: ${quest.reward}", style = MaterialTheme.typography.bodySmall)
             Text(
-                "Habits collegate: ${if (quest.habitIds.isEmpty()) "nessuna" else quest.habitIds.joinToString()}",
+                "Linked habits: ${if (quest.habitIds.isEmpty()) "none" else quest.habitIds.joinToString()}",
                 style = MaterialTheme.typography.bodySmall
             )
         }

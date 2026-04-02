@@ -67,7 +67,7 @@ class MarketplaceRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return MarketplaceLoadResult.Error("Impossibile contattare marketplace-service")
+            return MarketplaceLoadResult.Error("Unable to contact marketplace-service")
         }
 
         return when (response.status) {
@@ -75,15 +75,15 @@ class MarketplaceRepository {
                 val body = response.body<JsonObject>()
                 val source = body["content"]?.jsonObject ?: body
                 val marketplaceId = source["id"]?.jsonPrimitive?.contentOrNull
-                    ?: return MarketplaceLoadResult.Error("Risposta marketplace senza id")
+                    ?: return MarketplaceLoadResult.Error("Marketplace response missing id")
                 val items = parseItemsFromMarketplacePayload(source)
                 MarketplaceLoadResult.Success(marketplaceId, items)
             }
 
             HttpStatusCode.NotFound -> createMarketplace(token, avatarId)
 
-            HttpStatusCode.Unauthorized -> MarketplaceLoadResult.Error("Sessione scaduta, rifai il login")
-            else -> MarketplaceLoadResult.Error("Errore marketplace (${response.status.value})")
+            HttpStatusCode.Unauthorized -> MarketplaceLoadResult.Error("Session expired, please log in again")
+            else -> MarketplaceLoadResult.Error("Marketplace error (${response.status.value})")
         }
     }
 
@@ -99,7 +99,7 @@ class MarketplaceRepository {
                 )
             }
         }.getOrElse {
-            return MarketplaceLoadResult.Error("Impossibile contattare marketplace-service")
+            return MarketplaceLoadResult.Error("Unable to contact marketplace-service")
         }
 
         return when (response.status) {
@@ -107,14 +107,14 @@ class MarketplaceRepository {
                 val body = response.body<JsonObject>()
                 val source = body["content"]?.jsonObject ?: body
                 val marketplaceId = source["id"]?.jsonPrimitive?.contentOrNull
-                    ?: return MarketplaceLoadResult.Error("Risposta marketplace senza id")
+                    ?: return MarketplaceLoadResult.Error("Marketplace response missing id")
                 val items = parseItemsFromMarketplacePayload(source)
                 MarketplaceLoadResult.Success(marketplaceId, items)
             }
 
-            HttpStatusCode.Unauthorized -> MarketplaceLoadResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> MarketplaceLoadResult.Error("Avatar non trovato")
-            else -> MarketplaceLoadResult.Error("Errore marketplace (${response.status.value})")
+            HttpStatusCode.Unauthorized -> MarketplaceLoadResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> MarketplaceLoadResult.Error("Avatar not found")
+            else -> MarketplaceLoadResult.Error("Marketplace error (${response.status.value})")
         }
     }
 
@@ -125,7 +125,7 @@ class MarketplaceRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return MarketplaceItemsResult.Error("Impossibile aggiornare il marketplace")
+            return MarketplaceItemsResult.Error("Unable to refresh marketplace")
         }
 
         return when (response.status) {
@@ -134,9 +134,9 @@ class MarketplaceRepository {
                 MarketplaceItemsResult.Success(parseItemsFromMarketplacePayload(body))
             }
 
-            HttpStatusCode.Unauthorized -> MarketplaceItemsResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> MarketplaceItemsResult.Error("Marketplace non trovato")
-            else -> MarketplaceItemsResult.Error("Errore lettura marketplace (${response.status.value})")
+            HttpStatusCode.Unauthorized -> MarketplaceItemsResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> MarketplaceItemsResult.Error("Marketplace not found")
+            else -> MarketplaceItemsResult.Error("Marketplace read error (${response.status.value})")
         }
     }
 
@@ -153,15 +153,15 @@ class MarketplaceRepository {
                 parameter("currentLevel", currentLevel)
             }
         }.getOrElse {
-            return MarketplaceBuyResult.Error("Impossibile contattare marketplace-service")
+            return MarketplaceBuyResult.Error("Unable to contact marketplace-service")
         }
 
         return when (response.status) {
             HttpStatusCode.NoContent, HttpStatusCode.OK -> MarketplaceBuyResult.Success
-            HttpStatusCode.Forbidden -> MarketplaceBuyResult.Error("Livello insufficiente per acquistare questo oggetto")
-            HttpStatusCode.NotFound -> MarketplaceBuyResult.Error("Oggetto non disponibile")
-            HttpStatusCode.Unauthorized -> MarketplaceBuyResult.Error("Sessione scaduta, rifai il login")
-            else -> MarketplaceBuyResult.Error("Acquisto fallito (${response.status.value})")
+            HttpStatusCode.Forbidden -> MarketplaceBuyResult.Error("Level too low to buy this item")
+            HttpStatusCode.NotFound -> MarketplaceBuyResult.Error("Item not available")
+            HttpStatusCode.Unauthorized -> MarketplaceBuyResult.Error("Session expired, please log in again")
+            else -> MarketplaceBuyResult.Error("Purchase failed (${response.status.value})")
         }
     }
 
@@ -176,14 +176,14 @@ class MarketplaceRepository {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
         }.getOrElse {
-            return MarketplaceSellResult.Error("Impossibile contattare marketplace-service")
+            return MarketplaceSellResult.Error("Unable to contact marketplace-service")
         }
 
         return when (response.status) {
             HttpStatusCode.NoContent, HttpStatusCode.OK -> MarketplaceSellResult.Success
-            HttpStatusCode.NotFound -> MarketplaceSellResult.Error("Oggetto non disponibile")
-            HttpStatusCode.Unauthorized -> MarketplaceSellResult.Error("Sessione scaduta, rifai il login")
-            else -> MarketplaceSellResult.Error("Vendita fallita (${response.status.value})")
+            HttpStatusCode.NotFound -> MarketplaceSellResult.Error("Item not available")
+            HttpStatusCode.Unauthorized -> MarketplaceSellResult.Error("Session expired, please log in again")
+            else -> MarketplaceSellResult.Error("Sale failed (${response.status.value})")
         }
     }
 

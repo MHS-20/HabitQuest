@@ -77,7 +77,7 @@ class AvatarRepository {
 
     suspend fun fetchAvatar(avatarId: String, token: String): AvatarResult {
         if (avatarId.isBlank()) {
-            return AvatarResult.Error("Utente non valido")
+            return AvatarResult.Error("Invalid user")
         }
 
         val response = runCatching {
@@ -86,20 +86,20 @@ class AvatarRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return AvatarResult.Error("Impossibile contattare avatar-service")
+            return AvatarResult.Error("Unable to contact avatar-service")
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> mapAvatarResponse(response.body<JsonObject>())
-            HttpStatusCode.NotFound -> AvatarResult.Error("Avatar non trovato")
-            HttpStatusCode.Unauthorized -> AvatarResult.Error("Sessione scaduta, rifai il login")
-            else -> AvatarResult.Error("Errore avatar (${response.status.value})")
+            HttpStatusCode.NotFound -> AvatarResult.Error("Avatar not found")
+            HttpStatusCode.Unauthorized -> AvatarResult.Error("Session expired, please log in again")
+            else -> AvatarResult.Error("Avatar error (${response.status.value})")
         }
     }
 
     suspend fun fetchInventory(avatarId: String, token: String): AvatarInventoryResult {
         if (avatarId.isBlank()) {
-            return AvatarInventoryResult.Error("Utente non valido")
+            return AvatarInventoryResult.Error("Invalid user")
         }
 
         val response = runCatching {
@@ -108,7 +108,7 @@ class AvatarRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return AvatarInventoryResult.Error("Impossibile contattare avatar-service")
+            return AvatarInventoryResult.Error("Unable to contact avatar-service")
         }
 
         return when (response.status) {
@@ -117,15 +117,15 @@ class AvatarRepository {
                 AvatarInventoryResult.Success(parseInventoryFromPayload(body))
             }
 
-            HttpStatusCode.Unauthorized -> AvatarInventoryResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> AvatarInventoryResult.Error("Inventario non trovato")
-            else -> AvatarInventoryResult.Error("Errore inventario (${response.status.value})")
+            HttpStatusCode.Unauthorized -> AvatarInventoryResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> AvatarInventoryResult.Error("Inventory not found")
+            else -> AvatarInventoryResult.Error("Inventory error (${response.status.value})")
         }
     }
 
     suspend fun fetchEquippedItems(avatarId: String, token: String): AvatarEquippedItemsResult {
         if (avatarId.isBlank()) {
-            return AvatarEquippedItemsResult.Error("Utente non valido")
+            return AvatarEquippedItemsResult.Error("Invalid user")
         }
 
         val response = runCatching {
@@ -134,7 +134,7 @@ class AvatarRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return AvatarEquippedItemsResult.Error("Impossibile contattare avatar-service")
+            return AvatarEquippedItemsResult.Error("Unable to contact avatar-service")
         }
 
         return when (response.status) {
@@ -143,9 +143,9 @@ class AvatarRepository {
                 AvatarEquippedItemsResult.Success(parseEquippedItemsFromPayload(body))
             }
 
-            HttpStatusCode.Unauthorized -> AvatarEquippedItemsResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> AvatarEquippedItemsResult.Error("Inventario equipaggiato non trovato")
-            else -> AvatarEquippedItemsResult.Error("Errore equipaggiati (${response.status.value})")
+            HttpStatusCode.Unauthorized -> AvatarEquippedItemsResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> AvatarEquippedItemsResult.Error("Equipped inventory not found")
+            else -> AvatarEquippedItemsResult.Error("Equipped items error (${response.status.value})")
         }
     }
 
@@ -177,7 +177,7 @@ class AvatarRepository {
         errorPrefix: String,
     ): AvatarInventoryActionResult {
         if (avatarId.isBlank()) {
-            return AvatarInventoryActionResult.Error("Utente non valido")
+            return AvatarInventoryActionResult.Error("Invalid user")
         }
 
         val response = runCatching {
@@ -194,20 +194,20 @@ class AvatarRepository {
                 )
             }
         }.getOrElse {
-            return AvatarInventoryActionResult.Error("Impossibile contattare avatar-service")
+            return AvatarInventoryActionResult.Error("Unable to contact avatar-service")
         }
 
         return when (response.status) {
             HttpStatusCode.NoContent, HttpStatusCode.OK -> AvatarInventoryActionResult.Success
-            HttpStatusCode.Unauthorized -> AvatarInventoryActionResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> AvatarInventoryActionResult.Error("Oggetto non trovato")
+            HttpStatusCode.Unauthorized -> AvatarInventoryActionResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> AvatarInventoryActionResult.Error("Item not found")
             HttpStatusCode.BadRequest -> {
                 val body = runCatching { response.body<JsonObject>() }.getOrNull()
                 val message = body?.get("message")?.jsonPrimitive?.contentOrNull
-                AvatarInventoryActionResult.Error(message ?: "$errorPrefix fallito")
+                AvatarInventoryActionResult.Error(message ?: "$errorPrefix failed")
             }
 
-            else -> AvatarInventoryActionResult.Error("$errorPrefix fallito (${response.status.value})")
+            else -> AvatarInventoryActionResult.Error("$errorPrefix failed (${response.status.value})")
         }
     }
 
@@ -218,8 +218,8 @@ class AvatarRepository {
         val mana = source["mana"]?.jsonObject ?: buildJsonObject {}
         val stats = source["stats"]?.jsonObject ?: buildJsonObject {}
 
-        val id = source.stringValue("id") ?: return AvatarResult.Error("Risposta avatar senza id")
-        val name = source.stringValue("name") ?: return AvatarResult.Error("Risposta avatar senza nome")
+        val id = source.stringValue("id") ?: return AvatarResult.Error("Avatar response missing id")
+        val name = source.stringValue("name") ?: return AvatarResult.Error("Avatar response missing name")
 
         val data = AvatarData(
             id = id,
