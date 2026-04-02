@@ -2,6 +2,7 @@ package compose.project.demo
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
@@ -21,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +52,19 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
     var isCreatingHabit by remember { mutableStateOf(false) }
     var habitMessage by remember { mutableStateOf<String?>(null) }
     var showCreateHabitDialog by remember { mutableStateOf(false) }
+    var historyState by remember { mutableStateOf<DashboardHistoryUiState>(DashboardHistoryUiState.Loading) }
+
+    LaunchedEffect(token, avatarState) {
+        val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
+        historyState = when {
+            token.isBlank() -> DashboardHistoryUiState.Error("Invalid session")
+            avatar == null -> DashboardHistoryUiState.Error("Avatar not available")
+            else -> when (val result = habitRepository.fetchHistoryByAvatar(token, avatar.id)) {
+                is HabitHistoryResult.Success -> DashboardHistoryUiState.Ready(result.items)
+                is HabitHistoryResult.Error -> DashboardHistoryUiState.Error(result.message)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -61,7 +80,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
 
         AnimatedVisibility(showContent) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(Modifier.height(12.dp))
@@ -258,12 +277,44 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = habitMessage.orEmpty(),
-                        color = if (habitMessage?.startsWith("Habit creata") == true) {
+                        color = if (habitMessage?.startsWith("Habit created") == true) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.error
                         }
                     )
+                }
+
+                Spacer(Modifier.height(20.dp))
+                Text("Habit history", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(8.dp))
+
+                when (val state = historyState) {
+                    DashboardHistoryUiState.Loading -> Text("Loading history...")
+                    is DashboardHistoryUiState.Error -> Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
+
+                    is DashboardHistoryUiState.Ready -> {
+                        if (state.items.isEmpty()) {
+                            Text("No history events")
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(
+                                    items = state.items,
+                                    key = { "${it.occurredAt}-${it.eventType}-${it.habitId}" }
+                                ) { event ->
+                                    HistoryEventCard(item = event)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -273,4 +324,28 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
 private val allowedDaysOfWeek = setOf(
     "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"
 )
+
+@Composable
+private fun HistoryEventCard(item: HabitHistoryItem) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(item.eventType, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text("Date: ${item.occurredAt}", style = MaterialTheme.typography.bodySmall)
+            Text("Habit ID: ${item.habitId}", style = MaterialTheme.typography.bodySmall)
+            if (item.details.isNotBlank()) {
+                Text("Details: ${item.details}", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+private sealed interface DashboardHistoryUiState {
+    data object Loading : DashboardHistoryUiState
+    data class Ready(val items: List<HabitHistoryItem>) : DashboardHistoryUiState
+    data class Error(val message: String) : DashboardHistoryUiState
+}
 
