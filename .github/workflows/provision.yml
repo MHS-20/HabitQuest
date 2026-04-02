@@ -72,5 +72,7 @@ jobs:
         run: |
           chmod +x deployment/kubernetes/platform/deployPlatform.sh
           ./deployment/kubernetes/platform/deployPlatform.sh
+          chmod +x deployment/kubernetes/application/deployApplication.sh
+          ./deployment/kubernetes/application/deployApplication.sh
           chmod +x deployment/kubernetes/observability/deployObservability.sh
           ./deployment/kubernetes/observability/deployObservability.sh
