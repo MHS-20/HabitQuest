@@ -109,6 +109,14 @@ fun AvatarCard(avatar: AvatarData) {
                         max = avatar.nextLevelXp,
                         color = MaterialTheme.colorScheme.secondary
                     )
+
+                      Spacer(Modifier.height(12.dp))
+
+                      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween) {
+                          Text("💪 Str: ${avatar.strength}", style = MaterialTheme.typography.bodySmall)
+                          Text("🛡️ Def: ${avatar.defense}", style = MaterialTheme.typography.bodySmall)
+                          Text("🧠 Int: ${avatar.intelligence}", style = MaterialTheme.typography.bodySmall)
+                      }
                 }
             } else {
                 // Wide layout: avatar left, stats right
@@ -167,6 +175,14 @@ fun AvatarCard(avatar: AvatarData) {
                             max = avatar.nextLevelXp,
                             color = MaterialTheme.colorScheme.secondary
                         )
+
+                        Spacer(Modifier.height(12.dp))
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween) {
+                            Text("💪 Str: ${avatar.strength}", style = MaterialTheme.typography.bodySmall)
+                            Text("🛡️ Def: ${avatar.defense}", style = MaterialTheme.typography.bodySmall)
+                            Text("🧠 Int: ${avatar.intelligence}", style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }

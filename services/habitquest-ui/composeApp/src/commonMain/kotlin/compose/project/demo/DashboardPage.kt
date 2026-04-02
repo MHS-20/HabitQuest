@@ -72,7 +72,10 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                         color = MaterialTheme.colorScheme.error
                     )
 
-                    is AvatarUiState.Ready -> AvatarCard(avatar = state.avatar)
+                    is AvatarUiState.Ready -> {
+                        AvatarCard(avatar = state.avatar)
+                        Spacer(Modifier.height(12.dp))
+                    }
                 }
                 Spacer(Modifier.height(24.dp))
                 Text("Dati avatar aggiornati da avatar-service")
