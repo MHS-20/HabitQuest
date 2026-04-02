@@ -57,6 +57,33 @@ class MarketplaceRepository {
 
     suspend fun ensureMarketplace(token: String, avatarId: String): MarketplaceLoadResult {
         val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/marketplaces/by-avatar/$avatarId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return MarketplaceLoadResult.Error("Impossibile contattare marketplace-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+                val source = body["content"]?.jsonObject ?: body
+                val marketplaceId = source["id"]?.jsonPrimitive?.contentOrNull
+                    ?: return MarketplaceLoadResult.Error("Risposta marketplace senza id")
+                val items = parseItemsFromMarketplacePayload(source)
+                MarketplaceLoadResult.Success(marketplaceId, items)
+            }
+
+            HttpStatusCode.NotFound -> createMarketplace(token, avatarId)
+
+            HttpStatusCode.Unauthorized -> MarketplaceLoadResult.Error("Sessione scaduta, rifai il login")
+            else -> MarketplaceLoadResult.Error("Errore marketplace (${response.status.value})")
+        }
+    }
+
+    private suspend fun createMarketplace(token: String, avatarId: String): MarketplaceLoadResult {
+        val response = runCatching {
             client.post("${edgeServiceBaseUrl()}/api/v1/marketplaces") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.ContentType, ContentType.Application.Json)

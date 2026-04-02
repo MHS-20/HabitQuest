@@ -7,6 +7,7 @@ import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
 import java.time.Instant;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
 @Adapter
@@ -35,9 +36,13 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
 
     log.info(message, "Publishing ItemBought event");
 
-    boolean sent = streamBridge.send(ITEM_BOUGHT_BINDING, message);
-    if (!sent) {
-      log.error(message, "Failed to publish ItemBought event", null);
+    try {
+      boolean sent = streamBridge.send(ITEM_BOUGHT_BINDING, message);
+      if (!sent) {
+        log.error(message, "Failed to publish ItemBought event", null);
+      }
+    } catch (MessagingException ex) {
+      log.error(message, "Failed to publish ItemBought event", ex);
     }
   }
 
@@ -52,9 +57,13 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
 
     log.info(message, "Publishing ItemSold event");
 
-    boolean sent = streamBridge.send(ITEM_SOLD_BINDING, message);
-    if (!sent) {
-      log.error(message, "Failed to publish ItemSold event", null);
+    try {
+      boolean sent = streamBridge.send(ITEM_SOLD_BINDING, message);
+      if (!sent) {
+        log.error(message, "Failed to publish ItemSold event", null);
+      }
+    } catch (MessagingException ex) {
+      log.error(message, "Failed to publish ItemSold event", ex);
     }
   }
 

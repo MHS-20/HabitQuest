@@ -9,13 +9,6 @@ spring:
     name: marketplace-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
-
-info:
-  system: HabitQuest
-avatar:
-  service-uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
-
-################## KAFKA ##################
   cloud:
     stream:
       bindings:
@@ -35,6 +28,13 @@ avatar:
             acks: all
             retries: 3
             enable.idempotence: true
+
+info:
+  system: HabitQuest
+avatar:
+  service-uri: ${AVATAR_SERVICE_URI:http://avatar-service:8081}
+
+################## KAFKA ##################
 
 ################## RESILIENCY ##################
 resilience4j:
