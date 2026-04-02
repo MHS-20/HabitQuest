@@ -5,6 +5,8 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -29,6 +31,16 @@ sealed interface AvatarResult {
 sealed interface AvatarInventoryResult {
     data class Success(val items: List<AvatarInventoryItem>) : AvatarInventoryResult
     data class Error(val message: String) : AvatarInventoryResult
+}
+
+sealed interface AvatarEquippedItemsResult {
+    data class Success(val items: List<AvatarInventoryItem>) : AvatarEquippedItemsResult
+    data class Error(val message: String) : AvatarEquippedItemsResult
+}
+
+sealed interface AvatarInventoryActionResult {
+    data object Success : AvatarInventoryActionResult
+    data class Error(val message: String) : AvatarInventoryActionResult
 }
 
 data class AvatarData(
@@ -111,6 +123,94 @@ class AvatarRepository {
         }
     }
 
+    suspend fun fetchEquippedItems(avatarId: String, token: String): AvatarEquippedItemsResult {
+        if (avatarId.isBlank()) {
+            return AvatarEquippedItemsResult.Error("Utente non valido")
+        }
+
+        val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/equipped-items") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return AvatarEquippedItemsResult.Error("Impossibile contattare avatar-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonElement>()
+                AvatarEquippedItemsResult.Success(parseEquippedItemsFromPayload(body))
+            }
+
+            HttpStatusCode.Unauthorized -> AvatarEquippedItemsResult.Error("Sessione scaduta, rifai il login")
+            HttpStatusCode.NotFound -> AvatarEquippedItemsResult.Error("Inventario equipaggiato non trovato")
+            else -> AvatarEquippedItemsResult.Error("Errore equipaggiati (${response.status.value})")
+        }
+    }
+
+    suspend fun equipItem(token: String, avatarId: String, item: AvatarInventoryItem): AvatarInventoryActionResult {
+        return sendInventoryAction(
+            token = token,
+            avatarId = avatarId,
+            path = "equip",
+            item = item,
+            errorPrefix = "Equip"
+        )
+    }
+
+    suspend fun unequipItem(token: String, avatarId: String, item: AvatarInventoryItem): AvatarInventoryActionResult {
+        return sendInventoryAction(
+            token = token,
+            avatarId = avatarId,
+            path = "unequip",
+            item = item,
+            errorPrefix = "Unequip"
+        )
+    }
+
+    private suspend fun sendInventoryAction(
+        token: String,
+        avatarId: String,
+        path: String,
+        item: AvatarInventoryItem,
+        errorPrefix: String,
+    ): AvatarInventoryActionResult {
+        if (avatarId.isBlank()) {
+            return AvatarInventoryActionResult.Error("Utente non valido")
+        }
+
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/inventory/items/$path") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("type", JsonPrimitive(item.type))
+                        put("name", JsonPrimitive(item.name))
+                        put("description", JsonPrimitive(item.description))
+                        put("power", JsonPrimitive(item.power ?: 0))
+                    }
+                )
+            }
+        }.getOrElse {
+            return AvatarInventoryActionResult.Error("Impossibile contattare avatar-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> AvatarInventoryActionResult.Success
+            HttpStatusCode.Unauthorized -> AvatarInventoryActionResult.Error("Sessione scaduta, rifai il login")
+            HttpStatusCode.NotFound -> AvatarInventoryActionResult.Error("Oggetto non trovato")
+            HttpStatusCode.BadRequest -> {
+                val body = runCatching { response.body<JsonObject>() }.getOrNull()
+                val message = body?.get("message")?.jsonPrimitive?.contentOrNull
+                AvatarInventoryActionResult.Error(message ?: "$errorPrefix fallito")
+            }
+
+            else -> AvatarInventoryActionResult.Error("$errorPrefix fallito (${response.status.value})")
+        }
+    }
+
     private fun mapAvatarResponse(body: JsonObject): AvatarResult {
         val source = body["content"]?.jsonObject ?: body
         val level = source["level"]?.jsonObject ?: buildJsonObject {}
@@ -171,6 +271,10 @@ class AvatarRepository {
                 array.mapNotNull(::asInventoryItem)
             }
             .orEmpty()
+    }
+
+    private fun parseEquippedItemsFromPayload(payload: JsonElement): List<AvatarInventoryItem> {
+        return parseInventoryFromPayload(payload)
     }
 
     private fun asInventoryItem(element: JsonElement): AvatarInventoryItem? {

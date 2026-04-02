@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,9 +46,13 @@ fun CharacterScreen(
     var inventoryLoading by remember { mutableStateOf(false) }
     var inventoryError by remember { mutableStateOf<String?>(null) }
     var inventoryItems by remember { mutableStateOf<List<AvatarInventoryItem>>(emptyList()) }
+    var equippedItems by remember { mutableStateOf<List<AvatarInventoryItem>>(emptyList()) }
+    var equippedItemNames by remember { mutableStateOf<Set<String>>(emptySet()) }
     var marketplaceId by remember { mutableStateOf<String?>(null) }
     var sellingItemName by remember { mutableStateOf<String?>(null) }
+    var inventoryActionItemName by remember { mutableStateOf<String?>(null) }
     var sellActionMessage by remember { mutableStateOf<String?>(null) }
+    var inventoryActionMessage by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadInventory(avatarId: String) {
         inventoryLoading = true
@@ -57,6 +63,21 @@ fun CharacterScreen(
             is AvatarInventoryResult.Error -> inventoryError = result.message
         }
         inventoryLoading = false
+    }
+
+    suspend fun loadEquippedItems(avatarId: String) {
+        when (val result = avatarRepository.fetchEquippedItems(avatarId = avatarId, token = token)) {
+            is AvatarEquippedItemsResult.Success -> {
+                equippedItems = result.items
+                equippedItemNames = result.items.mapTo(mutableSetOf()) { it.name }
+            }
+            is AvatarEquippedItemsResult.Error -> inventoryError = result.message
+        }
+    }
+
+    suspend fun reloadInventoryState(avatarId: String) {
+        loadInventory(avatarId)
+        loadEquippedItems(avatarId)
     }
 
     suspend fun ensureMarketplaceId(avatarId: String): String? {
@@ -97,7 +118,7 @@ fun CharacterScreen(
             is AvatarUiState.Ready -> {
                 LaunchedEffect(state.avatar.id, token) {
                     marketplaceId = null
-                    loadInventory(state.avatar.id)
+                    reloadInventoryState(state.avatar.id)
                 }
 
                 Column(
@@ -122,6 +143,17 @@ fun CharacterScreen(
                         )
                     }
 
+                    inventoryActionMessage?.let { message ->
+                        Text(
+                            text = message,
+                            color = if (message.startsWith("Equip") || message.startsWith("Unequip")) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.error
+                            }
+                        )
+                    }
+
                     Spacer(Modifier.height(12.dp))
                     Text("Inventario", style = MaterialTheme.typography.titleMedium)
 
@@ -134,17 +166,35 @@ fun CharacterScreen(
 
                         inventoryItems.isEmpty() -> Text("Inventario vuoto")
                         else -> inventoryItems.forEach { item ->
+                            val isEquippable = item.type.equals("WEAPON", true) || item.type.equals("ARMOR", true)
+                            val isEquipped = equippedItemNames.contains(item.name)
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(
-                                        text = item.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Text(
+                                            text = item.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        if (isEquipped) {
+                                            Surface(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                shape = MaterialTheme.shapes.small
+                                            ) {
+                                                Text(
+                                                    text = "Equipped",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                )
+                                            }
+                                        }
+                                    }
                                     Spacer(Modifier.height(4.dp))
                                     Text(item.description, style = MaterialTheme.typography.bodyMedium)
                                     Spacer(Modifier.height(4.dp))
@@ -153,6 +203,48 @@ fun CharacterScreen(
                                     Text("Quantità: ${item.quantity}", style = MaterialTheme.typography.bodySmall)
                                     Text("Prezzo: ${item.price}", style = MaterialTheme.typography.bodySmall)
                                     Spacer(Modifier.height(10.dp))
+                                    if (isEquippable) {
+                                        Button(
+                                            onClick = {
+                                                scope.launch {
+                                                    inventoryActionItemName = item.name
+                                                    inventoryActionMessage = null
+                                                    val result = if (isEquipped) {
+                                                        avatarRepository.unequipItem(token, state.avatar.id, item)
+                                                    } else {
+                                                        avatarRepository.equipItem(token, state.avatar.id, item)
+                                                    }
+                                                    when (result) {
+                                                        AvatarInventoryActionResult.Success -> {
+                                                            inventoryActionMessage = if (isEquipped) {
+                                                                "Unequip completato: ${item.name}"
+                                                            } else {
+                                                                "Equip completato: ${item.name}"
+                                                            }
+                                                            onAvatarRefresh()
+                                                            reloadInventoryState(state.avatar.id)
+                                                        }
+
+                                                        is AvatarInventoryActionResult.Error -> {
+                                                            inventoryActionMessage = result.message
+                                                        }
+                                                    }
+                                                    inventoryActionItemName = null
+                                                }
+                                            },
+                                            enabled = inventoryActionItemName == null || inventoryActionItemName == item.name,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            if (inventoryActionItemName == item.name) {
+                                                CircularProgressIndicator(strokeWidth = 2.dp)
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(if (isEquipped) "Unequip..." else "Equip...")
+                                            } else {
+                                                Text(if (isEquipped) "Unequip" else "Equip")
+                                            }
+                                        }
+                                        Spacer(Modifier.height(8.dp))
+                                    }
                                     Button(
                                         onClick = {
                                             scope.launch {
@@ -168,7 +260,7 @@ fun CharacterScreen(
                                                         sellActionMessage = "Vendita completata: ${item.name}"
                                                         onMoneyDelta(item.price)
                                                         onAvatarRefresh()
-                                                        loadInventory(state.avatar.id)
+                                                        reloadInventoryState(state.avatar.id)
                                                     }
 
                                                     is MarketplaceSellResult.Error -> {
@@ -187,6 +279,79 @@ fun CharacterScreen(
                                             Text("Vendo...")
                                         } else {
                                             Text("Vendi")
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+                    Text("Equipaggiati", style = MaterialTheme.typography.titleMedium)
+                    if (equippedItems.isEmpty()) {
+                        Text("Nessun oggetto equipaggiato")
+                    } else {
+                        equippedItems.forEach { item ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Text(
+                                            text = item.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            shape = MaterialTheme.shapes.small
+                                        ) {
+                                            Text(
+                                                text = "Equipped",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(item.description, style = MaterialTheme.typography.bodyMedium)
+                                    Spacer(Modifier.height(4.dp))
+                                    Text("Tipo: ${item.type}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Potenza: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
+                                    Spacer(Modifier.height(10.dp))
+                                    Button(
+                                        onClick = {
+                                            scope.launch {
+                                                inventoryActionItemName = item.name
+                                                inventoryActionMessage = null
+                                                when (val result = avatarRepository.unequipItem(token, state.avatar.id, item)) {
+                                                    AvatarInventoryActionResult.Success -> {
+                                                        inventoryActionMessage = "Unequip completato: ${item.name}"
+                                                        onAvatarRefresh()
+                                                        reloadInventoryState(state.avatar.id)
+                                                    }
+
+                                                    is AvatarInventoryActionResult.Error -> {
+                                                        inventoryActionMessage = result.message
+                                                    }
+                                                }
+                                                inventoryActionItemName = null
+                                            }
+                                        },
+                                        enabled = inventoryActionItemName == null || inventoryActionItemName == item.name,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        if (inventoryActionItemName == item.name) {
+                                            CircularProgressIndicator(strokeWidth = 2.dp)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Unequip...")
+                                        } else {
+                                            Text("Unequip")
                                         }
                                     }
                                 }
