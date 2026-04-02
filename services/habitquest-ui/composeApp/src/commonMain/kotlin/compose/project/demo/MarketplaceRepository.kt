@@ -11,6 +11,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.encodeURLPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -113,8 +114,9 @@ class MarketplaceRepository {
         itemName: String,
         currentLevel: Int,
     ): MarketplaceBuyResult {
+        val encodedItemName = itemName.encodeURLPath()
         val response = runCatching {
-            client.post("${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/items/$itemName/buy") {
+            client.post("${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/items/$encodedItemName/buy") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 parameter("currentLevel", currentLevel)
             }
