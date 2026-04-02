@@ -10,6 +10,7 @@ nav:
   - Event Storming: eventStorming/event_storming.md
   - Event Flows: eventFlows/event_flows.md
   - Interactions: interactions/interactions.md
+  - Microservices Patterns: microservicesPatterns/microservices-patterns.md
   - API:
     - Overview: api/overview.md
     - Authentication: api/auth.md
@@ -19,7 +20,6 @@ nav:
     - Guilds & Battles: api/guild.md
     - Marketplace: api/marketplace.md
     - Notifications: api/notification.md
-  - Microservices Patterns: microservices/microservices_patterns.md
   - Kubernetes Deployment:
     - Overview: kubernetes/kubernetes-deployment-overview.md
     - Application: kubernetes/kubernetes-application-layer.md
