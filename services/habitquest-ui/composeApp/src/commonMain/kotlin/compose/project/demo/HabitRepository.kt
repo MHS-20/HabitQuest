@@ -3,6 +3,7 @@ package compose.project.demo
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -61,6 +62,11 @@ sealed interface HabitListResult {
 sealed interface AttendHabitResult {
     data object Success : AttendHabitResult
     data class Error(val message: String) : AttendHabitResult
+}
+
+sealed interface DeleteHabitResult {
+    data object Success : DeleteHabitResult
+    data class Error(val message: String) : DeleteHabitResult
 }
 
 sealed interface HabitHistoryResult {
@@ -186,6 +192,23 @@ class HabitsApiRepository {
             HttpStatusCode.Unauthorized -> AttendHabitResult.Error("Sessione scaduta, rifai il login")
             HttpStatusCode.NotFound -> AttendHabitResult.Error("Habit non trovata")
             else -> AttendHabitResult.Error("Errore attend habit (${response.status.value})")
+        }
+    }
+
+    suspend fun deleteHabit(token: String, habitId: String): DeleteHabitResult {
+        val response = runCatching {
+            client.delete("${edgeServiceBaseUrl()}/api/v1/habits/$habitId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+        }.getOrElse {
+            return DeleteHabitResult.Error("Impossibile contattare habit-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> DeleteHabitResult.Success
+            HttpStatusCode.Unauthorized -> DeleteHabitResult.Error("Sessione scaduta, rifai il login")
+            HttpStatusCode.NotFound -> DeleteHabitResult.Error("Habit non trovata")
+            else -> DeleteHabitResult.Error("Errore delete habit (${response.status.value})")
         }
     }
 
