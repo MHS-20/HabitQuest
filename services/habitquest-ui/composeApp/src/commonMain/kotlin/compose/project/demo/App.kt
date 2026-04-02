@@ -182,7 +182,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     avatarState = avatarState,
                     onItemBought = ::requestAvatarRefresh,
                 )
-                AppPage.Character -> CharacterScreen(avatarState = avatarState)
+                AppPage.Character -> CharacterScreen(token = token, avatarState = avatarState)
                 AppPage.HabitHistory -> HabitHistoryScreen(token = token, avatarState = avatarState)
             }
         }

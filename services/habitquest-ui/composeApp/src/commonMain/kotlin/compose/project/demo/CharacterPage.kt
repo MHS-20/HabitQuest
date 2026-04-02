@@ -9,15 +9,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CharacterScreen(avatarState: AvatarUiState) {
+fun CharacterScreen(token: String, avatarState: AvatarUiState) {
+    val avatarRepository = remember { AvatarRepository() }
+    var inventoryLoading by remember { mutableStateOf(false) }
+    var inventoryError by remember { mutableStateOf<String?>(null) }
+    var inventoryItems by remember { mutableStateOf<List<AvatarInventoryItem>>(emptyList()) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -37,24 +49,45 @@ fun CharacterScreen(avatarState: AvatarUiState) {
                 modifier = Modifier.align(Alignment.Center)
             )
 
-            is AvatarUiState.Ready -> Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("👤 ${state.avatar.name}", style = MaterialTheme.typography.headlineSmall)
-                Text("ID: ${state.avatar.id}")
-                Text("Livello: ${state.avatar.level}")
-                Text("XP: ${state.avatar.currentXp} / ${state.avatar.nextLevelXp}")
-                Text("HP: ${state.avatar.hp} / ${state.avatar.maxHp}")
-                Text("Mana: ${state.avatar.mana} / ${state.avatar.maxMana}")
-                Text("Money: ${state.avatar.money}")
-                Spacer(Modifier.height(8.dp))
-                Text("Statistiche", style = MaterialTheme.typography.titleMedium)
-                Text("Strength: ${state.avatar.strength}")
-                Text("Defense: ${state.avatar.defense}")
-                Text("Intelligence: ${state.avatar.intelligence}")
+            is AvatarUiState.Ready -> {
+                LaunchedEffect(state.avatar.id, token) {
+                    inventoryLoading = true
+                    inventoryError = null
+                    inventoryItems = emptyList()
+                    when (val result = avatarRepository.fetchInventory(avatarId = state.avatar.id, token = token)) {
+                        is AvatarInventoryResult.Success -> inventoryItems = result.items
+                        is AvatarInventoryResult.Error -> inventoryError = result.message
+                    }
+                    inventoryLoading = false
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("👤 ${state.avatar.name}", style = MaterialTheme.typography.headlineSmall)
+                    Text("ID: ${state.avatar.id}")
+                    Text("Money: ${state.avatar.money}")
+
+                    Spacer(Modifier.height(12.dp))
+                    Text("Inventario", style = MaterialTheme.typography.titleMedium)
+
+                    when {
+                        inventoryLoading -> Text("Caricamento inventario...")
+                        inventoryError != null -> Text(
+                            text = inventoryError.orEmpty(),
+                            color = MaterialTheme.colorScheme.error
+                        )
+
+                        inventoryItems.isEmpty() -> Text("Inventario vuoto")
+                        else -> inventoryItems.forEach { item ->
+                            Text("- ${item.name} x${item.quantity} (${item.type})")
+                        }
+                    }
+                }
             }
         }
     }
