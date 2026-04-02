@@ -71,7 +71,6 @@ jobs:
       matrix:
         service: ${{ fromJson(needs.detect-changes.outputs.services) }}
       fail-fast: false
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v6
