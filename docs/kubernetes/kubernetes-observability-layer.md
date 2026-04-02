@@ -1,6 +1,5 @@
 # Observability Layer - Deployment Kubernetes
 
-
 L'Observability Layer implementa lo stack completo per **monitoring**, **logging** e **distributed tracing** dell'applicazione HabitQuest. 
 Segue i principi dei **Three Pillars of Observability**: Metrics, Logs e Traces.
 
@@ -27,6 +26,7 @@ metadata:
 - Namespace `logging`
 
 **Metadati aggiunti ad ogni log**:
+
 - `namespace`: Kubernetes namespace
 - `pod`: Pod name
 - `container`: Container name
@@ -56,6 +56,7 @@ Spring Boot Micrometer produce le traces automaticamente:
 - Namespace `logging`
 
 Dashboard disponibili:
+
 - `circuit-breaker.json`: Resilience4j circuit breakers statuses and metrics
 - `http-rest-controllers.json`: REST endpoint performance and http traffic
 - `jvm.json`: JVM heap, threads, GC metrics
