@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 fun MarketplaceScreen(
     token: String,
     avatarState: AvatarUiState,
-    onItemBought: () -> Unit = {},
+    onItemBought: (Int) -> Unit = {},
 ) {
     val repository = remember { MarketplaceRepository() }
     val scope = rememberCoroutineScope()
@@ -138,7 +138,7 @@ fun MarketplaceScreen(
                                         ) {
                                             MarketplaceBuyResult.Success -> {
                                                 actionMessage = "Acquisto completato: ${item.name}"
-                                                onItemBought()
+                                                onItemBought(item.price)
                                                 loadMarketplace(showLoading = false)
                                             }
 

@@ -91,6 +91,7 @@ services:
     environment:
       SERVER_PORT: 8083
       KAFKA_BROKER: kafka:9092
+      AVATAR_SERVICE_URI: http://avatar-service:8081
       #SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka:9092
       #SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector:4318
