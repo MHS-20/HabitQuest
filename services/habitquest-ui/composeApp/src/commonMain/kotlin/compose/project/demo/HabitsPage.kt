@@ -15,7 +15,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +40,8 @@ fun HabitsScreen(
     val scope = rememberCoroutineScope()
     var uiState by remember { mutableStateOf<HabitsUiState>(HabitsUiState.Loading) }
     var attendingHabitId by remember { mutableStateOf<String?>(null) }
+    var deletingHabitId by remember { mutableStateOf<String?>(null) }
+    var pendingDeleteHabit by remember { mutableStateOf<HabitListItem?>(null) }
     var actionMessage by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadHabits(showLoading: Boolean) {
@@ -71,7 +75,7 @@ fun HabitsScreen(
         actionMessage?.let { message ->
             Text(
                 text = message,
-                color = if (message.startsWith("Habit completata")) {
+                color = if (message.startsWith("Habit completata") || message.startsWith("Habit eliminata")) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.error
@@ -91,6 +95,7 @@ fun HabitsScreen(
                             HabitRow(
                                 habit = habit,
                                 isAttending = attendingHabitId == habit.id,
+                                isDeleting = deletingHabitId == habit.id,
                                 onAttend = {
                                     scope.launch {
                                         attendingHabitId = habit.id
@@ -108,12 +113,50 @@ fun HabitsScreen(
                                         }
                                         attendingHabitId = null
                                     }
+                                },
+                                onDelete = {
+                                    pendingDeleteHabit = habit
                                 }
                             )
                         }
                     }
                 }
             }
+        }
+
+        pendingDeleteHabit?.let { habit ->
+            AlertDialog(
+                onDismissRequest = { pendingDeleteHabit = null },
+                title = { Text("Eliminare habit?") },
+                text = { Text("Vuoi eliminare \"${habit.title}\"? Questa azione non può essere annullata.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        scope.launch {
+                            deletingHabitId = habit.id
+                            actionMessage = null
+                            when (val result = habitRepository.deleteHabit(token, habit.id)) {
+                                DeleteHabitResult.Success -> {
+                                    actionMessage = "Habit eliminata: ${habit.title}"
+                                    pendingDeleteHabit = null
+                                    loadHabits(showLoading = false)
+                                }
+
+                                is DeleteHabitResult.Error -> {
+                                    actionMessage = result.message
+                                }
+                            }
+                            deletingHabitId = null
+                        }
+                    }) {
+                        Text("Elimina")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteHabit = null }) {
+                        Text("Annulla")
+                    }
+                }
+            )
         }
     }
 }
@@ -122,7 +165,9 @@ fun HabitsScreen(
 private fun HabitRow(
     habit: HabitListItem,
     isAttending: Boolean,
+    isDeleting: Boolean,
     onAttend: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     val tagsText = habit.tags.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nessun tag"
     val lastAttendedText = habit.lastAttendedDate ?: "Non disponibile"
@@ -145,7 +190,7 @@ private fun HabitRow(
             Spacer(Modifier.height(10.dp))
             Button(
                 onClick = onAttend,
-                enabled = !isAttending,
+                enabled = !isAttending && !isDeleting,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (isAttending) {
@@ -154,6 +199,24 @@ private fun HabitRow(
                     Text("Attendo...")
                 } else {
                     Text("Segna come completata")
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = onDelete,
+                enabled = !isAttending && !isDeleting,
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                )
+            ) {
+                if (isDeleting) {
+                    CircularProgressIndicator(strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Elimino...")
+                } else {
+                    Text("Elimina")
                 }
             }
         }
