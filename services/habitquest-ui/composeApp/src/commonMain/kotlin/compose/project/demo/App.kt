@@ -17,7 +17,6 @@ enum class AppPage(val label: String, val emoji: String) {
     Quest("Quest", "🎯"),
     Marketplace("Marketplace", "🛒"),
     Character("Character", "👤"),
-    HabitHistory("History", "🕒"),
 }
 
 private enum class AuthRoute {
@@ -201,7 +200,6 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     onMoneyDelta = ::applyMoneyDelta,
                     onAvatarRefresh = ::requestAvatarRefresh,
                 )
-                AppPage.HabitHistory -> HabitHistoryScreen(token = token, avatarState = avatarState)
             }
         }
     }
