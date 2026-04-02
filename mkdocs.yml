@@ -19,4 +19,10 @@ nav:
     - Guilds & Battles: api/guild.md
     - Marketplace: api/marketplace.md
     - Notifications: api/notification.md
+  - Microservices Patterns: microservices/microservices_patterns.md
+  - Kubernetes Deployment:
+    - Overview: kubernetes/kubernetes-deployment-overview.md
+    - Application: kubernetes/kubernetes-application-layer.md
+    - Observability: kubernetes/kubernetes-observability-layer.md
+
 theme: readthedocs
