@@ -68,7 +68,7 @@ class QuestRepository {
                 )
             }
         }.getOrElse {
-            return CreateQuestResult.Error("Impossibile contattare quest-service")
+            return CreateQuestResult.Error("Unable to contact quest-service")
         }
 
         return when (response.status) {
@@ -76,13 +76,13 @@ class QuestRepository {
                 val body = response.body<JsonObject>()
                 val source = body["content"]?.jsonObject ?: body
                 val id = source["id"]?.jsonPrimitive?.contentOrNull
-                    ?: return CreateQuestResult.Error("Risposta create quest senza id")
+                    ?: return CreateQuestResult.Error("Create quest response missing id")
                 CreateQuestResult.Success(id)
             }
 
-            HttpStatusCode.BadRequest -> CreateQuestResult.Error("Dati quest non validi")
-            HttpStatusCode.Unauthorized -> CreateQuestResult.Error("Sessione scaduta, rifai il login")
-            else -> CreateQuestResult.Error("Errore create quest (${response.status.value})")
+            HttpStatusCode.BadRequest -> CreateQuestResult.Error("Invalid quest data")
+            HttpStatusCode.Unauthorized -> CreateQuestResult.Error("Session expired, please log in again")
+            else -> CreateQuestResult.Error("Create quest error (${response.status.value})")
         }
     }
 
@@ -93,20 +93,20 @@ class QuestRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return QuestResult.Error("Impossibile contattare quest-service")
+            return QuestResult.Error("Unable to contact quest-service")
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> {
                 val body = response.body<JsonObject>()
                 val source = body["content"]?.jsonObject ?: body
-                val quest = parseQuest(source) ?: return QuestResult.Error("Risposta quest non valida")
+                val quest = parseQuest(source) ?: return QuestResult.Error("Invalid quest response")
                 QuestResult.Success(quest)
             }
 
-            HttpStatusCode.NotFound -> QuestResult.Error("Quest non trovata")
-            HttpStatusCode.Unauthorized -> QuestResult.Error("Sessione scaduta, rifai il login")
-            else -> QuestResult.Error("Errore lettura quest (${response.status.value})")
+            HttpStatusCode.NotFound -> QuestResult.Error("Quest not found")
+            HttpStatusCode.Unauthorized -> QuestResult.Error("Session expired, please log in again")
+            else -> QuestResult.Error("Quest read error (${response.status.value})")
         }
     }
 
@@ -117,7 +117,7 @@ class QuestRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return QuestListResult.Error("Impossibile contattare quest-service")
+            return QuestListResult.Error("Unable to contact quest-service")
         }
 
         return when (response.status) {
@@ -127,8 +127,8 @@ class QuestRepository {
                 QuestListResult.Success(quests)
             }
 
-            HttpStatusCode.Unauthorized -> QuestListResult.Error("Sessione scaduta, rifai il login")
-            else -> QuestListResult.Error("Errore lettura quests (${response.status.value})")
+            HttpStatusCode.Unauthorized -> QuestListResult.Error("Session expired, please log in again")
+            else -> QuestListResult.Error("Quest list read error (${response.status.value})")
         }
     }
 
@@ -207,14 +207,14 @@ class QuestRepository {
         if (duration.isNotBlank()) {
             val durationUpdated = updateQuestDuration(token, questId, duration)
             if (!durationUpdated) {
-                return CreateQuestResult.Error("Quest creata ma durata non aggiornata")
+                return CreateQuestResult.Error("Quest created but duration was not updated")
             }
         }
 
         for (habit in habits) {
             val habitAdded = addHabitToQuest(token, questId, habit)
             if (!habitAdded) {
-                return CreateQuestResult.Error("Quest creata ma non tutte le habits sono state aggiunte")
+                return CreateQuestResult.Error("Quest created but not all habits were added")
             }
         }
 

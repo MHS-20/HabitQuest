@@ -43,14 +43,14 @@ class AuthRepository {
                 )
             }
         }.getOrElse {
-            return AuthResult.Error("Impossibile contattare edge-service")
+            return AuthResult.Error("Unable to contact edge-service")
         }
 
         return when (response.status) {
             HttpStatusCode.OK -> mapSuccess(response.body<JsonObject>())
-            HttpStatusCode.Unauthorized -> AuthResult.Error("Credenziali non valide")
-            HttpStatusCode.BadRequest -> AuthResult.Error("Controlla email e password")
-            else -> AuthResult.Error("Errore login (${response.status.value})")
+            HttpStatusCode.Unauthorized -> AuthResult.Error("Invalid credentials")
+            HttpStatusCode.BadRequest -> AuthResult.Error("Check email and password")
+            else -> AuthResult.Error("Login error (${response.status.value})")
         }
     }
 
@@ -67,20 +67,20 @@ class AuthRepository {
                 )
             }
         }.getOrElse {
-            return AuthResult.Error("Impossibile contattare edge-service")
+            return AuthResult.Error("Unable to contact edge-service")
         }
 
         return when (response.status) {
             HttpStatusCode.Created -> mapSuccess(response.body<JsonObject>())
-            HttpStatusCode.Conflict -> AuthResult.Error("Email gia registrata")
-            HttpStatusCode.BadRequest -> AuthResult.Error("Dati non validi")
-            else -> AuthResult.Error("Errore registrazione (${response.status.value})")
+            HttpStatusCode.Conflict -> AuthResult.Error("Email already registered")
+            HttpStatusCode.BadRequest -> AuthResult.Error("Invalid data")
+            else -> AuthResult.Error("Registration error (${response.status.value})")
         }
     }
 
     private fun mapSuccess(body: JsonObject): AuthResult {
         val token = body["token"]?.jsonPrimitive?.contentOrNull
-            ?: return AuthResult.Error("Token mancante nella risposta")
+            ?: return AuthResult.Error("Token missing in response")
         val userId = body["userId"]
             ?.jsonObject
             ?.get("value")
