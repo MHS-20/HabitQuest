@@ -120,12 +120,12 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
         avatarRefreshTick += 1
     }
 
-    fun applySpentMoney(spentAmount: Int) {
-        if (spentAmount <= 0) return
+    fun applyMoneyDelta(delta: Int) {
+        if (delta == 0) return
         val readyState = avatarState as? AvatarUiState.Ready ?: return
         avatarState = readyState.copy(
             avatar = readyState.avatar.copy(
-                money = (readyState.avatar.money - spentAmount).coerceAtLeast(0)
+                money = (readyState.avatar.money + delta).coerceAtLeast(0)
             )
         )
     }
@@ -191,11 +191,16 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     token = token,
                     avatarState = avatarState,
                     onItemBought = { spentAmount ->
-                        applySpentMoney(spentAmount)
+                        applyMoneyDelta(-spentAmount)
                         requestAvatarRefresh()
                     },
                 )
-                AppPage.Character -> CharacterScreen(token = token, avatarState = avatarState)
+                AppPage.Character -> CharacterScreen(
+                    token = token,
+                    avatarState = avatarState,
+                    onMoneyDelta = ::applyMoneyDelta,
+                    onAvatarRefresh = ::requestAvatarRefresh,
+                )
                 AppPage.HabitHistory -> HabitHistoryScreen(token = token, avatarState = avatarState)
             }
         }
