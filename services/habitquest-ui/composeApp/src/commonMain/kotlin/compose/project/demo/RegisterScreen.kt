@@ -53,7 +53,7 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "🛡️ Crea il tuo account",
+                    text = "🛡️ Create your account",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
@@ -65,7 +65,7 @@ fun RegisterScreen(
                         name = it
                         localError = null
                     },
-                    label = { Text("Nome") },
+                    label = { Text("Name") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -104,7 +104,7 @@ fun RegisterScreen(
                         confirmPassword = it
                         localError = null
                     },
-                    label = { Text("Conferma password") },
+                    label = { Text("Confirm password") },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
@@ -112,7 +112,7 @@ fun RegisterScreen(
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = {
                         TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Text(if (passwordVisible) "Nascondi" else "Mostra")
+                            Text(if (passwordVisible) "Hide" else "Show")
                         }
                     }
                 )
@@ -129,11 +129,11 @@ fun RegisterScreen(
                 Button(
                     onClick = {
                         when {
-                            name.isBlank() -> localError = "Inserisci il tuo nome"
-                            email.isBlank() -> localError = "Inserisci la tua email"
-                            !email.contains("@") -> localError = "Inserisci una email valida"
-                            password.length < 8 -> localError = "La password deve avere almeno 8 caratteri"
-                            confirmPassword != password -> localError = "Le password non coincidono"
+                            name.isBlank() -> localError = "Enter your name"
+                            email.isBlank() -> localError = "Enter your email"
+                            !email.contains("@") -> localError = "Enter a valid email"
+                            password.length < 8 -> localError = "Password must be at least 8 characters"
+                            confirmPassword != password -> localError = "Passwords do not match"
                             else -> onRegister(name.trim(), email.trim(), password)
                         }
                     },
@@ -150,7 +150,7 @@ fun RegisterScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Registrati", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Sign up", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
@@ -161,7 +161,7 @@ fun RegisterScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Hai gia un account? Accedi")
+                    Text("Already have an account? Sign in")
                 }
             }
         }

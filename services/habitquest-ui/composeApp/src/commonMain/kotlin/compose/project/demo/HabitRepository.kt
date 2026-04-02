@@ -110,7 +110,7 @@ class HabitsApiRepository {
                 )
             }
         }.getOrElse {
-            return CreateHabitResult.Error("Impossibile contattare habit-service")
+            return CreateHabitResult.Error("Unable to contact habit-service")
         }
 
         return when (response.status) {
@@ -118,19 +118,19 @@ class HabitsApiRepository {
                 val body = response.body<JsonObject>()
                 val source = body["content"]?.jsonObject ?: body
                 val id = source["id"]?.jsonPrimitive?.contentOrNull
-                    ?: return CreateHabitResult.Error("Risposta create habit senza id")
+                    ?: return CreateHabitResult.Error("Create habit response missing id")
                 CreateHabitResult.Success(id)
             }
 
             HttpStatusCode.BadRequest -> {
                 val body = response.body<JsonObject>()
                 val message = body["message"]?.jsonPrimitive?.contentOrNull
-                    ?: "Dati habit non validi"
+                    ?: "Invalid habit data"
                 CreateHabitResult.Error(message)
             }
 
-            HttpStatusCode.Unauthorized -> CreateHabitResult.Error("Sessione scaduta, rifai il login")
-            else -> CreateHabitResult.Error("Errore create habit (${response.status.value})")
+            HttpStatusCode.Unauthorized -> CreateHabitResult.Error("Session expired, please log in again")
+            else -> CreateHabitResult.Error("Create habit error (${response.status.value})")
         }
     }
 
@@ -141,7 +141,7 @@ class HabitsApiRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return HabitListResult.Error("Impossibile contattare habit-service")
+            return HabitListResult.Error("Unable to contact habit-service")
         }
 
         return when (response.status) {
@@ -164,8 +164,8 @@ class HabitsApiRepository {
                 HabitListResult.Success(items)
             }
 
-            HttpStatusCode.Unauthorized -> HabitListResult.Error("Sessione scaduta, rifai il login")
-            else -> HabitListResult.Error("Errore lettura habits (${response.status.value})")
+            HttpStatusCode.Unauthorized -> HabitListResult.Error("Session expired, please log in again")
+            else -> HabitListResult.Error("Habit read error (${response.status.value})")
         }
     }
 
@@ -184,14 +184,14 @@ class HabitsApiRepository {
                 )
             }
         }.getOrElse {
-            return AttendHabitResult.Error("Impossibile contattare habit-service")
+            return AttendHabitResult.Error("Unable to contact habit-service")
         }
 
         return when (response.status) {
             HttpStatusCode.NoContent, HttpStatusCode.OK -> AttendHabitResult.Success
-            HttpStatusCode.Unauthorized -> AttendHabitResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> AttendHabitResult.Error("Habit non trovata")
-            else -> AttendHabitResult.Error("Errore attend habit (${response.status.value})")
+            HttpStatusCode.Unauthorized -> AttendHabitResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> AttendHabitResult.Error("Habit not found")
+            else -> AttendHabitResult.Error("Attend habit error (${response.status.value})")
         }
     }
 
@@ -201,14 +201,14 @@ class HabitsApiRepository {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
         }.getOrElse {
-            return DeleteHabitResult.Error("Impossibile contattare habit-service")
+            return DeleteHabitResult.Error("Unable to contact habit-service")
         }
 
         return when (response.status) {
             HttpStatusCode.NoContent, HttpStatusCode.OK -> DeleteHabitResult.Success
-            HttpStatusCode.Unauthorized -> DeleteHabitResult.Error("Sessione scaduta, rifai il login")
-            HttpStatusCode.NotFound -> DeleteHabitResult.Error("Habit non trovata")
-            else -> DeleteHabitResult.Error("Errore delete habit (${response.status.value})")
+            HttpStatusCode.Unauthorized -> DeleteHabitResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> DeleteHabitResult.Error("Habit not found")
+            else -> DeleteHabitResult.Error("Delete habit error (${response.status.value})")
         }
     }
 
@@ -219,7 +219,7 @@ class HabitsApiRepository {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }
         }.getOrElse {
-            return HabitHistoryResult.Error("Impossibile contattare habit-service")
+            return HabitHistoryResult.Error("Unable to contact habit-service")
         }
 
         return when (response.status) {
@@ -237,8 +237,8 @@ class HabitsApiRepository {
                 HabitHistoryResult.Success(items)
             }
 
-            HttpStatusCode.Unauthorized -> HabitHistoryResult.Error("Sessione scaduta, rifai il login")
-            else -> HabitHistoryResult.Error("Errore lettura storico habits (${response.status.value})")
+            HttpStatusCode.Unauthorized -> HabitHistoryResult.Error("Session expired, please log in again")
+            else -> HabitHistoryResult.Error("Habit history read error (${response.status.value})")
         }
     }
 }

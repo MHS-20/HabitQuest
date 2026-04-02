@@ -31,8 +31,8 @@ fun HabitHistoryScreen(token: String, avatarState: AvatarUiState) {
     LaunchedEffect(token, avatarState) {
         val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
         uiState = when {
-            token.isBlank() -> HabitHistoryUiState.Error("Sessione non valida")
-            avatar == null -> HabitHistoryUiState.Error("Avatar non disponibile")
+            token.isBlank() -> HabitHistoryUiState.Error("Invalid session")
+            avatar == null -> HabitHistoryUiState.Error("Avatar not available")
             else -> when (val result = habitRepository.fetchHistoryByAvatar(token, avatar.id)) {
                 is HabitHistoryResult.Success -> HabitHistoryUiState.Ready(result.items)
                 is HabitHistoryResult.Error -> HabitHistoryUiState.Error(result.message)
@@ -47,14 +47,14 @@ fun HabitHistoryScreen(token: String, avatarState: AvatarUiState) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Storico abitudini", style = MaterialTheme.typography.headlineSmall)
+        Text("Habit history", style = MaterialTheme.typography.headlineSmall)
 
         when (val state = uiState) {
-            HabitHistoryUiState.Loading -> Text("Caricamento storico...")
+            HabitHistoryUiState.Loading -> Text("Loading history...")
             is HabitHistoryUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
             is HabitHistoryUiState.Ready -> {
                 if (state.items.isEmpty()) {
-                    Text("Nessun evento nello storico")
+                    Text("No history events")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(state.items, key = { "${it.occurredAt}-${it.eventType}-${it.habitId}" }) { item ->
@@ -76,10 +76,10 @@ private fun HabitHistoryRow(item: HabitHistoryItem) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(item.eventType, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
-            Text("Data: ${item.occurredAt}", style = MaterialTheme.typography.bodySmall)
+            Text("Date: ${item.occurredAt}", style = MaterialTheme.typography.bodySmall)
             Text("Habit ID: ${item.habitId}", style = MaterialTheme.typography.bodySmall)
             if (item.details.isNotBlank()) {
-                Text("Dettagli: ${item.details}", style = MaterialTheme.typography.bodySmall)
+                Text("Details: ${item.details}", style = MaterialTheme.typography.bodySmall)
             }
         }
     }

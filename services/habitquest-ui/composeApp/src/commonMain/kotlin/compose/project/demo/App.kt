@@ -13,11 +13,11 @@ import kotlinx.coroutines.launch
 // Pagine disponibili nella nav bar
 enum class AppPage(val label: String, val emoji: String) {
     Dashboard("Dashboard", "🏠"),
-    Habits("Abitudini", "📝"),
+    Habits("Habits", "📝"),
     Quest("Quest", "🎯"),
     Marketplace("Marketplace", "🛒"),
-    Character("Personaggio", "👤"),
-    HabitHistory("Storico", "🕒"),
+    Character("Character", "👤"),
+    HabitHistory("History", "🕒"),
 }
 
 private enum class AuthRoute {
@@ -133,8 +133,8 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
     LaunchedEffect(token, userId, avatarRefreshTick) {
         avatarState = AvatarUiState.Loading
         avatarState = when {
-            token.isBlank() -> AvatarUiState.Error("Sessione non valida")
-            userId.isBlank() -> AvatarUiState.Error("Utente non disponibile nella sessione")
+            token.isBlank() -> AvatarUiState.Error("Invalid session")
+            userId.isBlank() -> AvatarUiState.Error("User not available in session")
             else -> when (val result = avatarRepository.fetchAvatar(avatarId = userId, token = token)) {
                 is AvatarResult.Success -> AvatarUiState.Ready(result.avatar)
                 is AvatarResult.Error -> AvatarUiState.Error(result.message)

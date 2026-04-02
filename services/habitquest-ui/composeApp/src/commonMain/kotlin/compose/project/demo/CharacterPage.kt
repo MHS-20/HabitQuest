@@ -103,7 +103,7 @@ fun CharacterScreen(
     ) {
         when (val state = avatarState) {
             AvatarUiState.Loading -> Text(
-                text = "Caricamento personaggio...",
+                text = "Loading character...",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -135,7 +135,7 @@ fun CharacterScreen(
                     sellActionMessage?.let { message ->
                         Text(
                             text = message,
-                            color = if (message.startsWith("Vendita completata")) {
+                            color = if (message.startsWith("Sale completed")) {
                                 MaterialTheme.colorScheme.primary
                             } else {
                                 MaterialTheme.colorScheme.error
@@ -155,16 +155,16 @@ fun CharacterScreen(
                     }
 
                     Spacer(Modifier.height(12.dp))
-                    Text("Inventario", style = MaterialTheme.typography.titleMedium)
+                    Text("Inventory", style = MaterialTheme.typography.titleMedium)
 
                     when {
-                        inventoryLoading -> Text("Caricamento inventario...")
+                        inventoryLoading -> Text("Loading inventory...")
                         inventoryError != null -> Text(
                             text = inventoryError.orEmpty(),
                             color = MaterialTheme.colorScheme.error
                         )
 
-                        inventoryItems.isEmpty() -> Text("Inventario vuoto")
+                        inventoryItems.isEmpty() -> Text("Inventory is empty")
                         else -> inventoryItems.forEach { item ->
                             val isEquippable = item.type.equals("WEAPON", true) || item.type.equals("ARMOR", true)
                             val isEquipped = equippedItemNames.contains(item.name)
@@ -198,10 +198,10 @@ fun CharacterScreen(
                                     Spacer(Modifier.height(4.dp))
                                     Text(item.description, style = MaterialTheme.typography.bodyMedium)
                                     Spacer(Modifier.height(4.dp))
-                                    Text("Tipo: ${item.type}", style = MaterialTheme.typography.bodySmall)
-                                    Text("Potenza: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
-                                    Text("Quantità: ${item.quantity}", style = MaterialTheme.typography.bodySmall)
-                                    Text("Prezzo: ${item.price}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Type: ${item.type}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Power: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Quantity: ${item.quantity}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Price: ${item.price}", style = MaterialTheme.typography.bodySmall)
                                     Spacer(Modifier.height(10.dp))
                                     if (isEquippable) {
                                         Button(
@@ -217,9 +217,9 @@ fun CharacterScreen(
                                                     when (result) {
                                                         AvatarInventoryActionResult.Success -> {
                                                             inventoryActionMessage = if (isEquipped) {
-                                                                "Unequip completato: ${item.name}"
+                                                                "Unequip completed: ${item.name}"
                                                             } else {
-                                                                "Equip completato: ${item.name}"
+                                                                "Equip completed: ${item.name}"
                                                             }
                                                             onAvatarRefresh()
                                                             reloadInventoryState(state.avatar.id)
@@ -257,7 +257,7 @@ fun CharacterScreen(
                                                 }
                                                 when (val result = marketplaceRepository.sellItem(token, marketplace, item.name)) {
                                                     MarketplaceSellResult.Success -> {
-                                                        sellActionMessage = "Vendita completata: ${item.name}"
+                                                        sellActionMessage = "Sale completed: ${item.name}"
                                                         onMoneyDelta(item.price)
                                                         onAvatarRefresh()
                                                         reloadInventoryState(state.avatar.id)
@@ -276,9 +276,9 @@ fun CharacterScreen(
                                         if (sellingItemName == item.name) {
                                             CircularProgressIndicator(strokeWidth = 2.dp)
                                             Spacer(Modifier.width(8.dp))
-                                            Text("Vendo...")
+                                            Text("Selling...")
                                         } else {
-                                            Text("Vendi")
+                                            Text("Sell")
                                         }
                                     }
                                 }
@@ -288,9 +288,9 @@ fun CharacterScreen(
                     }
 
                     Spacer(Modifier.height(12.dp))
-                    Text("Equipaggiati", style = MaterialTheme.typography.titleMedium)
+                    Text("Equipped", style = MaterialTheme.typography.titleMedium)
                     if (equippedItems.isEmpty()) {
-                        Text("Nessun oggetto equipaggiato")
+                        Text("No equipped items")
                     } else {
                         equippedItems.forEach { item ->
                             Card(
@@ -321,8 +321,8 @@ fun CharacterScreen(
                                     Spacer(Modifier.height(4.dp))
                                     Text(item.description, style = MaterialTheme.typography.bodyMedium)
                                     Spacer(Modifier.height(4.dp))
-                                    Text("Tipo: ${item.type}", style = MaterialTheme.typography.bodySmall)
-                                    Text("Potenza: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Type: ${item.type}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Power: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
                                     Spacer(Modifier.height(10.dp))
                                     Button(
                                         onClick = {
@@ -331,7 +331,7 @@ fun CharacterScreen(
                                                 inventoryActionMessage = null
                                                 when (val result = avatarRepository.unequipItem(token, state.avatar.id, item)) {
                                                     AvatarInventoryActionResult.Success -> {
-                                                        inventoryActionMessage = "Unequip completato: ${item.name}"
+                                                        inventoryActionMessage = "Unequip completed: ${item.name}"
                                                         onAvatarRefresh()
                                                         reloadInventoryState(state.avatar.id)
                                                     }
@@ -364,4 +364,3 @@ fun CharacterScreen(
         }
     }
 }
-

@@ -66,7 +66,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
             ) {
                 Spacer(Modifier.height(12.dp))
                 when (val state = avatarState) {
-                    AvatarUiState.Loading -> Text("Caricamento avatar in corso...")
+                    AvatarUiState.Loading -> Text("Loading avatar...")
                     is AvatarUiState.Error -> Text(
                         text = state.message,
                         color = MaterialTheme.colorScheme.error
@@ -78,7 +78,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     }
                 }
                 Spacer(Modifier.height(24.dp))
-                Text("Dati avatar aggiornati da avatar-service")
+                Text("Avatar data updated by avatar-service")
 
                 Spacer(Modifier.height(16.dp))
                 Button(
@@ -88,13 +88,13 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Nuova Habit")
+                    Text("New Habit")
                 }
 
                 if (showCreateHabitDialog) {
                     AlertDialog(
                         onDismissRequest = { showCreateHabitDialog = false },
-                        title = { Text("Nuova Habit") },
+                        title = { Text("New Habit") },
                         text = {
                             Column {
                                 OutlinedTextField(
@@ -103,7 +103,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                         title = it
                                         habitMessage = null
                                     },
-                                    label = { Text("Titolo") },
+                                    label = { Text("Title") },
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -116,7 +116,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                         description = it
                                         habitMessage = null
                                     },
-                                    label = { Text("Descrizione") },
+                                    label = { Text("Description") },
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
@@ -157,7 +157,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                             dayOfWeek = it.uppercase()
                                             habitMessage = null
                                         },
-                                        label = { Text("Day Of Week (es. MONDAY)") },
+                                        label = { Text("Day Of Week (e.g. MONDAY)") },
                                         singleLine = true,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -183,12 +183,12 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                 onClick = {
                                     val readyAvatar = (avatarState as? AvatarUiState.Ready)?.avatar
                                     if (readyAvatar == null) {
-                                        habitMessage = "Avatar non disponibile"
+                                        habitMessage = "Avatar not available"
                                         return@TextButton
                                     }
 
                                     if (title.isBlank()) {
-                                        habitMessage = "Inserisci un titolo"
+                                        habitMessage = "Enter a title"
                                         return@TextButton
                                     }
 
@@ -200,12 +200,12 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                         else null
 
                                     if (recurrenceType == CreateHabitRecurrenceType.WEEKLY && normalizedDayOfWeek !in allowedDaysOfWeek) {
-                                        habitMessage = "Day Of Week non valido"
+                                        habitMessage = "Invalid Day Of Week"
                                         return@TextButton
                                     }
 
                                     if (recurrenceType == CreateHabitRecurrenceType.MONTHLY && (normalizedDayOfMonth == null || normalizedDayOfMonth !in 1..31)) {
-                                        habitMessage = "Day Of Month deve essere tra 1 e 31"
+                                        habitMessage = "Day Of Month must be between 1 and 31"
                                         return@TextButton
                                     }
 
@@ -224,7 +224,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                             )
                                         ) {
                                             is CreateHabitResult.Success -> {
-                                                habitMessage = "Habit creata (id: ${result.habitId})"
+                                                habitMessage = "Habit created (id: ${result.habitId})"
                                                 title = ""
                                                 description = ""
                                                 showCreateHabitDialog = false
@@ -242,13 +242,13 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                                 if (isCreatingHabit) {
                                     CircularProgressIndicator(strokeWidth = 2.dp)
                                 } else {
-                                    Text("Crea")
+                                    Text("Create")
                                 }
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showCreateHabitDialog = false }) {
-                                Text("Annulla")
+                                Text("Cancel")
                             }
                         }
                     )

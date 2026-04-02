@@ -18,7 +18,7 @@ fun AchievementsScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "⭐ Pagina Traguardi",
+            text = "⭐ Achievements Page",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground
         )

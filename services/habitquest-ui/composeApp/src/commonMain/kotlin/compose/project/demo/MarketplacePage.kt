@@ -48,8 +48,8 @@ fun MarketplaceScreen(
         }
 
         uiState = when {
-            token.isBlank() -> MarketplaceUiState.Error("Sessione non valida")
-            avatar == null -> MarketplaceUiState.Error("Avatar non disponibile")
+            token.isBlank() -> MarketplaceUiState.Error("Invalid session")
+            avatar == null -> MarketplaceUiState.Error("Avatar not available")
             marketplaceId != null -> {
                 when (val refreshed = repository.fetchAvailableItems(token, marketplaceId.orEmpty())) {
                     is MarketplaceItemsResult.Success -> MarketplaceUiState.Ready(
@@ -99,7 +99,7 @@ fun MarketplaceScreen(
         actionMessage?.let { message ->
             Text(
                 text = message,
-                color = if (message.startsWith("Acquisto completato")) {
+                color = if (message.startsWith("Purchase completed")) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.error
@@ -108,7 +108,7 @@ fun MarketplaceScreen(
         }
 
         when (val state = uiState) {
-            MarketplaceUiState.Loading -> Text("Caricamento marketplace...")
+            MarketplaceUiState.Loading -> Text("Loading marketplace...")
             is MarketplaceUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
             is MarketplaceUiState.Ready -> {
                 if (state.warning != null) {
@@ -116,7 +116,7 @@ fun MarketplaceScreen(
                 }
 
                 if (state.items.isEmpty()) {
-                    Text("Nessun oggetto disponibile")
+                    Text("No items available")
                 } else {
                     val avatarLevel = (avatarState as? AvatarUiState.Ready)?.avatar?.level ?: 0
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -137,7 +137,7 @@ fun MarketplaceScreen(
                                             )
                                         ) {
                                             MarketplaceBuyResult.Success -> {
-                                                actionMessage = "Acquisto completato: ${item.name}"
+                                                actionMessage = "Purchase completed: ${item.name}"
                                                 onItemBought(item.price)
                                                 loadMarketplace(showLoading = false)
                                             }
@@ -173,9 +173,9 @@ private fun MarketplaceItemRow(
             Spacer(Modifier.height(4.dp))
             Text(item.description, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(6.dp))
-            Text("Tipo: ${item.type}", style = MaterialTheme.typography.bodySmall)
-            Text("Potenza: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
-            Text("Prezzo: ${item.price}", style = MaterialTheme.typography.bodySmall)
+            Text("Type: ${item.type}", style = MaterialTheme.typography.bodySmall)
+            Text("Power: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
+            Text("Price: ${item.price}", style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(10.dp))
             Button(
                 onClick = onBuy,
@@ -185,9 +185,9 @@ private fun MarketplaceItemRow(
                 if (isBuying) {
                     CircularProgressIndicator(strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("Acquisto...")
+                    Text("Purchasing...")
                 } else {
-                    Text("Compra")
+                    Text("Buy")
                 }
             }
         }

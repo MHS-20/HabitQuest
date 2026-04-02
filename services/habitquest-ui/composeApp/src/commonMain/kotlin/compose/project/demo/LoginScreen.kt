@@ -59,7 +59,7 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Accedi con il tuo account",
+                    text = "Sign in with your account",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -98,7 +98,7 @@ fun LoginScreen(
                     trailingIcon = {
                         TextButton(onClick = { passwordVisible = !passwordVisible }) {
                             Text(
-                                text = if (passwordVisible) "Nascondi" else "Mostra",
+                                text = if (passwordVisible) "Hide" else "Show",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -131,9 +131,9 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         when {
-                            email.isBlank() -> localError = "Inserisci la tua email"
-                            !email.contains("@") -> localError = "Inserisci una email valida"
-                            password.isBlank() -> localError = "Inserisci la password"
+                            email.isBlank() -> localError = "Enter your email"
+                            !email.contains("@") -> localError = "Enter a valid email"
+                            password.isBlank() -> localError = "Enter your password"
                             else -> onLogin(email.trim(), password)
                         }
                     },
@@ -154,7 +154,7 @@ fun LoginScreen(
                         )
                     } else {
                         Text(
-                            text = "Accedi",
+                            text = "Sign in",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -168,7 +168,7 @@ fun LoginScreen(
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f))
                     Text(
-                        text = "  oppure  ",
+                        text = "  or  ",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -187,7 +187,7 @@ fun LoginScreen(
                     )
                 ) {
                     Text(
-                        text = "Crea un account",
+                        text = "Create an account",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )

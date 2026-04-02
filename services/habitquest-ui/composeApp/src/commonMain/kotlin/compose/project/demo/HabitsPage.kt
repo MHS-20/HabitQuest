@@ -50,8 +50,8 @@ fun HabitsScreen(
             uiState = HabitsUiState.Loading
         }
         uiState = when {
-            token.isBlank() -> HabitsUiState.Error("Sessione non valida")
-            avatar == null -> HabitsUiState.Error("Avatar non disponibile")
+            token.isBlank() -> HabitsUiState.Error("Invalid session")
+            avatar == null -> HabitsUiState.Error("Avatar not available")
             else -> when (val result = habitRepository.fetchHabitsByAvatar(token, avatar.id)) {
                 is HabitListResult.Success -> HabitsUiState.Ready(result.habits)
                 is HabitListResult.Error -> HabitsUiState.Error(result.message)
@@ -70,12 +70,12 @@ fun HabitsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Le mie abitudini", style = MaterialTheme.typography.headlineSmall)
+        Text("My habits", style = MaterialTheme.typography.headlineSmall)
 
         actionMessage?.let { message ->
             Text(
                 text = message,
-                color = if (message.startsWith("Habit completata") || message.startsWith("Habit eliminata")) {
+                color = if (message.startsWith("Habit completed") || message.startsWith("Habit deleted")) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.error
@@ -84,11 +84,11 @@ fun HabitsScreen(
         }
 
         when (val state = uiState) {
-            HabitsUiState.Loading -> Text("Caricamento habits...")
+            HabitsUiState.Loading -> Text("Loading habits...")
             is HabitsUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
             is HabitsUiState.Ready -> {
                 if (state.habits.isEmpty()) {
-                    Text("Nessuna habit trovata")
+                    Text("No habits found")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(state.habits, key = { it.id }) { habit ->
@@ -102,7 +102,7 @@ fun HabitsScreen(
                                         actionMessage = null
                                         when (val result = habitRepository.attendHabit(token, habit.id)) {
                                             AttendHabitResult.Success -> {
-                                                actionMessage = "Habit completata: ${habit.title}"
+                                                actionMessage = "Habit completed: ${habit.title}"
                                                 onHabitAttended()
                                                 loadHabits(showLoading = false)
                                             }
@@ -127,8 +127,8 @@ fun HabitsScreen(
         pendingDeleteHabit?.let { habit ->
             AlertDialog(
                 onDismissRequest = { pendingDeleteHabit = null },
-                title = { Text("Eliminare habit?") },
-                text = { Text("Vuoi eliminare \"${habit.title}\"? Questa azione non può essere annullata.") },
+                title = { Text("Delete habit?") },
+                text = { Text("Do you want to delete \"${habit.title}\"? This action cannot be undone.") },
                 confirmButton = {
                     TextButton(onClick = {
                         scope.launch {
@@ -136,7 +136,7 @@ fun HabitsScreen(
                             actionMessage = null
                             when (val result = habitRepository.deleteHabit(token, habit.id)) {
                                 DeleteHabitResult.Success -> {
-                                    actionMessage = "Habit eliminata: ${habit.title}"
+                                    actionMessage = "Habit deleted: ${habit.title}"
                                     pendingDeleteHabit = null
                                     loadHabits(showLoading = false)
                                 }
@@ -148,12 +148,12 @@ fun HabitsScreen(
                             deletingHabitId = null
                         }
                     }) {
-                        Text("Elimina")
+                        Text("Delete")
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { pendingDeleteHabit = null }) {
-                        Text("Annulla")
+                        Text("Cancel")
                     }
                 }
             )
@@ -169,9 +169,9 @@ private fun HabitRow(
     onAttend: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val tagsText = habit.tags.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nessun tag"
-    val lastAttendedText = habit.lastAttendedDate ?: "Non disponibile"
-    val nextRecurrenceText = habit.nextRecurrenceDate ?: "Non disponibile"
+    val tagsText = habit.tags.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "No tags"
+    val lastAttendedText = habit.lastAttendedDate ?: "Not available"
+    val nextRecurrenceText = habit.nextRecurrenceDate ?: "Not available"
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -196,9 +196,9 @@ private fun HabitRow(
                 if (isAttending) {
                     CircularProgressIndicator(strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("Attendo...")
+                    Text("Marking...")
                 } else {
-                    Text("Segna come completata")
+                    Text("Mark as completed")
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -214,9 +214,9 @@ private fun HabitRow(
                 if (isDeleting) {
                     CircularProgressIndicator(strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("Elimino...")
+                    Text("Deleting...")
                 } else {
-                    Text("Elimina")
+                    Text("Delete")
                 }
             }
         }
