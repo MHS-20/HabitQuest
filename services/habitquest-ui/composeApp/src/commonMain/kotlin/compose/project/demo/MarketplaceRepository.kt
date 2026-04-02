@@ -48,6 +48,11 @@ sealed interface MarketplaceBuyResult {
     data class Error(val message: String) : MarketplaceBuyResult
 }
 
+sealed interface MarketplaceSellResult {
+    data object Success : MarketplaceSellResult
+    data class Error(val message: String) : MarketplaceSellResult
+}
+
 class MarketplaceRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
@@ -157,6 +162,28 @@ class MarketplaceRepository {
             HttpStatusCode.NotFound -> MarketplaceBuyResult.Error("Oggetto non disponibile")
             HttpStatusCode.Unauthorized -> MarketplaceBuyResult.Error("Sessione scaduta, rifai il login")
             else -> MarketplaceBuyResult.Error("Acquisto fallito (${response.status.value})")
+        }
+    }
+
+    suspend fun sellItem(
+        token: String,
+        marketplaceId: String,
+        itemName: String,
+    ): MarketplaceSellResult {
+        val encodedItemName = itemName.encodeURLPath()
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/sold-items/$encodedItemName/sell") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+        }.getOrElse {
+            return MarketplaceSellResult.Error("Impossibile contattare marketplace-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> MarketplaceSellResult.Success
+            HttpStatusCode.NotFound -> MarketplaceSellResult.Error("Oggetto non disponibile")
+            HttpStatusCode.Unauthorized -> MarketplaceSellResult.Error("Sessione scaduta, rifai il login")
+            else -> MarketplaceSellResult.Error("Vendita fallita (${response.status.value})")
         }
     }
 
