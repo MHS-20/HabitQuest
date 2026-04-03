@@ -7,7 +7,7 @@ public class QuestMapper {
     return new QuestResponse(
         quest.getId().value(),
         quest.getName(),
-        quest.getDuration() != null ? quest.getDuration().toString() : null,
+        quest.getDuration() != null ? (int) quest.getDuration().toDays() : null,
         quest.getReward() != null ? quest.getReward().value() : null,
         quest.getHabits().stream().map(h -> h.getId().value()).toList());
   }

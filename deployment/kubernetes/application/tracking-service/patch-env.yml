@@ -12,6 +12,8 @@ spec:
               value: prod
             - name: AVATAR_SERVICE_URI
               value: http://avatar-service:8081
+            - name: QUEST_SERVICE_URI
+              value: http://quest-service:8084
             - name: KAFKA_BROKER
               value: kafka-service:9092
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT

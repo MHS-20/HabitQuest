@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -288,6 +289,12 @@ public class HabitController {
   public ResponseEntity<ErrorResponse> handleAvatarException(RuntimeException ex) {
     log.error(ex, "Domain error", ex);
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+  }
+
+  @ExceptionHandler({QuestCommunicationException.class})
+  public ResponseEntity<ErrorResponse> handleQuestException(RuntimeException ex) {
+    log.error(ex, "Quest service communication error", ex);
+    return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(ex.getMessage()));
   }
 
   // ─── HATEOAS helpers ────────────────────────────────────────────────────────
