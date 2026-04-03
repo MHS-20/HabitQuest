@@ -21,7 +21,7 @@ public final class QuestFixtures {
   public static final String TAG_MINDFULNESS = "mindfulness";
 
   // Default values
-  public static final Duration DEFAULT_DURATION = Duration.ofHours(2);
+  public static final Duration DEFAULT_DURATION = Duration.ofDays(2);
   public static final int DEFAULT_REWARD = 10;
   public static final MoneyReward DEFAULT_MONEY_REWARD = new MoneyReward(DEFAULT_REWARD);
 

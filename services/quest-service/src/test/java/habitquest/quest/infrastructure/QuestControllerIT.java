@@ -131,7 +131,7 @@ public class QuestControllerIT {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.id").value(QUEST_ID.value()))
           .andExpect(jsonPath("$.name").value(QUEST_NAME))
-          .andExpect(jsonPath("$.duration").value("PT2H"))
+          .andExpect(jsonPath("$.duration").value("PT48H"))
           .andExpect(jsonPath("$.habitIds[0]").value(HABIT_ID_1.value()));
     }
 

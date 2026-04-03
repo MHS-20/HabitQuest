@@ -49,30 +49,39 @@ class ActiveQuestsTest {
   }
 
   @Test
-  @DisplayName("quest is completed only after all required attendances are recorded")
-  void completesOnlyWhenAllRequiredOccurrencesAreDone() {
+  @DisplayName("quest is completed only after every habit is attended at least once")
+  void completesOnlyWhenEveryHabitIsAttended() {
     Quest quest = new Quest(new Id<>("quest-2"), "Two day quest");
     quest.setDuration(Duration.ofDays(2));
 
-    Habit habit =
+    Habit firstHabit =
         new Habit(
             new Id<>("habit-1"),
             "Stretch",
             "Morning stretch",
             List.of(new Tag("fitness")),
             new DailyRecurrence());
-    quest.addHabit(habit);
+    Habit secondHabit =
+        new Habit(
+            new Id<>("habit-2"),
+            "Hydrate",
+            "Drink water",
+            List.of(new Tag("health")),
+            new DailyRecurrence());
+    quest.addHabit(firstHabit);
+    quest.addHabit(secondHabit);
 
     ActiveQuests active =
         ActiveQuests.fromQuest(
             new Id<>("active-2"), new Id<>("avatar-2"), LocalDate.of(2026, 4, 1), quest);
 
-    assertThat(active.recordAttendance(habit.getId(), LocalDate.of(2026, 4, 1))).isTrue();
+    assertThat(active.recordAttendance(firstHabit.getId(), LocalDate.of(2026, 4, 1))).isTrue();
     assertThat(active.getStatus()).isEqualTo(ActiveQuests.Status.IN_PROGRESS);
 
-    assertThat(active.recordAttendance(habit.getId(), LocalDate.of(2026, 4, 2))).isTrue();
+    assertThat(active.recordAttendance(secondHabit.getId(), LocalDate.of(2026, 4, 2))).isTrue();
     assertThat(active.getStatus()).isEqualTo(ActiveQuests.Status.COMPLETED);
-    assertThat(active.remainingOccurrences(habit.getId())).isZero();
+    assertThat(active.remainingOccurrences(firstHabit.getId())).isEqualTo(1);
+    assertThat(active.remainingOccurrences(secondHabit.getId())).isEqualTo(1);
   }
 
   @Test
@@ -81,20 +90,28 @@ class ActiveQuestsTest {
     Quest quest = new Quest(new Id<>("quest-3"), "Daily");
     quest.setDuration(Duration.ofDays(2));
 
-    Habit habit =
+    Habit firstHabit =
         new Habit(
             new Id<>("habit-1"),
             "Walk",
             "Walk 30 minutes",
             List.of(new Tag("health")),
             new DailyRecurrence());
-    quest.addHabit(habit);
+    Habit secondHabit =
+        new Habit(
+            new Id<>("habit-2"),
+            "Stretch",
+            "Morning stretch",
+            List.of(new Tag("fitness")),
+            new DailyRecurrence());
+    quest.addHabit(firstHabit);
+    quest.addHabit(secondHabit);
 
     ActiveQuests active =
         ActiveQuests.fromQuest(
             new Id<>("active-3"), new Id<>("avatar-3"), LocalDate.of(2026, 4, 1), quest);
 
-    active.recordAttendance(habit.getId(), LocalDate.of(2026, 4, 1));
+    active.recordAttendance(firstHabit.getId(), LocalDate.of(2026, 4, 1));
     active.refreshStatus(LocalDate.of(2026, 4, 4));
 
     assertThat(active.getStatus()).isEqualTo(ActiveQuests.Status.EXPIRED);
