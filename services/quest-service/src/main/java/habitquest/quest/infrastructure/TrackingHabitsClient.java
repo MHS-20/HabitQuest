@@ -67,7 +67,8 @@ public class TrackingHabitsClient implements TrackingHabitsClientPort {
         recurrenceType,
         dayOfWeek,
         dayOfMonth,
-        questId.value());
+        questId.value(),
+        habit.getId().value());
   }
 
   private record CreateTrackingHabitRequest(
@@ -77,5 +78,6 @@ public class TrackingHabitsClient implements TrackingHabitsClientPort {
       String recurrenceType,
       String dayOfWeek,
       Integer dayOfMonth,
-      String associatedQuestId) {}
+      String associatedQuestId,
+      String sourceHabitId) {}
 }

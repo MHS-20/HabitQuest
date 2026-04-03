@@ -114,9 +114,14 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
     val avatarRepository = remember { AvatarRepository() }
     var avatarState by remember { mutableStateOf<AvatarUiState>(AvatarUiState.Loading) }
     var avatarRefreshTick by remember { mutableIntStateOf(0) }
+    var questProgressRefreshTick by remember { mutableIntStateOf(0) }
 
     fun requestAvatarRefresh() {
         avatarRefreshTick += 1
+    }
+
+    fun requestQuestProgressRefresh() {
+        questProgressRefreshTick += 1
     }
 
     fun applyMoneyDelta(delta: Int) {
@@ -183,9 +188,16 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                 AppPage.Habits -> HabitsScreen(
                     token = token,
                     avatarState = avatarState,
-                    onHabitAttended = ::requestAvatarRefresh,
+                    onHabitAttended = {
+                        requestAvatarRefresh()
+                        requestQuestProgressRefresh()
+                    },
                 )
-                AppPage.Quest -> QuestScreen(token = token, avatarState = avatarState)
+                AppPage.Quest -> QuestScreen(
+                    token = token,
+                    avatarState = avatarState,
+                    progressRefreshTick = questProgressRefreshTick,
+                )
                 AppPage.Marketplace -> MarketplaceScreen(
                     token = token,
                     avatarState = avatarState,

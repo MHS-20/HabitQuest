@@ -24,7 +24,8 @@ public class HabitMapper {
         toRecurrenceResponse(habit.getRecurrence()),
         habit.getLastAttendedDate(),
         habit.nextRecurrence(),
-        habit.getAssociatedQuestId().orElse(null));
+        habit.getAssociatedQuestId().orElse(null),
+        habit.getSourceHabitId().orElse(null));
   }
 
   public static HabitHistoryEventResponse toResponse(HabitHistoryEvent event) {
