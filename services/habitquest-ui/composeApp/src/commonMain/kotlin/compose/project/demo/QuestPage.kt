@@ -244,11 +244,11 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        val selectedDurationIso = resolveQuestDurationIso(
+                        val selectedDurationPreviewDays = resolveQuestDurationDays(
                             days = selectedDurationDays.toInt()
                         )
                         Text(
-                            "Selected: ${selectedDurationIso ?: "invalid duration"}",
+                            "Selected: ${selectedDurationPreviewDays ?: 0} days",
                             style = MaterialTheme.typography.bodySmall
                         )
 
@@ -287,10 +287,10 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                 message = "Enter the quest name"
                                 return@TextButton
                             }
-                            val durationIso = resolveQuestDurationIso(
+                            val durationDays = resolveQuestDurationDays(
                                 days = selectedDurationDays.toInt()
                             )
-                            if (durationIso == null) {
+                            if (durationDays == null) {
                                 message = "Duration must be a positive number of days"
                                 return@TextButton
                             }
@@ -301,7 +301,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                     val result = repository.createQuestWithDetails(
                                         token = token,
                                         name = questName.trim(),
-                                        duration = durationIso,
+                                        durationDays = durationDays,
                                         habits = selectedHabits,
                                     )
                                 ) {
@@ -337,11 +337,11 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
     }
 }
 
-private fun resolveQuestDurationIso(
+private fun resolveQuestDurationDays(
     days: Int,
-): String? {
+): Int? {
     if (days <= 0) return null
-    return "P${days}D"
+    return days
 }
 
 @Composable
@@ -378,7 +378,7 @@ private fun QuestRow(quest: QuestData, canJoin: Boolean, onJoin: () -> Unit) {
             Text(quest.name, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text("ID: ${quest.id}", style = MaterialTheme.typography.bodySmall)
-            Text("Duration: ${quest.duration}", style = MaterialTheme.typography.bodySmall)
+            Text("Duration: ${quest.durationDays} days", style = MaterialTheme.typography.bodySmall)
             Text("Reward: ${quest.reward}", style = MaterialTheme.typography.bodySmall)
             Text(
                 "Linked habits: ${if (quest.habitIds.isEmpty()) "none" else quest.habitIds.joinToString()}",

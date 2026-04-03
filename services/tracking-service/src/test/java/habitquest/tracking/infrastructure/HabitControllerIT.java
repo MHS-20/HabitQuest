@@ -573,5 +573,24 @@ public class HabitControllerIT {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Attendance date cannot be in the future"));
     }
+
+    @Test
+    @DisplayName("returns 502 when quest-service synchronization fails")
+    void shouldReturn502OnQuestCommunicationError() throws Exception {
+      when(habitService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
+          .thenThrow(
+              new QuestCommunicationException(
+                  "Failed to update quest progress for quest " + QUEST_1,
+                  new RuntimeException("downstream error")));
+
+      mockMvc
+          .perform(
+              post("/api/v1/habits/{id}/attend", HABIT_ID.value())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"date\":\"%s\"}".formatted(NEXT_ATTENDED_AT)))
+          .andExpect(status().isBadGateway())
+          .andExpect(
+              jsonPath("$.message").value("Failed to update quest progress for quest " + QUEST_1));
+    }
   }
 }
