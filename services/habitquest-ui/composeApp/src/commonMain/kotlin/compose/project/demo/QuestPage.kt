@@ -34,7 +34,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun QuestScreen(token: String, avatarState: AvatarUiState) {
+fun QuestScreen(
+    token: String,
+    avatarState: AvatarUiState,
+    progressRefreshTick: Int = 0,
+) {
     val repository = remember { QuestRepository() }
     val habitRepository = remember { HabitsApiRepository() }
     val scope = rememberCoroutineScope()
@@ -95,7 +99,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
         isLoading = false
     }
 
-    LaunchedEffect(token, avatarState) {
+    LaunchedEffect(token, avatarState, progressRefreshTick) {
         loadAvatarHabits()
         loadProgressForAvatar()
     }
@@ -199,7 +203,21 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
         }
 
         Spacer(Modifier.height(8.dp))
-        Text("Active quest progress", style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Active quest progress", style = MaterialTheme.typography.titleMedium)
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        loadProgressForAvatar()
+                    }
+                }
+            ) {
+                Text("Refresh")
+            }
+        }
         if (progress.isEmpty()) {
             Text("No active quest progress for this avatar")
         } else {

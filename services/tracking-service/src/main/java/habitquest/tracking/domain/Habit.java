@@ -17,6 +17,7 @@ public class Habit implements Aggregate<Id<Habit>> {
   private LocalDateTime lastAttendedDate;
   private final Id<Avatar> avatarId;
   private final Optional<String> associatedQuestId;
+  private final Optional<String> sourceHabitId;
   private final LocalDateTime createdAt = LocalDateTime.now();
 
   public Habit(
@@ -25,13 +26,25 @@ public class Habit implements Aggregate<Id<Habit>> {
       String title,
       String description,
       Recurrence recurrence,
-      Optional<String> associatedQuestId) {
+      Optional<String> associatedQuestId,
+      Optional<String> sourceHabitId) {
     this.id = id;
     this.avatarId = avatarId;
     this.title = title;
     this.description = description;
     this.recurrence = recurrence;
     this.associatedQuestId = associatedQuestId;
+    this.sourceHabitId = sourceHabitId;
+  }
+
+  public Habit(
+      Id<Habit> id,
+      Id<Avatar> avatarId,
+      String title,
+      String description,
+      Recurrence recurrence,
+      Optional<String> associatedQuestId) {
+    this(id, avatarId, title, description, recurrence, associatedQuestId, Optional.empty());
   }
 
   public void attendHabit(LocalDateTime date) {
@@ -65,6 +78,10 @@ public class Habit implements Aggregate<Id<Habit>> {
 
   public Optional<String> getAssociatedQuestId() {
     return associatedQuestId;
+  }
+
+  public Optional<String> getSourceHabitId() {
+    return sourceHabitId;
   }
 
   public Recurrence getRecurrence() {

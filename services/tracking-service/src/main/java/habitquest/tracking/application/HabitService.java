@@ -18,6 +18,13 @@ public interface HabitService {
   Habit createDailyHabit(
       Id<Avatar> avatarId, String title, String description, String associatedQuestId);
 
+  Habit createDailyHabit(
+      Id<Avatar> avatarId,
+      String title,
+      String description,
+      String associatedQuestId,
+      String sourceHabitId);
+
   Habit createWeeklyHabit(
       Id<Avatar> avatarId, String title, String description, DayOfWeek dayOfWeek);
 
@@ -28,6 +35,14 @@ public interface HabitService {
       DayOfWeek dayOfWeek,
       String associatedQuestId);
 
+  Habit createWeeklyHabit(
+      Id<Avatar> avatarId,
+      String title,
+      String description,
+      DayOfWeek dayOfWeek,
+      String associatedQuestId,
+      String sourceHabitId);
+
   Habit createMonthlyHabit(
       Id<Avatar> avatarId, String title, String description, Integer dayOfMonth);
 
@@ -37,6 +52,14 @@ public interface HabitService {
       String description,
       Integer dayOfMonth,
       String associatedQuestId);
+
+  Habit createMonthlyHabit(
+      Id<Avatar> avatarId,
+      String title,
+      String description,
+      Integer dayOfMonth,
+      String associatedQuestId,
+      String sourceHabitId);
 
   Habit getHabitById(Id<Habit> habitId) throws HabitNotFoundException;
 
