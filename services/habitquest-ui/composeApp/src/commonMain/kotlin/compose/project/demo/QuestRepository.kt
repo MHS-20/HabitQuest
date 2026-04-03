@@ -24,6 +24,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.put
 
 data class QuestData(
     val id: String,
@@ -345,7 +346,20 @@ class QuestRepository {
                                 habit.tags.forEach { tag -> add(JsonPrimitive(tag)) }
                             }
                         )
-                        put("recurrence", JsonNull)
+                        put(
+                            "recurrence",
+                            buildJsonObject {
+                                put("type", JsonPrimitive(habit.recurrenceType.uppercase()))
+                                put(
+                                    "dayOfMonth",
+                                    habit.recurrenceDayOfMonth?.let { JsonPrimitive(it) } ?: JsonNull
+                                )
+                                put(
+                                    "dayOfWeek",
+                                    habit.recurrenceDayOfWeek?.let { JsonPrimitive(it) } ?: JsonNull
+                                )
+                            }
+                        )
                     }
                 )
             }
