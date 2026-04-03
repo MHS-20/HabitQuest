@@ -3,12 +3,19 @@ nav:
   - Home: index.md
   - Domain Driven Design:
     - Requirements: ddd/specifications/requirements.md
+    - Ubiquitous Language: ddd/specifications/ubiquitous_language.md
+    - Event Storming: ddd/eventStorming/event_storming.md
+    - Use Cases: ddd/useCases/use_cases.md
+    - User Stories: ddd/specifications/user_stories.md
     - Quality Attributes: ddd/specifications/quality_attributes.md
     - Quality Attribute Scenarios: ddd/specifications/quality_attributes_scenarios.md
-    - Ubiquitous Language: ddd/specifications/ubiquitous_language.md
-    - User Stories: ddd/specifications/user_stories.md
-    - Use Cases: ddd/useCases/use_cases.md
-    - Event Storming: ddd/eventStorming/event_storming.md
+  - Domain Overview:
+    - Avatar: domain/avatar.md
+    - Gilde: domain/guild.md
+    - Battaglie: domain/battle.md
+    - Marketplace: domain/marketplace.md
+    - Quest: domain/quest.md
+    - Abitudini: domain/habit.md
   - Architecture & Implementation:
     - Interactions: implementation/interactions/interactions.md
     - Hexagonal Architecture: implementation/hexagonal-architecture.md

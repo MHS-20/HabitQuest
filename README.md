@@ -76,6 +76,12 @@ cd ./services/habitquest-ui
 ```
 NOTE: the observability stack is not deployed with docker compose, use minikube for that.
 
+To stop, remove the containers and deleting the images:
+```bash
+docker compose down
+docker rmi $(docker images -q habitquest-*)
+```
+
 ## Option 2: Minikube
 NOTE: this tools needs to be installed on the system:
 - kubectl
@@ -88,6 +94,11 @@ Just run these commands:
 ./deploy.sh
 cd ./services/habitquest-ui
 ./gradlew composeApp:run
+```
+
+To stop and delete the cluster:
+```bash
+./delete.sh
 ```
 
 
