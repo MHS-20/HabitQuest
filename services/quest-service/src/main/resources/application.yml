@@ -7,7 +7,7 @@ server:
 info:
   system: HabitQuest
 tracking:
-  service-uri: ${TRACKING_SERVICE_URI:http://localhost:8085}
+  service-uri: ${TRACKING_SERVICE_URI:http://tracking-service:8085}
 avatar:
   service-uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
 

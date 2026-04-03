@@ -57,19 +57,24 @@ public class HabitController {
         switch (Objects.requireNonNull(request.recurrenceType()).toUpperCase(Locale.ITALIAN)) {
           case "DAILY" ->
               habitService.createDailyHabit(
-                  idOfAvatar(request.avatarId()), request.title(), request.description());
+                  idOfAvatar(request.avatarId()),
+                  request.title(),
+                  request.description(),
+                  request.associatedQuestId());
           case "WEEKLY" ->
               habitService.createWeeklyHabit(
                   idOfAvatar(request.avatarId()),
                   request.title(),
                   request.description(),
-                  request.dayOfWeek());
+                  request.dayOfWeek(),
+                  request.associatedQuestId());
           case "MONTHLY" ->
               habitService.createMonthlyHabit(
                   idOfAvatar(request.avatarId()),
                   request.title(),
                   request.description(),
-                  request.dayOfMonth());
+                  request.dayOfMonth(),
+                  request.associatedQuestId());
           default ->
               throw new IllegalArgumentException(
                   "Unknown recurrence type: " + request.recurrenceType());
@@ -310,7 +315,8 @@ public class HabitController {
       String description,
       String recurrenceType,
       DayOfWeek dayOfWeek,
-      Integer dayOfMonth) {}
+      Integer dayOfMonth,
+      String associatedQuestId) {}
 
   public record UpdateTitleRequest(String title) {}
 

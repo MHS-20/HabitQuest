@@ -3,6 +3,7 @@ package compose.project.demo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -179,6 +180,28 @@ private fun HabitRow(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(habit.title, style = MaterialTheme.typography.titleMedium)
+            habit.associatedQuestId?.let { questId ->
+                Spacer(Modifier.height(4.dp))
+                Row {
+                    Text(
+                        text = "From quest",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = MaterialTheme.shapes.small,
+                            )
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "($questId)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             Spacer(Modifier.height(4.dp))
             Text(habit.description, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(6.dp))
