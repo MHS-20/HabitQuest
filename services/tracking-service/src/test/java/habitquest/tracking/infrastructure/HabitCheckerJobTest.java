@@ -12,6 +12,7 @@ import habitquest.tracking.application.HabitHistoryRepository;
 import habitquest.tracking.application.HabitRepository;
 import habitquest.tracking.application.HabitService;
 import habitquest.tracking.application.HabitServiceImpl;
+import habitquest.tracking.application.QuestClientPort;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.events.HabitEvent;
 import habitquest.tracking.domain.events.HabitNotAttended;
@@ -38,6 +39,7 @@ class HabitCheckerJobTest {
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
   @Mock private AvatarClientPort avatarClient;
+  @Mock private QuestClientPort questClient;
 
   private HabitCheckerJob job;
 
@@ -71,7 +73,12 @@ class HabitCheckerJobTest {
 
     HabitService realService =
         new HabitServiceImpl(
-            habitRepository, historyRepository, habitFactory, habitObserver, avatarClient);
+            habitRepository,
+            historyRepository,
+            habitFactory,
+            habitObserver,
+            avatarClient,
+            questClient);
     HabitCheckerJob realJob = new HabitCheckerJob(realService);
 
     realJob.run();

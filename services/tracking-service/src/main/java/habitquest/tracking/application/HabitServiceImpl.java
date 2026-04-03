@@ -33,18 +33,21 @@ public class HabitServiceImpl implements HabitService {
   private final HabitFactory habitFactory;
   private final HabitObserver habitObserver;
   private final AvatarClientPort avatarClient;
+  private final QuestClientPort questClient;
 
   public HabitServiceImpl(
       HabitRepository habitRepository,
       HabitHistoryRepository historyRepository,
       HabitFactory habitFactory,
       HabitObserver habitObserver,
-      AvatarClientPort avatarClient) {
+      AvatarClientPort avatarClient,
+      QuestClientPort questClient) {
     this.habitRepository = habitRepository;
     this.historyRepository = historyRepository;
     this.habitFactory = habitFactory;
     this.habitObserver = habitObserver;
     this.avatarClient = avatarClient;
+    this.questClient = questClient;
   }
 
   @Override
@@ -212,6 +215,12 @@ public class HabitServiceImpl implements HabitService {
     habit.attendHabit(date);
     habitRepository.save(habit);
     avatarClient.grantExperience(habit.getAvatarId(), ATTEND_HABIT_XP_REWARD);
+    habit
+        .getAssociatedQuestId()
+        .ifPresent(
+            questId ->
+                questClient.recordHabitAttendance(
+                    questId, habit.getAvatarId(), habit.getId(), date.toLocalDate()));
     HabitAttended event = new HabitAttended(habit, habit.getAvatarId());
     appendHistory(event, "attendedAt=" + date);
     habitObserver.notifyHabitEvent(event);

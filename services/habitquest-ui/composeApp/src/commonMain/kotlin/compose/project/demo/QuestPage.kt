@@ -42,6 +42,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
     var searchText by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     var quests by remember { mutableStateOf<List<QuestData>>(emptyList()) }
+    var progress by remember { mutableStateOf<List<QuestProgressData>>(emptyList()) }
     var availableHabits by remember { mutableStateOf<List<HabitListItem>>(emptyList()) }
     var selectedHabitIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -72,6 +73,19 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
         }
     }
 
+    suspend fun loadProgressForAvatar() {
+        val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
+        if (avatar == null) {
+            progress = emptyList()
+            return
+        }
+
+        when (val result = repository.fetchActiveProgressByAvatar(token, avatar.id)) {
+            is QuestProgressListResult.Success -> progress = result.progress
+            is QuestProgressListResult.Error -> message = result.message
+        }
+    }
+
     LaunchedEffect(token) {
         isLoading = true
         message = null
@@ -81,6 +95,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
 
     LaunchedEffect(token, avatarState) {
         loadAvatarHabits()
+        loadProgressForAvatar()
     }
 
     val normalizedSearch = searchText.trim()
@@ -149,8 +164,49 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(filteredQuests, key = { it.id }) { quest ->
-                        QuestRow(quest)
+                        QuestRow(
+                            quest = quest,
+                            canJoin = avatarState is AvatarUiState.Ready,
+                            onJoin = {
+                                val avatarId = (avatarState as? AvatarUiState.Ready)?.avatar?.id
+                                if (avatarId.isNullOrBlank()) {
+                                    message = "Avatar not available for this session"
+                                    return@QuestRow
+                                }
+
+                                scope.launch {
+                                    isLoading = true
+                                    message = null
+                                    when (val result = repository.joinQuest(token, quest.id, avatarId)) {
+                                        is JoinQuestResult.Success -> {
+                                            message = "Joined quest: ${quest.name}"
+                                            loadProgressForAvatar()
+                                        }
+
+                                        is JoinQuestResult.Error -> {
+                                            message = result.message
+                                        }
+                                    }
+                                    isLoading = false
+                                }
+                            }
+                        )
                     }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Text("Active quest progress", style = MaterialTheme.typography.titleMedium)
+        if (progress.isEmpty()) {
+            Text("No active quest progress for this avatar")
+        } else {
+            LazyColumn(
+                modifier = Modifier.height(220.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(progress, key = { it.questId }) { item ->
+                    QuestProgressRow(item)
                 }
             }
         }
@@ -238,6 +294,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                         questName = ""
                                         selectedHabitIds = emptySet()
                                         loadQuests()
+                                        loadProgressForAvatar()
                                         showCreateDialog = false
                                     }
 
@@ -264,7 +321,31 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
 }
 
 @Composable
-private fun QuestRow(quest: QuestData) {
+private fun QuestProgressRow(progress: QuestProgressData) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(progress.questName, style = MaterialTheme.typography.titleSmall)
+            Text("Status: ${progress.status}", style = MaterialTheme.typography.bodySmall)
+            Text("Completion: ${progress.completionPercentage}%", style = MaterialTheme.typography.bodySmall)
+            if (progress.habits.isEmpty()) {
+                Text("No linked habits", style = MaterialTheme.typography.bodySmall)
+            } else {
+                progress.habits.forEach { habit ->
+                    Text(
+                        "- ${habit.title}: ${habit.attendedOccurrences}/${habit.requiredOccurrences} (remaining ${habit.remainingOccurrences})",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuestRow(quest: QuestData, canJoin: Boolean, onJoin: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -279,6 +360,14 @@ private fun QuestRow(quest: QuestData) {
                 "Linked habits: ${if (quest.habitIds.isEmpty()) "none" else quest.habitIds.joinToString()}",
                 style = MaterialTheme.typography.bodySmall
             )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = onJoin,
+                enabled = canJoin,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Join quest")
+            }
         }
     }
 }
