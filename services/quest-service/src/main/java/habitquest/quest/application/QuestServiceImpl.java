@@ -42,8 +42,8 @@ public class QuestServiceImpl implements QuestService {
   }
 
   @Override
-  public Quest createQuest(String name) {
-    Quest quest = questFactory.createQuest(name);
+  public Quest createQuest(String name, Duration duration) {
+    Quest quest = questFactory.createQuest(name, duration);
     questRepository.save(quest);
     questObserver.notifyQuestEvent(new QuestCreated(quest));
     return quest;

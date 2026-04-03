@@ -16,6 +16,7 @@ import habitquest.quest.infrastructure.dto.QuestResponse;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -48,7 +49,7 @@ public class QuestController {
   public ResponseEntity<EntityModel<QuestCreatedResponse>> createQuest(
       @RequestBody CreateQuestRequest request) {
     log.info(request, "Creating quest");
-    Quest created = questService.createQuest(request.name());
+    Quest created = questService.createQuest(request.name(), parseDuration(request.duration()));
     log.info(created, "Quest created");
 
     QuestCreatedResponse body = new QuestCreatedResponse(created.getId().value());
@@ -308,7 +309,18 @@ public class QuestController {
     }
   }
 
-  public record CreateQuestRequest(String name) {}
+  private static Duration parseDuration(String duration) {
+    if (duration == null || duration.isBlank()) {
+      throw new IllegalArgumentException("Duration cannot be blank");
+    }
+    try {
+      return Duration.parse(duration);
+    } catch (DateTimeParseException ex) {
+      throw new IllegalArgumentException("Invalid duration: " + duration);
+    }
+  }
+
+  public record CreateQuestRequest(String name, String duration) {}
 
   public record UpdateNameRequest(String name) {}
 
