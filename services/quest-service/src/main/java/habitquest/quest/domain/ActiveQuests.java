@@ -63,8 +63,7 @@ public class ActiveQuests implements Aggregate<Id<ActiveQuests>> {
     }
 
     this.status = Status.IN_PROGRESS;
-    if (this.requiredOccurrences.isEmpty()
-        || areAllHabitsCompleted(this.requiredOccurrences, this.attendedOccurrences)) {
+    if (areAllHabitsCompleted(this.requiredOccurrences, this.attendedOccurrences)) {
       this.status = Status.COMPLETED;
       this.completedOn = startedOn;
     }
@@ -129,9 +128,13 @@ public class ActiveQuests implements Aggregate<Id<ActiveQuests>> {
 
   private static boolean areAllHabitsCompleted(
       Map<Id<Habit>, Integer> requiredOccurrences, Map<Id<Habit>, Integer> attendedOccurrences) {
+    if (requiredOccurrences.isEmpty()) {
+      return false;
+    }
+
     for (Map.Entry<Id<Habit>, Integer> required : requiredOccurrences.entrySet()) {
       int done = attendedOccurrences.getOrDefault(required.getKey(), 0);
-      if (done < required.getValue()) {
+      if (done <= 0) {
         return false;
       }
     }
