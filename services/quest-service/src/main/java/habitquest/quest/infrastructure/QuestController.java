@@ -243,11 +243,13 @@ public class QuestController {
   public ResponseEntity<Void> recordAttendance(
       @PathVariable String id, @RequestBody RecordAttendanceRequest request)
       throws QuestNotFoundException {
+    log.info(request, "Recording habit attendance for quest " + id);
     questService.recordHabitAttendance(
         idOfQuest(id),
         idOfAvatar(request.avatarId()),
         idOfHabit(request.habitId()),
         LocalDate.parse(request.attendedOn()));
+    log.info(request, "Habit attendance recorded for quest " + id);
     return ResponseEntity.noContent().build();
   }
 
