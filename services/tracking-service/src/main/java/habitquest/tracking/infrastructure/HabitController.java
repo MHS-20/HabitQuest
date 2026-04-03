@@ -57,25 +57,48 @@ public class HabitController {
     Habit created =
         switch (Objects.requireNonNull(request.recurrenceType()).toUpperCase(Locale.ITALIAN)) {
           case "DAILY" ->
-              habitService.createDailyHabit(
-                  idOfAvatar(request.avatarId()),
-                  request.title(),
-                  request.description(),
-                  request.associatedQuestId());
+              request.sourceHabitId() == null || request.sourceHabitId().isBlank()
+                  ? habitService.createDailyHabit(
+                      idOfAvatar(request.avatarId()),
+                      request.title(),
+                      request.description(),
+                      request.associatedQuestId())
+                  : habitService.createDailyHabit(
+                      idOfAvatar(request.avatarId()),
+                      request.title(),
+                      request.description(),
+                      request.associatedQuestId(),
+                      request.sourceHabitId());
           case "WEEKLY" ->
-              habitService.createWeeklyHabit(
-                  idOfAvatar(request.avatarId()),
-                  request.title(),
-                  request.description(),
-                  request.dayOfWeek(),
-                  request.associatedQuestId());
+              request.sourceHabitId() == null || request.sourceHabitId().isBlank()
+                  ? habitService.createWeeklyHabit(
+                      idOfAvatar(request.avatarId()),
+                      request.title(),
+                      request.description(),
+                      request.dayOfWeek(),
+                      request.associatedQuestId())
+                  : habitService.createWeeklyHabit(
+                      idOfAvatar(request.avatarId()),
+                      request.title(),
+                      request.description(),
+                      request.dayOfWeek(),
+                      request.associatedQuestId(),
+                      request.sourceHabitId());
           case "MONTHLY" ->
-              habitService.createMonthlyHabit(
-                  idOfAvatar(request.avatarId()),
-                  request.title(),
-                  request.description(),
-                  request.dayOfMonth(),
-                  request.associatedQuestId());
+              request.sourceHabitId() == null || request.sourceHabitId().isBlank()
+                  ? habitService.createMonthlyHabit(
+                      idOfAvatar(request.avatarId()),
+                      request.title(),
+                      request.description(),
+                      request.dayOfMonth(),
+                      request.associatedQuestId())
+                  : habitService.createMonthlyHabit(
+                      idOfAvatar(request.avatarId()),
+                      request.title(),
+                      request.description(),
+                      request.dayOfMonth(),
+                      request.associatedQuestId(),
+                      request.sourceHabitId());
           default ->
               throw new IllegalArgumentException(
                   "Unknown recurrence type: " + request.recurrenceType());
@@ -323,7 +346,8 @@ public class HabitController {
       String recurrenceType,
       DayOfWeek dayOfWeek,
       Integer dayOfMonth,
-      String associatedQuestId) {}
+      String associatedQuestId,
+      String sourceHabitId) {}
 
   public record UpdateTitleRequest(String title) {}
 

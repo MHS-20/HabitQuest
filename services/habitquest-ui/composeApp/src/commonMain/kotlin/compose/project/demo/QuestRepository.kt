@@ -20,6 +20,7 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -164,6 +165,8 @@ class QuestRepository {
             client.get("${edgeServiceBaseUrl()}/api/v1/quests/progress/$avatarId") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.Accept, ContentType.Application.Json)
+                header(HttpHeaders.CacheControl, "no-cache")
+                header("Pragma", "no-cache")
             }
         }.getOrElse {
             return QuestProgressListResult.Error("Unable to contact quest-service")
@@ -284,16 +287,16 @@ class QuestRepository {
         val questId = source["questId"]?.jsonPrimitive?.contentOrNull ?: return null
         val questName = source["questName"]?.jsonPrimitive?.contentOrNull ?: questId
         val status = source["status"]?.jsonPrimitive?.contentOrNull ?: "IN_PROGRESS"
-        val completion = source["completionPercentage"]?.jsonPrimitive?.intOrNull ?: 0
+        val completion = source.readInt("completionPercentage", "completion")
         val habits = source["habits"]?.jsonArray?.mapNotNull { habitElement ->
             val habit = habitElement as? JsonObject ?: return@mapNotNull null
             val habitId = habit["habitId"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
             QuestHabitProgressData(
                 habitId = habitId,
                 title = habit["title"]?.jsonPrimitive?.contentOrNull ?: habitId,
-                requiredOccurrences = habit["requiredOccurrences"]?.jsonPrimitive?.intOrNull ?: 0,
-                attendedOccurrences = habit["attendedOccurrences"]?.jsonPrimitive?.intOrNull ?: 0,
-                remainingOccurrences = habit["remainingOccurrences"]?.jsonPrimitive?.intOrNull ?: 0,
+                requiredOccurrences = habit.readInt("requiredOccurrences", "required"),
+                attendedOccurrences = habit.readInt("attendedOccurrences", "attended", "doneOccurrences"),
+                remainingOccurrences = habit.readInt("remainingOccurrences", "remaining"),
             )
         }.orEmpty()
 
@@ -304,6 +307,15 @@ class QuestRepository {
             completionPercentage = completion,
             habits = habits,
         )
+    }
+
+    private fun JsonObject.readInt(vararg keys: String): Int {
+        for (key in keys) {
+            val value = this[key]?.jsonPrimitive ?: continue
+            value.intOrNull?.let { return it }
+            value.longOrNull?.let { return it.toInt() }
+        }
+        return 0
     }
 
     suspend fun createQuestWithDetails(

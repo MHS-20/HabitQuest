@@ -13,4 +13,5 @@ public record HabitResponse(
     HabitController.RecurrenceResponse recurrence,
     LocalDateTime lastAttendedDate,
     LocalDateTime nextRecurrenceDate,
-    String associatedQuestId) {}
+    String associatedQuestId,
+    String sourceHabitId) {}
