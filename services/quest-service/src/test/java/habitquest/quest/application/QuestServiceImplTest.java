@@ -302,9 +302,10 @@ class QuestServiceImplTest {
     @DisplayName("emits QuestCompleted when progress reaches completion")
     void emitsQuestCompletedOnCompletion() {
       Quest quest = fullQuest();
-      LocalDate attendedOn = LocalDate.of(2026, 4, 3);
+      LocalDate firstAttendance = LocalDate.of(2026, 4, 3);
+      LocalDate secondAttendance = LocalDate.of(2026, 4, 4);
       ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, attendedOn, quest);
+          ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, firstAttendance, quest);
 
       when(questRepository.findById(QUEST_ID)).thenReturn(quest);
       when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
@@ -312,7 +313,8 @@ class QuestServiceImplTest {
       when(activeQuestsRepository.save(any(ActiveQuests.class)))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
-      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, attendedOn);
+      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
+      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
 
       verify(questObserver)
           .notifyQuestEvent(
@@ -394,7 +396,7 @@ class QuestServiceImplTest {
       assertThat(first.questId()).isEqualTo(QUEST_ID.value());
       assertThat(first.completionPercentage()).isEqualTo(100);
       assertThat(first.habits()).hasSize(1);
-      assertThat(first.habits().getFirst().remainingOccurrences()).isZero();
+      assertThat(first.habits().getFirst().remainingOccurrences()).isEqualTo(1);
     }
   }
 }

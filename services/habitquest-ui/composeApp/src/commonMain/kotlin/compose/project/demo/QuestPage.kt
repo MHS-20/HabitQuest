@@ -359,7 +359,7 @@ private fun QuestProgressRow(progress: QuestProgressData) {
             } else {
                 progress.habits.forEach { habit ->
                     Text(
-                        "- ${habit.title}: ${habit.attendedOccurrences}/${habit.requiredOccurrences} (remaining ${habit.remainingOccurrences})",
+                        "- ${habit.title}: required ${habit.requiredOccurrences}, attended ${habit.attendedOccurrences}, remaining ${habit.remainingOccurrences}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
