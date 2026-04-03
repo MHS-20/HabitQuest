@@ -54,6 +54,7 @@ resilience4j:
         retry-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
+          - habitquest.tracking.infrastructure.AvatarCommunicationException
 
   circuit-breaker:
     default-config: default
@@ -70,6 +71,7 @@ resilience4j:
         record-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
+          - habitquest.tracking.infrastructure.AvatarCommunicationException
 
 
 ############ OBSERVABILITY #############
