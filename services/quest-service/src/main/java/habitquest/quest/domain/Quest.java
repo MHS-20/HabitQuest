@@ -2,6 +2,9 @@ package habitquest.quest.domain;
 
 import common.ddd.Aggregate;
 import common.ddd.Id;
+import habitquest.quest.domain.reminder.DailyRecurrence;
+import habitquest.quest.domain.reminder.MonthlyRecurrence;
+import habitquest.quest.domain.reminder.WeeklyRecurrence;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,27 @@ public class Quest implements Aggregate<Id<Quest>> {
 
   public void addHabit(Habit habit) {
     this.habits.add(habit);
+  }
+
+  public Integer getTotalNumberOfHabits() {
+    long durationInDays = this.getDuration().toDays();
+    int result = 0;
+    for (Habit h : this.getHabits()) {
+      switch (h.getRecurrence()) {
+        case DailyRecurrence d:
+          result += (int) durationInDays;
+          break;
+        case WeeklyRecurrence w:
+          result += (int) durationInDays / 7;
+          break;
+        case MonthlyRecurrence m:
+          result += (int) durationInDays / 30;
+          break;
+        default:
+          result += 0;
+      }
+    }
+    return result;
   }
 
   public void removeHabit(Id<Habit> habitId) {
