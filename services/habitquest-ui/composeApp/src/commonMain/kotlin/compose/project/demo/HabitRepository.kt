@@ -44,6 +44,7 @@ data class HabitListItem(
     val tags : List<String> = emptyList(),
     val lastAttendedDate: String? = null,
     val nextRecurrenceDate: String? = null,
+    val associatedQuestId: String? = null,
 )
 
 data class HabitHistoryItem(
@@ -158,6 +159,7 @@ class HabitsApiRepository {
                             ?: "UNKNOWN",
                         lastAttendedDate = obj["lastAttendedDate"]?.jsonPrimitive?.contentOrNull,
                         nextRecurrenceDate = obj["nextRecurrenceDate"]?.jsonPrimitive?.contentOrNull,
+                        associatedQuestId = obj["associatedQuestId"]?.jsonPrimitive?.contentOrNull,
 
                     )
                 }
