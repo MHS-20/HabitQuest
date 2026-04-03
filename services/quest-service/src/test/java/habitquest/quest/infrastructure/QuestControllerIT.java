@@ -45,46 +45,58 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 201 with the new quest id")
     void shouldReturn201WithId() throws Exception {
-      when(questService.createQuest(QUEST_NAME)).thenReturn(fullQuest());
+      when(questService.createQuest(QUEST_NAME, Duration.ofDays(14))).thenReturn(fullQuest());
 
       mockMvc
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"Morning Routine\"}"))
+                  .content("{\"name\":\"Morning Routine\",\"duration\":\"P14D\"}"))
           .andExpect(status().isCreated())
           .andExpect(header().string("Location", "/api/v1/quests/" + QUEST_ID.value()))
           .andExpect(jsonPath("$.id").value(QUEST_ID.value()));
     }
 
     @Test
-    @DisplayName("delegates name to the service")
-    void shouldDelegateNameToService() throws Exception {
-      when(questService.createQuest(anyString())).thenReturn(fullQuest());
+    @DisplayName("delegates name and duration to the service")
+    void shouldDelegateNameAndDurationToService() throws Exception {
+      when(questService.createQuest(anyString(), any(Duration.class))).thenReturn(fullQuest());
 
       mockMvc
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"Morning Routine\"}"))
+                  .content("{\"name\":\"Morning Routine\",\"duration\":\"P14D\"}"))
           .andExpect(status().isCreated());
 
-      verify(questService).createQuest(QUEST_NAME);
+      verify(questService).createQuest(QUEST_NAME, Duration.ofDays(14));
     }
 
     @Test
     @DisplayName("returns 400 when domain rejects the request")
     void shouldReturn400OnDomainError() throws Exception {
-      when(questService.createQuest(anyString()))
+      when(questService.createQuest(anyString(), any(Duration.class)))
           .thenThrow(new IllegalArgumentException("Quest name cannot be blank"));
 
       mockMvc
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"\"}"))
+                  .content("{\"name\":\"\",\"duration\":\"P14D\"}"))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Quest name cannot be blank"));
+    }
+
+    @Test
+    @DisplayName("returns 400 when duration is malformed")
+    void shouldReturn400OnMalformedDuration() throws Exception {
+      mockMvc
+          .perform(
+              post("/api/v1/quests")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"name\":\"Morning Routine\",\"duration\":\"oops\"}"))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Invalid duration: oops"));
     }
   }
 

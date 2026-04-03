@@ -56,15 +56,17 @@ class QuestServiceImplTest {
     @DisplayName("saves and emits QuestCreated event")
     void createsAndEmitsEvent() {
       Quest quest = fullQuest();
-      when(questFactory.createQuest(QUEST_NAME)).thenReturn(quest);
+      when(questFactory.createQuest(QUEST_NAME, DEFAULT_DURATION)).thenReturn(quest);
       when(questRepository.save(any(Quest.class)))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
-      Quest created = service.createQuest(QUEST_NAME);
+      Quest created = service.createQuest(QUEST_NAME, DEFAULT_DURATION);
 
       assertThat(created.getId().value()).isNotBlank();
       assertThat(created.getName()).isEqualTo(QUEST_NAME);
+      assertThat(created.getDuration()).isEqualTo(DEFAULT_DURATION);
       verify(questRepository).save(created);
+      verify(questFactory).createQuest(QUEST_NAME, DEFAULT_DURATION);
 
       ArgumentCaptor<QuestEvent> eventCaptor = ArgumentCaptor.forClass(QuestEvent.class);
       verify(questObserver).notifyQuestEvent(eventCaptor.capture());
