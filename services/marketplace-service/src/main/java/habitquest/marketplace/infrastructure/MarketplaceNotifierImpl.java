@@ -68,7 +68,6 @@ public class MarketplaceNotifierImpl implements MarketplaceNotifier {
   }
 
   // ─── Message records (the actual Kafka payload) ──────────────────────────────
-
   public record ItemBoughtMessage(
       String marketplaceId, String itemName, String avatarId, Instant occurredOn) {}
 

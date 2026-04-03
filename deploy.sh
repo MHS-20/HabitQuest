@@ -5,8 +5,8 @@ find . -type f -name "*.sh" -exec chmod +x {} \;
 ./deployment/kubernetes/minikube-setup.sh
 ./deployment/kubernetes/build-images.sh
 ./deployment/kubernetes/platform/deployPlatform.sh
-./deployment/kubernetes/application/deployApplication.sh
 ./deployment/kubernetes/observability/deployObservability.sh
+./deployment/kubernetes/application/deployApplication.sh
 
 kubectl port-forward svc/edge-service 9000:9000 > /dev/null 2>&1 &
 echo $! > f1.pid
