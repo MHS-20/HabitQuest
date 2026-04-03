@@ -3,6 +3,7 @@ package compose.project.demo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +40,7 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
     val scope = rememberCoroutineScope()
 
     var questName by remember { mutableStateOf("") }
-    var questDuration by remember { mutableStateOf("PT30M") }
+    var selectedDurationDays by remember { mutableStateOf(14f) }
     var searchText by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     var quests by remember { mutableStateOf<List<QuestData>>(emptyList()) }
@@ -228,15 +230,26 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        OutlinedTextField(
-                            value = questDuration,
+                        Text("Duration", style = MaterialTheme.typography.bodyMedium)
+
+                        Text("${selectedDurationDays.toInt()} days", style = MaterialTheme.typography.bodyMedium)
+                        Slider(
+                            value = selectedDurationDays,
                             onValueChange = {
-                                questDuration = it
+                                selectedDurationDays = it
                                 message = null
                             },
-                            label = { Text("Duration (e.g. PT30M, PT2H)") },
-                            singleLine = true,
+                            valueRange = 1f..90f,
+                            steps = 88,
                             modifier = Modifier.fillMaxWidth()
+                        )
+
+                        val selectedDurationIso = resolveQuestDurationIso(
+                            days = selectedDurationDays.toInt()
+                        )
+                        Text(
+                            "Selected: ${selectedDurationIso ?: "invalid duration"}",
+                            style = MaterialTheme.typography.bodySmall
                         )
 
                         Text("Select habits to include", style = MaterialTheme.typography.bodyMedium)
@@ -274,8 +287,11 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                 message = "Enter the quest name"
                                 return@TextButton
                             }
-                            if (questDuration.isBlank()) {
-                                message = "Enter a valid duration (e.g. PT30M)"
+                            val durationIso = resolveQuestDurationIso(
+                                days = selectedDurationDays.toInt()
+                            )
+                            if (durationIso == null) {
+                                message = "Duration must be a positive number of days"
                                 return@TextButton
                             }
                             scope.launch {
@@ -285,13 +301,14 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
                                     val result = repository.createQuestWithDetails(
                                         token = token,
                                         name = questName.trim(),
-                                        duration = questDuration.trim(),
+                                        duration = durationIso,
                                         habits = selectedHabits,
                                     )
                                 ) {
                                     is CreateQuestResult.Success -> {
                                         message = "Quest created: ${result.questId}"
                                         questName = ""
+                                        selectedDurationDays = 14f
                                         selectedHabitIds = emptySet()
                                         loadQuests()
                                         loadProgressForAvatar()
@@ -318,6 +335,13 @@ fun QuestScreen(token: String, avatarState: AvatarUiState) {
             )
         }
     }
+}
+
+private fun resolveQuestDurationIso(
+    days: Int,
+): String? {
+    if (days <= 0) return null
+    return "P${days}D"
 }
 
 @Composable
