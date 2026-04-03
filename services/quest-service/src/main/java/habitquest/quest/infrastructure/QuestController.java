@@ -6,6 +6,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import common.ddd.Id;
 import habitquest.quest.application.QuestLogger;
 import habitquest.quest.application.QuestNotFoundException;
+import habitquest.quest.application.QuestProgressView;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.*;
 import habitquest.quest.infrastructure.dto.HabitMapper;
@@ -14,6 +15,7 @@ import habitquest.quest.infrastructure.dto.QuestMapper;
 import habitquest.quest.infrastructure.dto.QuestResponse;
 import java.net.URI;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -158,6 +160,39 @@ public class QuestController {
     return ResponseEntity.ok(model);
   }
 
+  @GetMapping("/progress/{avatarId}")
+  public ResponseEntity<EntityModel<AvatarQuestProgressResponse>> getActiveQuestProgress(
+      @PathVariable String avatarId) {
+    List<QuestProgressView> progress =
+        questService.getActiveQuestProgressByAvatar(idOfAvatar(avatarId));
+    List<QuestProgressResponse> items =
+        progress.stream()
+            .map(
+                p ->
+                    new QuestProgressResponse(
+                        p.questId(),
+                        p.questName(),
+                        p.status(),
+                        p.completionPercentage(),
+                        p.habits().stream()
+                            .map(
+                                h ->
+                                    new HabitProgressResponse(
+                                        h.habitId(),
+                                        h.title(),
+                                        h.requiredOccurrences(),
+                                        h.attendedOccurrences(),
+                                        h.remainingOccurrences()))
+                            .toList()))
+            .toList();
+
+    EntityModel<AvatarQuestProgressResponse> model =
+        EntityModel.of(
+            new AvatarQuestProgressResponse(avatarId, items),
+            linkTo(methodOn(QuestController.class).getActiveQuestProgress(avatarId)).withSelfRel());
+    return ResponseEntity.ok(model);
+  }
+
   @PatchMapping("/{id}/name")
   public ResponseEntity<Void> updateName(
       @PathVariable String id, @RequestBody UpdateNameRequest request)
@@ -202,6 +237,30 @@ public class QuestController {
     return ResponseEntity.noContent().build();
   }
 
+  @PostMapping("/{id}/attendance")
+  public ResponseEntity<Void> recordAttendance(
+      @PathVariable String id, @RequestBody RecordAttendanceRequest request)
+      throws QuestNotFoundException {
+    questService.recordHabitAttendance(
+        idOfQuest(id),
+        idOfAvatar(request.avatarId()),
+        idOfHabit(request.habitId()),
+        LocalDate.parse(request.attendedOn()));
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{id}/join")
+  public ResponseEntity<Void> joinQuest(
+      @PathVariable String id, @RequestBody JoinQuestRequest request)
+      throws QuestNotFoundException {
+    LocalDate joinedOn =
+        request.joinedOn() == null || request.joinedOn().isBlank()
+            ? LocalDate.now()
+            : LocalDate.parse(request.joinedOn());
+    questService.joinQuest(idOfQuest(id), idOfAvatar(request.avatarId()), joinedOn);
+    return ResponseEntity.noContent().build();
+  }
+
   @ExceptionHandler(QuestNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleQuestNotFound(QuestNotFoundException ex) {
     return ResponseEntity.notFound().build();
@@ -218,6 +277,10 @@ public class QuestController {
   }
 
   private static Id<Habit> idOfHabit(String id) {
+    return new Id<>(id);
+  }
+
+  private static Id<Avatar> idOfAvatar(String id) {
     return new Id<>(id);
   }
 
@@ -256,6 +319,10 @@ public class QuestController {
 
   public record RecurrenceRequest(String type, Integer dayOfMonth, String dayOfWeek) {}
 
+  public record RecordAttendanceRequest(String avatarId, String habitId, String attendedOn) {}
+
+  public record JoinQuestRequest(String avatarId, String joinedOn) {}
+
   public record QuestCreatedResponse(String id) {}
 
   public record NameResponse(String name) {}
@@ -263,6 +330,22 @@ public class QuestController {
   public record DurationResponse(String duration) {}
 
   public record HabitsResponse(List<HabitResponse> habits) {}
+
+  public record AvatarQuestProgressResponse(String avatarId, List<QuestProgressResponse> quests) {}
+
+  public record QuestProgressResponse(
+      String questId,
+      String questName,
+      String status,
+      Integer completionPercentage,
+      List<HabitProgressResponse> habits) {}
+
+  public record HabitProgressResponse(
+      String habitId,
+      String title,
+      Integer requiredOccurrences,
+      Integer attendedOccurrences,
+      Integer remainingOccurrences) {}
 
   public record ErrorResponse(String message) {}
 }

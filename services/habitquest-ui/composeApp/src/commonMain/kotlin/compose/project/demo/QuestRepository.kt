@@ -34,6 +34,22 @@ data class QuestData(
     val habitIds: List<String>,
 )
 
+data class QuestHabitProgressData(
+    val habitId: String,
+    val title: String,
+    val requiredOccurrences: Int,
+    val attendedOccurrences: Int,
+    val remainingOccurrences: Int,
+)
+
+data class QuestProgressData(
+    val questId: String,
+    val questName: String,
+    val status: String,
+    val completionPercentage: Int,
+    val habits: List<QuestHabitProgressData>,
+)
+
 sealed interface CreateQuestResult {
     data class Success(val questId: String) : CreateQuestResult
     data class Error(val message: String) : CreateQuestResult
@@ -47,6 +63,16 @@ sealed interface QuestResult {
 sealed interface QuestListResult {
     data class Success(val quests: List<QuestData>) : QuestListResult
     data class Error(val message: String) : QuestListResult
+}
+
+sealed interface QuestProgressListResult {
+    data class Success(val progress: List<QuestProgressData>) : QuestProgressListResult
+    data class Error(val message: String) : QuestProgressListResult
+}
+
+sealed interface JoinQuestResult {
+    data object Success : JoinQuestResult
+    data class Error(val message: String) : JoinQuestResult
 }
 
 class QuestRepository {
@@ -132,6 +158,53 @@ class QuestRepository {
         }
     }
 
+    suspend fun fetchActiveProgressByAvatar(token: String, avatarId: String): QuestProgressListResult {
+        val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/quests/progress/$avatarId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return QuestProgressListResult.Error("Unable to contact quest-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+                val source = body["content"]?.jsonObject ?: body
+                val quests = source["quests"]?.jsonArray?.mapNotNull { parseProgress(it as? JsonObject) }.orEmpty()
+                QuestProgressListResult.Success(quests)
+            }
+
+            HttpStatusCode.Unauthorized -> QuestProgressListResult.Error("Session expired, please log in again")
+            else -> QuestProgressListResult.Error("Quest progress read error (${response.status.value})")
+        }
+    }
+
+    suspend fun joinQuest(token: String, questId: String, avatarId: String): JoinQuestResult {
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/quests/$questId/join") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("avatarId", JsonPrimitive(avatarId))
+                    }
+                )
+            }
+        }.getOrElse {
+            return JoinQuestResult.Error("Unable to contact quest-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> JoinQuestResult.Success
+            HttpStatusCode.NotFound -> JoinQuestResult.Error("Quest not found")
+            HttpStatusCode.Unauthorized -> JoinQuestResult.Error("Session expired, please log in again")
+            HttpStatusCode.BadRequest -> JoinQuestResult.Error("Invalid join request")
+            else -> JoinQuestResult.Error("Join quest error (${response.status.value})")
+        }
+    }
+
     private fun parseQuest(source: JsonObject): QuestData? {
         val id = source["id"]?.jsonPrimitive?.contentOrNull ?: return null
         return QuestData(
@@ -189,6 +262,33 @@ class QuestRepository {
             val source = item["content"]?.jsonObject ?: item
             parseQuest(source)
         }
+    }
+
+    private fun parseProgress(source: JsonObject?): QuestProgressData? {
+        if (source == null) return null
+        val questId = source["questId"]?.jsonPrimitive?.contentOrNull ?: return null
+        val questName = source["questName"]?.jsonPrimitive?.contentOrNull ?: questId
+        val status = source["status"]?.jsonPrimitive?.contentOrNull ?: "IN_PROGRESS"
+        val completion = source["completionPercentage"]?.jsonPrimitive?.intOrNull ?: 0
+        val habits = source["habits"]?.jsonArray?.mapNotNull { habitElement ->
+            val habit = habitElement as? JsonObject ?: return@mapNotNull null
+            val habitId = habit["habitId"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+            QuestHabitProgressData(
+                habitId = habitId,
+                title = habit["title"]?.jsonPrimitive?.contentOrNull ?: habitId,
+                requiredOccurrences = habit["requiredOccurrences"]?.jsonPrimitive?.intOrNull ?: 0,
+                attendedOccurrences = habit["attendedOccurrences"]?.jsonPrimitive?.intOrNull ?: 0,
+                remainingOccurrences = habit["remainingOccurrences"]?.jsonPrimitive?.intOrNull ?: 0,
+            )
+        }.orEmpty()
+
+        return QuestProgressData(
+            questId = questId,
+            questName = questName,
+            status = status,
+            completionPercentage = completion,
+            habits = habits,
+        )
     }
 
     suspend fun createQuestWithDetails(
