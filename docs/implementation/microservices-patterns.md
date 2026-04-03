@@ -85,6 +85,45 @@ La configurazione è applicata sia alle comunicazioni **tra microservizi** (chia
 - **Isolamento dei guasti**: il malfunzionamento di un singolo servizio non si propaga all'intero sistema.
 - **Auto-healing**: il circuito si richiude automaticamente quando il servizio torna disponibile.
 
+I retry sono configurati in questo modo: 
+- Una richiesta viene tentata 3 volte in totale
+- Dopo il primo fallimento si aspettano 500ms 
+- Il tempo di attensa raddoppia per ogni nuovo tentantivo fallito.
+```
+resilience4j:
+  retry:
+    instances:
+      avatarClient:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+          - habitquest.guild.infrastructure.AvatarCommunicationException
+```
+
+I CircuitBreakers sono configurati in questo modo:
+- **Sliding Window**: Analizza le ultime 10 chiamate.
+- **Soglia di Fallimento**: Se il 50% delle chiamate nella finestra fallisce, il circuito passa allo stato OPEN.
+- **Gestione Lentezza**: Se l'80% delle chiamate impiega più di 3 secondi, il circuito si apre.
+- **Stato OPEN**: Il circuito resta aperto per 10 secondi. In questo arco di tempo, ogni richiesta fallisce istantaneamente.
+- **Stato HALF-OPEN**: Passati i 10s, il sistema permette 3 chiamate di test. Se queste hanno successo, il circuito torna CLOSED; altrimenti torna OPEN
+```
+  circuit-breaker:
+    instances:
+      avatarClient:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 3s
+        wait-duration-in-open-state: 10s
+        permitted-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+```
+
 
 ### 5. Externalized Configuration — *Kustomize e Spring `application.yml`*
 La configurazione non deve essere hardcoded nel codice sorgente né nelle immagini Docker. 
