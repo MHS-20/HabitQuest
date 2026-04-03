@@ -55,7 +55,6 @@ resilience4j:
         retry-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
-        ignore-exceptions:
           - habitquest.avatar.infrastructure.MarketplaceCommunicationException
 
   # CIRCUIT BREAKER
@@ -73,6 +72,7 @@ resilience4j:
         record-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
+          - habitquest.avatar.infrastructure.MarketplaceCommunicationException
 
 ############ OBSERVABILITY #############
 logging:
