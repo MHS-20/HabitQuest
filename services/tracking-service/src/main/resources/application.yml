@@ -8,6 +8,8 @@ info:
   system: HabitQuest
 avatar:
   service-uri: ${AVATAR_SERVICE_URI:http://localhost:8081}
+quest:
+  service-uri: ${QUEST_SERVICE_URI:http://localhost:8084}
 
 spring:
   application:

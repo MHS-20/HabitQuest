@@ -34,6 +34,7 @@ class HabitServiceImplTest {
   @Mock private HabitFactory habitFactory;
   @Mock private HabitObserver habitObserver;
   @Mock private AvatarClientPort avatarClient;
+  @Mock private QuestClientPort questClient;
 
   private HabitServiceImpl service;
 
@@ -41,7 +42,12 @@ class HabitServiceImplTest {
   void setUp() {
     service =
         new HabitServiceImpl(
-            habitRepository, historyRepository, habitFactory, habitObserver, avatarClient);
+            habitRepository,
+            historyRepository,
+            habitFactory,
+            habitObserver,
+            avatarClient,
+            questClient);
   }
 
   @Nested
@@ -287,7 +293,20 @@ class HabitServiceImplTest {
       assertThat(captor.getValue()).isInstanceOf(HabitAttended.class);
       assertThat(((HabitAttended) captor.getValue()).habit()).isSameAs(habit);
       assertThat(((HabitAttended) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
+      verify(questClient, never()).recordHabitAttendance(anyString(), any(), any(), any());
       verify(historyRepository).append(any(HabitHistoryEvent.class));
+    }
+
+    @Test
+    @DisplayName("updates quest progress when attended habit is linked to a quest")
+    void updatesQuestProgressWhenAssociatedQuestIsPresent() {
+      var habit = hydrateHabitWithQuest();
+      when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
+
+      service.attendHabit(HABIT_ID, NEXT_ATTENDED_AT);
+
+      verify(questClient)
+          .recordHabitAttendance(QUEST_1, AVATAR_ID, HABIT_ID, NEXT_ATTENDED_AT.toLocalDate());
     }
 
     @Test

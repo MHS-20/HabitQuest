@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import common.ddd.Id;
 import habitquest.quest.application.QuestLogger;
 import habitquest.quest.application.QuestNotFoundException;
+import habitquest.quest.application.QuestProgressView;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
@@ -380,6 +381,86 @@ public class QuestControllerIT {
                   .content("{\"habitId\":\"habit-404\"}"))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Habit is not part of this quest"));
+    }
+  }
+
+  @Nested
+  @DisplayName("POST /api/v1/quests/{id}/attendance")
+  class RecordAttendance {
+
+    @Test
+    @DisplayName("returns 204 and delegates attendance payload to service")
+    void shouldReturn204AndDelegateAttendance() throws Exception {
+      mockMvc
+          .perform(
+              post("/api/v1/quests/{id}/attendance", QUEST_ID.value())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {
+                        "avatarId": "avatar-1",
+                        "habitId": "habit-1",
+                        "attendedOn": "2026-04-03"
+                      }
+                      """))
+          .andExpect(status().isNoContent());
+
+      verify(questService)
+          .recordHabitAttendance(
+              QUEST_ID, new Id<>("avatar-1"), HABIT_ID_1, java.time.LocalDate.parse("2026-04-03"));
+    }
+  }
+
+  @Nested
+  @DisplayName("POST /api/v1/quests/{id}/join")
+  class JoinQuest {
+
+    @Test
+    @DisplayName("returns 204 and delegates join payload to service")
+    void shouldReturn204AndDelegateJoin() throws Exception {
+      mockMvc
+          .perform(
+              post("/api/v1/quests/{id}/join", QUEST_ID.value())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {
+                        "avatarId": "avatar-1"
+                      }
+                      """))
+          .andExpect(status().isNoContent());
+
+      verify(questService)
+          .joinQuest(eq(QUEST_ID), eq(new Id<>("avatar-1")), any(java.time.LocalDate.class));
+    }
+  }
+
+  @Nested
+  @DisplayName("GET /api/v1/quests/progress/{avatarId}")
+  class GetActiveQuestProgress {
+
+    @Test
+    @DisplayName("returns active quest progress for avatar")
+    void shouldReturnProgressList() throws Exception {
+      when(questService.getActiveQuestProgressByAvatar(new Id<>("avatar-1")))
+          .thenReturn(
+              List.of(
+                  new QuestProgressView(
+                      QUEST_ID.value(),
+                      QUEST_NAME,
+                      "IN_PROGRESS",
+                      50,
+                      List.of(
+                          new QuestProgressView.HabitProgressView(
+                              HABIT_ID_1.value(), HABIT_TITLE, 2, 1, 1)))));
+
+      mockMvc
+          .perform(get("/api/v1/quests/progress/{avatarId}", "avatar-1"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.avatarId").value("avatar-1"))
+          .andExpect(jsonPath("$.quests[0].questId").value(QUEST_ID.value()))
+          .andExpect(jsonPath("$.quests[0].completionPercentage").value(50))
+          .andExpect(jsonPath("$.quests[0].habits[0].remainingOccurrences").value(1));
     }
   }
 }

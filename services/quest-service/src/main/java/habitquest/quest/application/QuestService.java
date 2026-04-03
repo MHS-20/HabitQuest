@@ -2,11 +2,14 @@ package habitquest.quest.application;
 
 import common.ddd.Id;
 import common.hexagonal.InBoundPort;
+import habitquest.quest.domain.ActiveQuests;
+import habitquest.quest.domain.Avatar;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 @InBoundPort
@@ -42,5 +45,14 @@ public interface QuestService {
   Quest addHabit(Id<Quest> questId, Habit habit) throws QuestNotFoundException;
 
   Quest removeHabit(Id<Quest> questId, Id<Habit> habit) throws QuestNotFoundException;
+
+  ActiveQuests recordHabitAttendance(
+      Id<Quest> questId, Id<Avatar> avatarId, Id<Habit> habitId, LocalDate attendedOn)
+      throws QuestNotFoundException;
+
+  ActiveQuests joinQuest(Id<Quest> questId, Id<Avatar> avatarId, LocalDate joinedOn)
+      throws QuestNotFoundException;
+
+  List<QuestProgressView> getActiveQuestProgressByAvatar(Id<Avatar> avatarId);
   // endregion
 }
