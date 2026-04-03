@@ -21,6 +21,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -41,6 +42,8 @@ data class HabitListItem(
     val title: String,
     val description: String,
     val recurrenceType: String,
+    val recurrenceDayOfWeek: String? = null,
+    val recurrenceDayOfMonth: Int? = null,
     val tags : List<String> = emptyList(),
     val lastAttendedDate: String? = null,
     val nextRecurrenceDate: String? = null,
@@ -157,6 +160,8 @@ class HabitsApiRepository {
                         tags = obj["tags"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull } ?: emptyList(),
                         recurrenceType = recurrence?.get("type")?.jsonPrimitive?.contentOrNull
                             ?: "UNKNOWN",
+                        recurrenceDayOfWeek = recurrence?.get("dayOfWeek")?.jsonPrimitive?.contentOrNull,
+                        recurrenceDayOfMonth = recurrence?.get("dayOfMonth")?.jsonPrimitive?.intOrNull,
                         lastAttendedDate = obj["lastAttendedDate"]?.jsonPrimitive?.contentOrNull,
                         nextRecurrenceDate = obj["nextRecurrenceDate"]?.jsonPrimitive?.contentOrNull,
                         associatedQuestId = obj["associatedQuestId"]?.jsonPrimitive?.contentOrNull,
