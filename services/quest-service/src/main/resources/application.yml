@@ -77,7 +77,7 @@ resilience4j:
         record-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
-          - habitquest.quest.infrastructure.TrackingHabitCommunicationExceptio
+          - habitquest.quest.infrastructure.TrackingHabitCommunicationException
 
 ############ OBSERVABILITY #############
 logging:

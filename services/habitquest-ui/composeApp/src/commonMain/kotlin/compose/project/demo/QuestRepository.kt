@@ -28,7 +28,7 @@ import kotlinx.serialization.json.JsonElement
 data class QuestData(
     val id: String,
     val name: String,
-    val duration: String,
+    val durationDays: Int,
     val reward: Int,
     val habitIds: List<String>,
 )
@@ -81,7 +81,7 @@ class QuestRepository {
         }
     }
 
-    suspend fun createQuest(token: String, name: String, duration: String): CreateQuestResult {
+    suspend fun createQuest(token: String, name: String, durationDays: Int): CreateQuestResult {
         val response = runCatching {
             client.post("${edgeServiceBaseUrl()}/api/v1/quests") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -89,7 +89,7 @@ class QuestRepository {
                 setBody(
                     buildJsonObject {
                         put("name", JsonPrimitive(name))
-                        put("duration", JsonPrimitive(duration))
+                        put("durationDays", JsonPrimitive(durationDays))
                     }
                 )
             }
@@ -212,11 +212,25 @@ class QuestRepository {
             name = source["name"]?.jsonPrimitive?.contentOrNull
                 ?: source["title"]?.jsonPrimitive?.contentOrNull
                 ?: "",
-            duration = source["duration"]?.jsonPrimitive?.contentOrNull ?: "PT0S",
+            durationDays = parseDurationDays(source),
             reward = source["reward"]?.jsonPrimitive?.intOrNull ?: 0,
             habitIds = source["habitIds"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull }
                 ?: emptyList(),
         )
+    }
+
+    private fun parseDurationDays(source: JsonObject): Int {
+        source["durationDays"]?.jsonPrimitive?.intOrNull?.let { return it }
+
+        val iso = source["duration"]?.jsonPrimitive?.contentOrNull ?: return 0
+        if (iso.startsWith("P") && iso.endsWith("D")) {
+            return iso.removePrefix("P").removeSuffix("D").toIntOrNull() ?: 0
+        }
+        if (iso.startsWith("PT") && iso.endsWith("H")) {
+            val hours = iso.removePrefix("PT").removeSuffix("H").toIntOrNull() ?: return 0
+            return hours / 24
+        }
+        return 0
     }
 
     private fun parseQuestCollection(body: JsonObject): List<QuestData> {
@@ -294,10 +308,10 @@ class QuestRepository {
     suspend fun createQuestWithDetails(
         token: String,
         name: String,
-        duration: String,
+        durationDays: Int,
         habits: List<HabitListItem>,
     ): CreateQuestResult {
-        val created = createQuest(token, name, duration)
+        val created = createQuest(token, name, durationDays)
         if (created is CreateQuestResult.Error) {
             return created
         }

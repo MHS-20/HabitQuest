@@ -51,7 +51,7 @@ public class QuestControllerIT {
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"Morning Routine\",\"duration\":\"P14D\"}"))
+                  .content("{\"name\":\"Morning Routine\",\"durationDays\":14}"))
           .andExpect(status().isCreated())
           .andExpect(header().string("Location", "/api/v1/quests/" + QUEST_ID.value()))
           .andExpect(jsonPath("$.id").value(QUEST_ID.value()));
@@ -66,7 +66,7 @@ public class QuestControllerIT {
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"Morning Routine\",\"duration\":\"P14D\"}"))
+                  .content("{\"name\":\"Morning Routine\",\"durationDays\":14}"))
           .andExpect(status().isCreated());
 
       verify(questService).createQuest(QUEST_NAME, Duration.ofDays(14));
@@ -82,21 +82,21 @@ public class QuestControllerIT {
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"\",\"duration\":\"P14D\"}"))
+                  .content("{\"name\":\"\",\"durationDays\":14}"))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Quest name cannot be blank"));
     }
 
     @Test
-    @DisplayName("returns 400 when duration is malformed")
-    void shouldReturn400OnMalformedDuration() throws Exception {
+    @DisplayName("returns 400 when duration days is invalid")
+    void shouldReturn400OnInvalidDurationDays() throws Exception {
       mockMvc
           .perform(
               post("/api/v1/quests")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"name\":\"Morning Routine\",\"duration\":\"oops\"}"))
+                  .content("{\"name\":\"Morning Routine\",\"durationDays\":0}"))
           .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.message").value("Invalid duration: oops"));
+          .andExpect(jsonPath("$.message").value("Duration days must be greater than 0"));
     }
   }
 
@@ -131,7 +131,7 @@ public class QuestControllerIT {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.id").value(QUEST_ID.value()))
           .andExpect(jsonPath("$.name").value(QUEST_NAME))
-          .andExpect(jsonPath("$.duration").value("PT48H"))
+          .andExpect(jsonPath("$.durationDays").value(2))
           .andExpect(jsonPath("$.habitIds[0]").value(HABIT_ID_1.value()));
     }
 
@@ -199,12 +199,12 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns 200 with quest duration")
     void shouldReturnDuration() throws Exception {
-      when(questService.getDuration(QUEST_ID)).thenReturn(Duration.ofMinutes(90));
+      when(questService.getDuration(QUEST_ID)).thenReturn(Duration.ofDays(3));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/duration", QUEST_ID.value()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.duration").value("PT1H30M"));
+          .andExpect(jsonPath("$.durationDays").value(3));
     }
   }
 
@@ -293,19 +293,19 @@ public class QuestControllerIT {
   class UpdateDuration {
 
     @Test
-    @DisplayName("returns 204 and delegates parsed duration to service")
+    @DisplayName("returns 204 and delegates day-based duration to service")
     void shouldReturn204AndDelegateDuration() throws Exception {
       when(questService.updateDuration(eq(QUEST_ID), any(Duration.class))).thenReturn(fullQuest());
       mockMvc
           .perform(
               patch("/api/v1/quests/{id}/duration", QUEST_ID.value())
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"duration\":\"PT45M\"}"))
+                  .content("{\"durationDays\":7}"))
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<Duration> captor = ArgumentCaptor.forClass(Duration.class);
       verify(questService).updateDuration(eq(QUEST_ID), captor.capture());
-      assertThat(captor.getValue()).isEqualTo(Duration.ofMinutes(45));
+      assertThat(captor.getValue()).isEqualTo(Duration.ofDays(7));
     }
   }
 

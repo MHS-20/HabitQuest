@@ -16,7 +16,6 @@ import habitquest.quest.infrastructure.dto.QuestResponse;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -49,7 +48,8 @@ public class QuestController {
   public ResponseEntity<EntityModel<QuestCreatedResponse>> createQuest(
       @RequestBody CreateQuestRequest request) {
     log.info(request, "Creating quest");
-    Quest created = questService.createQuest(request.name(), parseDuration(request.duration()));
+    Quest created =
+        questService.createQuest(request.name(), parseDurationDays(request.durationDays()));
     log.info(created, "Quest created");
 
     QuestCreatedResponse body = new QuestCreatedResponse(created.getId().value());
@@ -138,7 +138,7 @@ public class QuestController {
     Duration duration = questService.getDuration(idOfQuest(id));
     log.info(idOfQuest(id), "Fetched quest duration");
     EntityModel<DurationResponse> model =
-        EntityModel.of(new DurationResponse(duration.toString()), selfLink(id), questLink(id));
+        EntityModel.of(new DurationResponse(duration.toDays()), selfLink(id), questLink(id));
     return ResponseEntity.ok(model);
   }
 
@@ -209,7 +209,7 @@ public class QuestController {
       @PathVariable String id, @RequestBody UpdateDurationRequest request)
       throws QuestNotFoundException {
     log.info(request, "Updating quest duration for quest " + id);
-    questService.updateDuration(idOfQuest(id), Duration.parse(request.duration()));
+    questService.updateDuration(idOfQuest(id), parseDurationDays(request.durationDays()));
     return ResponseEntity.noContent().build();
   }
 
@@ -309,22 +309,21 @@ public class QuestController {
     }
   }
 
-  private static Duration parseDuration(String duration) {
-    if (duration == null || duration.isBlank()) {
-      throw new IllegalArgumentException("Duration cannot be blank");
+  private static Duration parseDurationDays(Integer durationDays) {
+    if (durationDays == null) {
+      throw new IllegalArgumentException("Duration days cannot be null");
     }
-    try {
-      return Duration.parse(duration);
-    } catch (DateTimeParseException ex) {
-      throw new IllegalArgumentException("Invalid duration: " + duration);
+    if (durationDays <= 0) {
+      throw new IllegalArgumentException("Duration days must be greater than 0");
     }
+    return Duration.ofDays(durationDays);
   }
 
-  public record CreateQuestRequest(String name, String duration) {}
+  public record CreateQuestRequest(String name, Integer durationDays) {}
 
   public record UpdateNameRequest(String name) {}
 
-  public record UpdateDurationRequest(String duration) {}
+  public record UpdateDurationRequest(Integer durationDays) {}
 
   public record UpdateRewardRequest(Integer experience, Integer money) {}
 
@@ -347,7 +346,7 @@ public class QuestController {
 
   public record NameResponse(String name) {}
 
-  public record DurationResponse(String duration) {}
+  public record DurationResponse(Long durationDays) {}
 
   public record HabitsResponse(List<HabitResponse> habits) {}
 
