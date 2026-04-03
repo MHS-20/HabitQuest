@@ -20,6 +20,7 @@ import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -270,6 +271,13 @@ public class QuestController {
   public ResponseEntity<ErrorResponse> handleDomainError(RuntimeException ex) {
     log.error(ex, "Domain error", ex);
     return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+  }
+
+  @ExceptionHandler(TrackingHabitCommunicationException.class)
+  public ResponseEntity<ErrorResponse> handleTrackingHabitError(
+      TrackingHabitCommunicationException ex) {
+    log.error(ex, "Tracking habit synchronization error", ex);
+    return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(ex.getMessage()));
   }
 
   private static Id<Quest> idOfQuest(String id) {

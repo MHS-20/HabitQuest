@@ -15,10 +15,7 @@ import habitquest.quest.domain.events.QuestObserver;
 import habitquest.quest.domain.factory.QuestFactory;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Adapter
@@ -27,16 +24,19 @@ public class QuestServiceImpl implements QuestService {
 
   private final QuestRepository questRepository;
   private final ActiveQuestsRepository activeQuestsRepository;
+  private final TrackingHabitsClientPort trackingHabitsClient;
   private final QuestObserver questObserver;
   private final QuestFactory questFactory;
 
   public QuestServiceImpl(
       QuestRepository questRepository,
       ActiveQuestsRepository activeQuestsRepository,
+      TrackingHabitsClientPort trackingHabitsClient,
       QuestObserver questObserver,
       QuestFactory questFactory) {
     this.questRepository = questRepository;
     this.activeQuestsRepository = activeQuestsRepository;
+    this.trackingHabitsClient = trackingHabitsClient;
     this.questObserver = questObserver;
     this.questFactory = questFactory;
   }
@@ -162,7 +162,7 @@ public class QuestServiceImpl implements QuestService {
   public ActiveQuests joinQuest(Id<Quest> questId, Id<Avatar> avatarId, LocalDate joinedOn)
       throws QuestNotFoundException {
     Quest quest = questRepository.findById(questId);
-    java.util.Optional<ActiveQuests> existing =
+    Optional<ActiveQuests> existing =
         activeQuestsRepository.findByQuestIdAndAvatarId(questId, avatarId);
     if (existing.isPresent()) {
       return existing.get();
@@ -170,6 +170,7 @@ public class QuestServiceImpl implements QuestService {
 
     ActiveQuests joined =
         ActiveQuests.fromQuest(new Id<>(UUID.randomUUID().toString()), avatarId, joinedOn, quest);
+    trackingHabitsClient.createQuestHabitsForAvatar(avatarId, questId, quest.getHabits());
     ActiveQuests saved = activeQuestsRepository.save(joined);
     questObserver.notifyQuestEvent(new QuestJoined(quest, avatarId));
     return saved;
