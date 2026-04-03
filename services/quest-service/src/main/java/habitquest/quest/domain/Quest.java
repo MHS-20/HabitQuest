@@ -28,6 +28,11 @@ public class Quest implements Aggregate<Id<Quest>> {
     this.habits = new ArrayList<>();
   }
 
+  public Quest(Id<Quest> id, String name, Duration duration) {
+    this(id, name);
+    this.duration = duration;
+  }
+
   public String getName() {
     return name;
   }

@@ -14,7 +14,7 @@ import java.util.List;
 
 @InBoundPort
 public interface QuestService {
-  Quest createQuest(String name);
+  Quest createQuest(String name, Duration duration);
 
   List<Quest> getAllQuests();
 

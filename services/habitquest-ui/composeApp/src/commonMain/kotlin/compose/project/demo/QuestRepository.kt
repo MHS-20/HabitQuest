@@ -5,7 +5,6 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -82,7 +81,7 @@ class QuestRepository {
         }
     }
 
-    suspend fun createQuest(token: String, name: String): CreateQuestResult {
+    suspend fun createQuest(token: String, name: String, duration: String): CreateQuestResult {
         val response = runCatching {
             client.post("${edgeServiceBaseUrl()}/api/v1/quests") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -90,6 +89,7 @@ class QuestRepository {
                 setBody(
                     buildJsonObject {
                         put("name", JsonPrimitive(name))
+                        put("duration", JsonPrimitive(duration))
                     }
                 )
             }
@@ -297,19 +297,12 @@ class QuestRepository {
         duration: String,
         habits: List<HabitListItem>,
     ): CreateQuestResult {
-        val created = createQuest(token, name)
+        val created = createQuest(token, name, duration)
         if (created is CreateQuestResult.Error) {
             return created
         }
 
         val questId = (created as CreateQuestResult.Success).questId
-
-        if (duration.isNotBlank()) {
-            val durationUpdated = updateQuestDuration(token, questId, duration)
-            if (!durationUpdated) {
-                return CreateQuestResult.Error("Quest created but duration was not updated")
-            }
-        }
 
         for (habit in habits) {
             val habitAdded = addHabitToQuest(token, questId, habit)
@@ -321,21 +314,6 @@ class QuestRepository {
         return CreateQuestResult.Success(questId)
     }
 
-    private suspend fun updateQuestDuration(token: String, questId: String, duration: String): Boolean {
-        val response = runCatching {
-            client.patch("${edgeServiceBaseUrl()}/api/v1/quests/$questId/duration") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-                setBody(
-                    buildJsonObject {
-                        put("duration", JsonPrimitive(duration))
-                    }
-                )
-            }
-        }.getOrNull() ?: return false
-
-        return response.status == HttpStatusCode.NoContent || response.status == HttpStatusCode.OK
-    }
 
     private suspend fun addHabitToQuest(token: String, questId: String, habit: HabitListItem): Boolean {
         val response = runCatching {

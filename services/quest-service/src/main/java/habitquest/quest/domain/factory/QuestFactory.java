@@ -3,6 +3,7 @@ package habitquest.quest.domain.factory;
 import common.ddd.Factory;
 import common.ddd.Id;
 import habitquest.quest.domain.Quest;
+import java.time.Duration;
 
 public class QuestFactory implements Factory {
 
@@ -12,7 +13,7 @@ public class QuestFactory implements Factory {
     this.idGenerator = idGenerator;
   }
 
-  public Quest createQuest(String name) {
-    return new Quest(new Id<>(idGenerator.nextId()), name);
+  public Quest createQuest(String name, Duration duration) {
+    return new Quest(new Id<>(idGenerator.nextId()), name, duration);
   }
 }
