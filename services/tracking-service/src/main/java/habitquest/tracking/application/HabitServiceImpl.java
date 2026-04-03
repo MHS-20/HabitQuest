@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Adapter
@@ -52,7 +53,15 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit createDailyHabit(Id<Avatar> avatarId, String name, String description) {
-    Habit habit = habitFactory.createDailyHabit(avatarId, name, description);
+    return createDailyHabit(avatarId, name, description, null);
+  }
+
+  @Override
+  public Habit createDailyHabit(
+      Id<Avatar> avatarId, String name, String description, String associatedQuestId) {
+    Habit habit =
+        habitFactory.createDailyHabit(
+            avatarId, name, description, Optional.ofNullable(associatedQuestId));
     Habit saved = habitRepository.save(habit);
     appendHistory(new HabitCreated(saved, saved.getAvatarId()), "daily recurrence");
     return saved;
@@ -61,7 +70,19 @@ public class HabitServiceImpl implements HabitService {
   @Override
   public Habit createWeeklyHabit(
       Id<Avatar> avatarId, String title, String description, DayOfWeek dayOfWeek) {
-    Habit habit = habitFactory.createWeeklyHabit(avatarId, title, description, dayOfWeek);
+    return createWeeklyHabit(avatarId, title, description, dayOfWeek, null);
+  }
+
+  @Override
+  public Habit createWeeklyHabit(
+      Id<Avatar> avatarId,
+      String title,
+      String description,
+      DayOfWeek dayOfWeek,
+      String associatedQuestId) {
+    Habit habit =
+        habitFactory.createWeeklyHabit(
+            avatarId, title, description, dayOfWeek, Optional.ofNullable(associatedQuestId));
     Habit saved = habitRepository.save(habit);
     appendHistory(
         new HabitCreated(saved, saved.getAvatarId()), "weekly recurrence day=" + dayOfWeek);
@@ -71,7 +92,19 @@ public class HabitServiceImpl implements HabitService {
   @Override
   public Habit createMonthlyHabit(
       Id<Avatar> avatarId, String title, String description, Integer dayOfMonth) {
-    Habit habit = habitFactory.createMonthlyHabit(avatarId, title, description, dayOfMonth);
+    return createMonthlyHabit(avatarId, title, description, dayOfMonth, null);
+  }
+
+  @Override
+  public Habit createMonthlyHabit(
+      Id<Avatar> avatarId,
+      String title,
+      String description,
+      Integer dayOfMonth,
+      String associatedQuestId) {
+    Habit habit =
+        habitFactory.createMonthlyHabit(
+            avatarId, title, description, dayOfMonth, Optional.ofNullable(associatedQuestId));
     Habit saved = habitRepository.save(habit);
     appendHistory(
         new HabitCreated(saved, saved.getAvatarId()), "monthly recurrence day=" + dayOfMonth);

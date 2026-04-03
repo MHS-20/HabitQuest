@@ -58,13 +58,14 @@ class HabitServiceImplTest {
     @DisplayName("createDailyHabit delegates to factory, saves, and returns habit")
     void createsDaily() {
       var habit = hydrateHabit();
-      when(habitFactory.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION)).thenReturn(habit);
+      when(habitFactory.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION, Optional.empty()))
+          .thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
       var created = service.createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
 
       assertThat(created).isSameAs(habit);
-      verify(habitFactory).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION);
+      verify(habitFactory).createDailyHabit(AVATAR_ID, TITLE, DESCRIPTION, Optional.empty());
       verify(habitRepository).save(habit);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
@@ -73,14 +74,16 @@ class HabitServiceImplTest {
     @DisplayName("createWeeklyHabit delegates to factory, saves, and returns habit")
     void createsWeekly() {
       var habit = hydrateHabit();
-      when(habitFactory.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK))
+      when(habitFactory.createWeeklyHabit(
+              AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK, Optional.empty()))
           .thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
       var created = service.createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK);
 
       assertThat(created).isSameAs(habit);
-      verify(habitFactory).createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK);
+      verify(habitFactory)
+          .createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK, Optional.empty());
       verify(habitRepository).save(habit);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
     }
@@ -89,14 +92,17 @@ class HabitServiceImplTest {
     @DisplayName("createMonthlyHabit delegates to factory, saves, and returns habit")
     void createsMonthly() {
       var habit = hydrateHabit();
-      when(habitFactory.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH))
+      when(habitFactory.createMonthlyHabit(
+              AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH, Optional.empty()))
           .thenReturn(habit);
       when(habitRepository.save(habit)).thenReturn(habit);
 
       var created = service.createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH);
 
       assertThat(created).isSameAs(habit);
-      verify(habitFactory).createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH);
+      verify(habitFactory)
+          .createMonthlyHabit(
+              AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH, Optional.empty());
       verify(habitRepository).save(habit);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
     }

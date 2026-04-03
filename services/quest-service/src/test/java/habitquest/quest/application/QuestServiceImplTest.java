@@ -32,6 +32,7 @@ class QuestServiceImplTest {
 
   @Mock private QuestRepository questRepository;
   @Mock private ActiveQuestsRepository activeQuestsRepository;
+  @Mock private TrackingHabitsClientPort trackingHabitsClient;
   @Mock private QuestObserver questObserver;
   @Mock private QuestFactory questFactory;
   private QuestServiceImpl service;
@@ -39,7 +40,12 @@ class QuestServiceImplTest {
   @BeforeEach
   void setUp() {
     service =
-        new QuestServiceImpl(questRepository, activeQuestsRepository, questObserver, questFactory);
+        new QuestServiceImpl(
+            questRepository,
+            activeQuestsRepository,
+            trackingHabitsClient,
+            questObserver,
+            questFactory);
   }
 
   @Nested
@@ -332,6 +338,8 @@ class QuestServiceImplTest {
 
       assertThat(joined.getQuestId()).isEqualTo(QUEST_ID);
       assertThat(joined.getAvatarId()).isEqualTo(AVATAR_ID_1);
+      verify(trackingHabitsClient)
+          .createQuestHabitsForAvatar(eq(AVATAR_ID_1), eq(QUEST_ID), anyList());
       verify(activeQuestsRepository).save(any(ActiveQuests.class));
       verify(questObserver)
           .notifyQuestEvent(
@@ -353,6 +361,7 @@ class QuestServiceImplTest {
       ActiveQuests joined = service.joinQuest(QUEST_ID, AVATAR_ID_1, joinedOn);
 
       assertThat(joined).isSameAs(existing);
+      verify(trackingHabitsClient, never()).createQuestHabitsForAvatar(any(), any(), anyList());
       verify(activeQuestsRepository, never()).save(any(ActiveQuests.class));
       verify(questObserver, never())
           .notifyQuestEvent(

@@ -68,8 +68,9 @@ https://mhs-20.github.io/HabitQuest/
 ## Option 1: Docker Compose
 Run these commands: 
 ```bash
-docker-compose build
-docker-compose up -d
+docker compose down --remove-orphans
+docker compose build
+docker compose up -d
 cd ./services/habitquest-ui
 ./gradlew composeApp:run
 ```
