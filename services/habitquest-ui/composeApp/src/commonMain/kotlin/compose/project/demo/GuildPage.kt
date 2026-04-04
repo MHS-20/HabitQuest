@@ -52,6 +52,10 @@ fun GuildScreen(
     var inviteSearchResult by remember { mutableStateOf<SearchAvatarData?>(null) }
     var inviteLoading by remember { mutableStateOf(false) }
     var inviteError by remember { mutableStateOf<String?>(null) }
+    var showPendingInvitesDialog by remember { mutableStateOf(false) }
+    var pendingInvites by remember { mutableStateOf<List<PendingInviteData>>(emptyList()) }
+    var pendingInvitesLoading by remember { mutableStateOf(false) }
+    var pendingInvitesError by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
@@ -109,6 +113,34 @@ fun GuildScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Create guild")
+        }
+
+        Button(
+            onClick = {
+                val currentAvatar = (avatarState as? AvatarUiState.Ready)?.avatar
+                if (currentAvatar == null) {
+                    statusMessage = "Avatar not available"
+                    return@Button
+                }
+
+                showPendingInvitesDialog = true
+                scope.launch {
+                    pendingInvitesLoading = true
+                    pendingInvitesError = null
+                    when (val result = repository.fetchPendingInvites(token, currentAvatar.id)) {
+                        is PendingInvitesResult.Success -> pendingInvites = result.invites
+                        is PendingInvitesResult.Error -> {
+                            pendingInvites = emptyList()
+                            pendingInvitesError = result.message
+                        }
+                    }
+                    pendingInvitesLoading = false
+                }
+            },
+            enabled = avatar != null && !loading,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Pending invites")
         }
 
         OutlinedTextField(
@@ -357,6 +389,70 @@ fun GuildScreen(
                             inviteError = null
                         }
                     ) {
+                        Text("Close")
+                    }
+                }
+            )
+        }
+
+        if (showPendingInvitesDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showPendingInvitesDialog = false
+                    pendingInvites = emptyList()
+                    pendingInvitesError = null
+                },
+                title = { Text("Pending guild invites") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (pendingInvitesLoading) {
+                            CircularProgressIndicator()
+                        }
+
+                        pendingInvitesError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        if (!pendingInvitesLoading && pendingInvitesError == null) {
+                            if (pendingInvites.isEmpty()) {
+                                Text("No pending invites")
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(220.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(pendingInvites, key = { it.inviteId }) { invite ->
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                                            ) {
+                                                Text(invite.guildName, style = MaterialTheme.typography.titleSmall)
+                                                Text("Guild ID: ${invite.guildId}", style = MaterialTheme.typography.bodySmall)
+                                                Text("Invite ID: ${invite.inviteId}", style = MaterialTheme.typography.bodySmall)
+                                                Text(
+                                                    "Expires at: ${invite.expiresAt ?: "-"}",
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPendingInvitesDialog = false }) {
                         Text("Close")
                     }
                 }
