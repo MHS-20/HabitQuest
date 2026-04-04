@@ -12,7 +12,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -217,18 +216,21 @@ class GuildRepository {
     suspend fun inviteAvatarToGuild(
         token: String,
         guildId: String,
+        requestorId: String,
         avatarId: String,
     ): InviteAvatarResult {
         if (guildId.isBlank()) return InviteAvatarResult.Error("Guild id cannot be blank")
+        if (requestorId.isBlank()) return InviteAvatarResult.Error("Requestor id cannot be blank")
         if (avatarId.isBlank()) return InviteAvatarResult.Error("Avatar id cannot be blank")
 
         val response = runCatching {
-            client.post("${edgeServiceBaseUrl()}/api/v1/guilds/$guildId/invite") {
+            client.post("${edgeServiceBaseUrl()}/api/v1/guilds/$guildId/invites") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 setBody(
                     buildJsonObject {
-                        put("avatarId", JsonPrimitive(avatarId))
+                        put("requestorId", JsonPrimitive(requestorId))
+                        put("targetAvatarId", JsonPrimitive(avatarId))
                     }
                 )
             }

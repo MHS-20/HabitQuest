@@ -308,12 +308,19 @@ fun GuildScreen(
                                     Button(
                                         onClick = {
                                             scope.launch {
+                                                val currentAvatarId = (avatarState as? AvatarUiState.Ready)?.avatar?.id
+                                                if (currentAvatarId.isNullOrBlank()) {
+                                                    inviteError = "Current avatar not available"
+                                                    return@launch
+                                                }
+
                                                 inviteLoading = true
                                                 inviteError = null
                                                 when (
                                                     val result = repository.inviteAvatarToGuild(
                                                         token = token,
                                                         guildId = selectedGuildForInvite!!.id,
+                                                        requestorId = currentAvatarId,
                                                         avatarId = avatar.id
                                                     )
                                                 ) {

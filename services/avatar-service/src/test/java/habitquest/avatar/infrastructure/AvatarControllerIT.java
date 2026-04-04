@@ -862,4 +862,29 @@ public class AvatarControllerIT {
           .andExpect(status().isNotFound());
     }
   }
+
+  // ── POST /api/v1/avatars/{id}/invites ───────────────────────────────────────
+
+  @Nested
+  @DisplayName("POST /api/v1/avatars/{id}/invites")
+  class ReceiveGuildInvite {
+
+    @Test
+    @DisplayName("returns 204 even when expiresAt is omitted")
+    void shouldReturn204WhenExpiresAtMissing() throws Exception {
+      doNothing().when(avatarService).addPendingInvite(eq(AVATAR_ID), any(Invite.class));
+
+      mockMvc
+          .perform(
+              post("/api/v1/avatars/{id}/invites", AVATAR_1)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      {"inviteId":"invite-1","guildId":"guild-1","guildName":"Guild"}
+                      """))
+          .andExpect(status().isNoContent());
+
+      verify(avatarService).addPendingInvite(eq(AVATAR_ID), any(Invite.class));
+    }
+  }
 }
