@@ -4,9 +4,7 @@ import common.ddd.Id;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
-import habitquest.avatar.domain.items.EquippedItems;
-import habitquest.avatar.domain.items.Inventory;
-import habitquest.avatar.domain.items.Item;
+import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.List;
@@ -53,12 +51,12 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void acceptInvite(Id<Avatar> avatarId, Id<Invite> inviteId) throws AvatarNotFoundException {
+  public void acceptInvite(Id<Avatar> avatarId, Id<Invite> inviteId)
+      throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.acceptGuildInvite(inviteId);
     avatarRepository.save(avatar);
   }
-
 
   @Override
   public void deleteAvatar(Id<Avatar> id) throws AvatarNotFoundException {
@@ -169,6 +167,37 @@ public class AvatarServiceImpl implements AvatarService {
     }
     avatarRepository.save(avatar);
     return died;
+  }
+
+  @Override
+  public void useHealthPotion(Id<Avatar> avatarId, String potionName)
+      throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
+    HealthPotion potion =
+        avatar.getInventory().getItems().stream()
+            .filter(item -> item instanceof HealthPotion)
+            .map(item -> (HealthPotion) item)
+            .filter(p -> p.name().equals(potionName))
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException("No potion found with name: " + potionName));
+    avatar.heal(potion.healingPower());
+    avatar.removeItemFromInventory(potion);
+  }
+
+  @Override
+  public void useManaPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
+    ManaPotion potion =
+        avatar.getInventory().getItems().stream()
+            .filter(item -> item instanceof ManaPotion)
+            .map(item -> (ManaPotion) item)
+            .filter(p -> p.name().equals(potionName))
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException("No potion found with name: " + potionName));
+    avatar.restoreMana(potion.getValue());
+    avatar.removeItemFromInventory(potion);
   }
 
   @Override
