@@ -12,6 +12,7 @@ import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.dto.*;
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -35,6 +36,14 @@ public class AvatarController {
   }
 
   private Id<Avatar> idOf(String id) {
+    return new Id<>(id);
+  }
+
+  private Id<Guild> guildIdOf(String id) {
+    return new Id<>(id);
+  }
+
+  private Id<Invite> inviteIdOf(String id) {
     return new Id<>(id);
   }
 
@@ -127,8 +136,47 @@ public class AvatarController {
     return ResponseEntity.noContent().build();
   }
 
-  // ─── Queries ────────────────────────────────────────────────────────────────
+  // ─── Guild Invites ───────────────────────────────────────────────────────────
+  @PostMapping("/{id}/invites")
+  public ResponseEntity<Void> receiveGuildInvite(
+      @PathVariable String id, @RequestBody GuildInviteRequest request)
+      throws AvatarNotFoundException {
 
+    avatarService.addPendingInvite(
+        idOf(id),
+        new Invite(
+            inviteIdOf(request.inviteId()),
+            guildIdOf(request.guildId()),
+            request.guildName(),
+            Instant.parse(request.expiresAt())));
+
+    log.info(request, "Guild invite received for avatar id: " + id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/{id}/invites")
+  public ResponseEntity<CollectionModel<EntityModel<InviteResponse>>> getPendingInvites(
+      @PathVariable String id) throws AvatarNotFoundException {
+    Avatar avatar = avatarService.getAvatarById(idOf(id));
+    List<Invite> invites = avatar.getPendingInvites();
+    log.info(invites, "Pending guild invites retrieved for avatar id: " + id);
+    List<EntityModel<InviteResponse>> inviteModels =
+        invites.stream()
+            .map(
+                invite -> {
+                  InviteResponse dto =
+                      new InviteResponse(
+                          invite.inviteId().value(),
+                          invite.guildId().value(),
+                          invite.guildName(),
+                          invite.expiresAt());
+                  return EntityModel.of(dto);
+                })
+            .toList();
+    return ResponseEntity.ok(CollectionModel.of(inviteModels));
+  }
+
+  // ─── Queries ────────────────────────────────────────────────────────────────
   @GetMapping("/{id}/name")
   public ResponseEntity<EntityModel<NameResponse>> getName(@PathVariable String id)
       throws AvatarNotFoundException {
@@ -283,7 +331,6 @@ public class AvatarController {
   }
 
   // ─── Money ──────────────────────────────────────────────────────────────────
-
   @PostMapping("/{id}/money/earn")
   public ResponseEntity<Void> earnMoney(@PathVariable String id, @RequestBody AmountRequest request)
       throws AvatarNotFoundException {
@@ -303,7 +350,6 @@ public class AvatarController {
   }
 
   // ─── Inventory ──────────────────────────────────────────────────────────────
-
   @PostMapping("/{id}/inventory/items")
   public ResponseEntity<Void> addItem(@PathVariable String id, @RequestBody ItemRequest request)
       throws AvatarNotFoundException {
@@ -480,6 +526,12 @@ public class AvatarController {
   public record HealthResponse(Integer current, Integer max) {}
 
   public record DamageResponse(boolean died) {}
+
+  public record GuildInviteRequest(
+      String inviteId, String guildId, String guildName, String expiresAt) {}
+
+  public record InviteResponse(
+      String inviteId, String guildId, String guildName, Instant expiresAt) {}
 
   public record LevelResponse(
       Integer levelNumber, Integer currentExperience, Integer experienceRequired) {}

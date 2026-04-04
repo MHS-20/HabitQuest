@@ -21,7 +21,7 @@ public interface GuildService {
 
   boolean isLeader(Id<Guild> guildId, Id<GuildMember> memberId) throws GuildNotFoundException;
 
-  void sendInvite(Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> targetAvatarId)
+  Invite sendInvite(Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> targetAvatarId)
       throws GuildNotFoundException;
 
   void acceptInvite(
