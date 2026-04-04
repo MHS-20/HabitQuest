@@ -13,6 +13,7 @@ import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
@@ -88,6 +89,11 @@ public class BattleServiceImpl implements BattleService {
   @Override
   public BossEnemy getBoss(Id<Battle> battleId) throws BattleNotFoundException {
     return getBattleById(battleId).getBoss();
+  }
+
+  @Override
+  public List<BossEnemy> getAllBossTypes() {
+    return BossType.allBossTypes();
   }
 
   @Override

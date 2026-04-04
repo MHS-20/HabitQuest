@@ -78,7 +78,7 @@ public class GuildServiceImpl implements GuildService {
   }
 
   @Override
-  public void sendInvite(
+  public Invite sendInvite(
       Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> targetAvatarId)
       throws GuildNotFoundException {
     Guild guild =
@@ -89,6 +89,7 @@ public class GuildServiceImpl implements GuildService {
     guild.sendInvite(requestorId, invite);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new InviteSent(guildId, targetAvatarId, invite.inviteId()));
+    return invite;
   }
 
   @Override

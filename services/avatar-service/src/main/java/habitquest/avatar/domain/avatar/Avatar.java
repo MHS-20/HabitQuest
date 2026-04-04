@@ -21,6 +21,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
   private AvatarMana mana;
   private AvatarStats avatarStats;
   private List<Spell> spells;
+  private List<Invite> pendingInvites;
 
   public Avatar(
       String name,
@@ -38,6 +39,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     this.mana = new AvatarMana(new Mana(50), new Mana(50));
     this.avatarStats = new AvatarStats(avatarStatsId, 10, 10, 10);
     this.spells = new ArrayList<>();
+    this.pendingInvites = new ArrayList<>();
   }
 
   public Avatar(
@@ -61,6 +63,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     this.mana = mana;
     this.avatarStats = avatarStats;
     this.spells = spells;
+    this.pendingInvites = new ArrayList<>();
   }
 
   @Override
@@ -71,6 +74,10 @@ public class Avatar implements Aggregate<Id<Avatar>> {
   // --- Getters ---
   public String getName() {
     return name;
+  }
+
+  public List<Invite> getPendingInvites() {
+    return pendingInvites;
   }
 
   public Money getMoney() {
@@ -111,6 +118,10 @@ public class Avatar implements Aggregate<Id<Avatar>> {
       throw new IllegalArgumentException("Name cannot be null or blank");
     }
     this.name = newName;
+  }
+
+  public void addPendingGuildInvite(Invite invite) {
+    this.pendingInvites.add(invite);
   }
 
   public void gainExperience(Integer amount) {

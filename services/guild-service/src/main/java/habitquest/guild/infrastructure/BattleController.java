@@ -18,7 +18,9 @@ import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
 import habitquest.guild.infrastructure.dto.BattleResponse;
 import habitquest.guild.infrastructure.dto.BossResponse;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -157,6 +159,17 @@ public class BattleController {
             body,
             linkTo(methodOn(BattleController.class).hasBattleInProgress(guildId)).withSelfRel(),
             linkTo(methodOn(BattleController.class).getBattleByGuild(guildId)).withRel("battle"));
+    return ResponseEntity.ok(model);
+  }
+
+  @GetMapping("/boss")
+  public ResponseEntity<CollectionModel<BossResponse>> getAllBosses() {
+    List<BossResponse> bosses =
+        battleService.getAllBossTypes().stream().map(BossResponse::from).toList();
+    log.info(bosses.size(), "All boss types retrieved");
+    CollectionModel<BossResponse> model =
+        CollectionModel.of(
+            bosses, linkTo(methodOn(BattleController.class).getAllBosses()).withSelfRel());
     return ResponseEntity.ok(model);
   }
 

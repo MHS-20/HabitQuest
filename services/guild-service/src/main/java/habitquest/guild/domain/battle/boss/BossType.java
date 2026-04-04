@@ -8,6 +8,7 @@ import habitquest.guild.domain.battle.stats.Defense;
 import habitquest.guild.domain.battle.stats.Health;
 import habitquest.guild.domain.battle.stats.Stats;
 import habitquest.guild.domain.battle.stats.Strength;
+import java.util.List;
 import java.util.Locale;
 
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.NonSerializableClass"})
@@ -32,6 +33,10 @@ public enum BossType implements BossEnemy {
     this.moneyReward = moneyReward;
     this.penalty = penalty;
     this.experienceReward = experienceReward;
+  }
+
+  public static List<BossEnemy> allBossTypes() {
+    return List.of(BossType.values());
   }
 
   @Override
