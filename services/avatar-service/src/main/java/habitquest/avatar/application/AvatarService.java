@@ -25,6 +25,8 @@ public interface AvatarService {
 
   void addPendingInvite(Id<Avatar> avatarId, Invite invite) throws AvatarNotFoundException;
 
+  void acceptInvite(Id<Avatar> avatarId, Id<Invite> inviteId) throws AvatarNotFoundException;
+
   // --- Query ---
   String getName(Id<Avatar> avatarId) throws AvatarNotFoundException;
 

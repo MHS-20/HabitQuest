@@ -22,6 +22,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
   private AvatarStats avatarStats;
   private List<Spell> spells;
   private List<Invite> pendingInvites;
+  private Id<Guild> guildId;
 
   public Avatar(
       String name,
@@ -122,6 +123,24 @@ public class Avatar implements Aggregate<Id<Avatar>> {
 
   public void addPendingGuildInvite(Invite invite) {
     this.pendingInvites.add(invite);
+  }
+
+  public void acceptGuildInvite(Id<Invite> inviteId) {
+    if (inviteId == null) {
+      throw new IllegalArgumentException("Invite id cannot be null");
+    }
+
+    Invite invite = this.pendingInvites.stream()
+        .filter(i -> i.inviteId().equals(inviteId))
+        .findFirst()
+        .orElse(null);
+
+    if (invite == null) {
+      throw new IllegalStateException("Invite not found in pending invites");
+    }
+
+    this.guildId = invite.guildId();
+    this.pendingInvites.remove(invite);
   }
 
   public void gainExperience(Integer amount) {
