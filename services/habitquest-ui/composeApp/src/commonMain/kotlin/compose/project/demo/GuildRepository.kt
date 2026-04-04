@@ -69,6 +69,18 @@ data class SearchAvatarData(
     val name: String,
 )
 
+data class PendingInviteData(
+    val inviteId: String,
+    val guildId: String,
+    val guildName: String,
+    val expiresAt: String?,
+)
+
+sealed interface PendingInvitesResult {
+    data class Success(val invites: List<PendingInviteData>) : PendingInvitesResult
+    data class Error(val message: String) : PendingInvitesResult
+}
+
 class GuildRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
@@ -247,6 +259,30 @@ class GuildRepository {
         }
     }
 
+    suspend fun fetchPendingInvites(token: String, avatarId: String): PendingInvitesResult {
+        if (avatarId.isBlank()) return PendingInvitesResult.Error("Avatar id cannot be blank")
+
+        val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/invites") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return PendingInvitesResult.Error("Unable to contact avatar-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+                PendingInvitesResult.Success(parsePendingInviteCollection(body))
+            }
+
+            HttpStatusCode.NotFound -> PendingInvitesResult.Error("Avatar not found")
+            HttpStatusCode.Unauthorized -> PendingInvitesResult.Error("Session expired, please log in again")
+            else -> PendingInvitesResult.Error("Pending invites error (${response.status.value})")
+        }
+    }
+
     private fun parseGuild(source: JsonObject): GuildData? {
         val id = source["id"]?.jsonPrimitive?.contentOrNull ?: return null
         val name = source["name"]?.jsonPrimitive?.contentOrNull.orEmpty()
@@ -302,5 +338,54 @@ class GuildRepository {
             val source = item["content"]?.jsonObject ?: item
             parseGuild(source)
         }
+    }
+
+    private fun parsePendingInviteCollection(body: JsonObject): List<PendingInviteData> {
+        val directArray = body["invites"] as? JsonArray
+        if (directArray != null) {
+            return parsePendingInviteArray(directArray)
+        }
+
+        val embedded = body["_embedded"]?.jsonObject
+        val embeddedItems = embedded?.values?.flatMap { parsePendingInviteElements(it) }.orEmpty()
+        if (embeddedItems.isNotEmpty()) {
+            return embeddedItems
+        }
+
+        val contentArray = body["content"] as? JsonArray
+        if (contentArray != null) {
+            return parsePendingInviteArray(contentArray)
+        }
+
+        return parsePendingInvite(body)?.let(::listOf).orEmpty()
+    }
+
+    private fun parsePendingInviteElements(element: JsonElement): List<PendingInviteData> {
+        val objectValue = element as? JsonObject
+        if (objectValue != null) {
+            val maybeContentArray = objectValue["content"] as? JsonArray
+            if (maybeContentArray != null) {
+                return parsePendingInviteArray(maybeContentArray)
+            }
+        }
+
+        val arrayValue = element as? JsonArray
+        return if (arrayValue != null) parsePendingInviteArray(arrayValue) else emptyList()
+    }
+
+    private fun parsePendingInviteArray(array: JsonArray): List<PendingInviteData> {
+        return array.mapNotNull { element ->
+            val item = element as? JsonObject ?: return@mapNotNull null
+            val source = item["content"]?.jsonObject ?: item
+            parsePendingInvite(source)
+        }
+    }
+
+    private fun parsePendingInvite(source: JsonObject): PendingInviteData? {
+        val inviteId = source["inviteId"]?.jsonPrimitive?.contentOrNull ?: return null
+        val guildId = source["guildId"]?.jsonPrimitive?.contentOrNull ?: return null
+        val guildName = source["guildName"]?.jsonPrimitive?.contentOrNull.orEmpty()
+        val expiresAt = source["expiresAt"]?.jsonPrimitive?.contentOrNull
+        return PendingInviteData(inviteId = inviteId, guildId = guildId, guildName = guildName, expiresAt = expiresAt)
     }
 }
