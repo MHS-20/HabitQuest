@@ -130,10 +130,11 @@ public class Avatar implements Aggregate<Id<Avatar>> {
       throw new IllegalArgumentException("Invite id cannot be null");
     }
 
-    Invite invite = this.pendingInvites.stream()
-        .filter(i -> i.inviteId().equals(inviteId))
-        .findFirst()
-        .orElse(null);
+    Invite invite =
+        this.pendingInvites.stream()
+            .filter(i -> i.inviteId().equals(inviteId))
+            .findFirst()
+            .orElse(null);
 
     if (invite == null) {
       throw new IllegalStateException("Invite not found in pending invites");

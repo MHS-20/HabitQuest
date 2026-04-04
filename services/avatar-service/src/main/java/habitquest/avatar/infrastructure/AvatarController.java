@@ -176,13 +176,13 @@ public class AvatarController {
     return ResponseEntity.ok(CollectionModel.of(inviteModels));
   }
 
-    @PostMapping("/{id}/invites/{inviteId}/accept")
-    public ResponseEntity<Void> acceptGuildInvite(
-        @PathVariable String id, @PathVariable String inviteId) throws AvatarNotFoundException {
-      avatarService.acceptInvite(idOf(id), inviteIdOf(inviteId));
-      log.info(id, "Guild invite accepted for avatar id: " + id);
-      return ResponseEntity.noContent().build();
-    }
+  @PostMapping("/{id}/invites/{inviteId}/accept")
+  public ResponseEntity<Void> acceptGuildInvite(
+      @PathVariable String id, @PathVariable String inviteId) throws AvatarNotFoundException {
+    avatarService.acceptInvite(idOf(id), inviteIdOf(inviteId));
+    log.info(id, "Guild invite accepted for avatar id: " + id);
+    return ResponseEntity.noContent().build();
+  }
 
   // ─── Queries ────────────────────────────────────────────────────────────────
   @GetMapping("/{id}/name")
@@ -403,6 +403,22 @@ public class AvatarController {
     return ResponseEntity.ok(response);
   }
 
+  @PostMapping("/{id}/health/potion")
+  public ResponseEntity<Void> useHealthPotion(
+      @PathVariable String id, @RequestBody PotionRequest request) throws AvatarNotFoundException {
+    avatarService.useHealthPotion(idOf(id), request.potionName());
+    log.info(request, "Health potion used for avatar id: " + id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{id}/mana/potion")
+  public ResponseEntity<Void> useManaPotion(
+      @PathVariable String id, @RequestBody PotionRequest request) throws AvatarNotFoundException {
+    avatarService.useManaPotion(idOf(id), request.potionName());
+    log.info(request, "Mana potion used for avatar id: " + id);
+    return ResponseEntity.noContent().build();
+  }
+
   @PostMapping("/{id}/health/heal")
   public ResponseEntity<Void> healAvatar(
       @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
@@ -428,7 +444,6 @@ public class AvatarController {
   }
 
   // ─── Progression ────────────────────────────────────────────────────────────
-
   @PostMapping("/{id}/experience/grant")
   public ResponseEntity<Void> grantExperience(
       @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
@@ -505,6 +520,8 @@ public class AvatarController {
   public record UpdateNameRequest(String name) {}
 
   public record AmountRequest(Integer amount) {}
+
+  public record PotionRequest(String potionName) {}
 
   public record AvatarCreatedResponse(String id) {}
 

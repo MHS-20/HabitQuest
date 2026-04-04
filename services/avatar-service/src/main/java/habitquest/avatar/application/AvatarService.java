@@ -63,6 +63,10 @@ public interface AvatarService {
   // --- Combat ---
   boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
 
+  void useHealthPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;
+
+  void useManaPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;
+
   void healAvatar(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
 
   void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
