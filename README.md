@@ -44,26 +44,6 @@ https://mhs-20.github.io/HabitQuest/
 - Attacks and magic consume resources
 - Damage calculated from stats and equipment
 
----
-## Architecture
-- **Microservices**: Identity, Tracking, Notification, Avatar, Shop, Guild, Quest
-- **Databases**: one per service
-- **Communication**:
-  - REST/gRPC for synchronous requests
-  - Event-driven async via message broker
-  - WebSocket for real-time chat and combat
-- **DDD**: Aggregates, entities, value objects, domain events
-
----
-## Tech Stack
-- Backend: Spring Boot
-- DB: PostgreSQL
-- Event Bus: Kafka
-- Auth: OAuth2
-- UI: Kotlin multiplatform 
-- Testing: Gherkin
-- Deployment: Kubernetes
-
 # Deployment
 ## Option 1: Docker Compose
 Run these commands: 
@@ -96,9 +76,17 @@ cd ./services/habitquest-ui
 ./gradlew composeApp:run
 ```
 
+To see some metrics in Grafana, run E2E tests or load tests: 
+```python
+python -m venv .venv
+source .venv/bin/activate
+pip install httpx rich
+
+python ./e2e/load_test.py
+python ./e2e/e2e_test.py
+```
+
 To stop and delete the cluster:
 ```bash
 ./delete.sh
 ```
-
-

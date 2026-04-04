@@ -2,11 +2,12 @@
 
 ## Panoramica della Strategia
 La strategia di test segue una **piramide a livelli**, dove la base è composta da unit test sul dominio, 
-il piano intermedio da test del comportamento applicativo, 
-e il vertice da integration test che validano gli adapter infrastrutturali contro dei mock o container reali.
-Inoltre sono presenti test architetturali con ArchUnit che controllano staticamente le dipendenze tra i layer.
+il secondo livello da test del comportamento applicativo, 
+e il terzo livello da integration test che validano gli adapter infrastrutturali contro dei mock o container reali, 
+e infine il vertice dove si fanno test end-to-end e di carico.
+Inoltre sono presenti test architetturali con ArchUnit che controllano staticamente le dipendenze tra i layer, 
+per assicurarsi che la Clean Architecture sia rispettata.
 La struttura è sistematicamente replicata in ogni microservizio.
-
 
 ## Livello 1 — Unit Test del Dominio
 I test di dominio sono test di unità che verificano che le regole di business e gli invarianti siano rispettati.
@@ -78,7 +79,6 @@ Ogni operazione che accede al repository ha un caso negativo che verifica il lan
 
 
 ## Livello 3 — Integration Test dell'Infrastruttura
-
 I test di integrazione verificano gli **adapter infrastrutturali** contro sistemi reali avviati in container Docker tramite **Testcontainers**. 
 Ogni adapter ha il proprio IT che testa solo se stesso, mantenendo il resto dell'applicazione mockato.
 
@@ -114,6 +114,39 @@ static void kafkaProperties(DynamicPropertyRegistry registry) {
 }
 ```
 
+## Livello 4 — Test End-to-End e di Carico
+I test di quarto livello operano direttamente sull'edge service esposto sulla porta 9000, 
+simulando il comportamento di un client reale senza alcun mock. 
+L'intera infrastruttura deve essere attiva.
+
+### End-to-End
+La suite E2E esegue scenari sequenziali con stato condiviso: 
+ogni flow alimenta il successivo, come avviene in una sessione utente reale. 
+
+I flussi coperti sono:
+
+- **Auth flow** — registrazione, login, validazione del token JWT, e verifica dei casi negativi (credenziali errate → 401, email duplicata → 409).
+- **Guild flow** — creazione di una guild, lettura dei membri, consultazione della leaderboard, e verifica della risposta 404 per risorse inesistenti.
+- **Battle flow** — recupero dei boss disponibili, avvio di una battaglia, verifica dello stato e dell'HP del boss, infliggi danno, e controllo che un non-leader non possa avviare battaglie (→ 403).
+- **Quest flow** — creazione di una quest, aggiunta di un habit, iscrizione di un avatar, registrazione di una presenza e lettura del progresso.
+- **Marketplace flow** — creazione del marketplace per un avatar, recupero del marketplace e degli item disponibili.
+- **Resilience** — verifica che il rate limiter si attivi correttamente in caso di traffico elevato, aspettandosi almeno un 429.
+
+### Load Test
+La suite di carico opera in modo asincrono con un pool di virtual user configurabile (`--vus`, default 20) 
+che sovraccaricano l'endpoint per una durata stabilita (`--duration`, default 10s per scenario). 
+I risultati vengono classificati in quattro categorie distinte 
+— risposte 2xx, 429 (rate limited), altri 4xx e 5xx/errori di rete — 
+per distinguere i veri successi dai rigetti del gateway. 
+Per ogni scenario vengono riportati RPS, percentuale di successo e le latenze ai percentili p50, p95 e p99.
+
+Gli scenari previsti coprono i path più sollecitati in produzione:
+
+- **auth** — burst di login con credenziali casuali, per misurare la capacità del gateway di assorbire traffico sull'endpoint di autenticazione.
+- **guild_reads** — lettura continua della leaderboard, endpoint read-heavy senza autenticazione.
+- **battle_reads** — recupero della lista boss, analogo al precedente ma sul dominio battle.
+- **quest_reads** — GET su tutte le quest, per misurare la risposta sotto carico del quest-service.
+- **quest_write** — ciclo create/delete su quest, lo scenario più stressante perché genera scritture, potenziali conflitti e interazione col circuit breaker.
 
 ## Test Architetturali con ArchUnit
 Questi test analizzano il codice e verificano che le dipendenze tra layer rispettino le regole dell'Hexagonal Architecture.
@@ -159,18 +192,3 @@ Scenario: Avatar levels up when reaching threshold
   And the avatar stats should increase according to level up rules
 ```
 
-## La Classe AvatarFixtures: dati di test condivisi
-Tutti i livelli della piramide condividono una singola classe `AvatarFixtures` che centralizza costanti e factory di oggetti di test. 
-Questo evita la duplicazione di setup e garantisce che domain test, application test e integration test usino gli stessi identificatori e valori di riferimento.
-
-```java
-public final class AvatarFixtures {
-    public static final Id<Avatar>    AVATAR_ID   = new Id<>("avatar-1");
-    public static final Id<Avatar>    UNKNOWN_ID  = new Id<>("ghost-99");
-    public static final Weapon        SWORD       = new Weapon("Iron Sword", "A basic sword", 15);
-
-    public static Avatar mutableAvatar() { /* avatar con ArrayList modificabile */ }
-    public static Avatar readOnlyAvatar() { /* avatar con List.of() per test readonly */ }
-    public static Avatar avatarAtLevel(int level, int xpToNext) { ... }
-}
-```
