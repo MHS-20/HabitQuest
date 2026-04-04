@@ -81,6 +81,11 @@ sealed interface PendingInvitesResult {
     data class Error(val message: String) : PendingInvitesResult
 }
 
+sealed interface AcceptInviteResult {
+    data object Success : AcceptInviteResult
+    data class Error(val message: String) : AcceptInviteResult
+}
+
 class GuildRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
@@ -280,6 +285,28 @@ class GuildRepository {
             HttpStatusCode.NotFound -> PendingInvitesResult.Error("Avatar not found")
             HttpStatusCode.Unauthorized -> PendingInvitesResult.Error("Session expired, please log in again")
             else -> PendingInvitesResult.Error("Pending invites error (${response.status.value})")
+        }
+    }
+
+    suspend fun acceptInvite(token: String, avatarId: String, inviteId: String): AcceptInviteResult {
+        if (avatarId.isBlank()) return AcceptInviteResult.Error("Avatar id cannot be blank")
+        if (inviteId.isBlank()) return AcceptInviteResult.Error("Invite id cannot be blank")
+
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/invites/$inviteId/accept") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return AcceptInviteResult.Error("Unable to contact avatar-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> AcceptInviteResult.Success
+            HttpStatusCode.NotFound -> AcceptInviteResult.Error("Invite or avatar not found")
+            HttpStatusCode.Unauthorized -> AcceptInviteResult.Error("Session expired, please log in again")
+            HttpStatusCode.BadRequest -> AcceptInviteResult.Error("Invalid invite request")
+            else -> AcceptInviteResult.Error("Accept invite error (${response.status.value})")
         }
     }
 
