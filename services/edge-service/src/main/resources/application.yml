@@ -98,6 +98,8 @@ resilience4j:
         baseConfig: default
       guildCircuitBreaker:
         baseConfig: default
+      marketplaceCircuitBreaker:
+        baseConfig: default
       questCircuitBreaker:
         baseConfig: default
       habitCircuitBreaker:
@@ -107,7 +109,6 @@ resilience4j:
     configs:
       default:
         timeoutDuration: 5s
-
   ratelimiter:
     instances:
       default:
