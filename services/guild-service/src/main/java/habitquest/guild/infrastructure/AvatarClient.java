@@ -157,7 +157,13 @@ public class AvatarClient {
         "Avatar service non disponibile (money) per " + avatarId, ex);
   }
 
-  private void sendInviteToAvatarFallback(String avatarId, String guildName, Exception ex) {
+  private void sendInviteToAvatarFallback(
+      String inviteId,
+      String avatarId,
+      String guildId,
+      String guildName,
+      Instant expiresAt,
+      Throwable ex) {
     log.error(
         new AvatarRequest(avatarId, 0),
         "Circuit breaker OPEN per sendInviteToAvatar, avatarId=" + avatarId,
