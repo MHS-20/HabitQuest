@@ -15,6 +15,7 @@ enum class AppPage(val label: String, val emoji: String) {
     Dashboard("Dashboard", "🏠"),
     Habits("Habits", "📝"),
     Quest("Quest", "🎯"),
+    Guild("Guild", "🛡️"),
     Marketplace("Marketplace", "🛒"),
     Character("Character", "👤"),
 }
@@ -198,6 +199,11 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                     avatarState = avatarState,
                     progressRefreshTick = questProgressRefreshTick,
                 )
+<<<<<<< Updated upstream
+=======
+                AppPage.Quest -> QuestScreen(token = token, avatarState = avatarState)
+                AppPage.Guild -> GuildScreen(token = token, avatarState = avatarState)
+>>>>>>> Stashed changes
                 AppPage.Marketplace -> MarketplaceScreen(
                     token = token,
                     avatarState = avatarState,
