@@ -92,8 +92,8 @@ public class AvatarController {
     return ResponseEntity.ok(model);
   }
 
-  // GET /api/v1/avatars/search
-  @GetMapping("/search")
+  // POST /api/v1/avatars/search
+  @PostMapping("/search")
   public ResponseEntity<CollectionModel<EntityModel<AvatarResponse>>> searchAvatars(
       @RequestBody AvatarSearchRequest query) {
     List<Avatar> avatars = avatarService.searchAvatars(query);
