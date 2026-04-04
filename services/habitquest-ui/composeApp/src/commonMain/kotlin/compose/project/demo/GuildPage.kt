@@ -46,6 +46,12 @@ fun GuildScreen(
     var loading by remember { mutableStateOf(false) }
     var leaderboard by remember { mutableStateOf<List<GuildData>>(emptyList()) }
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showInviteDialog by remember { mutableStateOf(false) }
+    var selectedGuildForInvite by remember { mutableStateOf<GuildData?>(null) }
+    var inviteSearchText by remember { mutableStateOf("") }
+    var inviteSearchResult by remember { mutableStateOf<SearchAvatarData?>(null) }
+    var inviteLoading by remember { mutableStateOf(false) }
+    var inviteError by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
@@ -152,7 +158,17 @@ fun GuildScreen(
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(filteredGuilds, key = { it.id }) { guild ->
-                    GuildLeaderboardRow(guild = guild)
+                    GuildLeaderboardRow(
+                        guild = guild,
+                        onInviteClick = {
+                            selectedGuildForInvite = guild
+                            showInviteDialog = true
+                            inviteSearchText = ""
+                            inviteSearchResult = null
+                            inviteError = null
+                        }
+                    )
+
                 }
             }
         }
@@ -226,6 +242,119 @@ fun GuildScreen(
                 }
             )
         }
+
+        if (showInviteDialog && selectedGuildForInvite != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showInviteDialog = false
+                    inviteSearchText = ""
+                    inviteSearchResult = null
+                    inviteError = null
+                },
+                title = { Text("Invite avatar to ${selectedGuildForInvite!!.name}") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = inviteSearchText,
+                            onValueChange = {
+                                inviteSearchText = it
+                                inviteError = null
+                            },
+                            label = { Text("Search avatar by name") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    inviteLoading = true
+                                    inviteError = null
+                                    when (val result = repository.searchAvatar(token, inviteSearchText)) {
+                                        is SearchAvatarResult.Success -> {
+                                            inviteSearchResult = result.avatar
+                                        }
+
+                                        is SearchAvatarResult.Error -> {
+                                            inviteError = result.message
+                                            inviteSearchResult = null
+                                        }
+                                    }
+                                    inviteLoading = false
+                                }
+                            },
+                            enabled = inviteSearchText.isNotBlank() && !inviteLoading,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Search")
+                        }
+
+                        inviteError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        inviteSearchResult?.let { avatar ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(avatar.name, style = MaterialTheme.typography.titleSmall)
+                                    Text("ID: ${avatar.id}", style = MaterialTheme.typography.bodySmall)
+                                    Button(
+                                        onClick = {
+                                            scope.launch {
+                                                inviteLoading = true
+                                                inviteError = null
+                                                when (
+                                                    val result = repository.inviteAvatarToGuild(
+                                                        token = token,
+                                                        guildId = selectedGuildForInvite!!.id,
+                                                        avatarId = avatar.id
+                                                    )
+                                                ) {
+                                                    is InviteAvatarResult.Success -> {
+                                                        inviteError = "Invite sent successfully!"
+                                                        inviteSearchText = ""
+                                                        inviteSearchResult = null
+                                                        loadLeaderboard(showLoading = false)
+                                                    }
+
+                                                    is InviteAvatarResult.Error -> {
+                                                        inviteError = result.message
+                                                    }
+                                                }
+                                                inviteLoading = false
+                                            }
+                                        },
+                                        enabled = !inviteLoading,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("Send Invite")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showInviteDialog = false
+                            inviteSearchText = ""
+                            inviteSearchResult = null
+                            inviteError = null
+                        }
+                    ) {
+                        Text("Close")
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -258,7 +387,7 @@ private fun GuildCard(guild: GuildData) {
 }
 
 @Composable
-private fun GuildLeaderboardRow(guild: GuildData) {
+private fun GuildLeaderboardRow(guild: GuildData, onInviteClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -271,6 +400,12 @@ private fun GuildLeaderboardRow(guild: GuildData) {
                 style = MaterialTheme.typography.bodySmall
             )
             Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
+            Button(
+                onClick = onInviteClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Invite avatar")
+            }
         }
     }
 }

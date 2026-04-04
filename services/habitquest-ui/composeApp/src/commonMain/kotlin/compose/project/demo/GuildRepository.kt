@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+
 package compose.project.demo
 
 import io.ktor.client.HttpClient
@@ -10,6 +12,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -51,6 +54,21 @@ sealed interface GuildLeaderboardResult {
     data class Success(val guilds: List<GuildData>) : GuildLeaderboardResult
     data class Error(val message: String) : GuildLeaderboardResult
 }
+
+sealed interface SearchAvatarResult {
+    data class Success(val avatar: SearchAvatarData) : SearchAvatarResult
+    data class Error(val message: String) : SearchAvatarResult
+}
+
+sealed interface InviteAvatarResult {
+    data object Success : InviteAvatarResult
+    data class Error(val message: String) : InviteAvatarResult
+}
+
+data class SearchAvatarData(
+    val id: String,
+    val name: String,
+)
 
 class GuildRepository {
     private val client = HttpClient(createHttpEngine()) {
@@ -144,6 +162,86 @@ class GuildRepository {
 
             HttpStatusCode.Unauthorized -> GuildLeaderboardResult.Error("Session expired, please log in again")
             else -> GuildLeaderboardResult.Error("Leaderboard read error (${response.status.value})")
+        }
+    }
+
+    suspend fun searchAvatar(token: String, search: String): SearchAvatarResult {
+        if (search.isBlank()) return SearchAvatarResult.Error("Search cannot be empty")
+
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/avatars/search") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("name", JsonPrimitive(search.trim()))
+                        put("minLevel", null)
+                        put("maxLevel", null)
+                    }
+                )
+            }
+        }.getOrElse {
+            return SearchAvatarResult.Error("Unable to contact avatar-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+
+                // Parse the response which may contain _embedded.avatarResponseList
+                val embedded = body["_embedded"]?.jsonObject
+                val avatarList = embedded?.get("avatarResponseList")?.jsonArray
+
+                if (avatarList != null && avatarList.isNotEmpty()) {
+                    val firstAvatar = avatarList[0] as? JsonObject ?: return SearchAvatarResult.Error("Invalid avatar response")
+                    val id = firstAvatar["id"]?.jsonPrimitive?.contentOrNull
+                    val name = firstAvatar["name"]?.jsonPrimitive?.contentOrNull
+
+                    if (id != null && name != null) {
+                        SearchAvatarResult.Success(SearchAvatarData(id, name))
+                    } else {
+                        SearchAvatarResult.Error("Invalid avatar response")
+                    }
+                } else {
+                    SearchAvatarResult.Error("Avatar not found")
+                }
+            }
+
+            HttpStatusCode.NotFound -> SearchAvatarResult.Error("Avatar not found")
+            HttpStatusCode.Unauthorized -> SearchAvatarResult.Error("Session expired, please log in again")
+            else -> SearchAvatarResult.Error("Search error (${response.status.value})")
+        }
+    }
+
+    suspend fun inviteAvatarToGuild(
+        token: String,
+        guildId: String,
+        avatarId: String,
+    ): InviteAvatarResult {
+        if (guildId.isBlank()) return InviteAvatarResult.Error("Guild id cannot be blank")
+        if (avatarId.isBlank()) return InviteAvatarResult.Error("Avatar id cannot be blank")
+
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/guilds/$guildId/invite") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("avatarId", JsonPrimitive(avatarId))
+                    }
+                )
+            }
+        }.getOrElse {
+            return InviteAvatarResult.Error("Unable to contact guild-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK, HttpStatusCode.Created, HttpStatusCode.NoContent -> InviteAvatarResult.Success
+            HttpStatusCode.BadRequest -> InviteAvatarResult.Error("Invalid guild or avatar data")
+            HttpStatusCode.Unauthorized -> InviteAvatarResult.Error("Session expired, please log in again")
+            HttpStatusCode.NotFound -> InviteAvatarResult.Error("Guild or avatar not found")
+            else -> InviteAvatarResult.Error("Invite error (${response.status.value})")
         }
     }
 

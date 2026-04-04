@@ -110,7 +110,7 @@ public class AvatarControllerIT {
     // ── GET /api/v1/avatars/search ──────────────────────────────────────────────
 
     @Nested
-    @DisplayName("GET /api/v1/avatars/search")
+    @DisplayName("POST /api/v1/avatars/search")
     class SearchAvatars {
 
       @Test
@@ -120,7 +120,7 @@ public class AvatarControllerIT {
 
         mockMvc
             .perform(
-                get("/api/v1/avatars/search")
+                post("/api/v1/avatars/search")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
@@ -137,7 +137,7 @@ public class AvatarControllerIT {
 
         mockMvc
             .perform(
-                get("/api/v1/avatars/search")
+                post("/api/v1/avatars/search")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
@@ -153,7 +153,7 @@ public class AvatarControllerIT {
 
         mockMvc
             .perform(
-                get("/api/v1/avatars/search")
+                post("/api/v1/avatars/search")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
@@ -172,7 +172,7 @@ public class AvatarControllerIT {
 
         mockMvc
             .perform(
-                get("/api/v1/avatars/search")
+                post("/api/v1/avatars/search")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
