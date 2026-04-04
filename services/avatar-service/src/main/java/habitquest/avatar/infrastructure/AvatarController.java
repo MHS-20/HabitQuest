@@ -142,13 +142,18 @@ public class AvatarController {
       @PathVariable String id, @RequestBody GuildInviteRequest request)
       throws AvatarNotFoundException {
 
+    Instant expiresAt =
+        request.expiresAt() == null || request.expiresAt().isBlank()
+            ? Instant.now().plusSeconds(86400)
+            : Instant.parse(request.expiresAt());
+
     avatarService.addPendingInvite(
         idOf(id),
         new Invite(
             inviteIdOf(request.inviteId()),
             guildIdOf(request.guildId()),
             request.guildName(),
-            Instant.parse(request.expiresAt())));
+            expiresAt));
 
     log.info(request, "Guild invite received for avatar id: " + id);
     return ResponseEntity.noContent().build();

@@ -1,5 +1,6 @@
 package habitquest.guild.infrastructure;
 
+import habitquest.guild.application.GuildLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,11 @@ public class AvatarClientConfig {
   @Bean
   RestClient avatarRestClient(
       RestClient.Builder builder,
-      @Value("${habitquest.avatar-service-uri:http://localhost:8081}") String avatarServiceUri) {
+      @Value("${AVATAR_SERVICE_URI:${habitquest.avatar-service-uri:http://localhost:8081}}")
+          String avatarServiceUri,
+      GuildLogger log) {
+
+    log.info(avatarServiceUri, "Resolved avatar service URI for guild-service");
 
     return builder
         .baseUrl(avatarServiceUri)
