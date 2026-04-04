@@ -4,6 +4,7 @@ import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildLogger;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import java.time.Instant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -99,6 +100,26 @@ public class AvatarClient {
     }
   }
 
+  @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "sendInviteToAvatarFallback")
+  @Retry(name = AVATAR_CLIENT)
+  public void sendInviteToAvatar(
+      String inviteId, String avatarId, String guildId, String guildName, Instant expiresAt) {
+    AvatarRequest request = new AvatarRequest(avatarId, 0);
+    log.info(request, "Sending guild invite to avatar");
+    try {
+      restClient
+          .post()
+          .uri("/api/v1/avatars/{id}/invites", avatarId)
+          .body(new GuildInviteRequest(inviteId, guildId, guildName, expiresAt.toString()))
+          .retrieve()
+          .toBodilessEntity();
+    } catch (RestClientException e) {
+      log.error(request, "Failed to send guild invite to avatar: " + avatarId, e);
+      throw new AvatarCommunicationException(
+          "Failed to send guild invite to avatar " + avatarId, e);
+    }
+  }
+
   // ── Fallback methods ────────────────────────────────────────────────────────
   private DamageResult applyDamageFallback(String avatarId, int amount, Exception ex) {
     log.error(
@@ -136,9 +157,21 @@ public class AvatarClient {
         "Avatar service non disponibile (money) per " + avatarId, ex);
   }
 
+  private void sendInviteToAvatarFallback(String avatarId, String guildName, Exception ex) {
+    log.error(
+        new AvatarRequest(avatarId, 0),
+        "Circuit breaker OPEN per sendInviteToAvatar, avatarId=" + avatarId,
+        ex);
+    throw new AvatarCommunicationException(
+        "Avatar service non disponibile (guild invite) per " + avatarId, ex);
+  }
+
   private record AmountRequest(Integer amount) {}
 
   private record AvatarRequest(String avatarId, int amount) {}
 
   public record DamageResult(boolean died) {}
+
+  private record GuildInviteRequest(
+      String inviteId, String guildId, String guildName, String expires) {}
 }

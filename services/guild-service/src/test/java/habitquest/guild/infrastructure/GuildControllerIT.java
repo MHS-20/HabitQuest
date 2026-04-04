@@ -12,6 +12,7 @@ import habitquest.guild.application.GuildLogger;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.*;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +35,7 @@ public class GuildControllerIT {
 
   @MockitoBean private GuildService guildService;
   @MockitoBean private GuildLogger log;
+  @MockitoBean private AvatarClient avatarClient;
 
   // ── POST /api/v1/guilds ───────────────────────────────────────────────────────
 
@@ -186,7 +188,12 @@ public class GuildControllerIT {
     @Test
     @DisplayName("returns 204 when leader sends an invite")
     void shouldReturn204AndDelegate() throws Exception {
-      doNothing().when(guildService).sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
+      Invite mockInvite =
+          new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400));
+      when(guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID)).thenReturn(mockInvite);
+      // when(guildService.getGuild(GUILD_ID)).thenReturn(GUILD_1);
+      doReturn(guild()).when(guildService).getGuild(GUILD_ID);
+      doNothing().when(avatarClient).sendInviteToAvatar(any(), any(), any(), any(), any());
 
       mockMvc
           .perform(
@@ -199,6 +206,7 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
+      verify(avatarClient).sendInviteToAvatar(any(), eq(MEMBER_1), eq(GUILD_1), any(), any());
     }
 
     @Test

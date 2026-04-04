@@ -9,6 +9,7 @@ import habitquest.guild.domain.battle.boss.BossStatus;
 import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
+import java.util.List;
 import java.util.Optional;
 
 @InBoundPort
@@ -31,6 +32,8 @@ public interface BattleService {
 
   // --- Boss info ---
   Id<Guild> getGuildId(Id<Battle> battleId) throws BattleNotFoundException;
+
+  List<BossEnemy> getAllBossTypes();
 
   BossEnemy getBoss(Id<Battle> battleId) throws BattleNotFoundException;
 

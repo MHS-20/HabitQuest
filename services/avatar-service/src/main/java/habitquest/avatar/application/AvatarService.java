@@ -23,6 +23,8 @@ public interface AvatarService {
 
   List<Avatar> searchAvatars(AvatarSearchRequest criteria);
 
+  void addPendingInvite(Id<Avatar> avatarId, Invite invite) throws AvatarNotFoundException;
+
   // --- Query ---
   String getName(Id<Avatar> avatarId) throws AvatarNotFoundException;
 

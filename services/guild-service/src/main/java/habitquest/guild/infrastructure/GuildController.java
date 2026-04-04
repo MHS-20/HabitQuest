@@ -26,10 +26,12 @@ public class GuildController {
 
   private final GuildService guildService;
   private final GuildLogger log;
+  private final AvatarClient avatarClient;
 
-  public GuildController(GuildService guildService, GuildLogger log) {
+  public GuildController(GuildService guildService, GuildLogger log, AvatarClient avatarClient) {
     this.guildService = guildService;
     this.log = log;
+    this.avatarClient = avatarClient;
   }
 
   private Id<Guild> idOfGuild(String id) {
@@ -108,11 +110,18 @@ public class GuildController {
       @PathVariable String id, @RequestBody SendInviteRequest request)
       throws GuildNotFoundException {
     try {
-      guildService.sendInvite(
-          idOfGuild(id),
-          idOfGuildMember(request.requestorId()),
-          idOfGuildMember(request.targetAvatarId()));
+      Invite invite =
+          guildService.sendInvite(
+              idOfGuild(id),
+              idOfGuildMember(request.requestorId()),
+              idOfGuildMember(request.targetAvatarId()));
       log.info(request, "Invite sent");
+      avatarClient.sendInviteToAvatar(
+          invite.inviteId().value(),
+          request.targetAvatarId(),
+          id,
+          guildService.getGuild(idOfGuild(id)).getName(),
+          invite.expiresAt());
       return ResponseEntity.noContent().build();
     } catch (UnauthorizedGuildOperationException e) {
       log.warn(request, "Unauthorized invite attempt");

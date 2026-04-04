@@ -46,6 +46,13 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
+  public void addPendingInvite(Id<Avatar> avatarId, Invite invite) throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
+    avatar.addPendingGuildInvite(invite);
+    avatarRepository.save(avatar);
+  }
+
+  @Override
   public void deleteAvatar(Id<Avatar> id) throws AvatarNotFoundException {
     avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id.value()));
     avatarRepository.deleteById(id);
