@@ -14,8 +14,8 @@ nav:
     - Gilde: domain/guild.md
     - Battaglie: domain/battle.md
     - Marketplace: domain/marketplace.md
-    - Quest: domain/quest.md
     - Abitudini: domain/habit.md
+    - Quest: domain/quest.md
   - Architecture & Implementation:
     - Interactions: implementation/interactions/interactions.md
     - Hexagonal Architecture: implementation/hexagonal-architecture.md
