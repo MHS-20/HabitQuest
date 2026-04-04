@@ -176,6 +176,14 @@ public class AvatarController {
     return ResponseEntity.ok(CollectionModel.of(inviteModels));
   }
 
+    @PostMapping("/{id}/invites/{inviteId}/accept")
+    public ResponseEntity<Void> acceptGuildInvite(
+        @PathVariable String id, @PathVariable String inviteId) throws AvatarNotFoundException {
+      avatarService.acceptInvite(idOf(id), inviteIdOf(inviteId));
+      log.info(id, "Guild invite accepted for avatar id: " + id);
+      return ResponseEntity.noContent().build();
+    }
+
   // ─── Queries ────────────────────────────────────────────────────────────────
   @GetMapping("/{id}/name")
   public ResponseEntity<EntityModel<NameResponse>> getName(@PathVariable String id)
@@ -380,14 +388,12 @@ public class AvatarController {
   @PostMapping("/{id}/inventory/items/unequip")
   public ResponseEntity<Void> unequipItem(@PathVariable String id, @RequestBody ItemRequest request)
       throws AvatarNotFoundException {
-
     avatarService.unequipItem(idOf(id), ItemMapper.toDomain(request));
     log.info(request, "Item unequipped for avatar id: " + id);
     return ResponseEntity.noContent().build();
   }
 
   // ─── Combat ─────────────────────────────────────────────────────────────────
-
   @PostMapping("/{id}/health/damage")
   public ResponseEntity<DamageResponse> applyDamage(
       @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
@@ -400,7 +406,6 @@ public class AvatarController {
   @PostMapping("/{id}/health/heal")
   public ResponseEntity<Void> healAvatar(
       @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
-
     avatarService.healAvatar(idOf(id), request.amount());
     log.info(request, "Avatar healed for id: " + id);
     return ResponseEntity.noContent().build();
@@ -409,7 +414,6 @@ public class AvatarController {
   @PostMapping("/{id}/mana/spend")
   public ResponseEntity<Void> spendMana(@PathVariable String id, @RequestBody AmountRequest request)
       throws AvatarNotFoundException {
-
     avatarService.spendMana(idOf(id), request.amount());
     log.info(request, "Avatar spent mana for id: " + id);
     return ResponseEntity.noContent().build();
@@ -418,7 +422,6 @@ public class AvatarController {
   @PostMapping("/{id}/mana/restore")
   public ResponseEntity<Void> restoreMana(
       @PathVariable String id, @RequestBody AmountRequest request) throws AvatarNotFoundException {
-
     avatarService.restoreMana(idOf(id), request.amount());
     log.info(request, "Avatar mana restored for id: " + id);
     return ResponseEntity.noContent().build();
