@@ -56,6 +56,8 @@ fun GuildScreen(
     var pendingInvites by remember { mutableStateOf<List<PendingInviteData>>(emptyList()) }
     var pendingInvitesLoading by remember { mutableStateOf(false) }
     var pendingInvitesError by remember { mutableStateOf<String?>(null) }
+    var pendingInvitesMessage by remember { mutableStateOf<String?>(null) }
+    var acceptingInviteId by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
@@ -90,6 +92,7 @@ fun GuildScreen(
         Text("Guild", style = MaterialTheme.typography.headlineSmall)
 
         val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
+        val avatarId = avatar?.id
         Text(
             text = if (avatar != null) {
                 "Current avatar: ${avatar.name} (${avatar.id})"
@@ -127,6 +130,7 @@ fun GuildScreen(
                 scope.launch {
                     pendingInvitesLoading = true
                     pendingInvitesError = null
+                    pendingInvitesMessage = null
                     when (val result = repository.fetchPendingInvites(token, currentAvatar.id)) {
                         is PendingInvitesResult.Success -> pendingInvites = result.invites
                         is PendingInvitesResult.Error -> {
@@ -401,6 +405,8 @@ fun GuildScreen(
                     showPendingInvitesDialog = false
                     pendingInvites = emptyList()
                     pendingInvitesError = null
+                    pendingInvitesMessage = null
+                    acceptingInviteId = null
                 },
                 title = { Text("Pending guild invites") },
                 text = {
@@ -413,6 +419,13 @@ fun GuildScreen(
                             Text(
                                 text = error,
                                 color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        pendingInvitesMessage?.let { message ->
+                            Text(
+                                text = message,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -443,6 +456,45 @@ fun GuildScreen(
                                                     "Expires at: ${invite.expiresAt ?: "-"}",
                                                     style = MaterialTheme.typography.bodySmall
                                                 )
+                                                Button(
+                                                    onClick = {
+                                                        if (avatarId.isNullOrBlank()) {
+                                                            pendingInvitesError = "Avatar not available"
+                                                            return@Button
+                                                        }
+
+                                                        scope.launch {
+                                                            acceptingInviteId = invite.inviteId
+                                                            pendingInvitesError = null
+                                                            pendingInvitesMessage = null
+                                                            when (
+                                                                val result = repository.acceptInvite(
+                                                                    token = token,
+                                                                    avatarId = avatarId,
+                                                                    inviteId = invite.inviteId
+                                                                )
+                                                            ) {
+                                                                is AcceptInviteResult.Success -> {
+                                                                    pendingInvites = pendingInvites.filterNot { it.inviteId == invite.inviteId }
+                                                                    pendingInvitesMessage = "Invite accepted"
+                                                                    statusMessage = null
+                                                                    loadLeaderboard(showLoading = false)
+                                                                }
+
+                                                                is AcceptInviteResult.Error -> {
+                                                                    pendingInvitesError = result.message
+                                                                }
+                                                            }
+                                                            acceptingInviteId = null
+                                                        }
+                                                    },
+                                                    enabled = acceptingInviteId != invite.inviteId,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text(
+                                                        if (acceptingInviteId == invite.inviteId) "Accepting..." else "Accept invite"
+                                                    )
+                                                }
                                             }
                                         }
                                     }
