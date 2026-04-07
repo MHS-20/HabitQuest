@@ -15,20 +15,15 @@
       }
     ]
   },
-  "description": "HTTP REST endpoint metrics from Spring Boot Actuator \u2014 http.server.requests",
+  "description": "HTTP REST endpoint metrics from Spring Boot Actuator — http.server.requests",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": null,
+  "id": 3,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -38,16 +33,7 @@
       "id": 1,
       "panels": [],
       "title": "Summary",
-      "type": "row",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
-          "refId": "A"
-        }
-      ]
+      "type": "row"
     },
     {
       "datasource": {
@@ -66,7 +52,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -90,6 +76,7 @@
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -97,9 +84,11 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -131,7 +120,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "orange",
@@ -159,6 +148,7 @@
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -166,9 +156,11 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -200,7 +192,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "orange",
@@ -228,6 +220,7 @@
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -235,9 +228,11 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -269,7 +264,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -293,6 +288,7 @@
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -300,9 +296,11 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -319,10 +317,6 @@
     },
     {
       "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -332,16 +326,7 @@
       "id": 10,
       "panels": [],
       "title": "Throughput",
-      "type": "row",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
-          "refId": "A"
-        }
-      ]
+      "type": "row"
     },
     {
       "datasource": {
@@ -361,6 +346,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -377,6 +363,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -393,7 +380,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -412,7 +399,6 @@
         "y": 6
       },
       "id": 11,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -423,11 +409,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -462,6 +449,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -478,6 +466,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -494,7 +483,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -513,7 +502,6 @@
         "y": 6
       },
       "id": 12,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -524,11 +512,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -547,10 +536,6 @@
     },
     {
       "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -560,16 +545,7 @@
       "id": 20,
       "panels": [],
       "title": "Latency",
-      "type": "row",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
-          "refId": "A"
-        }
-      ]
+      "type": "row"
     },
     {
       "datasource": {
@@ -589,6 +565,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -605,6 +582,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -621,7 +599,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -640,7 +618,6 @@
         "y": 15
       },
       "id": 21,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -651,11 +628,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -691,7 +669,7 @@
           "refId": "C"
         }
       ],
-      "title": "Latency percentiles \u2014 all URIs",
+      "title": "Latency percentiles — all URIs",
       "type": "timeseries"
     },
     {
@@ -712,6 +690,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -728,6 +707,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -744,7 +724,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -763,7 +743,6 @@
         "y": 23
       },
       "id": 22,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -774,11 +753,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -813,6 +793,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -829,6 +810,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -845,7 +827,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -864,7 +846,6 @@
         "y": 23
       },
       "id": 23,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -875,11 +856,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -898,10 +880,6 @@
     },
     {
       "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -911,16 +889,7 @@
       "id": 30,
       "panels": [],
       "title": "Errors",
-      "type": "row",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
-          "refId": "A"
-        }
-      ]
+      "type": "row"
     },
     {
       "datasource": {
@@ -940,6 +909,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -956,6 +926,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -972,7 +943,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -991,7 +962,6 @@
         "y": 32
       },
       "id": 31,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -1002,11 +972,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -1041,6 +1012,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -1057,6 +1029,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1073,7 +1046,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -1092,7 +1065,6 @@
         "y": 32
       },
       "id": 32,
-      "links": [],
       "options": {
         "legend": {
           "calcs": [
@@ -1103,11 +1075,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.2",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -1123,72 +1096,11 @@
       ],
       "title": "4xx error rate by URI",
       "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 39
-      },
-      "id": 40,
-      "panels": [],
-      "title": "Logs",
-      "type": "row",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-habitquest"
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 40
-      },
-      "id": 41,
-      "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-habitquest"
-          },
-          "expr": "{application=\"$application\"} |= \"\" | json | level=~\"WARN|ERROR\"",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "WARN/ERROR logs \u2014 $application",
-      "type": "logs"
     }
   ],
+  "preload": false,
   "refresh": "10s",
-  "schemaVersion": 38,
+  "schemaVersion": 42,
   "tags": [
     "spring",
     "http",
@@ -1203,7 +1115,6 @@
           "uid": "prometheus-habitquest"
         },
         "definition": "label_values(http_server_requests_seconds_count, application)",
-        "hide": 0,
         "includeAll": true,
         "label": "Application",
         "multi": true,
@@ -1225,7 +1136,6 @@
           "uid": "prometheus-habitquest"
         },
         "definition": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, instance)",
-        "hide": 0,
         "includeAll": true,
         "label": "Instance",
         "multi": true,
@@ -1247,7 +1157,6 @@
           "uid": "prometheus-habitquest"
         },
         "definition": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, uri)",
-        "hide": 0,
         "includeAll": true,
         "label": "URI",
         "multi": true,
@@ -1269,7 +1178,6 @@
           "uid": "prometheus-habitquest"
         },
         "definition": "label_values(http_server_requests_seconds_count{application=~\"$application\"}, method)",
-        "hide": 0,
         "includeAll": true,
         "label": "Method",
         "multi": true,
@@ -1294,5 +1202,5 @@
   "timezone": "browser",
   "title": "HTTP Traffic",
   "uid": "http-rest-controllers-dashboard",
-  "version": 1
+  "version": 2
 }

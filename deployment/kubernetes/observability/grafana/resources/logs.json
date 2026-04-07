@@ -107,7 +107,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"edge-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"edge-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -174,7 +174,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"avatar-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"avatar-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -241,7 +241,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"guild-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"guild-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -308,7 +308,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"marketplace-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"marketplace-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -375,7 +375,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"quest-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"quest-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -442,7 +442,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"tracking-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"tracking-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -509,7 +509,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum(count_over_time({container=\"notification-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum(count_over_time({container=\"notification-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "refId": "A"
         }
       ],
@@ -599,7 +599,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "sum by (container) (rate({container=~\".*-service\"} |~ \"(?i)(error|exception|fatal)\" [$__interval]))",
+          "expr": "sum by (container) (rate({container=~\".*-service\"} |~ \"^.*(ERROR|FATAL).*\" [$__interval]))",
           "legendFormat": "{{container}}",
           "refId": "A"
         }
@@ -905,7 +905,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"edge-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"edge-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -940,7 +940,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"avatar-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"avatar-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -975,7 +975,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"guild-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"guild-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -1010,7 +1010,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"marketplace-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"marketplace-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -1045,7 +1045,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"quest-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"quest-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -1080,7 +1080,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"tracking-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"tracking-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -1115,7 +1115,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=\"notification-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=\"notification-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],
@@ -1150,7 +1150,7 @@
             "type": "loki",
             "uid": "loki-habitquest"
           },
-          "expr": "{container=~\".*-service\"} |~ \"(?i)(error|exception|fatal)\"",
+          "expr": "{container=~\".*-service\"} |~ \"^.*(ERROR|FATAL).*\"",
           "refId": "A"
         }
       ],

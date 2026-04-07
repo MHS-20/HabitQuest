@@ -8,6 +8,9 @@ import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,17 +30,14 @@ class BattleTest {
   private static final int MONEY_REWARD = BossType.MINOTAUR.moneyReward().amount();
   private static final int PENALTY = BossType.MINOTAUR.penalty().amount();
 
-  // Battle è costruita con numOfTurns=0, poi i 3 membri la portano a 3.
-  // Così numOfTurns == memberIds.size() == 3, e nextTurn() non esplode.
   private Battle battle;
 
   @BeforeEach
   void setUp() {
-    battle = new Battle(BATTLE_ID, GUILD_ID, BossType.MINOTAUR, 0);
+    battle = new Battle(BATTLE_ID, GUILD_ID, BossType.MINOTAUR, 0, new ArrayList<>());
     battle.increaseNumOfTurns(MEMBER_1);
     battle.increaseNumOfTurns(MEMBER_2);
     battle.increaseNumOfTurns(MEMBER_3);
-    // numOfTurns == 3, memberIds == [MEMBER_1, MEMBER_2, MEMBER_3]
   }
 
   // -------------------------------------------------------------------------

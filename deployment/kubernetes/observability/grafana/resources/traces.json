@@ -95,14 +95,14 @@
           ],
           "limit": 20,
           "metricsQueryType": "range",
-          "query": "{resource.service.name=\"$service\"}",
+          "query": "{\n  resource.service.name = \"$service\" &&\n  span.http.url !~ \".*actuator.*\"\n}",
           "queryType": "traceql",
           "refId": "A",
           "serviceMapUseNativeHistograms": false,
           "tableType": "traces"
         }
       ],
-      "title": "New Panel",
+      "title": "Traces",
       "type": "table"
     }
   ],
