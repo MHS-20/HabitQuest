@@ -196,8 +196,19 @@ public class QuestServiceImpl implements QuestService {
             active -> {
               ActiveQuests.Status before = active.getStatus();
               active.refreshStatus(today);
-              if (before != active.getStatus()) {
+              ActiveQuests.Status after = active.getStatus();
+
+              if (before != after) {
                 activeQuestsRepository.save(active);
+                // Apply damage if quest expired without being completed
+                if (after == ActiveQuests.Status.EXPIRED
+                    && before != ActiveQuests.Status.COMPLETED) {
+                  try {
+                    avatarClient.applyDamage(avatarId, 10);
+                  } catch (AvatarRewardException ex) {
+                    log.error(active, "Failed to apply quest penalty damage", ex);
+                  }
+                }
               }
 
               Quest quest = questRepository.findById(active.getQuestId());
@@ -233,7 +244,7 @@ public class QuestServiceImpl implements QuestService {
               return new QuestProgressView(
                   quest.getId().value(),
                   quest.getName(),
-                  active.getStatus().name(),
+                  after.name(),
                   Math.clamp(completion, 0, 100),
                   habitProgress);
             })
