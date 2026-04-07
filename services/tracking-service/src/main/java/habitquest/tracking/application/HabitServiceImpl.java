@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class HabitServiceImpl implements HabitService {
 
   private static final int ATTEND_HABIT_XP_REWARD = 10;
+  private static final int NOT_ATTENDED_DAMAGE = 10;
 
   private final HabitRepository habitRepository;
   private final HabitHistoryRepository historyRepository;
@@ -338,14 +339,21 @@ public class HabitServiceImpl implements HabitService {
       LocalDateTime lastAttendedDate = habit.getLastAttendedDate();
       if (lastAttendedDate == null) {
         HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
-        appendNotAttendedHistoryIfNew(habit, "never-attended", event);
+        boolean appended = appendNotAttendedHistoryIfNew(habit, "never-attended", event);
+        if (appended) {
+          avatarClient.applyDamage(habit.getAvatarId(), NOT_ATTENDED_DAMAGE);
+        }
         habitObserver.notifyHabitEvent(event);
         continue;
       }
       LocalDateTime nextExpected = habit.nextRecurrence();
       if (nextExpected.isBefore(now)) {
         HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
-        appendNotAttendedHistoryIfNew(habit, "expectedAt=" + nextExpected, event);
+        boolean appended =
+            appendNotAttendedHistoryIfNew(habit, "expectedAt=" + nextExpected, event);
+        if (appended) {
+          avatarClient.applyDamage(habit.getAvatarId(), NOT_ATTENDED_DAMAGE);
+        }
         habitObserver.notifyHabitEvent(event);
       }
     }
@@ -355,7 +363,7 @@ public class HabitServiceImpl implements HabitService {
     historyRepository.append(new HabitHistoryEvent(event, LocalDateTime.now(), details));
   }
 
-  private void appendNotAttendedHistoryIfNew(
+  private boolean appendNotAttendedHistoryIfNew(
       Habit habit, String marker, HabitNotAttended notAttendedEvent) {
     List<HabitHistoryEvent> history = historyRepository.findByHabitId(habit.getId());
     HabitHistoryEvent last = history.isEmpty() ? null : history.getLast();
@@ -363,6 +371,8 @@ public class HabitServiceImpl implements HabitService {
         || !(last.event() instanceof HabitNotAttended)
         || !Objects.equals(last.details(), marker)) {
       appendHistory(notAttendedEvent, marker);
+      return true;
     }
+    return false;
   }
 }
