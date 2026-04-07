@@ -1,23 +1,12 @@
 package habitquest.avatar.domain;
 
+import static habitquest.avatar.AvatarFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 
-import common.ddd.Id;
 import habitquest.avatar.domain.avatar.Avatar;
-import habitquest.avatar.domain.avatar.AvatarHealth;
-import habitquest.avatar.domain.avatar.AvatarMana;
-import habitquest.avatar.domain.avatar.Experience;
-import habitquest.avatar.domain.avatar.Health;
-import habitquest.avatar.domain.avatar.Level;
-import habitquest.avatar.domain.avatar.Mana;
-import habitquest.avatar.domain.avatar.Money;
-import habitquest.avatar.domain.items.EquippedItems;
-import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.domain.spells.Spell;
-import habitquest.avatar.domain.stats.AvatarStats;
-import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,18 +19,7 @@ class AvatarTest {
 
   @BeforeEach
   void setUp() {
-    avatar =
-        new Avatar(
-            new Id<>("id-1"),
-            "Hero",
-            new Money(0),
-            new Inventory(new Id<>("inv-1")),
-            new EquippedItems(new Id<>("equip-1")),
-            new Level(1, new Experience(0), new Experience(100)),
-            new AvatarHealth(new Health(100), new Health(100)),
-            new AvatarMana(new Mana(50), new Mana(50)),
-            new AvatarStats(new Id<>("stats-1"), 10, 10, 10),
-            new ArrayList<>());
+    avatar = mutableAvatar();
   }
 
   // ─── Identity ───────────────────────────────────────────────────────────────
@@ -49,13 +27,13 @@ class AvatarTest {
   @Test
   @DisplayName("getId returns the id supplied at construction")
   void getId() {
-    assertThat(avatar.getId().value()).isEqualTo("id-1");
+    assertThat(avatar.getId().value()).isEqualTo(AVATAR_1);
   }
 
   @Test
   @DisplayName("getName returns the name supplied at construction")
   void getName() {
-    assertThat(avatar.getName()).isEqualTo("Hero");
+    assertThat(avatar.getName()).isEqualTo(AVATAR_NAME);
   }
 
   // ─── Rename ─────────────────────────────────────────────────────────────────

@@ -1,5 +1,7 @@
 package habitquest.marketplace;
 
+import static org.mockito.Mockito.when;
+
 import common.ddd.Id;
 import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemCatalog;
@@ -8,11 +10,9 @@ import habitquest.marketplace.domain.MarketplaceImpl;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
-import habitquest.marketplace.domain.items.Armor;
-import habitquest.marketplace.domain.items.HealthPotion;
-import habitquest.marketplace.domain.items.Level;
-import habitquest.marketplace.domain.items.ManaPotion;
-import habitquest.marketplace.domain.items.Weapon;
+import habitquest.marketplace.domain.items.*;
+import java.util.List;
+import java.util.Optional;
 
 public final class MarketplaceFixtures {
 
@@ -122,6 +122,34 @@ public final class MarketplaceFixtures {
   public static ItemSold itemSold(
       Id<Marketplace> marketplaceId, String itemName, Id<Avatar> avatarId) {
     return new ItemSold(marketplaceId, itemName, avatarId);
+  }
+
+  public static ItemCatalog mockCatalog() {
+    ItemCatalog catalog = org.mockito.Mockito.mock(ItemCatalog.class);
+    var sword = sword();
+    var shield = shield();
+    var hp = hpPotion();
+    var mp = mpPotion();
+
+    when(catalog.getAllItems()).thenReturn(List.of(sword, shield, hp, mp));
+    when(catalog.getItemsByType(ItemType.ALL)).thenReturn(List.of(sword, shield, hp, mp));
+    when(catalog.getItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield));
+    when(catalog.getItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword));
+    when(catalog.getItemsByType(ItemType.POTION)).thenReturn(List.of(hp, mp));
+    when(catalog.getItemsByType(ItemType.HEALTH_POTION)).thenReturn(List.of(hp));
+    when(catalog.getItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(mp));
+    when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(sword));
+    when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(shield));
+    when(catalog.getItem(HP_POTION_NAME)).thenReturn(Optional.of(hp));
+    when(catalog.getItem(MP_POTION_NAME)).thenReturn(Optional.of(mp));
+    when(catalog.getItem(UNKNOWN_ITEM_NAME)).thenReturn(Optional.empty());
+    when(catalog.contains(SWORD_NAME)).thenReturn(true);
+    when(catalog.contains(SHIELD_NAME)).thenReturn(true);
+    when(catalog.contains(HP_POTION_NAME)).thenReturn(true);
+    when(catalog.contains(MP_POTION_NAME)).thenReturn(true);
+    when(catalog.contains(UNKNOWN_ITEM_NAME)).thenReturn(false);
+
+    return catalog;
   }
 
   // Prevent instantiation

@@ -10,7 +10,7 @@ Usage:
     python load_test.py --base-url http://prod:9000  # custom URL
     python load_test.py --vus 50 --duration 30       # custom VUs and duration
 
-Available scenarios: auth | guild_reads | battle_reads | quest_reads | quest_write
+Available scenarios: auth | guild_reads | battle_reads | quest_reads | quest_write | habit_reads | habit_write
 """
 
 import argparse
@@ -259,6 +259,70 @@ class LoadSuite:
 
             return await self._run_scenario("battles — GET all bosses", round_robin_call, vus, duration_s)
 
+
+    # ── Scenario: habit reads ──────────────────────────────────────────────
+    async def scenario_habit_reads(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
+        async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
+            def make_call(creds: Optional[VUCredentials]):
+                async def call():
+                    headers = {"Authorization": f"Bearer {creds.token}"} if creds else {}
+                    # Chiamata all'endpoint delle abitudini dell'avatar
+                    r = await client.get(f"/api/v1/habits/avatar/{creds.user_id}", headers=headers)
+                    return r.status_code
+                return call
+
+            calls = [make_call(vu_creds[i % len(vu_creds)]) for i in range(vus)]
+            call_index = 0
+
+            async def round_robin_call():
+                nonlocal call_index
+                fn = calls[call_index % len(calls)]
+                call_index += 1
+                return await fn()
+
+            return await self._run_scenario("habits — GET avatar habits", round_robin_call, vus, duration_s)
+
+    # ── Scenario: habit write ───────────────────────────
+    async def scenario_habit_write(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
+        async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
+            def make_call(creds: Optional[VUCredentials]):
+                async def call():
+                    import datetime
+                    headers = {"Authorization": f"Bearer {creds.token}"} if creds else {}
+
+                    # 1. POST Create
+                    r = await client.post("/api/v1/habits", json={
+                        "avatarId": creds.user_id,
+                        "title": f"LoadHabit-{rand_str(4)}",
+                        "description": "Load test habit",
+                        "recurrenceType": "DAILY"
+                    }, headers=headers)
+
+                    if r.status_code == 201:
+                        data = r.json()
+                        # Gestione HATEOAS o flat JSON
+                        hid = (data.get("content") or data).get("id")
+                        if hid:
+                            # 2. POST Attend
+                            now = datetime.datetime.now().isoformat()
+                            r_attend = await client.post(f"/api/v1/habits/{hid}/attend",
+                                                         json={"date": now},
+                                                         headers=headers)
+                            return r_attend.status_code
+                    return r.status_code
+                return call
+
+            calls = [make_call(vu_creds[i % len(vu_creds)]) for i in range(vus)]
+            call_index = 0
+
+            async def round_robin_call():
+                nonlocal call_index
+                fn = calls[call_index % len(calls)]
+                call_index += 1
+                return await fn()
+
+            return await self._run_scenario("habits — POST create / attend", round_robin_call, vus, duration_s)
+
     # ── Scenario: quest reads ────────────────────────────────────────────────
     async def scenario_quest_reads(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
         async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
@@ -311,13 +375,15 @@ class LoadSuite:
 
     # ── Run all load scenarios ────────────────────────────────────────────────
     async def run_async(self, scenario_filter: Optional[str], vus: int, duration_s: int):
-        scenarios_needing_auth = {"guild_reads", "battle_reads", "quest_reads", "quest_write"}
+        scenarios_needing_auth = {"guild_reads", "battle_reads", "quest_reads", "quest_write", "habit_reads", "habit_write"}
         scenarios = {
             "auth":          (self.scenario_auth,         False),
             "guild_reads":   (self.scenario_guild_reads,  True),
             "battle_reads":  (self.scenario_battle_reads, True),
             "quest_reads":   (self.scenario_quest_reads,  True),
             "quest_write":   (self.scenario_quest_write,  True),
+            "habit_reads":   (self.scenario_habit_reads,  True),
+            "habit_write":   (self.scenario_habit_write,  True),
         }
 
         selected = {k: v for k, v in scenarios.items()
@@ -409,12 +475,11 @@ def main():
     parser = argparse.ArgumentParser(description="HabitQuest load test suite")
     parser.add_argument("--base-url", default=BASE_URL, help=f"Gateway URL (default: {BASE_URL})")
     parser.add_argument("--scenario", default=None,
-                        help="Scenario: auth | guild_reads | battle_reads | quest_reads | quest_write")
+                        help="Scenario: auth | guild_reads | battle_reads | quest_reads | quest_write | habit_reads | habit_write (default: all)")
     parser.add_argument("--vus", type=int, default=20, help="Virtual users (default: 20)")
     parser.add_argument("--duration", type=int, default=10, help="Duration in seconds per scenario (default: 10)")
     args = parser.parse_args()
     LoadSuite(args.base_url).run(args.scenario, args.vus, args.duration)
-
 
 if __name__ == "__main__":
     main()

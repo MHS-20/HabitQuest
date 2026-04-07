@@ -42,7 +42,6 @@ class GuildServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    // La gilda di base fornita dalle fixtures
     guild = guild();
   }
 

@@ -24,14 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AvatarServiceImpl")
 class AvatarServiceImplTest {
-
-  // Costanti e factory da AvatarFixtures.*:
-  //   AVATAR_ID   → Id<Avatar> per "avatar-1"   (usato nelle chiamate al service/repository)
-  //   AVATAR_1    → String "avatar-1"            (usato nelle assertion su .value())
-  //   UNKNOWN_ID  → Id<Avatar> per "ghost-99"
-  //   AVATAR_NAME, DEFAULT_HEALTH, DEFAULT_MANA, DEFAULT_XP_TO_NEXT, SWORD, SHIELD, ...
-
-  // BAD_ID è locale: distingue "id malformato" da UNKNOWN_ID ("id ben formato ma inesistente").
   private static final String BAD_ID = "bad";
 
   @Mock private AvatarFactory avatarFactory;

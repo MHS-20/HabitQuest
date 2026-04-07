@@ -36,15 +36,6 @@ public class AvatarControllerIT {
   @MockitoBean private AvatarService avatarService;
   @MockitoBean private AvatarLogger avatarLogger;
 
-  // Costanti e factory da AvatarFixtures.*:
-  //   AVATAR_ID     → Id<Avatar>   usato nelle chiamate al service mockato
-  //   AVATAR_1      → String       usato nelle URL e nelle assertion su valori JSON
-  //   UNKNOWN_ID    → Id<Avatar>
-  //   UNKNOWN_AVATAR → String      usato nelle URL per i casi 404
-  //   INVENTORY_ID, EQUIPPED_ID, STATS_ID → Id<> già istanziati
-  //   AVATAR_NAME, SWORD, SHIELD, DEFAULT_HEALTH, DEFAULT_MANA, ...
-  //   readOnlyAvatar() → stub avatar con List.of() per i test di sola lettura
-
   // ── POST /api/v1/avatars ──────────────────────────────────────────────────────
 
   @Nested

@@ -72,6 +72,28 @@ public final class QuestFixtures {
     return quest;
   }
 
+  public static Habit weeklyHabit() {
+    return new Habit(
+        new Id<>("habit-weekly"),
+        "Clean desk",
+        "Weekly cleanup",
+        List.of(new Tag("home")),
+        new habitquest.quest.domain.reminder.WeeklyRecurrence(java.time.DayOfWeek.MONDAY));
+  }
+
+  public static Quest questWithDuration(String id, int days) {
+    Quest quest = new Quest(new Id<>(id), "Timed Quest");
+    quest.setDuration(Duration.ofDays(days));
+    return quest;
+  }
+
+  public static Quest complexQuest() {
+    Quest quest = questWithDuration(QUEST_1, 14);
+    quest.addHabit(morningRunHabit());
+    quest.addHabit(weeklyHabit());
+    return quest;
+  }
+
   // Prevent instantiation
   private QuestFixtures() {
     throw new UnsupportedOperationException("utility class");
