@@ -7,4 +7,6 @@ import habitquest.tracking.domain.Avatar;
 @OutBoundPort
 public interface AvatarClientPort {
   void grantExperience(Id<Avatar> avatarId, int amount);
+
+  void applyDamage(Id<Avatar> avatarId, int amount);
 }

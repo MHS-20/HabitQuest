@@ -344,6 +344,7 @@ class HabitServiceImplTest {
       assertThat(captor.getValue()).isInstanceOf(HabitNotAttended.class);
       assertThat(((HabitNotAttended) captor.getValue()).habit()).isSameAs(neverAttended);
       assertThat(((HabitNotAttended) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
+      verify(avatarClient).applyDamage(AVATAR_ID, 10);
     }
 
     @Test
@@ -360,6 +361,7 @@ class HabitServiceImplTest {
       assertThat(captor.getValue()).isInstanceOf(HabitNotAttended.class);
       assertThat(((HabitNotAttended) captor.getValue()).habit()).isSameAs(overdue);
       assertThat(((HabitNotAttended) captor.getValue()).avatarId()).isEqualTo(AVATAR_ID);
+      verify(avatarClient).applyDamage(AVATAR_ID, 10);
     }
 
     @Test
@@ -371,6 +373,7 @@ class HabitServiceImplTest {
       service.detectOverdueHabits();
 
       verify(habitObserver, never()).notifyHabitEvent(any(HabitNotAttended.class));
+      verify(avatarClient, never()).applyDamage(any(), anyInt());
     }
 
     @Test
@@ -393,6 +396,7 @@ class HabitServiceImplTest {
 
       verify(historyRepository, never())
           .append(argThat(e -> e.event() instanceof HabitNotAttended));
+      verify(avatarClient, never()).applyDamage(any(), anyInt());
     }
   }
 
