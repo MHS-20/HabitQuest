@@ -18,6 +18,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -58,6 +60,7 @@ fun GuildScreen(
     var pendingInvitesError by remember { mutableStateOf<String?>(null) }
     var pendingInvitesMessage by remember { mutableStateOf<String?>(null) }
     var acceptingInviteId by remember { mutableStateOf<String?>(null) }
+    var selectedTabIndex by remember { mutableStateOf(0) }
 
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
@@ -73,12 +76,22 @@ fun GuildScreen(
         loadLeaderboard(showLoading = true)
     }
 
+    val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
+    val avatarId = avatar?.id
+
     val normalizedSearch = searchText.trim().lowercase()
     val filteredGuilds = if (normalizedSearch.isBlank()) {
         leaderboard
     } else {
         leaderboard.filter { guild ->
             guild.name.lowercase().contains(normalizedSearch) || guild.id.lowercase().contains(normalizedSearch)
+        }
+    }
+    val joinedGuilds = if (avatarId.isNullOrBlank()) {
+        emptyList()
+    } else {
+        leaderboard.filter { guild ->
+            guild.members.any { member -> member.avatarId == avatarId }
         }
     }
 
@@ -91,8 +104,6 @@ fun GuildScreen(
     ) {
         Text("Guild", style = MaterialTheme.typography.headlineSmall)
 
-        val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
-        val avatarId = avatar?.id
         Text(
             text = if (avatar != null) {
                 "Current avatar: ${avatar.name} (${avatar.id})"
@@ -147,13 +158,28 @@ fun GuildScreen(
             Text("Pending invites")
         }
 
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            label = { Text("Search guild by name") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+        PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
+            Tab(
+                selected = selectedTabIndex == 0,
+                onClick = { selectedTabIndex = 0 },
+                text = { Text("All guilds") }
+            )
+            Tab(
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 },
+                text = { Text("Joined guild") }
+            )
+        }
+
+        if (selectedTabIndex == 0) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                label = { Text("Search guild by name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -187,24 +213,39 @@ fun GuildScreen(
         }
 
         Spacer(Modifier.height(4.dp))
-        Text("All guilds", style = MaterialTheme.typography.titleMedium)
+        if (selectedTabIndex == 0) {
+            Text("All guilds", style = MaterialTheme.typography.titleMedium)
 
-        if (filteredGuilds.isEmpty()) {
-            Text("No guilds available")
+            if (filteredGuilds.isEmpty()) {
+                Text("No guilds available")
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(filteredGuilds, key = { it.id }) { guild ->
+                        GuildLeaderboardRow(
+                            guild = guild,
+                            onInviteClick = {
+                                selectedGuildForInvite = guild
+                                showInviteDialog = true
+                                inviteSearchText = ""
+                                inviteSearchResult = null
+                                inviteError = null
+                            }
+                        )
+                    }
+                }
+            }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(filteredGuilds, key = { it.id }) { guild ->
-                    GuildLeaderboardRow(
-                        guild = guild,
-                        onInviteClick = {
-                            selectedGuildForInvite = guild
-                            showInviteDialog = true
-                            inviteSearchText = ""
-                            inviteSearchResult = null
-                            inviteError = null
-                        }
-                    )
+            Text("Joined guild", style = MaterialTheme.typography.titleMedium)
 
+            if (avatarId.isNullOrBlank()) {
+                Text("Avatar not available")
+            } else if (joinedGuilds.isEmpty()) {
+                Text("You have not joined any guild yet")
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(joinedGuilds, key = { it.id }) { guild ->
+                        GuildCard(guild = guild)
+                    }
                 }
             }
         }
