@@ -288,11 +288,19 @@ class GuildRepository {
         }
     }
 
-    suspend fun acceptInvite(token: String, avatarId: String, inviteId: String): AcceptInviteResult {
+    suspend fun acceptInvite(
+        token: String,
+        avatarId: String,
+        inviteId: String,
+        guildId: String,
+        nickname: String,
+    ): AcceptInviteResult {
         if (avatarId.isBlank()) return AcceptInviteResult.Error("Avatar id cannot be blank")
         if (inviteId.isBlank()) return AcceptInviteResult.Error("Invite id cannot be blank")
+        if (guildId.isBlank()) return AcceptInviteResult.Error("Guild id cannot be blank")
+        if (nickname.isBlank()) return AcceptInviteResult.Error("Nickname cannot be blank")
 
-        val response = runCatching {
+        val avatarResponse = runCatching {
             client.post("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/invites/$inviteId/accept") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.Accept, ContentType.Application.Json)
@@ -301,12 +309,37 @@ class GuildRepository {
             return AcceptInviteResult.Error("Unable to contact avatar-service")
         }
 
-        return when (response.status) {
-            HttpStatusCode.NoContent, HttpStatusCode.OK -> AcceptInviteResult.Success
+        when (avatarResponse.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> Unit
             HttpStatusCode.NotFound -> AcceptInviteResult.Error("Invite or avatar not found")
             HttpStatusCode.Unauthorized -> AcceptInviteResult.Error("Session expired, please log in again")
             HttpStatusCode.BadRequest -> AcceptInviteResult.Error("Invalid invite request")
-            else -> AcceptInviteResult.Error("Accept invite error (${response.status.value})")
+            else -> return AcceptInviteResult.Error("Accept invite error (${avatarResponse.status.value})")
+        }
+
+        val guildResponse = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/guilds/$guildId/invites/$inviteId/accept") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("avatarId", JsonPrimitive(avatarId))
+                        put("nickname", JsonPrimitive(nickname))
+                    }
+                )
+            }
+        }.getOrElse {
+            return AcceptInviteResult.Error("Invite accepted on avatar-service, but failed to contact guild-service")
+        }
+
+        return when (guildResponse.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> AcceptInviteResult.Success
+            HttpStatusCode.NotFound -> AcceptInviteResult.Error("Guild or invite not found")
+            HttpStatusCode.Unauthorized -> AcceptInviteResult.Error("Session expired, please log in again")
+            HttpStatusCode.Forbidden -> AcceptInviteResult.Error("Not allowed to accept this invite")
+            HttpStatusCode.BadRequest -> AcceptInviteResult.Error("Invalid guild invite acceptance request")
+            else -> AcceptInviteResult.Error("Guild accept invite error (${guildResponse.status.value})")
         }
     }
 

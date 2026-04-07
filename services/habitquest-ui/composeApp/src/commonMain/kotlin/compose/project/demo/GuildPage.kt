@@ -503,6 +503,11 @@ fun GuildScreen(
                                                             pendingInvitesError = "Avatar not available"
                                                             return@Button
                                                         }
+                                                        val avatarNickname = avatar?.name?.takeIf { it.isNotBlank() }
+                                                        if (avatarNickname == null) {
+                                                            pendingInvitesError = "Avatar nickname not available"
+                                                            return@Button
+                                                        }
 
                                                         scope.launch {
                                                             acceptingInviteId = invite.inviteId
@@ -512,7 +517,9 @@ fun GuildScreen(
                                                                 val result = repository.acceptInvite(
                                                                     token = token,
                                                                     avatarId = avatarId,
-                                                                    inviteId = invite.inviteId
+                                                                    inviteId = invite.inviteId,
+                                                                    guildId = invite.guildId,
+                                                                    nickname = avatarNickname
                                                                 )
                                                             ) {
                                                                 is AcceptInviteResult.Success -> {
