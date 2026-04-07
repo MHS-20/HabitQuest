@@ -16,7 +16,8 @@ import java.util.Optional;
 public interface BattleService {
 
   // --- Battle lifecycle ---
-  Id<Battle> createBattle(Id<Guild> guildId, BossType bossType, Integer numOfTurns);
+  Id<Battle> createBattle(
+      Id<Guild> guildId, BossType bossType, Integer numOfTurns, List<Id<GuildMember>> members);
 
   Battle getBattleById(Id<Battle> battleId) throws BattleNotFoundException;
 

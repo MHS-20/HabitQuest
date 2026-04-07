@@ -4,11 +4,18 @@ server:
   tomcat:
     connection-timeout: 2s
 
+info:
+  system: HabitQuest
+avatar:
+  service-uri: ${AVATAR_SERVICE_URI:http://avatar-service:8081}
+
 spring:
   application:
     name: marketplace-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
+
+################## KAFKA ##################
   cloud:
     stream:
       bindings:
@@ -28,13 +35,6 @@ spring:
             acks: all
             retries: 3
             enable.idempotence: true
-
-info:
-  system: HabitQuest
-avatar:
-  service-uri: ${AVATAR_SERVICE_URI:http://avatar-service:8081}
-
-################## KAFKA ##################
 
 ################## RESILIENCY ##################
 resilience4j:
@@ -94,6 +94,11 @@ management:
       probability: 1.0
     propagation:
       type: W3C
+    observations:
+      key-values:
+        http.server.requests:
+          enabled: true
+
   otlp:
     metrics:
       export:

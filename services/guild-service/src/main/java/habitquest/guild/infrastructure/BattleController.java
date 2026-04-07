@@ -76,12 +76,14 @@ public class BattleController {
       log.warn(request, "Unauthorized battle creation attempt");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    var guildMembers = guildService.getMembers(idOfGuild(request.guildId()));
     String id =
         battleService
             .createBattle(
                 idOfGuild(request.guildId()),
                 bossType,
-                guildService.getMembers(idOfGuild(request.guildId())).size())
+                guildMembers.size(),
+                guildMembers.stream().map(GuildMember::getId).toList())
             .value();
     BattleCreatedResponse body = new BattleCreatedResponse(id);
     log.info(body, "Battle created");

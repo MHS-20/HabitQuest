@@ -8,6 +8,8 @@ import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.GuildRole;
 import habitquest.guild.domain.guild.Invite;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public final class GuildFixtures {
@@ -40,10 +42,14 @@ public final class GuildFixtures {
   public static final Id<Invite> UNKNOWN_INVITE_ID = new Id<>(UNKNOWN_INVITE);
   public static final Id<Battle> BATTLE_ID = new Id<>(BATTLE_1);
   public static final Id<Battle> UNKNOWN_BATTLE_ID = new Id<>(UNKNOWN_BATTLE);
+  public static final List<Id<GuildMember>> GUILD_MEMBERS =
+      new ArrayList<>(List.of(LEADER_ID, MEMBER_ID));
 
   public static final Id<GuildMember> LEADER_HTTP = new Id<>(LEADER_HTTP_ID);
   public static final Id<GuildMember> BATTLE_MEMBER_ID_1 = new Id<>(BATTLE_MEMBER_1);
   public static final Id<GuildMember> BATTLE_MEMBER_ID_2 = new Id<>(BATTLE_MEMBER_2);
+  public static final List<Id<GuildMember>> BATTLE_MEMBERS =
+      new ArrayList<>(List.of(BATTLE_MEMBER_ID_1, BATTLE_MEMBER_ID_2));
 
   // Guild metadata
   public static final String GUILD_NAME = "MyGuild";
@@ -98,13 +104,13 @@ public final class GuildFixtures {
 
   // Battle factories
   public static Battle battle() {
-    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0);
+    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, new ArrayList<>());
     b.increaseNumOfTurns(LEADER_ID);
     return b;
   }
 
   public static Battle battleWithTwoMembers() {
-    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0);
+    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, BATTLE_MEMBERS);
     b.increaseNumOfTurns(BATTLE_MEMBER_ID_1);
     b.increaseNumOfTurns(BATTLE_MEMBER_ID_2);
     return b;
