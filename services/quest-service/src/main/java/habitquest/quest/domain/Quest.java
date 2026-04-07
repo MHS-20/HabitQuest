@@ -20,12 +20,14 @@ public class Quest implements Aggregate<Id<Quest>> {
   public Quest(Id<Quest> id) {
     this.id = id;
     this.habits = new ArrayList<>();
+    this.reward = new MoneyReward(100);
   }
 
   public Quest(Id<Quest> id, String name) {
     this.id = id;
     this.name = name;
     this.habits = new ArrayList<>();
+    this.reward = new MoneyReward(100);
   }
 
   public Quest(Id<Quest> id, String name, Duration duration) {
