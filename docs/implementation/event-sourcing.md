@@ -4,7 +4,6 @@ che traccia ogni operazione rilevante eseguita su un'abitudine.
 Ogni abitudine porta con sé l'intera traccia di ciò che le è accaduto: creazione, frequentazione, modifiche etc.
 La storia è immutabile e cresce nel tempo, fornendo un audit trail completo.
 
-
 ### L'evento base: `HabitEvent`
 ```java
 public interface HabitEvent extends DomainEvent {}
@@ -13,6 +12,7 @@ public interface HabitEvent extends DomainEvent {}
 Tutti gli eventi sono implementati come `Record` e quindi immutabili.
 
 Sono definiti cinque eventi concreti:
+
 | Evento | Payload | Significato |
 |---|---|---|
 | `HabitCreated` | `Habit`, `Id<Avatar>` | Un'abitudine è stata creata |
@@ -27,6 +27,7 @@ Da notare che `HabitDeleted` porta solo gli ID e non l'oggetto `Habit` intero, p
 public record HabitHistoryEvent(HabitEvent event, LocalDateTime occurredAt, String details) {}
 ```
 `HabitHistoryEvent` è la **voce del log**. Avvolge un `HabitEvent` aggiungendo:
+
 - `occurredAt` — il timestamp preciso dell'occorrenza
 - `details` — una stringa libera con metadati contestual
 

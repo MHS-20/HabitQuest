@@ -3,6 +3,7 @@
 ## Edge Service – Availability
 
 **Scenario:**  
+
 - **Stimulus:** A login request arrives.  
 - **Source:** Authenticated mobile or web client.  
 - **Environment:** Normal operation, regular load.  
@@ -15,6 +16,7 @@
 ## Tracking Service – Performance
 
 **Scenario:**  
+
 - **Stimulus:** A user requests the list of active habits.  
 - **Source:** Authenticated web or mobile user.  
 - **Environment:** Under typical usage load.  
@@ -27,6 +29,7 @@
 ## Notification Service – Reliability
 
 **Scenario:**  
+
 - **Stimulus:** A scheduled reminder is due to be sent.  
 - **Source:** Internal scheduler.  
 - **Environment:** During normal system load.  
@@ -39,6 +42,7 @@
 ## Avatar Service – Consistency
 
 **Scenario:**  
+
 - **Stimulus:** HabitCompleted event arrives via event bus.  
 - **Source:** Habit Service.  
 - **Environment:** Normal event processing conditions.  
@@ -51,6 +55,7 @@
 ## Avatar Service – Correctness
 
 **Scenario:**  
+
 - **Stimulus:** ItemPurchased event is received.  
 - **Source:** Shop Service via event bus.  
 - **Environment:** Normal asynchronous processing.  
@@ -63,6 +68,7 @@
 ## Marketplace Service – Transactional Integrity
 
 **Scenario:**  
+
 - **Stimulus:** User submits an item purchase.  
 - **Source:** Authenticated client.  
 - **Environment:** Normal operating conditions.  
@@ -75,6 +81,7 @@
 ## Guild Service – Scalability
 
 **Scenario:**  
+
 - **Stimulus:** 50 users concurrently request to join a guild.  
 - **Source:** Multiple authenticated users.  
 - **Environment:** Elevated but expected load.  
@@ -86,6 +93,7 @@
 ## Guild Service – Reliability
 
 **Scenario:**  
+
 - **Stimulus:** Guild combat action (attack or spell) arrives.  
 - **Source:** Member of an active guild.  
 - **Environment:** Combat session in progress.  
@@ -98,6 +106,7 @@
 ## Guild Service – Real-time
 
 **Scenario:**  
+
 - **Stimulus:** Guild member sends a chat message.  
 - **Source:** Client via WebSocket.  
 - **Environment:** Chat session active.  
@@ -108,12 +117,10 @@
 ## Quest Service – Responsiveness
 
 **Scenario:**  
+
 - **Stimulus:** User requests quest details.  
 - **Source:** Authenticated client.  
 - **Environment:** Normal load.  
 - **Artifact:** Quest Service API.  
 - **Response:** Quest service returns the quest data including associated habits and progress status.  
 - **Response Measure:** ≤ 600 ms for 95% of requests.
-
----
-

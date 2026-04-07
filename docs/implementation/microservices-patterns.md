@@ -20,9 +20,10 @@ In questo modo qualsiasi riorganizzazione dei microservizi è trasparente per i 
 
 Il gateway è realizzato con **Spring Cloud Gateway**, un framework reattivo. 
 Ogni microservizio espone le proprie API, ma queste sono accessibili esclusivamente attraverso il gateway:
+
 - **Routing dinamico**: le richieste vengono instradate al microservizio corretto in base al path della richiesta.
 - **Centralizzazione delle politiche di routing**: autenticazione, logging delle richieste in ingresso e rate limiting sono gestiti a livello di gateway tramite filtri, evitando duplicazione di logica nei singoli servizi.
-- **Rate Limiting**: è stato implementato un `WebFilter` personalizzato nel gateway che limita il numero di richieste per client in un dato intervallo di tempo, proteggendo i servizi a valle da sovraccarichi imprevisti.
+- **Rate Limiting**: è stato implementato un `WebFilter` personalizzato nel gateway che limita il numero di richieste in un dato intervallo di tempo, proteggendo i servizi a valle da sovraccarichi imprevisti.
 - **Circuit Breaker**: il gateway è anche configurato con Resilience4j per proteggere i servizi a valle, restituendo risposte di fallback in caso di degrado.
 
 ### 2. Event-Driven Architecture — *Notification Service con Apache Kafka*
@@ -80,12 +81,15 @@ la chiamata viene interrotta e viene restituita una risposta di fallback, evitan
 
 - **Retry**: in caso di errori transitori, le chiamate vengono ritentate automaticamente un numero configurato di volte, con un intervallo di backoff tra un tentativo e l'altro.
 
-La configurazione è applicata sia alle comunicazioni **tra microservizi** (chiamate REST sincrone) sia tra il **gateway e i microservizi**, garantendo che il punto di ingresso sia anch'esso protetto.
+La configurazione è applicata sia alle comunicazioni **tra microservizi** 
+(chiamate REST sincrone) sia tra il **gateway e i microservizi**, garantendo che il punto di ingresso sia anch'esso protetto.
+
 - **Fail-fast**: i client ricevono risposte immediate invece di aspettare timeout lunghi.
 - **Isolamento dei guasti**: il malfunzionamento di un singolo servizio non si propaga all'intero sistema.
 - **Auto-healing**: il circuito si richiude automaticamente quando il servizio torna disponibile.
 
 I retry sono configurati in questo modo: 
+
 - Una richiesta viene tentata 3 volte in totale
 - Dopo il primo fallimento si aspettano 500ms 
 - Il tempo di attensa raddoppia per ogni nuovo tentantivo fallito.
@@ -105,6 +109,7 @@ resilience4j:
 ```
 
 I CircuitBreakers sono configurati in questo modo:
+
 - **Sliding Window**: Analizza le ultime 10 chiamate.
 - **Soglia di Fallimento**: Se il 50% delle chiamate nella finestra fallisce, il circuito passa allo stato OPEN.
 - **Gestione Lentezza**: Se l'80% delle chiamate impiega più di 3 secondi, il circuito si apre.
@@ -131,6 +136,7 @@ Il pattern **Externalized Configuration** consente di separare la configurazione
 rendendo possibile il deploy dello stesso artefatto in ambienti diversi (sviluppo, staging, produzione) senza modifiche al codice.
 
 La gestione della configurazione è strutturata su due livelli:
+
 1. **Livello applicativo — Spring `application.yml`**: Ogni microservizio definisce la propria configurazione in file `application.yml`.
 Le variabili sensibili o dipendenti dall'ambiente (eg: URLs) sono parametrizzate tramite variabili d'ambiente, che vengono iniettate al runtime dal layer Kubernetes.
 

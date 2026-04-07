@@ -20,6 +20,7 @@ La distinzione tra "disponibili" e "acquistati" è gestita dal marketplace stess
 Gli oggetti sono **value object**: non hanno un'identità propria, ma sono identificati dal loro nome. 
 
 Ogni oggetto ha:
+
 - un **nome** univoco (usato come chiave in tutte le operazioni),
 - una **descrizione**,
 - un **prezzo** in monete,
@@ -32,8 +33,8 @@ Esistono tre famiglie di oggetti:
 - **Armi (Weapon):** conferiscono un valore di potere d'attacco.
 - **Armature (Armor):** conferiscono un valore di potere difensivo.
 - **Pozioni (Potion):** si dividono in due sottotipi:
-  - *Health Potion* — ripristina punti vita (HP).
-  - *Mana Potion* — ripristina punti mana (MP).
+    - *Health Potion* — ripristina punti vita (HP).
+    - *Mana Potion* — ripristina punti mana (MP).
 
 ### Denaro
 Il **Money** è il valore monetario usato nel marketplace. 
@@ -79,6 +80,7 @@ Gli eventi sono immutabili e portano con sé tutte le informazioni necessarie pe
 
 ### ItemBought
 Emesso quando un avatar acquista con successo un oggetto. Contiene:
+
 - l'identificativo del marketplace,
 - il nome dell'oggetto acquistato,
 - l'identificativo dell'avatar.

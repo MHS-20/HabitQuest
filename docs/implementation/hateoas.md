@@ -96,5 +96,3 @@ Una risposta tipica per `GET /api/v1/avatars/{id}/money` si presenta così:
   }
 }
 ```
-
-## Vantaggi del pattern

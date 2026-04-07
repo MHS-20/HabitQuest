@@ -29,11 +29,10 @@ Il pattern da seguire è il seguente:
 
 **1. InBoundPort** — un'interfaccia `@InBoundPort` per ogni use-case principale del servizio (es. `QuestService`, `AvatarService`), che espone le operazioni sul dominio.
 **2. OutBoundPort** — un'interfaccia `@OutBoundPort` per ogni dipendenza esterna:
-- `XyzRepository` (persistenza)
-- `XyzNotifier` (messaggistica verso altri servizi)
-- `XyzRestClient` (chiamate HTTP verso altri microservizi)
-- `XyzLogger` (logging disaccoppiato)
-
+    - `XyzRepository` (persistenza)
+    - `XyzNotifier` (messaggistica verso altri servizi)
+    - `XyzRestClient` (chiamate HTTP verso altri microservizi)
+    - `XyzLogger` (logging disaccoppiato)
 **3. Adapter** — un'implementazione `@Adapter @Service` dell'InBoundPort, più le implementazioni `@Adapter @Component` di tutti gli OutBoundPort nel layer infrastrutturale (Notifier, Repository, RestClient, Logger).
 **4. Observer** — un'interfaccia `XyzObserver` nel dominio e una sua implementazione `XyzObserverImpl` nel layer application, che fa da dispatcher degli eventi verso il `XyzNotifier`.
 

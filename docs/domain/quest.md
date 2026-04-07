@@ -4,6 +4,7 @@ consiste in un insieme di abitudini da rispettare entro una finestra temporale d
 con una ricompensa in palio per chi la porta a termine.
 
 Una quest è composta da:
+
 - **Nome**: il titolo della missione.
 - **Durata**: la finestra temporale entro cui deve essere completata (espressa in giorni).
 - **Abitudini richieste**: la lista delle abitudini che l'Avatar deve rispettare durante la quest. Ogni abitudine ha un titolo, una descrizione, tag opzionali e una propria **ricorrenza** (giornaliera, settimanale o mensile), che determina quante volte dovrà essere completata nell'arco della durata totale.
