@@ -578,7 +578,10 @@ class GuildRepository {
 
     private fun parseBoss(source: JsonObject): BossData? {
         val name = source["name"]?.jsonPrimitive?.contentOrNull ?: return null
-        val type = source["type"]?.jsonPrimitive?.contentOrNull.orEmpty()
+        val type = source["type"]?.jsonPrimitive?.contentOrNull
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: name.trim().uppercase().replace(' ', '_')
         val health = source["health"]?.jsonPrimitive?.intOrNull ?: 0
         val strength = source["strength"]?.jsonPrimitive?.intOrNull ?: 0
         val defense = source["defense"]?.jsonPrimitive?.intOrNull ?: 0
