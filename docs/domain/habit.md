@@ -23,6 +23,7 @@ La ricorrenza serve al sistema per calcolare automaticamente quando un'abitudine
 ## Completamento
 Quando un utente rispetta la propria abitudine, il sistema registra la data di completamento. 
 Questo innesca due effetti collaterali verso gli altri servizi:
+
 1. **L'Avatar guadagna punti esperienza**.
 2. **Se c'è una Quest associata**, il sistema notifica il Quest Service registrando la partecipazione dell'Avatar all'abitudine in quella data. Il Quest Service potrà così aggiornare il progresso della missione.
 

@@ -4,6 +4,7 @@ il servizio `AvatarClient` (sistema esterno) e il `MarketplaceService` (dominio 
 
 ## Saga di acquisto (`buyItem`)
 L'operazione si articola in tre passi in sequenza, con due flag booleani — `moneySpent` e `inventoryAdded` — che tracciano lo stato di avanzamento per poter costruire il rollback esatto.
+
 - **Passo 0 — pre-condizione:** prima di avviare la saga, viene verificato che l'avatar abbia il livello sufficiente tramite `canBuyItem()`. Si tratta di un guard sincrono: se fallisce, si risponde immediatamente con `403 Forbidden` senza toccare nessun sistema.
 - **Passo 1 — `spendMoney`:** viene chiamato `avatarClient.spendMoney()`. Se ha successo, il flag `moneySpent` viene impostato a `true`.
 - **Passo 2 — `addItemToInventory`:** viene aggiunto l'oggetto all'inventario dell'avatar. Se ha successo, `inventoryAdded` diventa `true`.
@@ -11,20 +12,22 @@ L'operazione si articola in tre passi in sequenza, con due flag booleani — `mo
 
 **Compensazione (rollback)**: se un qualsiasi passo lancia `RestClientException` o `AvatarCommunicationException`, 
 il blocco `catch` esegue il rollback **selettivo** usando i flag:
+
 - se `inventoryAdded` è `true` : chiama `removeItemFromInventory`
 - se `moneySpent` è `true` : chiama `earnMoney`
 
 La compensazione stessa può fallire (catch annidato): 
 in quel caso viene sollevata un'eccezione con un messaggio che segnala l'inconsistenza residua, e il chiamante riceve `502 Bad Gateway`.
 
-
 ## Saga di vendita (`sellItem`)
 Stessa struttura, passi invertiti.
+
 - **Passo 1 — `removeItemFromInventory`:** l'oggetto viene rimosso dall'inventario dell'avatar. Se ha successo, `removedFromInventory` diventa `true`.
 - **Passo 2 — `earnMoney`:** l'avatar riceve il denaro dalla vendita. Se ha successo, `earnedMoney` diventa `true`.
 - **Passo 3 — `sellItem`:** il marketplace viene aggiornato localmente tramite `marketplaceService.sellItem()`.
 
 **Compensazione (rollback)**: se un qualsiasi passo lancia `RestClientException` o `AvatarCommunicationException`,il blocco `catch` esegue il rollback **selettivo** usando i flag:
+
 - se `earnedMoney` è `true` → chiama `spendMoney`
 - se `removedFromInventory` è `true` → chiama `addItemToInventory`
 

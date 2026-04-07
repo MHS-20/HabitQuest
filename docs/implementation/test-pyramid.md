@@ -172,6 +172,7 @@ class CleanArchitectureTest {
 }
 ```
 Le regole verificate sono:
+
 - Il dominio non importa classi da `application`, `infrastructure` o `adapter`.
 - Il dominio non usa annotazioni Spring (`@Service`, `@Repository`, `@Controller`).
 - Il layer application non dipende dagli adapter o dall'infrastruttura.

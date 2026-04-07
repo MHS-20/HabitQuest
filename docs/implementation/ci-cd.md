@@ -55,6 +55,7 @@ Questo è il workflow principale, il punto di ingresso dell'intera pipeline. Vie
 
 ### Validation
 Prima di qualsiasi operazione sul codice, due job paralleli operano come **gate di qualità**:
+
 - **`commit-lint`**: verifica che il messaggio di ogni commit rispetti la specifica **Conventional Commits**, prerequisito per il calcolo automatico del versioning semantico nel workflow successivo. Il job è saltato per i commit di Dependabot.
 - **`k8s-validate`**: installa `kustomize` e `kubeconform` e valida i manifest Kubernetes presenti nel repository. `kustomize build k8s` genera il manifest finale (comprensivo degli overlay) e `kubeconform` verifica la correttezza strutturale in modalità strict contro lo schema ufficiale Kubernetes. Questo previene il deploy di manifest malformati.
 
@@ -65,16 +66,18 @@ Il job `detect-changes` utilizza un filtro sul path per analizzare i file cambia
 ### Build e Test
 Il job `build` riceve la lista dei servizi modificati e avvia una **build matrix**: si esegue un job parallelo per ogni servizio modificato.
 Per ogni servizio:
+
 1. Viene configurato il JDK 21
 2. Viene eseguita la build Gradle, che include compilazione, test ed altri controlli di qualità (lint, checkstyle, etc.)
 3. Il JAR prodotto viene caricato come **artifact** di GitHub Actions, identificato univocamente per nome di servizio.
-Il job `build-aggregate` funge da punto di sincronizzazione: raccoglie i risultati di tutti i job paralleli e fallisce l'intera pipeline se anche uno solo ha prodotto un errore, garantendo che il passaggio successivo avvenga solo con tutti i build verdi.
+4. Il job `build-aggregate` funge da punto di sincronizzazione: raccoglie i risultati di tutti i job paralleli e fallisce l'intera pipeline se anche uno solo ha prodotto un errore, garantendo che il passaggio successivo avvenga solo con tutti i build verdi.
 
 ### Package, Scan e Publish
 Questo job, anch'esso in matrix, si occupa della containerizzazione e della pubblicazione delle immagini. 
 Esegue solo se `build-aggregate` ha avuto successo.
 
 Per ogni servizio:
+
 1. **Download dell'artifact**: recupera il JAR prodotto dal job precedente.
 2. **Autenticazione su GHCR**: accede al GitHub Container Registry usando il token automatico `GITHUB_TOKEN`.
 3. **Build dell'immagine Docker**: costruisce l'immagine usando il `Dockerfile` del singolo servizio, taggandola con lo SHA del commit (`github.sha`), che garantisce unicità e tracciabilità tra commit e immagine.
@@ -88,6 +91,7 @@ Questo workflow è dedicato esclusivamente al frontend **HabitQuest UI**, svilup
 È attivato solo su push o PR che toccano la directory `services/habitquest-ui/`.
 
 Il workflow si articola in quattro job in sequenza:
+
 1. **`commit-lint`**: stessa validazione Conventional Commits del workflow backend.
 2. **`static-scan`**: scansione statica delle vulnerabilità nel codice sorgente (non nell'immagine) tramite `anchore/scan-action`, con upload del report SARIF su GitHub Security.
 3. **`build`**: il job centrale esegue il build KMP con Gradle. Poiché i target KMP includono anche Kotlin/JS, vengono configurati sia il JDK 21 che Node.js 18.
@@ -102,12 +106,14 @@ Il workflow utilizza **`semantic-release`** con il plugin **`semantic-release-mo
 Ogni servizio ha il proprio scope di versioning indipendente, con tag nel formato `<nome-servizio>-v<MAJOR>.<MINOR>.<PATCH>`.
 
 Il versioning è calcolato automaticamente analizzando i messaggi di commit dall'ultimo tag:
+
 - `feat:` → incremento **MINOR**
 - `fix:` → incremento **PATCH**
 - `!` → incremento **MAJOR**
 
 ### Retag dell'Immagine Docker
 Dopodiché semantic-release si occupa di creare un nuovo tag su git e sul docker registry:
+
 1. Viene effettuato il pull dell'immagine `latest` da GHCR.
 2. L'immagine viene retaggata con la versione semantica calcolata (es. `2.3.1`).
 3. La nuova versione viene pushata su GHCR, affiancando i tag SHA e `latest` già esistenti.
@@ -140,6 +146,7 @@ GitHub Actions assume temporaneamente un ruolo IAM (`github-actions-terraform-ro
 
 ### Provisioning con Terraform
 La sequenza Terraform standard viene eseguita nella directory `./terraform`:
+
 1. **`terraform init`**: inizializza il backend remoto (Terraform Cloud, configurato tramite `TF_API_TOKEN`).
 2. **`terraform validate`**: verifica la sintassi e la coerenza dei file `.tf`.
 3. **`terraform plan`**: calcola il diff tra lo stato attuale dell'infrastruttura e quello desiderato, producendo un piano.
@@ -149,6 +156,7 @@ L'ARN del ruolo IAM viene passato come variabile Terraform (`TF_VAR_terraform_ro
 ### Deploy su EKS
 Dopo il provisioning infrastrutturale, vengono installati `kubectl` e `helm` sul runner, 
 e viene configurato l'accesso al cluster EKS tramite `aws eks update-kubeconfig`. Vengono quindi eseguiti due script shell:
+
 - **`deployPlatform.sh`**: installa i componenti di piattaforma (probabilmente Ingress Controller, cert-manager, e simili).
 - **`deployObservability.sh`**: installa lo stack di osservabilità (Prometheus, Grafana, Loki, Tempo).
 

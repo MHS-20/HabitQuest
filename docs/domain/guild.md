@@ -9,6 +9,7 @@ Una **Gilda** è un gruppo di giocatori che si uniscono per collaborare e affron
 - Invitare nuovi membri e gestire l'appartenenza
 
 Ogni membro della gilda è identificato da:
+
 - Un **ID Avatar** univoco che lo identifica nel sistema
 - Un **Nickname** visibile agli altri membri
 - Un **Ruolo** all'interno della gilda

@@ -1,6 +1,7 @@
 # HabitQuest Deployment on Kubernetes
 
 Il deployment dell'applicazione HabitQuest su Kubernetes è stato organizzato seguendo una chiara separazione delle responsabilità attraverso tre layer principali:
+
 - **Application Layer**: servizi applicativi del dominio business
 - **Platform Layer**: infrastruttura di base (message broker, ingress controller)
 - **Observability Layer**: stack completo per monitoring, logging e tracing
@@ -15,11 +16,13 @@ logging                  # Loki, Fluent Bit, Grafana
 ## Deployment dei Layer
 ### 1. Platform Layer
 Il platform layer deve essere deployato per primo in quanto fornisce l'infrastruttura di base:
+
 - **Kafka**: Message broker con modalità KRaft (senza Zookeeper)
 - **Kafka UI**: Interfaccia web per gestione e monitoring
 
 ### 2. Observability Layer
 Lo stack di osservabilità viene deployato successivamente:
+
 - **Prometheus**: Raccolta metriche
 - **Tempo**: Distributed tracing
 - **Loki**: Aggregazione log
@@ -29,6 +32,7 @@ Lo stack di osservabilità viene deployato successivamente:
 ### 3. Application Layer
 Infine, i servizi applicativi vengono deployati con ordinamento basato sulle dipendenze:
 **Ordine di deployment**:
+
 1. `avatar-service`, `tracking-service` (servizi core senza dipendenze REST)
 2. `guild-service`, `marketplace-service`, `quest-service` (dipendono da avatar-service)
 3. `notification-service` (consumer Kafka)
