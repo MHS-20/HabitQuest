@@ -63,10 +63,10 @@ public final class HabitFixtures {
   public static Habit hydrateHabit() {
     Habit habit =
         new Habit(HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, DAILY_RECURRENCE, Optional.empty());
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
+    //    habit.setTitle(TITLE);
+    //    habit.setDescription(DESCRIPTION);
     habit.setTags(List.of(new Tag(TAG_HEALTH), new Tag(TAG_WELLNESS)));
-    habit.setRecurrence(DAILY_RECURRENCE);
+    //    habit.setRecurrence(DAILY_RECURRENCE);
     habit.attendHabit(ATTENDED_AT);
     return habit;
   }
@@ -74,12 +74,17 @@ public final class HabitFixtures {
   public static Habit hydrateHabitWithQuest() {
     Habit habit =
         new Habit(HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, DAILY_RECURRENCE, Optional.of(QUEST_1));
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
-    habit.setRecurrence(DAILY_RECURRENCE);
+    //    habit.setTitle(TITLE);
+    //    habit.setDescription(DESCRIPTION);
+    //    habit.setRecurrence(DAILY_RECURRENCE);
     habit.setTags(List.of(new Tag(TAG_HEALTH)));
     habit.attendHabit(CONTROLLER_ATTENDED_AT);
     return habit;
+  }
+
+  public static Habit habitWithRecurrence(
+      habitquest.tracking.domain.reminder.Recurrence recurrence) {
+    return new Habit(HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, recurrence, Optional.empty());
   }
 
   public static Habit neverAttendedHabit() {
@@ -91,9 +96,9 @@ public final class HabitFixtures {
             DESCRIPTION,
             DAILY_RECURRENCE,
             Optional.empty());
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
-    habit.setRecurrence(DAILY_RECURRENCE);
+    //    habit.setTitle(TITLE);
+    //    habit.setDescription(DESCRIPTION);
+    //    habit.setRecurrence(DAILY_RECURRENCE);
     return habit;
   }
 
@@ -101,9 +106,9 @@ public final class HabitFixtures {
     Habit habit =
         new Habit(
             OVERDUE_HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, DAILY_RECURRENCE, Optional.empty());
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
-    habit.setRecurrence(DAILY_RECURRENCE);
+    //    habit.setTitle(TITLE);
+    //    habit.setDescription(DESCRIPTION);
+    //    habit.setRecurrence(DAILY_RECURRENCE);
     habit.attendHabit(LocalDateTime.now().minusDays(2));
     return habit;
   }
@@ -117,9 +122,9 @@ public final class HabitFixtures {
             DESCRIPTION,
             new MonthlyRecurrence(20),
             Optional.empty());
-    habit.setTitle(TITLE);
-    habit.setDescription(DESCRIPTION);
-    habit.setRecurrence(new MonthlyRecurrence(20));
+    //    habit.setTitle(TITLE);
+    //    habit.setDescription(DESCRIPTION);
+    //    habit.setRecurrence(new MonthlyRecurrence(20));
     habit.attendHabit(LocalDateTime.now());
     return habit;
   }

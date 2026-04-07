@@ -15,12 +15,12 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,20 +38,7 @@ class QuestServiceImplTest {
   @Mock private QuestObserver questObserver;
   @Mock private QuestFactory questFactory;
   @Mock private QuestLogger log;
-  private QuestServiceImpl service;
-
-  @BeforeEach
-  void setUp() {
-    service =
-        new QuestServiceImpl(
-            questRepository,
-            activeQuestsRepository,
-            avatarClient,
-            trackingHabitsClient,
-            questObserver,
-            questFactory,
-            log);
-  }
+  @InjectMocks private QuestServiceImpl service;
 
   @Nested
   @DisplayName("createQuest")

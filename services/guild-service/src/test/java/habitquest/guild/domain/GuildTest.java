@@ -1,5 +1,6 @@
 package habitquest.guild.domain;
 
+import static habitquest.guild.GuildFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 
 import common.ddd.Id;
@@ -13,25 +14,12 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Guild")
 class GuildTest {
 
-  private static final Id<Guild> GUILD_ID = new Id<>("guild-1");
-  private static final String GUILD_NAME = "Guild of Heroes";
-  private static final Id<GuildMember> LEADER_ID = new Id<>("avatar-1");
-  private static final Id<GuildMember> MEMBER_ID = new Id<>("avatar-2");
-  private static final Id<GuildMember> MEMBER_ID_2 = new Id<>("avatar-3");
-  private static final String MEMBER_NICK = "Nick2";
-  private static final String MEMBER_NICK_2 = "Nick3";
-  private static final Id<GuildMember> UNKNOWN_MEMBER_ID = new Id<>("non-existent-id");
-  private static final GuildRole LEADER_ROLE = GuildRole.LEADER;
-  private static final GuildRole MEMBER_ROLE = GuildRole.MEMBER;
-  private static final GuildRole OFFICER_ROLE = GuildRole.OFFICER;
-
   private GuildMember leader;
   private Guild guild;
 
   @BeforeEach
   void setUp() {
-    leader = new GuildMember(LEADER_ID, "LeaderNick", LEADER_ROLE);
-    guild = new Guild(GUILD_ID, GUILD_NAME, leader);
+    guild = guild();
   }
 
   // ── Creation ─────────────────────────────────────────────────────────────────

@@ -19,6 +19,11 @@ public final class GuildFixtures {
   public static final String UNKNOWN_GUILD = "ghost-99";
   public static final String LEADER_1 = "avatar-1";
   public static final String MEMBER_1 = "avatar-2";
+  public static final String MEMBER_2 = "avatar-3";
+  public static final String MEMBER_3 = "avatar-4";
+  public static final String MEMBER_4 = "avatar-5";
+  public static final String UNKNOWN_MEMBER = "ghost-avatar";
+
   public static final String INVITE_1 = "invite-1";
   public static final String BATTLE_1 = "battle-1";
   public static final String UNKNOWN_INVITE = "ghost-invite";
@@ -36,12 +41,20 @@ public final class GuildFixtures {
   // ── Typed domain IDs ─────────────────────────────────────────────────────────
   public static final Id<Guild> GUILD_ID = new Id<>(GUILD_1);
   public static final Id<Guild> UNKNOWN_GUILD_ID = new Id<>(UNKNOWN_GUILD);
+
   public static final Id<GuildMember> LEADER_ID = new Id<>(LEADER_1);
   public static final Id<GuildMember> MEMBER_ID = new Id<>(MEMBER_1);
+  public static final Id<GuildMember> MEMBER_ID_2 = new Id<>(MEMBER_2);
+  public static final Id<GuildMember> MEMBER_ID_3 = new Id<>(MEMBER_3);
+  public static final Id<GuildMember> MEMBER_ID_4 = new Id<>(MEMBER_4);
+  public static final Id<GuildMember> UNKNOWN_MEMBER_ID = new Id<>(UNKNOWN_MEMBER);
+
   public static final Id<Invite> INVITE_ID = new Id<>(INVITE_1);
   public static final Id<Invite> UNKNOWN_INVITE_ID = new Id<>(UNKNOWN_INVITE);
+
   public static final Id<Battle> BATTLE_ID = new Id<>(BATTLE_1);
   public static final Id<Battle> UNKNOWN_BATTLE_ID = new Id<>(UNKNOWN_BATTLE);
+
   public static final List<Id<GuildMember>> GUILD_MEMBERS =
       new ArrayList<>(List.of(LEADER_ID, MEMBER_ID));
 
@@ -55,6 +68,7 @@ public final class GuildFixtures {
   public static final String GUILD_NAME = "MyGuild";
   public static final String LEADER_NICK = "Hero";
   public static final String MEMBER_NICK = "Newbie";
+  public static final String MEMBER_NICK_2 = "Veteran";
   public static final GuildRole LEADER_ROLE = GuildRole.LEADER;
   public static final GuildRole OFFICER_ROLE = GuildRole.OFFICER;
   public static final GuildRole MEMBER_ROLE = GuildRole.MEMBER;
@@ -65,10 +79,15 @@ public final class GuildFixtures {
   public static final int EXP_REWARD = BOSS_TYPE.experienceReward().amount();
   public static final int MONEY_REWARD = BOSS_TYPE.moneyReward().amount();
   public static final int PENALTY = BOSS_TYPE.penalty().amount();
+  public static final int BOSS_MAX_HEALTH = BOSS_TYPE.stats().health().value();
 
   // Guild factories
   public static Guild guild() {
     return new Guild(GUILD_ID, GUILD_NAME, leader());
+  }
+
+  public static List<Id<GuildMember>> guildMembersFixture() {
+    return new java.util.ArrayList<>(List.of(LEADER_ID, MEMBER_ID));
   }
 
   public static Guild guildWithMembers(int n) {
@@ -113,6 +132,15 @@ public final class GuildFixtures {
     Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, BATTLE_MEMBERS);
     b.increaseNumOfTurns(BATTLE_MEMBER_ID_1);
     b.increaseNumOfTurns(BATTLE_MEMBER_ID_2);
+    return b;
+  }
+
+  public static Battle fullBattleFixture() {
+    List<Id<GuildMember>> members = new java.util.ArrayList<>();
+    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, members);
+    b.increaseNumOfTurns(MEMBER_ID);
+    b.increaseNumOfTurns(MEMBER_ID_2);
+    b.increaseNumOfTurns(MEMBER_ID_3);
     return b;
   }
 

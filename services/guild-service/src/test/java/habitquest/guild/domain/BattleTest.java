@@ -1,16 +1,10 @@
 package habitquest.guild.domain;
 
+import static habitquest.guild.GuildFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 
-import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
-import habitquest.guild.domain.battle.boss.BossType;
-import habitquest.guild.domain.guild.Guild;
-import habitquest.guild.domain.guild.GuildMember;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,25 +13,11 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Battle")
 class BattleTest {
 
-  private static final Id<Battle> BATTLE_ID = new Id<>("battle-1");
-  private static final Id<Guild> GUILD_ID = new Id<>("guild-1");
-  private static final Id<GuildMember> MEMBER_1 = new Id<>("member-1");
-  private static final Id<GuildMember> MEMBER_2 = new Id<>("member-2");
-  private static final Id<GuildMember> MEMBER_3 = new Id<>("member-3");
-  private static final Id<GuildMember> MEMBER_4 = new Id<>("member-4");
-  private static final int BOSS_MAX_HEALTH = BossType.MINOTAUR.stats().health().value();
-  private static final int EXP_REWARD = BossType.MINOTAUR.experienceReward().amount();
-  private static final int MONEY_REWARD = BossType.MINOTAUR.moneyReward().amount();
-  private static final int PENALTY = BossType.MINOTAUR.penalty().amount();
-
   private Battle battle;
 
   @BeforeEach
   void setUp() {
-    battle = new Battle(BATTLE_ID, GUILD_ID, BossType.MINOTAUR, 0, new ArrayList<>());
-    battle.increaseNumOfTurns(MEMBER_1);
-    battle.increaseNumOfTurns(MEMBER_2);
-    battle.increaseNumOfTurns(MEMBER_3);
+    battle = fullBattleFixture();
   }
 
   // -------------------------------------------------------------------------
@@ -114,7 +94,7 @@ class BattleTest {
     @Test
     @DisplayName("should reduce boss health by the damage amount")
     void shouldReduceBossHealth() {
-      battle.dealDamageOnBoss(MEMBER_1, 30);
+      battle.dealDamageOnBoss(MEMBER_ID, 30);
       assertThat(battle.getBossRemainingHealth().remainingHealth().value()).isEqualTo(70);
     }
 
@@ -122,7 +102,7 @@ class BattleTest {
     @DisplayName(
         "should return Ongoing and keep internal status Ongoing when boss still has health")
     void shouldReturnOngoingWhenBossAlive() {
-      BattleOutcome outcome = battle.dealDamageOnBoss(MEMBER_1, 50);
+      BattleOutcome outcome = battle.dealDamageOnBoss(MEMBER_ID, 50);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
       assertThat(battle.getBattleStatus()).isInstanceOf(BattleOutcome.Ongoing.class);
@@ -131,7 +111,7 @@ class BattleTest {
     @Test
     @DisplayName("should return Won with correct rewards when damage reduces health to zero")
     void shouldReturnWonWhenHealthReachesZero() {
-      BattleOutcome outcome = battle.dealDamageOnBoss(MEMBER_1, BOSS_MAX_HEALTH);
+      BattleOutcome outcome = battle.dealDamageOnBoss(MEMBER_ID, BOSS_MAX_HEALTH);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Won.class);
       BattleOutcome.Won won = (BattleOutcome.Won) outcome;
@@ -142,29 +122,29 @@ class BattleTest {
     @Test
     @DisplayName("should return Won when damage exceeds remaining health")
     void shouldReturnWonWhenDamageExceedsHealth() {
-      assertThat(battle.dealDamageOnBoss(MEMBER_1, BOSS_MAX_HEALTH + 50))
+      assertThat(battle.dealDamageOnBoss(MEMBER_ID, BOSS_MAX_HEALTH + 50))
           .isInstanceOf(BattleOutcome.Won.class);
     }
 
     @Test
     @DisplayName("should set boss health to zero when battle is won")
     void shouldSetHealthToZeroOnWin() {
-      battle.dealDamageOnBoss(MEMBER_1, BOSS_MAX_HEALTH);
+      battle.dealDamageOnBoss(MEMBER_ID, BOSS_MAX_HEALTH);
       assertThat(battle.getBossRemainingHealth().remainingHealth().value()).isEqualTo(0);
     }
 
     @Test
     @DisplayName("should accumulate damage from multiple hits")
     void shouldAccumulateDamage() {
-      battle.dealDamageOnBoss(MEMBER_1, 30);
-      battle.dealDamageOnBoss(MEMBER_2, 30);
+      battle.dealDamageOnBoss(MEMBER_ID, 30);
+      battle.dealDamageOnBoss(MEMBER_ID_2, 30);
       assertThat(battle.getBossRemainingHealth().remainingHealth().value()).isEqualTo(40);
     }
 
     @Test
     @DisplayName("should update internal battleStatus to Won after killing blow")
     void shouldUpdateInternalStatusToWon() {
-      battle.dealDamageOnBoss(MEMBER_1, BOSS_MAX_HEALTH);
+      battle.dealDamageOnBoss(MEMBER_ID, BOSS_MAX_HEALTH);
       assertThat(battle.getBattleStatus()).isInstanceOf(BattleOutcome.Won.class);
     }
   }
@@ -179,15 +159,15 @@ class BattleTest {
     @Test
     @DisplayName("should return Ongoing when not all members have fallen")
     void shouldReturnOngoingWhenNotAllFallen() {
-      assertThat(battle.applyCounterattack(MEMBER_1)).isInstanceOf(BattleOutcome.Ongoing.class);
+      assertThat(battle.applyCounterattack(MEMBER_ID)).isInstanceOf(BattleOutcome.Ongoing.class);
     }
 
     @Test
     @DisplayName("should return Lost with correct penalty when all members have fallen")
     void shouldReturnLostWhenAllFallen() {
-      battle.applyCounterattack(MEMBER_1);
-      battle.applyCounterattack(MEMBER_2);
-      BattleOutcome outcome = battle.applyCounterattack(MEMBER_3);
+      battle.applyCounterattack(MEMBER_ID);
+      battle.applyCounterattack(MEMBER_ID_2);
+      BattleOutcome outcome = battle.applyCounterattack(MEMBER_ID_3);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
       assertThat(((BattleOutcome.Lost) outcome).penalty()).isEqualTo(PENALTY);
@@ -196,9 +176,9 @@ class BattleTest {
     @Test
     @DisplayName("should update internal battleStatus to Lost when all members have fallen")
     void shouldUpdateInternalStatusToLost() {
-      battle.applyCounterattack(MEMBER_1);
-      battle.applyCounterattack(MEMBER_2);
-      battle.applyCounterattack(MEMBER_3);
+      battle.applyCounterattack(MEMBER_ID);
+      battle.applyCounterattack(MEMBER_ID_2);
+      battle.applyCounterattack(MEMBER_ID_3);
 
       assertThat(battle.getBattleStatus()).isInstanceOf(BattleOutcome.Lost.class);
     }
@@ -215,20 +195,20 @@ class BattleTest {
     @DisplayName("should increase the number of turns and add member")
     void shouldIncreaseNumOfTurns() {
       int before = battle.getNumOfTurns();
-      battle.increaseNumOfTurns(MEMBER_4);
+      battle.increaseNumOfTurns(MEMBER_ID_4);
 
       assertThat(battle.getNumOfTurns()).isEqualTo(before + 1);
-      assertThat(battle.getMembers()).contains(MEMBER_4);
+      assertThat(battle.getMembers()).contains(MEMBER_ID_4);
     }
 
     @Test
     @DisplayName("should decrease the number of turns and remove member")
     void shouldDecreaseNumOfTurns() {
       int before = battle.getNumOfTurns();
-      battle.decreaseNumOfTurns(MEMBER_1);
+      battle.decreaseNumOfTurns(MEMBER_ID);
 
       assertThat(battle.getNumOfTurns()).isEqualTo(before - 1);
-      assertThat(battle.getMembers()).doesNotContain(MEMBER_1);
+      assertThat(battle.getMembers()).doesNotContain(MEMBER_ID);
     }
   }
 }
