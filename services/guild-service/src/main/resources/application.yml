@@ -116,6 +116,11 @@ management:
       probability: 1.0
     propagation:
       type: W3C
+    observations:
+      key-values:
+        http.server.requests:
+          enabled: true
+
   otlp:
     metrics:
       export:

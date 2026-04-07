@@ -34,8 +34,9 @@ public class BattleServiceImpl implements BattleService {
 
   // --- Battle lifecycle ---
   @Override
-  public Id<Battle> createBattle(Id<Guild> guildId, BossType bossType, Integer numOfTurns) {
-    Battle battle = battleFactory.create(guildId, bossType, numOfTurns);
+  public Id<Battle> createBattle(
+      Id<Guild> guildId, BossType bossType, Integer numOfTurns, List<Id<GuildMember>> members) {
+    Battle battle = battleFactory.create(guildId, bossType, numOfTurns, members);
     battleRepository.save(battle);
     battleObserver.notifyBattleEvent(new BattleStarted(battle.getId(), battle.getGuildId()));
     return battle.getId();

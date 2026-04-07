@@ -30,6 +30,7 @@ from rich.table import Table
 # Config
 BASE_URL = "http://localhost:9000"
 TIMEOUT = 10.0
+PASSWORD = "Password1!"
 console = Console()
 
 
@@ -39,6 +40,12 @@ def rand_str(n: int = 8) -> str:
 
 def rand_email() -> str:
     return f"{rand_str()}@test.habitquest.io"
+
+@dataclass
+class VUCredentials:
+    email: str
+    token: str
+    user_id: Optional[str] = None
 
 @dataclass
 class LoadResult:
@@ -76,6 +83,74 @@ class LoadResult:
         return (self.success / self.total * 100) if self.total > 0 else 0
 
 
+# ─── Per-VU auth setup ───────────────────────────────────────────────────────
+async def setup_vu(client: httpx.AsyncClient, vu_index: int) -> Optional[VUCredentials]:
+    """
+    Register and login a fresh user for a virtual user.
+    Mirrors the auth flow from the e2e suite (register → login).
+    Returns VUCredentials on success, or None if setup fails.
+    """
+    email = rand_email()
+    name = f"loadvu{vu_index}{rand_str(4)}"
+
+    # 1. Register
+    try:
+        r = await client.post("/auth/register", json={
+            "name": name,
+            "email": email,
+            "password": PASSWORD,
+        })
+        if r.status_code != 201:
+            console.print(f"  [red]VU {vu_index}: register failed ({r.status_code})[/red]")
+            return None
+        data = r.json()
+        if "token" not in data:
+            console.print(f"  [red]VU {vu_index}: no token in register response[/red]")
+            return None
+        # Extract userId (handles both plain value and nested {"value": ...} wrapper)
+        user_id = data.get("userId")
+        if isinstance(user_id, dict) and "value" in user_id:
+            user_id = user_id["value"]
+        else:
+            user_id = user_id or data.get("id")
+    except Exception as e:
+        console.print(f"  [red]VU {vu_index}: register exception — {e}[/red]")
+        return None
+
+    # 2. Login (refreshes token, confirms credentials work)
+    try:
+        r = await client.post("/auth/login", json={
+            "email": email,
+            "password": PASSWORD,
+        })
+        if r.status_code != 200:
+            console.print(f"  [red]VU {vu_index}: login failed ({r.status_code})[/red]")
+            return None
+        data = r.json()
+        if "token" not in data:
+            console.print(f"  [red]VU {vu_index}: no token in login response[/red]")
+            return None
+        token = data["token"]
+    except Exception as e:
+        console.print(f"  [red]VU {vu_index}: login exception — {e}[/red]")
+        return None
+
+    return VUCredentials(email=email, token=token, user_id=user_id)
+
+
+async def setup_all_vus(base_url: str, vus: int) -> list[Optional[VUCredentials]]:
+    """Register + login all VUs concurrently before any load scenario starts."""
+    console.print(f"  [dim]Setting up {vus} virtual users (register + login)…[/dim]")
+    async with httpx.AsyncClient(base_url=base_url, timeout=TIMEOUT) as client:
+        creds = await asyncio.gather(
+            *(setup_vu(client, i) for i in range(vus)),
+            return_exceptions=False,
+        )
+    ok = sum(1 for c in creds if c is not None)
+    console.print(f"  [dim]VU setup complete: {ok}/{vus} authenticated[/dim]")
+    return list(creds)
+
+
 # ─── LOAD TESTS ───────────────────────────────────────────────────────────────
 class LoadSuite:
     def __init__(self, base_url: str):
@@ -84,11 +159,11 @@ class LoadSuite:
 
     # ── Individual scenario runners ──────────────────────────────────────────
     async def _run_scenario(
-        self,
-        name: str,
-        coroutine_factory,
-        vus: int = 20,
-        duration_s: int = 10,
+            self,
+            name: str,
+            coroutine_factory,
+            vus: int = 20,
+            duration_s: int = 10,
     ) -> LoadResult:
         result = LoadResult(
             scenario=name,
@@ -130,6 +205,8 @@ class LoadSuite:
 
     # ── Scenario: auth ───────────────────────────────────────────────────────
     async def scenario_auth(self, vus: int, duration_s: int) -> LoadResult:
+        # Auth scenario intentionally uses fresh random credentials (testing the
+        # login endpoint itself under load), so it does not reuse VU tokens.
         async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
             async def call():
                 r = await client.post("/auth/login", json={
@@ -141,57 +218,106 @@ class LoadSuite:
             return await self._run_scenario("auth — login burst", call, vus, duration_s)
 
     # ── Scenario: guild reads ────────────────────────────────────────────────
-    async def scenario_guild_reads(self, vus: int, duration_s: int) -> LoadResult:
+    async def scenario_guild_reads(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
         async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
-            async def call():
-                r = await client.get("/api/v1/guilds/leaderboard")
-                return r.status_code
+            def make_call(creds: Optional[VUCredentials]):
+                async def call():
+                    headers = {"Authorization": f"Bearer {creds.token}"} if creds else {}
+                    r = await client.get("/api/v1/guilds/leaderboard", headers=headers)
+                    return r.status_code
+                return call
 
-            return await self._run_scenario("guilds — GET leaderboard", call, vus, duration_s)
+            calls = [make_call(vu_creds[i % len(vu_creds)]) for i in range(vus)]
+            call_index = 0
+
+            async def round_robin_call():
+                nonlocal call_index
+                fn = calls[call_index % len(calls)]
+                call_index += 1
+                return await fn()
+
+            return await self._run_scenario("guilds — GET leaderboard", round_robin_call, vus, duration_s)
 
     # ── Scenario: battle reads ───────────────────────────────────────────────
-    async def scenario_battle_reads(self, vus: int, duration_s: int) -> LoadResult:
+    async def scenario_battle_reads(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
         async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
-            async def call():
-                r = await client.get("/api/v1/battles/boss")
-                return r.status_code
+            def make_call(creds: Optional[VUCredentials]):
+                async def call():
+                    headers = {"Authorization": f"Bearer {creds.token}"} if creds else {}
+                    r = await client.get("/api/v1/battles/boss", headers=headers)
+                    return r.status_code
+                return call
 
-            return await self._run_scenario("battles — GET all bosses", call, vus, duration_s)
+            calls = [make_call(vu_creds[i % len(vu_creds)]) for i in range(vus)]
+            call_index = 0
+
+            async def round_robin_call():
+                nonlocal call_index
+                fn = calls[call_index % len(calls)]
+                call_index += 1
+                return await fn()
+
+            return await self._run_scenario("battles — GET all bosses", round_robin_call, vus, duration_s)
 
     # ── Scenario: quest reads ────────────────────────────────────────────────
-    async def scenario_quest_reads(self, vus: int, duration_s: int) -> LoadResult:
+    async def scenario_quest_reads(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
         async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
-            async def call():
-                r = await client.get("/api/v1/quests")
-                return r.status_code
+            def make_call(creds: Optional[VUCredentials]):
+                async def call():
+                    headers = {"Authorization": f"Bearer {creds.token}"} if creds else {}
+                    r = await client.get("/api/v1/quests", headers=headers)
+                    return r.status_code
+                return call
 
-            return await self._run_scenario("quests — GET all quests", call, vus, duration_s)
+            calls = [make_call(vu_creds[i % len(vu_creds)]) for i in range(vus)]
+            call_index = 0
+
+            async def round_robin_call():
+                nonlocal call_index
+                fn = calls[call_index % len(calls)]
+                call_index += 1
+                return await fn()
+
+            return await self._run_scenario("quests — GET all quests", round_robin_call, vus, duration_s)
 
     # ── Scenario: mixed write (quest create + delete) ────────────────────────
-    async def scenario_quest_write(self, vus: int, duration_s: int) -> LoadResult:
+    async def scenario_quest_write(self, vus: int, duration_s: int, vu_creds: list[Optional[VUCredentials]]) -> LoadResult:
         async with httpx.AsyncClient(base_url=self.base_url, timeout=TIMEOUT) as client:
-            async def call():
-                r = await client.post("/api/v1/quests", json={
-                    "name": f"LoadQuest-{rand_str()}",
-                    "durationDays": 7,
-                })
-                if r.status_code == 201:
-                    data = r.json()
-                    qid = (data.get("content") or data).get("id")
-                    if qid:
-                        await client.delete(f"/api/v1/quests/{qid}")
-                return r.status_code
+            def make_call(creds: Optional[VUCredentials]):
+                async def call():
+                    headers = {"Authorization": f"Bearer {creds.token}"} if creds else {}
+                    r = await client.post("/api/v1/quests", json={
+                        "name": f"LoadQuest-{rand_str()}",
+                        "durationDays": 7,
+                    }, headers=headers)
+                    if r.status_code == 201:
+                        data = r.json()
+                        qid = (data.get("content") or data).get("id")
+                        if qid:
+                            await client.delete(f"/api/v1/quests/{qid}", headers=headers)
+                    return r.status_code
+                return call
 
-            return await self._run_scenario("quests — POST create / DELETE", call, vus, duration_s)
+            calls = [make_call(vu_creds[i % len(vu_creds)]) for i in range(vus)]
+            call_index = 0
+
+            async def round_robin_call():
+                nonlocal call_index
+                fn = calls[call_index % len(calls)]
+                call_index += 1
+                return await fn()
+
+            return await self._run_scenario("quests — POST create / DELETE", round_robin_call, vus, duration_s)
 
     # ── Run all load scenarios ────────────────────────────────────────────────
     async def run_async(self, scenario_filter: Optional[str], vus: int, duration_s: int):
+        scenarios_needing_auth = {"guild_reads", "battle_reads", "quest_reads", "quest_write"}
         scenarios = {
-            "auth":          self.scenario_auth,
-            "guild_reads":   self.scenario_guild_reads,
-            "battle_reads":  self.scenario_battle_reads,
-            "quest_reads":   self.scenario_quest_reads,
-            "quest_write":   self.scenario_quest_write,
+            "auth":          (self.scenario_auth,         False),
+            "guild_reads":   (self.scenario_guild_reads,  True),
+            "battle_reads":  (self.scenario_battle_reads, True),
+            "quest_reads":   (self.scenario_quest_reads,  True),
+            "quest_write":   (self.scenario_quest_write,  True),
         }
 
         selected = {k: v for k, v in scenarios.items()
@@ -208,9 +334,29 @@ class LoadSuite:
             style="yellow"
         ))
 
-        for name, fn in selected.items():
+        # Pre-provision VU credentials if any selected scenario needs auth
+        vu_creds: list[Optional[VUCredentials]] = []
+        needs_auth = any(needs for _, (_, needs) in selected.items())
+        if needs_auth:
+            vu_creds = await setup_all_vus(self.base_url, vus)
+            valid = [c for c in vu_creds if c is not None]
+            if not valid:
+                console.print("[red]All VU setups failed — aborting load test.[/red]")
+                return
+            if len(valid) < vus:
+                console.print(
+                    f"[yellow]Warning: only {len(valid)}/{vus} VUs authenticated. "
+                    f"Tokens will be reused for missing slots.[/yellow]"
+                )
+            # Fill any None slots with a valid credential to avoid crashing workers
+            vu_creds = [c if c is not None else valid[0] for c in vu_creds]
+
+        for name, (fn, needs) in selected.items():
             console.print(f"\n[bold]Running:[/bold] {name}  ({vus} VUs x {duration_s}s)")
-            result = await fn(vus, duration_s)
+            if needs:
+                result = await fn(vus, duration_s, vu_creds)
+            else:
+                result = await fn(vus, duration_s)
             self.results.append(result)
             console.print(
                 f"  Requests: {result.total}  "

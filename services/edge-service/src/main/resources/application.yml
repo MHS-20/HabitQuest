@@ -112,7 +112,7 @@ resilience4j:
   ratelimiter:
     instances:
       default:
-        limitForPeriod: 10
+        limitForPeriod: 3000
         limitRefreshPeriod: 1s
         timeoutDuration: 0
 
@@ -154,6 +154,11 @@ management:
       probability: 1.0
     propagation:
       type: W3C
+    observations:
+      key-values:
+        http.server.requests:
+          enabled: true
+
   otlp:
     metrics:
       export:

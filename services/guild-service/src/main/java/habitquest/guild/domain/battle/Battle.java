@@ -19,16 +19,20 @@ public class Battle implements Aggregate<Id<Battle>> {
   private BattleOutcome battleStatus;
   private final List<Id<GuildMember>> memberIds;
   private final Set<Id<GuildMember>> fallenAvatarIds;
-  private static final int MIN_NUM_OF_TURNS = 1;
 
-  public Battle(Id<Battle> battleId, Id<Guild> guildId, BossEnemy boss, Integer numOfTurns) {
+  public Battle(
+      Id<Battle> battleId,
+      Id<Guild> guildId,
+      BossEnemy boss,
+      Integer numOfTurns,
+      List<Id<GuildMember>> members) {
     this.battleId = battleId;
     this.guildId = guildId;
     this.boss = boss;
     this.numOfTurns = numOfTurns;
     this.currentTurn = 0;
     this.bossRemainingHealth = new BossStatus(boss.stats().health());
-    this.memberIds = new ArrayList<>();
+    this.memberIds = members;
     this.fallenAvatarIds = new HashSet<>();
     this.battleStatus = new BattleOutcome.Ongoing();
   }

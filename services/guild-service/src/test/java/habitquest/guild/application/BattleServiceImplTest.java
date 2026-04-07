@@ -1,11 +1,11 @@
 package habitquest.guild.application;
 
+import static habitquest.guild.GuildFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
-import habitquest.guild.GuildFixtures;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossType;
@@ -15,7 +15,6 @@ import habitquest.guild.domain.events.battleEvents.BattleObserver;
 import habitquest.guild.domain.events.battleEvents.BattleStarted;
 import habitquest.guild.domain.events.battleEvents.BattleWon;
 import habitquest.guild.domain.factory.BattleFactory;
-import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,14 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BattleServiceImplTest {
 
-  private static final Id<Battle> BATTLE_ID = GuildFixtures.BATTLE_ID;
-  private static final Id<Guild> GUILD_ID = GuildFixtures.GUILD_ID;
-  private static final Id<GuildMember> MEMBER_1 = GuildFixtures.BATTLE_MEMBER_ID_1;
-  private static final Id<GuildMember> MEMBER_2 = GuildFixtures.BATTLE_MEMBER_ID_2;
-  private static final int BOSS_HEALTH = GuildFixtures.BOSS_HEALTH;
-  private static final int EXP_REWARD = GuildFixtures.EXP_REWARD;
-  private static final int MONEY_REWARD = GuildFixtures.MONEY_REWARD;
-  private static final int PENALTY = GuildFixtures.PENALTY;
+  private static final Id<GuildMember> MEMBER_1 = BATTLE_MEMBER_ID_1;
+  private static final Id<GuildMember> MEMBER_2 = BATTLE_MEMBER_ID_2;
 
   @Mock private BattleRepository battleRepository;
   @Mock private BattleObserver battleObserver;
@@ -51,9 +44,7 @@ class BattleServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    // numOfTurns parte da 0, i due increaseNumOfTurns lo portano a 2.
-    // numOfTurns == memberIds.size() == 2 → Lost si scatena al 2° counterattack.
-    battle = GuildFixtures.battleWithTwoMembers();
+    battle = battleWithTwoMembers();
   }
 
   // ── createBattle ─────────────────────────────────────────────────────────────
@@ -65,9 +56,9 @@ class BattleServiceImplTest {
     @Test
     @DisplayName("should delegate to factory, save and return the battle id")
     void shouldCreateAndReturnId() {
-      when(battleFactory.create(any(), any(), any())).thenReturn(battle);
+      when(battleFactory.create(any(), any(), any(), any())).thenReturn(battle);
 
-      Id<Battle> result = battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2);
+      Id<Battle> result = battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2, GUILD_MEMBERS);
 
       verify(battleRepository).save(battle);
       assertThat(result).isEqualTo(BATTLE_ID);
@@ -76,9 +67,9 @@ class BattleServiceImplTest {
     @Test
     @DisplayName("should publish a BattleStarted event")
     void shouldPublishBattleStartedEvent() {
-      when(battleFactory.create(any(), any(), any())).thenReturn(battle);
+      when(battleFactory.create(any(), any(), any(), any())).thenReturn(battle);
 
-      battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2);
+      battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2, GUILD_MEMBERS);
 
       ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
       verify(battleObserver).notifyBattleEvent(captor.capture());
