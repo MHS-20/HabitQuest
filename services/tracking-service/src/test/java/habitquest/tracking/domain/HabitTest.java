@@ -1,53 +1,40 @@
 package habitquest.tracking.domain;
 
+import static habitquest.tracking.HabitFixtures.*; // Import statico delle fixture
 import static org.assertj.core.api.Assertions.assertThat;
 
-import common.ddd.Id;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("Habit domain")
 class HabitTest {
-  private static final Id<Habit> HABIT_ID = new Id<>("habit-1");
-  private static final Id<Avatar> AVATAR_ID = new Id<>("avatar-1");
-  private static final String TITLE = "Hydrate";
-  private static final String DESCRIPTION = "Drink water";
 
   @Test
   @DisplayName("attendHabit stores last attended date")
   void attendHabitStoresDate() {
-    Habit habit =
-        new Habit(
-            HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.of("quest-1"));
+    Habit habit = neverAttendedHabit();
     LocalDateTime attendedAt = LocalDateTime.of(2026, 3, 19, 9, 0);
-
     habit.attendHabit(attendedAt);
-
     assertThat(habit.getLastAttendedDate()).isEqualTo(attendedAt);
   }
 
   @Test
   @DisplayName("nextRecurrence(date) uses configured recurrence strategy")
   void nextRecurrenceFromProvidedDateUsesRecurrence() {
-    Habit habit =
-        new Habit(HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.empty());
+    Habit habit = habitWithRecurrence(new DailyRecurrence());
     habit.setRecurrence(new MonthlyRecurrence(31));
-
     LocalDateTime next = habit.nextRecurrence(LocalDateTime.of(2026, 4, 10, 8, 30));
-
     assertThat(next).isEqualTo(LocalDateTime.of(2026, 5, 31, 8, 30));
   }
 
   @Test
   @DisplayName("setters update mutable state")
   void settersUpdateState() {
-    Habit habit =
-        new Habit(HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.empty());
+    Habit habit = neverAttendedHabit();
 
     habit.setTitle("Read");
     habit.setDescription("Read 20 pages");
@@ -61,12 +48,9 @@ class HabitTest {
   @Test
   @DisplayName("constructor keeps immutable identifiers")
   void constructorKeepsIds() {
-    Habit habit =
-        new Habit(
-            HABIT_ID, AVATAR_ID, TITLE, DESCRIPTION, new DailyRecurrence(), Optional.of("quest-9"));
-
-    assertThat(habit.getId()).isEqualTo(new Id<>("habit-1"));
-    assertThat(habit.getAvatarId()).isEqualTo(new Id<>("avatar-1"));
-    assertThat(habit.getAssociatedQuestId()).contains("quest-9");
+    Habit habit = hydrateHabitWithQuest();
+    assertThat(habit.getId()).isEqualTo(HABIT_ID);
+    assertThat(habit.getAvatarId()).isEqualTo(AVATAR_ID);
+    assertThat(habit.getAssociatedQuestId()).contains(QUEST_1);
   }
 }

@@ -17,7 +17,6 @@ import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,26 +45,7 @@ public class MarketplaceControllerIT {
 
   @BeforeEach
   void setUp() {
-    catalog = mock(ItemCatalog.class);
-    when(catalog.getAllItems())
-        .thenReturn(List.of(sword(), shield(), healthPotion(), manaPotion()));
-    when(catalog.getItemsByType(ItemType.ALL))
-        .thenReturn(List.of(sword(), shield(), healthPotion(), manaPotion()));
-    when(catalog.getItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield()));
-    when(catalog.getItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword()));
-    when(catalog.getItemsByType(ItemType.POTION)).thenReturn(List.of(healthPotion(), manaPotion()));
-    when(catalog.getItemsByType(ItemType.HEALTH_POTION)).thenReturn(List.of(healthPotion()));
-    when(catalog.getItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(manaPotion()));
-    when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(sword()));
-    when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(shield()));
-    when(catalog.getItem(HEALTH_POTION_NAME)).thenReturn(Optional.of(healthPotion()));
-    when(catalog.getItem(MANA_POTION_NAME)).thenReturn(Optional.of(manaPotion()));
-    when(catalog.getItem(UNKNOWN_ITEM)).thenReturn(Optional.empty());
-    when(catalog.contains(SWORD_NAME)).thenReturn(true);
-    when(catalog.contains(SHIELD_NAME)).thenReturn(true);
-    when(catalog.contains(HEALTH_POTION_NAME)).thenReturn(true);
-    when(catalog.contains(MANA_POTION_NAME)).thenReturn(true);
-    when(catalog.contains(UNKNOWN_ITEM)).thenReturn(false);
+    catalog = mockCatalog();
   }
 
   private Marketplace stubMarketplace() {

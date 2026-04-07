@@ -151,6 +151,32 @@ class HabitQuestClient:
             "requesterId": requester_id,
         })
 
+    # Habit Tracking
+    def create_habit(self, avatar_id: str, title: str, recurrence: str = "DAILY"):
+        return self._client.post("/api/v1/habits", json={
+            "avatarId": avatar_id,
+            "title": title,
+            "description": f"Description for {title}",
+            "recurrenceType": recurrence
+        })
+
+    def get_habit(self, habit_id: str):
+        return self._client.get(f"/api/v1/habits/{habit_id}")
+
+    def get_habits_by_avatar(self, avatar_id: str):
+        return self._client.get(f"/api/v1/habits/avatar/{avatar_id}")
+
+    def attend_habit(self, habit_id: str, date_iso: str):
+        # Il controller si aspetta un LocalDateTime
+        return self._client.post(f"/api/v1/habits/{habit_id}/attend", json={
+            "date": date_iso
+        })
+
+    def update_habit_title(self, habit_id: str, new_title: str):
+        return self._client.patch(f"/api/v1/habits/{habit_id}/title", json={
+            "title": new_title
+        })
+
     # Quest
     def create_quest(self, name: str, duration_days: int):
         return self._client.post("/api/v1/quests", json={"name": name, "durationDays": duration_days})
@@ -421,6 +447,68 @@ class E2ESuite:
                 self._step("POST /api/v1/battles/{id}/damage", deal_damage)
             self._step("POST /api/v1/battles — non-leader → 403", forbidden_create)
 
+
+    # ── Habit Tracking flow ──────────────────────────────────────────────────
+    def test_habit_tracking_flow(self):
+        console.print("\n[bold]Habit Tracking flow[/bold]")
+        avatar_id = self.state.get("user_id")
+        habit_id = None
+
+        if not avatar_id:
+            console.print("  [yellow] Skipped — no user_id in state[/yellow]")
+            return
+
+        with HabitQuestClient(self.base_url, self.state.get("token")) as c:
+            def create_daily():
+                nonlocal habit_id
+                r = c.create_habit(avatar_id, f"Habit-{rand_str()}", "DAILY")
+                assert r.status_code == 201
+                data = r.json()
+                content = data.get("content") or data
+                habit_id = content.get("id")
+                assert habit_id is not None
+
+            def get_details():
+                r = c.get_habit(habit_id)
+                assert r.status_code == 200
+                data = r.json()
+                content = data.get("content", data)
+                assert "title" in content, f"Chiave 'title' non trovata in: {data}"
+                assert content["title"].startswith("Habit-")
+
+            def list_by_avatar():
+                r = c.get_habits_by_avatar(avatar_id)
+                assert r.status_code == 200
+                # Questo endpoint restituisce una lista diretta
+                habits = r.json()
+                assert any(h["id"] == habit_id for h in habits)
+
+            def attend():
+                import datetime
+                # Formato LocalDateTime richiesto dal controller
+                now = datetime.datetime.now().isoformat()
+                r = c.attend_habit(habit_id, now)
+                assert r.status_code == 204
+
+            def patch_title():
+                new_name = "Updated Title"
+                r = c.update_habit_title(habit_id, new_name)
+                assert r.status_code == 204
+
+                r_check = c.get_habit(habit_id)
+                assert r_check.status_code == 200
+
+                data = r_check.json()
+                content = data.get("content", data)
+                assert content["title"] == new_name
+
+            self._step("POST /api/v1/habits", create_daily)
+            if habit_id:
+                self._step("GET  /api/v1/habits/{id}", get_details)
+                self._step("GET  /api/v1/habits/avatar/{avatarId}", list_by_avatar)
+                self._step("POST /api/v1/habits/{id}/attend", attend)
+                self._step("PATCH /api/v1/habits/{id}/title", patch_title)
+
     # ── Quest flow ───────────────────────────────────────────────────────────
     def test_quest_flow(self):
         console.print("\n[bold]Quest flow[/bold]")
@@ -521,6 +609,7 @@ class E2ESuite:
         self.test_auth_flow()
         self.test_guild_flow()
         self.test_battle_flow()
+        self.test_habit_tracking_flow()
         self.test_quest_flow()
         self.test_marketplace_flow()
         self._print_summary()

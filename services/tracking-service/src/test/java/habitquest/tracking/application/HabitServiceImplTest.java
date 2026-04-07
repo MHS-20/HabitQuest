@@ -16,12 +16,12 @@ import habitquest.tracking.domain.factory.HabitFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -35,20 +35,7 @@ class HabitServiceImplTest {
   @Mock private HabitObserver habitObserver;
   @Mock private AvatarClientPort avatarClient;
   @Mock private QuestClientPort questClient;
-
-  private HabitServiceImpl service;
-
-  @BeforeEach
-  void setUp() {
-    service =
-        new HabitServiceImpl(
-            habitRepository,
-            historyRepository,
-            habitFactory,
-            habitObserver,
-            avatarClient,
-            questClient);
-  }
+  @InjectMocks private HabitServiceImpl service;
 
   @Nested
   @DisplayName("creation methods")
