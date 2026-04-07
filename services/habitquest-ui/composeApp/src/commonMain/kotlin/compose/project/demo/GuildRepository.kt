@@ -107,6 +107,21 @@ sealed interface BattleStartResult {
     data class Error(val message: String) : BattleStartResult
 }
 
+data class BattleStatsData(
+    val battleId: String,
+    val guildId: String,
+    val status: String,
+    val currentTurn: Int,
+    val totalTurns: Int,
+    val bossName: String,
+    val bossRemainingHealth: Int,
+)
+
+sealed interface BattleStatsResult {
+    data class Success(val stats: BattleStatsData) : BattleStatsResult
+    data class Error(val message: String) : BattleStatsResult
+}
+
 class GuildRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
@@ -535,6 +550,33 @@ class GuildRepository {
         }
     }
 
+    suspend fun fetchBattleStatsByGuild(token: String, guildId: String): BattleStatsResult {
+        if (guildId.isBlank()) return BattleStatsResult.Error("Guild id cannot be blank")
+
+        val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/battles/guild/$guildId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return BattleStatsResult.Error("Unable to contact battle-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+                val source = body["content"]?.jsonObject ?: body
+                val stats = parseBattleStats(source)
+                    ?: return BattleStatsResult.Error("Invalid battle stats response")
+                BattleStatsResult.Success(stats)
+            }
+
+            HttpStatusCode.NotFound -> BattleStatsResult.Error("No active battle for this guild")
+            HttpStatusCode.Unauthorized -> BattleStatsResult.Error("Session expired, please log in again")
+            else -> BattleStatsResult.Error("Battle stats error (${response.status.value})")
+        }
+    }
+
     private fun parseBossCollection(body: JsonObject): List<BossData> {
         val directArray = body["bosses"] as? JsonArray
         if (directArray != null) {
@@ -598,6 +640,33 @@ class GuildRepository {
             experienceReward = experienceReward,
             moneyReward = moneyReward,
             penalty = penalty,
+        )
+    }
+
+    private fun parseBattleStats(source: JsonObject): BattleStatsData? {
+        val battleId = source["id"]?.jsonPrimitive?.contentOrNull ?: return null
+        val guildId = source["guildId"]?.jsonPrimitive?.contentOrNull ?: return null
+        val currentTurn = source["currentTurn"]?.jsonPrimitive?.intOrNull ?: 0
+        val totalTurns = source["numOfTurns"]?.jsonPrimitive?.intOrNull ?: 0
+        val bossRemainingHealth = source["bossRemainingHealth"]?.jsonPrimitive?.intOrNull ?: 0
+        val bossName = source["boss"]?.jsonObject?.get("name")?.jsonPrimitive?.contentOrNull ?: "Unknown"
+
+        val statusElement = source["status"]
+        val status = when (statusElement) {
+            null -> "UNKNOWN"
+            is JsonPrimitive -> statusElement.contentOrNull ?: "UNKNOWN"
+            is JsonObject -> statusElement.keys.firstOrNull()?.uppercase() ?: "UNKNOWN"
+            else -> "UNKNOWN"
+        }
+
+        return BattleStatsData(
+            battleId = battleId,
+            guildId = guildId,
+            status = status,
+            currentTurn = currentTurn,
+            totalTurns = totalTurns,
+            bossName = bossName,
+            bossRemainingHealth = bossRemainingHealth,
         )
     }
 }

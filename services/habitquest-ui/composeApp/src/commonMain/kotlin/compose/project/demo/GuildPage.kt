@@ -69,6 +69,11 @@ fun GuildScreen(
     var bossesError by remember { mutableStateOf<String?>(null) }
     var battleStarting by remember { mutableStateOf(false) }
     var battleError by remember { mutableStateOf<String?>(null) }
+    var activeBattleGuildId by remember { mutableStateOf<String?>(null) }
+    var showBattleInfoDialog by remember { mutableStateOf(false) }
+    var battleStats by remember { mutableStateOf<BattleStatsData?>(null) }
+    var battleStatsLoading by remember { mutableStateOf(false) }
+    var battleStatsError by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
@@ -77,6 +82,19 @@ fun GuildScreen(
             is GuildLeaderboardResult.Error -> statusMessage = result.message
         }
         if (showLoading) loading = false
+    }
+
+    suspend fun loadBattleStats(guildId: String) {
+        battleStatsLoading = true
+        battleStatsError = null
+        when (val result = repository.fetchBattleStatsByGuild(token, guildId)) {
+            is BattleStatsResult.Success -> battleStats = result.stats
+            is BattleStatsResult.Error -> {
+                battleStats = null
+                battleStatsError = result.message
+            }
+        }
+        battleStatsLoading = false
     }
 
     LaunchedEffect(token) {
@@ -250,28 +268,55 @@ fun GuildScreen(
             } else if (joinedGuilds.isEmpty()) {
                 Text("You have not joined any guild yet")
             } else {
+                val joinedGuild = joinedGuilds.first()
+                val isLeader = joinedGuild.members.any { member ->
+                    member.avatarId == avatarId && member.role.uppercase() == "LEADER"
+                }
+
+                Button(
+                    onClick = {
+                        scope.launch {
+                            when (val result = repository.fetchBattleStatsByGuild(token, joinedGuild.id)) {
+                                is BattleStatsResult.Success -> {
+                                    activeBattleGuildId = joinedGuild.id
+                                    battleStats = result.stats
+                                    battleStatsError = null
+                                    showBattleInfoDialog = true
+                                }
+
+                                is BattleStatsResult.Error -> {
+                                    if (isLeader) {
+                                        showBattleDialog = true
+                                        bossesLoading = true
+                                        bossesError = null
+                                        selectedBoss = null
+                                        when (val bossesResult = repository.fetchBosses(token)) {
+                                            is BossesResult.Success -> bosses = bossesResult.bosses
+                                            is BossesResult.Error -> {
+                                                bossesError = bossesResult.message
+                                                bosses = emptyList()
+                                            }
+                                        }
+                                        bossesLoading = false
+                                    } else {
+                                        statusMessage = result.message
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    enabled = !loading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (isLeader) "Start battle / Battle info" else "Battle info")
+                }
+
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(joinedGuilds, key = { it.id }) { guild ->
                         GuildCard(
                             guild = guild,
                             isLeader = guild.members.any { member ->
                                 member.avatarId == avatarId && member.role.uppercase() == "LEADER"
-                            },
-                            onStartBattleClick = {
-                                showBattleDialog = true
-                                bossesLoading = true
-                                bossesError = null
-                                selectedBoss = null
-                                scope.launch {
-                                    when (val result = repository.fetchBosses(token)) {
-                                        is BossesResult.Success -> bosses = result.bosses
-                                        is BossesResult.Error -> {
-                                            bossesError = result.message
-                                            bosses = emptyList()
-                                        }
-                                    }
-                                    bossesLoading = false
-                                }
                             }
                         )
                     }
@@ -689,9 +734,12 @@ fun GuildScreen(
                                         ) {
                                             is BattleStartResult.Success -> {
                                                 statusMessage = "Battle started! Battle ID: ${result.battleId}"
+                                                activeBattleGuildId = currentJoinedGuild.id
                                                 selectedBoss = null
                                                 bosses = emptyList()
                                                 showBattleDialog = false
+                                                loadBattleStats(currentJoinedGuild.id)
+                                                showBattleInfoDialog = true
                                                 loadLeaderboard(showLoading = false)
                                             }
                                             is BattleStartResult.Error -> {
@@ -724,6 +772,52 @@ fun GuildScreen(
                 }
             )
         }
+
+        if (showBattleInfoDialog) {
+            val guildIdForStats = activeBattleGuildId ?: joinedGuilds.firstOrNull()?.id
+            AlertDialog(
+                onDismissRequest = { showBattleInfoDialog = false },
+                title = { Text("Battle info") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (battleStatsLoading) {
+                            CircularProgressIndicator()
+                        }
+
+                        battleStatsError?.let {
+                            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        battleStats?.let { stats ->
+                            Text("Battle ID: ${stats.battleId}", style = MaterialTheme.typography.bodySmall)
+                            Text("Guild ID: ${stats.guildId}", style = MaterialTheme.typography.bodySmall)
+                            Text("Status: ${stats.status}", style = MaterialTheme.typography.bodySmall)
+                            Text("Boss: ${stats.bossName}", style = MaterialTheme.typography.bodySmall)
+                            Text("Boss remaining HP: ${stats.bossRemainingHealth}", style = MaterialTheme.typography.bodySmall)
+                            Text("Current turn: ${stats.currentTurn}", style = MaterialTheme.typography.bodySmall)
+                            Text("Total turns: ${stats.totalTurns}", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (guildIdForStats != null) {
+                                scope.launch { loadBattleStats(guildIdForStats) }
+                            }
+                        },
+                        enabled = !battleStatsLoading && guildIdForStats != null
+                    ) {
+                        Text("Refresh")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBattleInfoDialog = false }) {
+                        Text("Close")
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -731,7 +825,6 @@ fun GuildScreen(
 private fun GuildCard(
     guild: GuildData,
     isLeader: Boolean = false,
-    onStartBattleClick: () -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -758,12 +851,7 @@ private fun GuildCard(
 
             if (isLeader) {
                 Spacer(Modifier.height(4.dp))
-                Button(
-                    onClick = onStartBattleClick,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Start Battle")
-                }
+                Text("Leader", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
             }
         }
     }
