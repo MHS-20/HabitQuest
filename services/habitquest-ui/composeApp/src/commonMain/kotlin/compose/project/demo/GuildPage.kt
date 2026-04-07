@@ -62,6 +62,14 @@ fun GuildScreen(
     var acceptingInviteId by remember { mutableStateOf<String?>(null) }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
+    var showBattleDialog by remember { mutableStateOf(false) }
+    var bosses by remember { mutableStateOf<List<BossData>>(emptyList()) }
+    var selectedBoss by remember { mutableStateOf<BossData?>(null) }
+    var bossesLoading by remember { mutableStateOf(false) }
+    var bossesError by remember { mutableStateOf<String?>(null) }
+    var battleStarting by remember { mutableStateOf(false) }
+    var battleError by remember { mutableStateOf<String?>(null) }
+
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
         when (val result = repository.fetchLeaderboard(token)) {
@@ -244,7 +252,28 @@ fun GuildScreen(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(joinedGuilds, key = { it.id }) { guild ->
-                        GuildCard(guild = guild)
+                        GuildCard(
+                            guild = guild,
+                            isLeader = guild.members.any { member ->
+                                member.avatarId == avatarId && member.role.uppercase() == "LEADER"
+                            },
+                            onStartBattleClick = {
+                                showBattleDialog = true
+                                bossesLoading = true
+                                bossesError = null
+                                selectedBoss = null
+                                scope.launch {
+                                    when (val result = repository.fetchBosses(token)) {
+                                        is BossesResult.Success -> bosses = result.bosses
+                                        is BossesResult.Error -> {
+                                            bossesError = result.message
+                                            bosses = emptyList()
+                                        }
+                                    }
+                                    bossesLoading = false
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -558,11 +587,152 @@ fun GuildScreen(
                 }
             )
         }
+
+        if (showBattleDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showBattleDialog = false
+                    bosses = emptyList()
+                    selectedBoss = null
+                    bossesError = null
+                    battleError = null
+                },
+                title = { Text("Select a boss to fight") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (bossesLoading) {
+                            CircularProgressIndicator()
+                        }
+
+                        bossesError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        battleError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        if (!bossesLoading && bossesError == null) {
+                            if (bosses.isEmpty()) {
+                                Text("No bosses available")
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(300.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(bosses, key = { it.type }) { boss ->
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = if (selectedBoss?.type == boss.type)
+                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                                else
+                                                    MaterialTheme.colorScheme.surfaceVariant
+                                            )
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Text(boss.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                                Text("Health: ${boss.health}", style = MaterialTheme.typography.bodySmall)
+                                                Text("Strength: ${boss.strength}", style = MaterialTheme.typography.bodySmall)
+                                                Text("Defense: ${boss.defense}", style = MaterialTheme.typography.bodySmall)
+                                                Text("XP Reward: ${boss.experienceReward}", style = MaterialTheme.typography.bodySmall)
+                                                Text("Money Reward: ${boss.moneyReward}", style = MaterialTheme.typography.bodySmall)
+                                                Text("Penalty on Loss: ${boss.penalty}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                                                Button(
+                                                    onClick = {
+                                                        selectedBoss = boss
+                                                    },
+                                                    enabled = !battleStarting,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text(if (selectedBoss?.type == boss.type) "Selected" else "Select")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (selectedBoss != null) {
+                                val currentJoinedGuild = joinedGuilds.firstOrNull()
+                                if (currentJoinedGuild != null && avatarId != null) {
+                                    scope.launch {
+                                        battleStarting = true
+                                        battleError = null
+                                        when (
+                                            val result = repository.initiateBattle(
+                                                token = token,
+                                                guildId = currentJoinedGuild.id,
+                                                requesterId = avatarId,
+                                                bossType = selectedBoss!!.type
+                                            )
+                                        ) {
+                                            is BattleStartResult.Success -> {
+                                                statusMessage = "Battle started! Battle ID: ${result.battleId}"
+                                                selectedBoss = null
+                                                bosses = emptyList()
+                                                showBattleDialog = false
+                                                loadLeaderboard(showLoading = false)
+                                            }
+                                            is BattleStartResult.Error -> {
+                                                battleError = result.message
+                                            }
+                                        }
+                                        battleStarting = false
+                                    }
+                                }
+                            }
+                        },
+                        enabled = selectedBoss != null && !battleStarting
+                    ) {
+                        Text(if (battleStarting) "Starting..." else "Start Battle")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showBattleDialog = false
+                            bosses = emptyList()
+                            selectedBoss = null
+                            bossesError = null
+                            battleError = null
+                        },
+                        enabled = !battleStarting
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
 }
 
 @Composable
-private fun GuildCard(guild: GuildData) {
+private fun GuildCard(
+    guild: GuildData,
+    isLeader: Boolean = false,
+    onStartBattleClick: () -> Unit = {},
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -583,6 +753,16 @@ private fun GuildCard(guild: GuildData) {
                         "- ${member.nickname} (${member.role}) [${member.avatarId}]",
                         style = MaterialTheme.typography.bodySmall
                     )
+                }
+            }
+
+            if (isLeader) {
+                Spacer(Modifier.height(4.dp))
+                Button(
+                    onClick = onStartBattleClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Start Battle")
                 }
             }
         }

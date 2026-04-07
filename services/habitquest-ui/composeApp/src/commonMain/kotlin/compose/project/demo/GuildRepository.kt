@@ -86,6 +86,27 @@ sealed interface AcceptInviteResult {
     data class Error(val message: String) : AcceptInviteResult
 }
 
+data class BossData(
+    val name: String,
+    val type: String,
+    val health: Int,
+    val strength: Int,
+    val defense: Int,
+    val experienceReward: Int,
+    val moneyReward: Int,
+    val penalty: Int,
+)
+
+sealed interface BossesResult {
+    data class Success(val bosses: List<BossData>) : BossesResult
+    data class Error(val message: String) : BossesResult
+}
+
+sealed interface BattleStartResult {
+    data class Success(val battleId: String) : BattleStartResult
+    data class Error(val message: String) : BattleStartResult
+}
+
 class GuildRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
@@ -446,6 +467,134 @@ class GuildRepository {
         val guildId = source["guildId"]?.jsonPrimitive?.contentOrNull ?: return null
         val guildName = source["guildName"]?.jsonPrimitive?.contentOrNull.orEmpty()
         val expiresAt = source["expiresAt"]?.jsonPrimitive?.contentOrNull
-        return PendingInviteData(inviteId = inviteId, guildId = guildId, guildName = guildName, expiresAt = expiresAt)
+         return PendingInviteData(inviteId = inviteId, guildId = guildId, guildName = guildName, expiresAt = expiresAt)
+     }
+
+     suspend fun fetchBosses(token: String): BossesResult {
+        val response = runCatching {
+            client.get("${edgeServiceBaseUrl()}/api/v1/battles/boss") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }
+        }.getOrElse {
+            return BossesResult.Error("Unable to contact battle-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+                val bosses = parseBossCollection(body)
+                BossesResult.Success(bosses)
+            }
+
+            HttpStatusCode.Unauthorized -> BossesResult.Error("Session expired, please log in again")
+            else -> BossesResult.Error("Bosses fetch error (${response.status.value})")
+        }
+    }
+
+    suspend fun initiateBattle(
+        token: String,
+        guildId: String,
+        requesterId: String,
+        bossType: String,
+    ): BattleStartResult {
+        if (guildId.isBlank()) return BattleStartResult.Error("Guild id cannot be blank")
+        if (requesterId.isBlank()) return BattleStartResult.Error("Requestor id cannot be blank")
+        if (bossType.isBlank()) return BattleStartResult.Error("Boss type cannot be blank")
+
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/battles") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("guildId", JsonPrimitive(guildId))
+                        put("requesterId", JsonPrimitive(requesterId))
+                        put("bossType", JsonPrimitive(bossType))
+                    }
+                )
+            }
+        }.getOrElse {
+            return BattleStartResult.Error("Unable to contact battle-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.Created, HttpStatusCode.OK -> {
+                val body = response.body<JsonObject>()
+                val source = body["content"]?.jsonObject ?: body
+                val battleId = source["id"]?.jsonPrimitive?.contentOrNull
+                    ?: return BattleStartResult.Error("Battle response missing id")
+                BattleStartResult.Success(battleId)
+            }
+
+            HttpStatusCode.BadRequest -> BattleStartResult.Error("Invalid battle data")
+            HttpStatusCode.Unauthorized -> BattleStartResult.Error("Session expired, please log in again")
+            HttpStatusCode.Forbidden -> BattleStartResult.Error("Only guild leaders can start battles")
+            HttpStatusCode.NotFound -> BattleStartResult.Error("Guild not found")
+            else -> BattleStartResult.Error("Battle start error (${response.status.value})")
+        }
+    }
+
+    private fun parseBossCollection(body: JsonObject): List<BossData> {
+        val directArray = body["bosses"] as? JsonArray
+        if (directArray != null) {
+            return parseBossArray(directArray)
+        }
+
+        val embedded = body["_embedded"]?.jsonObject
+        val embeddedItems = embedded?.values?.flatMap { parseBossElements(it) }.orEmpty()
+        if (embeddedItems.isNotEmpty()) {
+            return embeddedItems
+        }
+
+        val contentArray = body["content"] as? JsonArray
+        if (contentArray != null) {
+            return parseBossArray(contentArray)
+        }
+
+        return parseBoss(body)?.let(::listOf).orEmpty()
+    }
+
+    private fun parseBossElements(element: JsonElement): List<BossData> {
+        val objectValue = element as? JsonObject
+        if (objectValue != null) {
+            val maybeContentArray = objectValue["content"] as? JsonArray
+            if (maybeContentArray != null) {
+                return parseBossArray(maybeContentArray)
+            }
+        }
+
+        val arrayValue = element as? JsonArray
+        return if (arrayValue != null) parseBossArray(arrayValue) else emptyList()
+    }
+
+    private fun parseBossArray(array: JsonArray): List<BossData> {
+        return array.mapNotNull { element ->
+            val item = element as? JsonObject ?: return@mapNotNull null
+            val source = item["content"]?.jsonObject ?: item
+            parseBoss(source)
+        }
+    }
+
+    private fun parseBoss(source: JsonObject): BossData? {
+        val name = source["name"]?.jsonPrimitive?.contentOrNull ?: return null
+        val type = source["type"]?.jsonPrimitive?.contentOrNull.orEmpty()
+        val health = source["health"]?.jsonPrimitive?.intOrNull ?: 0
+        val strength = source["strength"]?.jsonPrimitive?.intOrNull ?: 0
+        val defense = source["defense"]?.jsonPrimitive?.intOrNull ?: 0
+        val experienceReward = source["experienceReward"]?.jsonPrimitive?.intOrNull ?: 0
+        val moneyReward = source["moneyReward"]?.jsonPrimitive?.intOrNull ?: 0
+        val penalty = source["penalty"]?.jsonPrimitive?.intOrNull ?: 0
+
+        return BossData(
+            name = name,
+            type = type,
+            health = health,
+            strength = strength,
+            defense = defense,
+            experienceReward = experienceReward,
+            moneyReward = moneyReward,
+            penalty = penalty,
+        )
     }
 }
