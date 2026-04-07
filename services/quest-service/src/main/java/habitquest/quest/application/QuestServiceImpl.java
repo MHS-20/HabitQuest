@@ -24,21 +24,27 @@ public class QuestServiceImpl implements QuestService {
 
   private final QuestRepository questRepository;
   private final ActiveQuestsRepository activeQuestsRepository;
+  private final AvatarClientPort avatarClient;
   private final TrackingHabitsClientPort trackingHabitsClient;
   private final QuestObserver questObserver;
   private final QuestFactory questFactory;
+  private final QuestLogger log;
 
   public QuestServiceImpl(
       QuestRepository questRepository,
       ActiveQuestsRepository activeQuestsRepository,
+      AvatarClientPort avatarClient,
       TrackingHabitsClientPort trackingHabitsClient,
       QuestObserver questObserver,
-      QuestFactory questFactory) {
+      QuestFactory questFactory,
+      QuestLogger log) {
     this.questRepository = questRepository;
     this.activeQuestsRepository = activeQuestsRepository;
+    this.avatarClient = avatarClient;
     this.trackingHabitsClient = trackingHabitsClient;
     this.questObserver = questObserver;
     this.questFactory = questFactory;
+    this.log = log;
   }
 
   @Override
@@ -152,6 +158,11 @@ public class QuestServiceImpl implements QuestService {
     ActiveQuests saved = activeQuestsRepository.save(activeQuest);
     if (previousStatus != ActiveQuests.Status.COMPLETED
         && saved.getStatus() == ActiveQuests.Status.COMPLETED) {
+      try {
+        avatarClient.earnMoney(avatarId, quest.getReward().value());
+      } catch (AvatarRewardException ex) {
+        log.error(saved, "Failed to grant quest completion money reward", ex);
+      }
       questObserver.notifyQuestEvent(new QuestCompleted(quest, avatarId));
     }
 
@@ -223,7 +234,7 @@ public class QuestServiceImpl implements QuestService {
                   quest.getId().value(),
                   quest.getName(),
                   active.getStatus().name(),
-                  Math.min(100, Math.max(0, completion)),
+                  Math.clamp(completion, 0, 100),
                   habitProgress);
             })
         .sorted(Comparator.comparing(QuestProgressView::questName, String.CASE_INSENSITIVE_ORDER))

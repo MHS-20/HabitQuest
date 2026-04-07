@@ -32,9 +32,11 @@ class QuestServiceImplTest {
 
   @Mock private QuestRepository questRepository;
   @Mock private ActiveQuestsRepository activeQuestsRepository;
+  @Mock private AvatarClientPort avatarClient;
   @Mock private TrackingHabitsClientPort trackingHabitsClient;
   @Mock private QuestObserver questObserver;
   @Mock private QuestFactory questFactory;
+  @Mock private QuestLogger log;
   private QuestServiceImpl service;
 
   @BeforeEach
@@ -43,9 +45,11 @@ class QuestServiceImplTest {
         new QuestServiceImpl(
             questRepository,
             activeQuestsRepository,
+            avatarClient,
             trackingHabitsClient,
             questObserver,
-            questFactory);
+            questFactory,
+            log);
   }
 
   @Nested
@@ -316,9 +320,37 @@ class QuestServiceImplTest {
       service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
       service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
 
+      verify(avatarClient).earnMoney(AVATAR_ID_1, DEFAULT_REWARD);
       verify(questObserver)
           .notifyQuestEvent(
               argThat(event -> event instanceof habitquest.quest.domain.events.QuestCompleted));
+    }
+
+    @Test
+    @DisplayName("still emits QuestCompleted when reward granting fails")
+    void emitsQuestCompletedEvenWhenRewardFails() {
+      Quest quest = fullQuest();
+      LocalDate firstAttendance = LocalDate.of(2026, 4, 3);
+      LocalDate secondAttendance = LocalDate.of(2026, 4, 4);
+      ActiveQuests active =
+          ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, firstAttendance, quest);
+
+      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+      when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
+          .thenReturn(Optional.of(active));
+      when(activeQuestsRepository.save(any(ActiveQuests.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+      doThrow(new AvatarRewardException("avatar down", new RuntimeException("cause")))
+          .when(avatarClient)
+          .earnMoney(AVATAR_ID_1, DEFAULT_REWARD);
+
+      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
+      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
+
+      verify(questObserver)
+          .notifyQuestEvent(
+              argThat(event -> event instanceof habitquest.quest.domain.events.QuestCompleted));
+      verify(log).error(any(), eq("Failed to grant quest completion money reward"), any());
     }
   }
 
