@@ -325,558 +325,234 @@ fun GuildScreen(
         }
 
         if (showCreateDialog) {
-            AlertDialog(
-                onDismissRequest = { showCreateDialog = false },
-                title = { Text("Create new guild") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = guildName,
-                            onValueChange = {
-                                guildName = it
-                                statusMessage = null
-                            },
-                            label = { Text("Guild name") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            text = "The current avatar will be used as the creator.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+            CreateGuildDialog(
+                guildName = guildName,
+                onGuildNameChange = {
+                    guildName = it
+                    statusMessage = null
                 },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            val currentAvatar = (avatarState as? AvatarUiState.Ready)?.avatar
-                            if (currentAvatar == null) {
-                                statusMessage = "Avatar not available"
-                                return@TextButton
+                loading = loading,
+                onCreate = {
+                    val currentAvatar = (avatarState as? AvatarUiState.Ready)?.avatar
+                    if (currentAvatar == null) {
+                        statusMessage = "Avatar not available"
+                        return@CreateGuildDialog
+                    }
+                    if (guildName.isBlank()) {
+                        statusMessage = "Enter a guild name"
+                        return@CreateGuildDialog
+                    }
+                    scope.launch {
+                        loading = true
+                        statusMessage = null
+                        when (
+                            val result = repository.createGuild(
+                                token = token,
+                                name = guildName.trim(),
+                                creatorAvatarId = currentAvatar.id,
+                                creatorNickname = currentAvatar.name,
+                            )
+                        ) {
+                            is GuildCreateResult.Success -> {
+                                statusMessage = "Guild created: ${result.guildId}"
+                                guildName = ""
+                                showCreateDialog = false
+                                loadLeaderboard(showLoading = false)
                             }
-                            if (guildName.isBlank()) {
-                                statusMessage = "Enter a guild name"
-                                return@TextButton
-                            }
-                            scope.launch {
-                                loading = true
-                                statusMessage = null
-                                when (
-                                    val result = repository.createGuild(
-                                        token = token,
-                                        name = guildName.trim(),
-                                        creatorAvatarId = currentAvatar.id,
-                                        creatorNickname = currentAvatar.name,
-                                    )
-                                ) {
-                                    is GuildCreateResult.Success -> {
-                                        statusMessage = "Guild created: ${result.guildId}"
-                                        guildName = ""
-                                        showCreateDialog = false
-                                        loadLeaderboard(showLoading = false)
-                                    }
 
-                                    is GuildCreateResult.Error -> statusMessage = result.message
-                                }
-                                loading = false
-                            }
-                        },
-                        enabled = !loading,
-                    ) {
-                        Text("Create")
+                            is GuildCreateResult.Error -> statusMessage = result.message
+                        }
+                        loading = false
                     }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showCreateDialog = false }) {
-                        Text("Cancel")
-                    }
-                }
+                onDismiss = { showCreateDialog = false },
             )
         }
 
         if (showInviteDialog && selectedGuildForInvite != null) {
-            AlertDialog(
-                onDismissRequest = {
+            InviteAvatarDialog(
+                guildName = selectedGuildForInvite!!.name,
+                inviteSearchText = inviteSearchText,
+                onInviteSearchTextChange = {
+                    inviteSearchText = it
+                    inviteError = null
+                },
+                inviteLoading = inviteLoading,
+                inviteError = inviteError,
+                inviteSearchResult = inviteSearchResult,
+                onSearch = {
+                    scope.launch {
+                        inviteLoading = true
+                        inviteError = null
+                        when (val result = repository.searchAvatar(token, inviteSearchText)) {
+                            is SearchAvatarResult.Success -> inviteSearchResult = result.avatar
+                            is SearchAvatarResult.Error -> {
+                                inviteError = result.message
+                                inviteSearchResult = null
+                            }
+                        }
+                        inviteLoading = false
+                    }
+                },
+                onSendInvite = { avatar ->
+                    scope.launch {
+                        val currentAvatarId = (avatarState as? AvatarUiState.Ready)?.avatar?.id
+                        if (currentAvatarId.isNullOrBlank()) {
+                            inviteError = "Current avatar not available"
+                            return@launch
+                        }
+
+                        inviteLoading = true
+                        inviteError = null
+                        when (
+                            val result = repository.inviteAvatarToGuild(
+                                token = token,
+                                guildId = selectedGuildForInvite!!.id,
+                                requestorId = currentAvatarId,
+                                avatarId = avatar.id
+                            )
+                        ) {
+                            is InviteAvatarResult.Success -> {
+                                inviteError = "Invite sent successfully!"
+                                inviteSearchText = ""
+                                inviteSearchResult = null
+                                loadLeaderboard(showLoading = false)
+                            }
+
+                            is InviteAvatarResult.Error -> inviteError = result.message
+                        }
+                        inviteLoading = false
+                    }
+                },
+                onDismiss = {
                     showInviteDialog = false
                     inviteSearchText = ""
                     inviteSearchResult = null
                     inviteError = null
                 },
-                title = { Text("Invite avatar to ${selectedGuildForInvite!!.name}") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = inviteSearchText,
-                            onValueChange = {
-                                inviteSearchText = it
-                                inviteError = null
-                            },
-                            label = { Text("Search avatar by name") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    inviteLoading = true
-                                    inviteError = null
-                                    when (val result = repository.searchAvatar(token, inviteSearchText)) {
-                                        is SearchAvatarResult.Success -> {
-                                            inviteSearchResult = result.avatar
-                                        }
-
-                                        is SearchAvatarResult.Error -> {
-                                            inviteError = result.message
-                                            inviteSearchResult = null
-                                        }
-                                    }
-                                    inviteLoading = false
-                                }
-                            },
-                            enabled = inviteSearchText.isNotBlank() && !inviteLoading,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Search")
-                        }
-
-                        inviteError?.let { error ->
-                            Text(
-                                text = error,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        inviteSearchResult?.let { avatar ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                            ) {
-                                Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(avatar.name, style = MaterialTheme.typography.titleSmall)
-                                    Text("ID: ${avatar.id}", style = MaterialTheme.typography.bodySmall)
-                                    Button(
-                                        onClick = {
-                                            scope.launch {
-                                                val currentAvatarId = (avatarState as? AvatarUiState.Ready)?.avatar?.id
-                                                if (currentAvatarId.isNullOrBlank()) {
-                                                    inviteError = "Current avatar not available"
-                                                    return@launch
-                                                }
-
-                                                inviteLoading = true
-                                                inviteError = null
-                                                when (
-                                                    val result = repository.inviteAvatarToGuild(
-                                                        token = token,
-                                                        guildId = selectedGuildForInvite!!.id,
-                                                        requestorId = currentAvatarId,
-                                                        avatarId = avatar.id
-                                                    )
-                                                ) {
-                                                    is InviteAvatarResult.Success -> {
-                                                        inviteError = "Invite sent successfully!"
-                                                        inviteSearchText = ""
-                                                        inviteSearchResult = null
-                                                        loadLeaderboard(showLoading = false)
-                                                    }
-
-                                                    is InviteAvatarResult.Error -> {
-                                                        inviteError = result.message
-                                                    }
-                                                }
-                                                inviteLoading = false
-                                            }
-                                        },
-                                        enabled = !inviteLoading,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text("Send Invite")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showInviteDialog = false
-                            inviteSearchText = ""
-                            inviteSearchResult = null
-                            inviteError = null
-                        }
-                    ) {
-                        Text("Close")
-                    }
-                }
             )
         }
 
         if (showPendingInvitesDialog) {
-            AlertDialog(
-                onDismissRequest = {
+            PendingInvitesDialog(
+                pendingInvitesLoading = pendingInvitesLoading,
+                pendingInvitesError = pendingInvitesError,
+                pendingInvitesMessage = pendingInvitesMessage,
+                pendingInvites = pendingInvites,
+                acceptingInviteId = acceptingInviteId,
+                onAcceptInvite = { invite ->
+                    if (avatarId.isNullOrBlank()) {
+                        pendingInvitesError = "Avatar not available"
+                        return@PendingInvitesDialog
+                    }
+                    val avatarNickname = avatar?.name?.takeIf { it.isNotBlank() }
+                    if (avatarNickname == null) {
+                        pendingInvitesError = "Avatar nickname not available"
+                        return@PendingInvitesDialog
+                    }
+
+                    scope.launch {
+                        acceptingInviteId = invite.inviteId
+                        pendingInvitesError = null
+                        pendingInvitesMessage = null
+                        when (
+                            val result = repository.acceptInvite(
+                                token = token,
+                                avatarId = avatarId,
+                                inviteId = invite.inviteId,
+                                guildId = invite.guildId,
+                                nickname = avatarNickname
+                            )
+                        ) {
+                            is AcceptInviteResult.Success -> {
+                                pendingInvites = pendingInvites.filterNot { it.inviteId == invite.inviteId }
+                                pendingInvitesMessage = "Invite accepted"
+                                statusMessage = null
+                                loadLeaderboard(showLoading = false)
+                            }
+
+                            is AcceptInviteResult.Error -> pendingInvitesError = result.message
+                        }
+                        acceptingInviteId = null
+                    }
+                },
+                onDismiss = {
                     showPendingInvitesDialog = false
                     pendingInvites = emptyList()
                     pendingInvitesError = null
                     pendingInvitesMessage = null
                     acceptingInviteId = null
                 },
-                title = { Text("Pending guild invites") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (pendingInvitesLoading) {
-                            CircularProgressIndicator()
-                        }
-
-                        pendingInvitesError?.let { error ->
-                            Text(
-                                text = error,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        pendingInvitesMessage?.let { message ->
-                            Text(
-                                text = message,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        if (!pendingInvitesLoading && pendingInvitesError == null) {
-                            if (pendingInvites.isEmpty()) {
-                                Text("No pending invites")
-                            } else {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(220.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    items(pendingInvites, key = { it.inviteId }) { invite ->
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.padding(8.dp),
-                                                verticalArrangement = Arrangement.spacedBy(2.dp)
-                                            ) {
-                                                Text(invite.guildName, style = MaterialTheme.typography.titleSmall)
-                                                Text("Guild ID: ${invite.guildId}", style = MaterialTheme.typography.bodySmall)
-                                                Text("Invite ID: ${invite.inviteId}", style = MaterialTheme.typography.bodySmall)
-                                                Text(
-                                                    "Expires at: ${invite.expiresAt ?: "-"}",
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
-                                                Button(
-                                                    onClick = {
-                                                        if (avatarId.isNullOrBlank()) {
-                                                            pendingInvitesError = "Avatar not available"
-                                                            return@Button
-                                                        }
-                                                        val avatarNickname = avatar?.name?.takeIf { it.isNotBlank() }
-                                                        if (avatarNickname == null) {
-                                                            pendingInvitesError = "Avatar nickname not available"
-                                                            return@Button
-                                                        }
-
-                                                        scope.launch {
-                                                            acceptingInviteId = invite.inviteId
-                                                            pendingInvitesError = null
-                                                            pendingInvitesMessage = null
-                                                            when (
-                                                                val result = repository.acceptInvite(
-                                                                    token = token,
-                                                                    avatarId = avatarId,
-                                                                    inviteId = invite.inviteId,
-                                                                    guildId = invite.guildId,
-                                                                    nickname = avatarNickname
-                                                                )
-                                                            ) {
-                                                                is AcceptInviteResult.Success -> {
-                                                                    pendingInvites = pendingInvites.filterNot { it.inviteId == invite.inviteId }
-                                                                    pendingInvitesMessage = "Invite accepted"
-                                                                    statusMessage = null
-                                                                    loadLeaderboard(showLoading = false)
-                                                                }
-
-                                                                is AcceptInviteResult.Error -> {
-                                                                    pendingInvitesError = result.message
-                                                                }
-                                                            }
-                                                            acceptingInviteId = null
-                                                        }
-                                                    },
-                                                    enabled = acceptingInviteId != invite.inviteId,
-                                                    modifier = Modifier.fillMaxWidth()
-                                                ) {
-                                                    Text(
-                                                        if (acceptingInviteId == invite.inviteId) "Accepting..." else "Accept invite"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showPendingInvitesDialog = false }) {
-                        Text("Close")
-                    }
-                }
             )
         }
 
         if (showBattleDialog) {
-            AlertDialog(
-                onDismissRequest = {
+            BattleSelectionDialog(
+                bossesLoading = bossesLoading,
+                bossesError = bossesError,
+                battleError = battleError,
+                bosses = bosses,
+                selectedBoss = selectedBoss,
+                battleStarting = battleStarting,
+                onSelectBoss = { selectedBoss = it },
+                onStartBattle = {
+                    if (selectedBoss != null) {
+                        val currentJoinedGuild = joinedGuilds.firstOrNull()
+                        if (currentJoinedGuild != null && avatarId != null) {
+                            scope.launch {
+                                battleStarting = true
+                                battleError = null
+                                when (
+                                    val result = repository.initiateBattle(
+                                        token = token,
+                                        guildId = currentJoinedGuild.id,
+                                        requesterId = avatarId,
+                                        bossType = selectedBoss!!.type
+                                    )
+                                ) {
+                                    is BattleStartResult.Success -> {
+                                        statusMessage = "Battle started! Battle ID: ${result.battleId}"
+                                        activeBattleGuildId = currentJoinedGuild.id
+                                        selectedBoss = null
+                                        bosses = emptyList()
+                                        showBattleDialog = false
+                                        loadBattleStats(currentJoinedGuild.id)
+                                        showBattleInfoDialog = true
+                                        loadLeaderboard(showLoading = false)
+                                    }
+                                    is BattleStartResult.Error -> {
+                                        battleError = result.message
+                                    }
+                                }
+                                battleStarting = false
+                            }
+                        }
+                    }
+                },
+                onDismiss = {
                     showBattleDialog = false
                     bosses = emptyList()
                     selectedBoss = null
                     bossesError = null
                     battleError = null
                 },
-                title = { Text("Select a boss to fight") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (bossesLoading) {
-                            CircularProgressIndicator()
-                        }
-
-                        bossesError?.let { error ->
-                            Text(
-                                text = error,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        battleError?.let { error ->
-                            Text(
-                                text = error,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        if (!bossesLoading && bossesError == null) {
-                            if (bosses.isEmpty()) {
-                                Text("No bosses available")
-                            } else {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(300.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    items(bosses, key = { it.type }) { boss ->
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = if (selectedBoss?.type == boss.type)
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                                                else
-                                                    MaterialTheme.colorScheme.surfaceVariant
-                                            )
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(8.dp),
-                                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                                            ) {
-                                                Text(boss.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                                                Text("Health: ${boss.health}", style = MaterialTheme.typography.bodySmall)
-                                                Text("Strength: ${boss.strength}", style = MaterialTheme.typography.bodySmall)
-                                                Text("Defense: ${boss.defense}", style = MaterialTheme.typography.bodySmall)
-                                                Text("XP Reward: ${boss.experienceReward}", style = MaterialTheme.typography.bodySmall)
-                                                Text("Money Reward: ${boss.moneyReward}", style = MaterialTheme.typography.bodySmall)
-                                                Text("Penalty on Loss: ${boss.penalty}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                                                Button(
-                                                    onClick = {
-                                                        selectedBoss = boss
-                                                    },
-                                                    enabled = !battleStarting,
-                                                    modifier = Modifier.fillMaxWidth()
-                                                ) {
-                                                    Text(if (selectedBoss?.type == boss.type) "Selected" else "Select")
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            if (selectedBoss != null) {
-                                val currentJoinedGuild = joinedGuilds.firstOrNull()
-                                if (currentJoinedGuild != null && avatarId != null) {
-                                    scope.launch {
-                                        battleStarting = true
-                                        battleError = null
-                                        when (
-                                            val result = repository.initiateBattle(
-                                                token = token,
-                                                guildId = currentJoinedGuild.id,
-                                                requesterId = avatarId,
-                                                bossType = selectedBoss!!.type
-                                            )
-                                        ) {
-                                            is BattleStartResult.Success -> {
-                                                statusMessage = "Battle started! Battle ID: ${result.battleId}"
-                                                activeBattleGuildId = currentJoinedGuild.id
-                                                selectedBoss = null
-                                                bosses = emptyList()
-                                                showBattleDialog = false
-                                                loadBattleStats(currentJoinedGuild.id)
-                                                showBattleInfoDialog = true
-                                                loadLeaderboard(showLoading = false)
-                                            }
-                                            is BattleStartResult.Error -> {
-                                                battleError = result.message
-                                            }
-                                        }
-                                        battleStarting = false
-                                    }
-                                }
-                            }
-                        },
-                        enabled = selectedBoss != null && !battleStarting
-                    ) {
-                        Text(if (battleStarting) "Starting..." else "Start Battle")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showBattleDialog = false
-                            bosses = emptyList()
-                            selectedBoss = null
-                            bossesError = null
-                            battleError = null
-                        },
-                        enabled = !battleStarting
-                    ) {
-                        Text("Cancel")
-                    }
-                }
             )
         }
 
         if (showBattleInfoDialog) {
             val guildIdForStats = activeBattleGuildId ?: joinedGuilds.firstOrNull()?.id
-            AlertDialog(
-                onDismissRequest = { showBattleInfoDialog = false },
-                title = { Text("Battle info") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (battleStatsLoading) {
-                            CircularProgressIndicator()
-                        }
-
-                        battleStatsError?.let {
-                            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                        }
-
-                        battleStats?.let { stats ->
-                            Text("Battle ID: ${stats.battleId}", style = MaterialTheme.typography.bodySmall)
-                            Text("Guild ID: ${stats.guildId}", style = MaterialTheme.typography.bodySmall)
-                            Text("Status: ${stats.status}", style = MaterialTheme.typography.bodySmall)
-                            Text("Boss: ${stats.bossName}", style = MaterialTheme.typography.bodySmall)
-                            Text("Boss remaining HP: ${stats.bossRemainingHealth}", style = MaterialTheme.typography.bodySmall)
-                            Text("Current turn: ${stats.currentTurn}", style = MaterialTheme.typography.bodySmall)
-                            Text("Total turns: ${stats.totalTurns}", style = MaterialTheme.typography.bodySmall)
-                        }
+            BattleInfoDialog(
+                battleStatsLoading = battleStatsLoading,
+                battleStatsError = battleStatsError,
+                battleStats = battleStats,
+                canRefresh = guildIdForStats != null,
+                onRefresh = {
+                    if (guildIdForStats != null) {
+                        scope.launch { loadBattleStats(guildIdForStats) }
                     }
                 },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            if (guildIdForStats != null) {
-                                scope.launch { loadBattleStats(guildIdForStats) }
-                            }
-                        },
-                        enabled = !battleStatsLoading && guildIdForStats != null
-                    ) {
-                        Text("Refresh")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showBattleInfoDialog = false }) {
-                        Text("Close")
-                    }
-                }
+                onClose = { showBattleInfoDialog = false },
             )
-        }
-    }
-}
-
-@Composable
-private fun GuildCard(
-    guild: GuildData,
-    isLeader: Boolean = false,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(guild.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text("ID: ${guild.id}", style = MaterialTheme.typography.bodySmall)
-            Text(
-                "Global rank: ${guild.globalRank?.toString() ?: "-"}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
-
-            if (guild.members.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
-                guild.members.forEach { member ->
-                    Text(
-                        "- ${member.nickname} (${member.role}) [${member.avatarId}]",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-
-            if (isLeader) {
-                Spacer(Modifier.height(4.dp))
-                Text("Leader", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-            }
-        }
-    }
-}
-
-@Composable
-private fun GuildLeaderboardRow(guild: GuildData, onInviteClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(guild.name, style = MaterialTheme.typography.titleMedium)
-            Text("ID: ${guild.id}", style = MaterialTheme.typography.bodySmall)
-            Text(
-                "Rank: ${guild.globalRank?.toString() ?: "-"}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
-            Button(
-                onClick = onInviteClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Invite avatar")
-            }
         }
     }
 }
