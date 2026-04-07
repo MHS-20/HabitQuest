@@ -5,6 +5,7 @@ Segue i principi dei **Three Pillars of Observability**: Metrics, Logs e Traces.
 
 ## Three Pillars of Observability
 ### 1. Metrics (Prometheus)
+
 - Misurazioni numeriche time-series (CPU, memoria, request rate, latency)  
 - Prometheus scraping di `/actuator/prometheus`, metriche esposte tramite Spring Boot Actuator
 - Namespace `prometheus-system`
@@ -46,6 +47,7 @@ env:
 ```
 
 Spring Boot Micrometer produce le traces automaticamente:
+
 1. Instrumenta le richieste HTTP
 2. Propaga trace context
 3. Invia spans a Tempo via OTLP

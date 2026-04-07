@@ -7,6 +7,7 @@ Una **Battaglia** è un evento cooperativo in cui i membri di una gilda affronta
 Il boss è il nemico che la gilda deve sconfiggere.
 
 Ogni Boss ha le seguenti caratteristiche:
+
 - **Nome**: identificativo del boss (es. "Minotaur")
 - **Statistiche di combattimento**:
     - **Salute (Health)**: punti vita totali del boss (es. 100 HP)
@@ -14,6 +15,7 @@ Ogni Boss ha le seguenti caratteristiche:
     - **Difesa (Defense)**: capacità difensiva (es. 50)
 
 Ogni Boss comporta Ricompense e Penalità:
+
 - **Ricompensa in Denaro**: monete che la gilda ottiene sconfiggendo il boss (es. 100 monete)
 - **Ricompensa in Esperienza**: punti esperienza assegnati singolarmente (es. 200 XP)
 - **Penalità**: danno/perdita subita se la gilda perde (es. -50 monete)
@@ -52,17 +54,20 @@ Una battaglia può trovarsi in tre stati:
 
 #### Meccanica del Danno
 **Danno al Boss:**
+
 - Durante il suo turno, un membro può infliggere danno al boss
 - Il danno riduce la salute rimanente del boss
 - Quando la salute arriva a 0, la battaglia è vinta
 
 **Contrattacco del Boss:**
+
 - Il boss contrattacca in automatico chi lo attacca
 - Il danno del contrattacco può far cadere il membro della gilda
 - I membri caduti non possono più partecipare alla battaglia
 
 #### Membri Caduti
 Quando un membro cade:
+
 - Viene aggiunto alla lista dei **membri caduti**
 - Non può più compiere azioni
 - Viene saltato nella rotazione dei turni
@@ -72,11 +77,13 @@ Quando un membro cade:
 La battaglia supporta l'ingresso e l'uscita dinamica di membri:
 
 Aumento dei Partecipanti:
+
 - Un nuovo membro può unirsi a una battaglia in corso
 - Il numero di turni aumenta
 - Il nuovo membro viene aggiunto alla rotazione
 
 Riduzione dei Partecipanti:
+
 - Un membro può lasciare la battaglia
 - Il numero di turni diminuisce
 - Il membro viene rimosso dalla rotazione e dalla lista dei caduti
@@ -101,6 +108,7 @@ I possibili eventi legati alla battaglia sono:
 
 ### Transizioni di Stato Valide
 **Per le Battaglie:**
+
 - Creata → In Corso (automatico)
 - In Corso → Vinta (boss sconfitto)
 - In Corso → Persa (tutti caduti)
