@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class QuestServiceImplTest {
 
   private static final String EVENING_ROUTINE = "Evening Routine";
+  private static final String ACTIVE_PROGRESS_ID = "active-2";
 
   @Mock private QuestRepository questRepository;
   @Mock private ActiveQuestsRepository activeQuestsRepository;
@@ -415,7 +416,7 @@ class QuestServiceImplTest {
       Quest quest = fullQuest();
       LocalDate startedOn = LocalDate.of(2026, 4, 3);
       ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>("active-2"), AVATAR_ID_1, startedOn, quest);
+          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
       active.recordAttendance(HABIT_ID_1, startedOn);
 
       when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
@@ -429,6 +430,64 @@ class QuestServiceImplTest {
       assertThat(first.completionPercentage()).isEqualTo(100);
       assertThat(first.habits()).hasSize(1);
       assertThat(first.habits().getFirst().remainingOccurrences()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("applies damage when quest expires without being completed")
+    void appliesDamageOnQuestExpiration() {
+      Quest quest = fullQuest();
+      LocalDate startedOn = LocalDate.of(2026, 4, 3);
+      LocalDate today = LocalDate.of(2026, 4, 6);
+      ActiveQuests active =
+          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
+      // Not attending any habits so quest will expire incomplete
+
+      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+
+      service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
+
+      verify(avatarClient).applyDamage(AVATAR_ID_1, 10);
+      verify(activeQuestsRepository).save(active);
+    }
+
+    @Test
+    @DisplayName("does not apply damage when quest expires but was completed")
+    void noDamageWhenQuestCompleted() {
+      Quest quest = fullQuest();
+      LocalDate startedOn = LocalDate.of(2026, 4, 3);
+      ActiveQuests active =
+          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
+      active.recordAttendance(HABIT_ID_1, startedOn);
+      // Simulate quest completion (though normally would not expire if completed)
+
+      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+
+      service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
+
+      verify(avatarClient, never()).applyDamage(any(), anyInt());
+    }
+
+    @Test
+    @DisplayName("handles damage application failures gracefully")
+    void handlesFailedDamageApplication() {
+      Quest quest = fullQuest();
+      LocalDate startedOn = LocalDate.of(2026, 4, 3);
+      LocalDate today = LocalDate.of(2026, 4, 6);
+      ActiveQuests active =
+          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
+
+      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+      doThrow(new AvatarRewardException("avatar down", new RuntimeException("cause")))
+          .when(avatarClient)
+          .applyDamage(AVATAR_ID_1, 10);
+
+      List<QuestProgressView> result = service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
+
+      assertThat(result).hasSize(1);
+      verify(log).error(any(), eq("Failed to apply quest penalty damage"), any());
     }
   }
 }

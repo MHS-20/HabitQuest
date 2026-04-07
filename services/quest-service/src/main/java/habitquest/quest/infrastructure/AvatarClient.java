@@ -41,5 +41,23 @@ public class AvatarClient implements AvatarClientPort {
     }
   }
 
+  @Override
+  public void applyDamage(Id<Avatar> avatarId, int amount) {
+    AmountRequest request = new AmountRequest(amount);
+    try {
+      restClient
+          .post()
+          .uri("/api/v1/avatars/{id}/health/damage", avatarId.value())
+          .body(request)
+          .retrieve()
+          .toBodilessEntity();
+      log.info(request, "Applied quest penalty damage to avatar " + avatarId.value());
+    } catch (RestClientException ex) {
+      log.error(request, "Failed to apply quest penalty damage to avatar " + avatarId.value(), ex);
+      throw new AvatarRewardException(
+          "Failed to apply quest penalty damage to avatar " + avatarId.value(), ex);
+    }
+  }
+
   private record AmountRequest(Integer amount) {}
 }
