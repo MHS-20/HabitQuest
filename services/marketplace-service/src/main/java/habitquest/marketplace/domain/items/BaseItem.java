@@ -3,11 +3,12 @@ package habitquest.marketplace.domain.items;
 import habitquest.marketplace.domain.Money;
 import java.util.Objects;
 
-public record BaseItem(String name, String description, Money price, Level requiredLevel)
-    implements Item {
+public record BaseItem(
+    String name, String description, Integer power, Money price, Level requiredLevel) {
 
   public static final int MIN_LEVEL = 1;
   public static final int MIN_PRICE = 0;
+  public static final int MIN_POWER = 0;
 
   public BaseItem {
     Objects.requireNonNull(name);
@@ -21,6 +22,10 @@ public record BaseItem(String name, String description, Money price, Level requi
 
     if (description.isBlank()) {
       throw new IllegalArgumentException("Item description cannot be null or blank");
+    }
+
+    if (power < MIN_POWER) {
+      throw new IllegalArgumentException("Item power cannot be negative");
     }
 
     if (price.amount() < MIN_PRICE) {

@@ -20,7 +20,6 @@ class AvatarManaTest {
     @Test
     @DisplayName("rejects negative amount")
     void negativeAmount() {
-      // Health record guards Mana at construction
       assertThatThrownBy(() -> new Mana(-1)).isInstanceOf(IllegalArgumentException.class);
     }
 
