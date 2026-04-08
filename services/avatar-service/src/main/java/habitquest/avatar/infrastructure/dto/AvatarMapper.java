@@ -12,9 +12,7 @@ import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.AvatarController.*;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
-@Component
 public final class AvatarMapper {
 
   private AvatarMapper() {}

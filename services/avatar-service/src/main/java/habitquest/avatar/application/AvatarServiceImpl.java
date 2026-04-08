@@ -181,7 +181,7 @@ public class AvatarServiceImpl implements AvatarService {
             .findFirst()
             .orElseThrow(
                 () -> new IllegalArgumentException("No potion found with name: " + potionName));
-    avatar.heal(potion.healingPower());
+    avatar.heal(potion.power());
     avatar.removeItemFromInventory(potion);
   }
 
@@ -196,7 +196,7 @@ public class AvatarServiceImpl implements AvatarService {
             .findFirst()
             .orElseThrow(
                 () -> new IllegalArgumentException("No potion found with name: " + potionName));
-    avatar.restoreMana(potion.getValue());
+    avatar.restoreMana(potion.power());
     avatar.removeItemFromInventory(potion);
   }
 
