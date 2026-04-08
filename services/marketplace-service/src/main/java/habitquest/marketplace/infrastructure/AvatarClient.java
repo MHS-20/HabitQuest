@@ -4,6 +4,8 @@ import common.hexagonal.Adapter;
 import habitquest.marketplace.application.MarketplaceLogger;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.Item;
+import habitquest.marketplace.infrastructure.dto.ItemMapper;
+import habitquest.marketplace.infrastructure.dto.ItemRequest;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Component;
@@ -66,7 +68,7 @@ public class AvatarClient {
   @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "addItemToInventoryFallback")
   @Retry(name = AVATAR_CLIENT)
   public void addItemToInventory(String avatarId, Item item) {
-    ItemRequest request = ItemRequest.from(item);
+    ItemRequest request = ItemMapper.from(item);
     log.info(request, "Adding item to inventory of avatar " + avatarId);
     try {
       restClient
@@ -85,7 +87,7 @@ public class AvatarClient {
   @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "removeItemFromInventoryFallback")
   @Retry(name = AVATAR_CLIENT)
   public void removeItemFromInventory(String avatarId, Item item) {
-    ItemRequest request = ItemRequest.from(item);
+    ItemRequest request = ItemMapper.from(item);
     log.info(request, "Removing item from inventory of avatar " + avatarId);
     try {
       restClient
@@ -123,7 +125,7 @@ public class AvatarClient {
 
   private void addItemToInventoryFallback(String avatarId, Item item, Exception ex) {
     log.error(
-        ItemRequest.from(item),
+        ItemMapper.from(item),
         "Circuit breaker OPEN per addItemToInventory, avatarId=" + avatarId,
         ex);
     throw new AvatarCommunicationException(
@@ -132,7 +134,7 @@ public class AvatarClient {
 
   private void removeItemFromInventoryFallback(String avatarId, Item item, Exception ex) {
     log.error(
-        ItemRequest.from(item),
+        ItemMapper.from(item),
         "Circuit breaker OPEN per removeItemFromInventory, avatarId=" + avatarId,
         ex);
     throw new AvatarCommunicationException(
@@ -140,23 +142,5 @@ public class AvatarClient {
   }
 
   // ─── Request records ────────────────────────────────────────────────────────
-
   record AmountRequest(Integer amount) {}
-
-  record ItemRequest(String type, String name, String description, Integer power) {
-
-    static ItemRequest from(Item item) {
-      return switch (item) {
-        case habitquest.marketplace.domain.items.Weapon w ->
-            new ItemRequest("WEAPON", w.name(), w.description(), w.attackPower());
-        case habitquest.marketplace.domain.items.Armor a ->
-            new ItemRequest("ARMOR", a.name(), a.description(), a.defensePower());
-        case habitquest.marketplace.domain.items.HealthPotion hp ->
-            new ItemRequest("HEALTH_POTION", hp.name(), hp.description(), hp.healingPower());
-        case habitquest.marketplace.domain.items.ManaPotion mp ->
-            new ItemRequest("MANA_POTION", mp.name(), mp.description(), mp.restoringPower());
-        default -> new ItemRequest("ITEM", item.name(), item.description(), 0);
-      };
-    }
-  }
 }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Level")
 class LevelTest {
 
-  /** Helper: level 1, 0/100 XP. */
   private static Level levelOne() {
     return new Level(1, new Experience(0), new Experience(100));
   }

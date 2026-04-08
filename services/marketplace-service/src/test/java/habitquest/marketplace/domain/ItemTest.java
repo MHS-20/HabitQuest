@@ -13,7 +13,9 @@ class ItemTest {
   private static final Money ZERO_GOLD = new Money(0);
   private static final Level LEVEL_1 = new Level(1);
   private static final Level LEVEL_5 = new Level(5);
+  private static final Integer POWER = 10;
   private static final String DESC = "desc";
+  public static final String DESCRIPTION = "Item power";
 
   // ── Level ────────────────────────────────────────────────────────────────────
 
@@ -38,34 +40,34 @@ class ItemTest {
 
   @Test
   void baseItemShouldRejectBlankName() {
-    assertThatThrownBy(() -> new BaseItem("  ", DESC, TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new BaseItem("  ", DESC, POWER, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("name");
   }
 
   @Test
   void baseItemShouldRejectBlankDescription() {
-    assertThatThrownBy(() -> new BaseItem("Sword", "  ", TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new BaseItem("Sword", "  ", POWER, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("description");
   }
 
   @Test
   void baseItemShouldRejectNullName() {
-    assertThatThrownBy(() -> new BaseItem(null, DESC, TEN_GOLD, LEVEL_1))
+    assertThatThrownBy(() -> new BaseItem(null, DESC, POWER, TEN_GOLD, LEVEL_1))
         .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void baseItemCanBuyWhenPlayerLevelMeetsRequirement() {
-    BaseItem item = new BaseItem("Item", DESC, TEN_GOLD, LEVEL_5);
+    BaseItem item = new BaseItem("Item", DESC, POWER, TEN_GOLD, LEVEL_5);
     assertThat(item.canBuy(LEVEL_5)).isTrue();
     assertThat(item.canBuy(new Level(10))).isTrue();
   }
 
   @Test
   void baseItemCannotBuyWhenPlayerLevelIsTooLow() {
-    BaseItem item = new BaseItem("Item", DESC, TEN_GOLD, LEVEL_5);
+    BaseItem item = new BaseItem("Item", DESC, POWER, TEN_GOLD, LEVEL_5);
     assertThat(item.canBuy(LEVEL_1)).isFalse();
     assertThat(item.canBuy(new Level(4))).isFalse();
   }
@@ -74,11 +76,11 @@ class ItemTest {
 
   @Test
   void weaponShouldExposeCorrectFields() {
-    Weapon sword = new Weapon("Iron Sword", "A sturdy blade", 15, TEN_GOLD, LEVEL_1);
+    Weapon sword = new Weapon("Iron Sword", "A sturdy blade", POWER, TEN_GOLD, LEVEL_1);
 
     assertThat(sword.name()).isEqualTo("Iron Sword");
     assertThat(sword.description()).isEqualTo("A sturdy blade");
-    assertThat(sword.attackPower()).isEqualTo(15);
+    assertThat(sword.power()).isEqualTo(POWER);
     assertThat(sword.price()).isEqualTo(TEN_GOLD);
     assertThat(sword.requiredLevel()).isEqualTo(LEVEL_1);
   }
@@ -87,7 +89,7 @@ class ItemTest {
   void weaponShouldRejectNegativeAttackPower() {
     assertThatThrownBy(() -> new Weapon("Sword", DESC, -1, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Attack power");
+        .hasMessageContaining(DESCRIPTION);
   }
 
   @Test
@@ -100,10 +102,10 @@ class ItemTest {
 
   @Test
   void armorShouldExposeCorrectFields() {
-    Armor shield = new Armor("Iron Shield", "Blocks hits", 20, TEN_GOLD, LEVEL_1);
+    Armor shield = new Armor("Iron Shield", "Blocks hits", POWER, TEN_GOLD, LEVEL_1);
 
     assertThat(shield.name()).isEqualTo("Iron Shield");
-    assertThat(shield.defensePower()).isEqualTo(20);
+    assertThat(shield.power()).isEqualTo(POWER);
     assertThat(shield.price()).isEqualTo(TEN_GOLD);
   }
 
@@ -111,7 +113,7 @@ class ItemTest {
   void armorShouldRejectNegativeDefensePower() {
     assertThatThrownBy(() -> new Armor("Shield", DESC, -5, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Defense power");
+        .hasMessageContaining(DESCRIPTION);
   }
 
   // ── HealthPotion ─────────────────────────────────────────────────────────────
@@ -119,10 +121,10 @@ class ItemTest {
   @Test
   void healthPotionShouldExposeCorrectFields() {
     HealthPotion potion =
-        new HealthPotion("Minor HP Potion", "Restores 50 HP", 50, TEN_GOLD, LEVEL_1);
+        new HealthPotion("Minor HP Potion", "Restores 50 HP", POWER, TEN_GOLD, LEVEL_1);
 
     assertThat(potion.name()).isEqualTo("Minor HP Potion");
-    assertThat(potion.healingPower()).isEqualTo(50);
+    assertThat(potion.power()).isEqualTo(POWER);
     assertThat(potion.price()).isEqualTo(TEN_GOLD);
   }
 
@@ -130,12 +132,12 @@ class ItemTest {
   void healthPotionShouldRejectNegativeHealingPower() {
     assertThatThrownBy(() -> new HealthPotion("Potion", DESC, -10, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Healing power");
+        .hasMessageContaining(DESCRIPTION);
   }
 
   @Test
   void healthPotionShouldImplementPotionInterface() {
-    HealthPotion potion = new HealthPotion("HP Potion", DESC, 10, TEN_GOLD, LEVEL_1);
+    HealthPotion potion = new HealthPotion("HP Potion", DESC, POWER, TEN_GOLD, LEVEL_1);
     assertThat(potion).isInstanceOf(Potion.class);
   }
 
@@ -143,10 +145,11 @@ class ItemTest {
 
   @Test
   void manaPotionShouldExposeCorrectFields() {
-    ManaPotion potion = new ManaPotion("Minor MP Potion", "Restores 30 MP", 30, TEN_GOLD, LEVEL_1);
+    ManaPotion potion =
+        new ManaPotion("Minor MP Potion", "Restores 30 MP", POWER, TEN_GOLD, LEVEL_1);
 
     assertThat(potion.name()).isEqualTo("Minor MP Potion");
-    assertThat(potion.restoringPower()).isEqualTo(30);
+    assertThat(potion.power()).isEqualTo(POWER);
     assertThat(potion.price()).isEqualTo(TEN_GOLD);
   }
 
@@ -154,12 +157,12 @@ class ItemTest {
   void manaPotionShouldRejectNegativeRestoringPower() {
     assertThatThrownBy(() -> new ManaPotion("Potion", DESC, -1, TEN_GOLD, LEVEL_1))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Mana power");
+        .hasMessageContaining(DESCRIPTION);
   }
 
   @Test
   void manaPotionShouldImplementPotionInterface() {
-    ManaPotion potion = new ManaPotion("MP Potion", DESC, 10, TEN_GOLD, LEVEL_1);
+    ManaPotion potion = new ManaPotion("MP Potion", DESC, POWER, TEN_GOLD, LEVEL_1);
     assertThat(potion).isInstanceOf(Potion.class);
   }
 }

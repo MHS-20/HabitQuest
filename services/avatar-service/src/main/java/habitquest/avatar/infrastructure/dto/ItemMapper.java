@@ -7,9 +7,7 @@ import habitquest.avatar.domain.items.ManaPotion;
 import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.infrastructure.AvatarController.*;
 import java.util.Locale;
-import org.springframework.stereotype.Component;
 
-@Component
 public final class ItemMapper {
 
   private ItemMapper() {}
@@ -33,18 +31,9 @@ public final class ItemMapper {
         switch (item) {
           case Weapon w -> "WEAPON";
           case Armor a -> "ARMOR";
-          case HealthPotion hp -> "HEALTH_POTION";
-          case ManaPotion mp -> "MANA_POTION";
-          default -> "UNKNOWN";
+          case HealthPotion h -> "HEALTH_POTION";
+          case ManaPotion m -> "MANA_POTION";
         };
-    Integer power =
-        switch (item) {
-          case Weapon w -> w.attackPower();
-          case Armor a -> a.defensePower();
-          case HealthPotion hp -> hp.healingPower();
-          case ManaPotion mp -> mp.restoringPower();
-          default -> null;
-        };
-    return new ItemResponse(type, item.name(), item.description(), power);
+    return new ItemResponse(type, item.name(), item.description(), item.power());
   }
 }
