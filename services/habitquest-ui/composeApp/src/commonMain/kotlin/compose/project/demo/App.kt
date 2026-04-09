@@ -185,7 +185,11 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
                 .padding(innerPadding)
         ) {
             when (selectedPage) {
-                AppPage.Dashboard -> DashboardScreen(token = token, avatarState = avatarState)
+                AppPage.Dashboard -> DashboardScreen(
+                    token = token,
+                    avatarState = avatarState,
+                    onRefreshStats = ::requestAvatarRefresh,
+                )
                 AppPage.Habits -> HabitsScreen(
                     token = token,
                     avatarState = avatarState,

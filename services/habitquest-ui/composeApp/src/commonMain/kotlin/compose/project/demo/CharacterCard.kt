@@ -18,6 +18,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,7 +31,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AvatarCard(avatar: AvatarData) {
+fun AvatarCard(
+    avatar: AvatarData,
+    onRefreshStats: (() -> Unit)? = null,
+) {
     val avatarClass = when {
         avatar.intelligence >= avatar.strength && avatar.intelligence >= avatar.defense -> "Mage"
         avatar.defense >= avatar.strength && avatar.defense >= avatar.intelligence -> "Guardian"
@@ -85,6 +89,12 @@ fun AvatarCard(avatar: AvatarData) {
                             color = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.padding(4.dp)
                         )
+                        if (onRefreshStats != null) {
+                            Spacer(Modifier.width(6.dp))
+                            TextButton(onClick = onRefreshStats) {
+                                Text("Refresh", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
                     }
 
                     Text(
@@ -151,6 +161,12 @@ fun AvatarCard(avatar: AvatarData) {
                                 color = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier.padding(4.dp)
                             )
+                            if (onRefreshStats != null) {
+                                Spacer(Modifier.width(6.dp))
+                                TextButton(onClick = onRefreshStats) {
+                                    Text("Refresh", style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
                         }
 
                         Text(
