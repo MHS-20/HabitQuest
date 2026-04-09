@@ -22,14 +22,17 @@ public class BattleServiceImpl implements BattleService {
   private final BattleRepository battleRepository;
   private final BattleObserver battleObserver;
   private final BattleFactory battleFactory;
+  private final AvatarClientPort avatarPort;
 
   public BattleServiceImpl(
       BattleRepository battleRepository,
       BattleObserver battleObserver,
-      BattleFactory battleFactory) {
+      BattleFactory battleFactory,
+      AvatarClientPort avatarPort) {
     this.battleRepository = battleRepository;
     this.battleObserver = battleObserver;
     this.battleFactory = battleFactory;
+    this.avatarPort = avatarPort;
   }
 
   // --- Battle lifecycle ---
@@ -137,6 +140,49 @@ public class BattleServiceImpl implements BattleService {
   }
 
   // --- Battle ---
+  @Override
+  public BattleOutcome processDamage(Id<Battle> battleId, Id<GuildMember> attackerId, int damage)
+      throws BattleNotFoundException {
+    Battle battle = getBattleById(battleId);
+    BattleOutcome outcome = battle.dealDamageOnBoss(attackerId, damage);
+
+    if (outcome instanceof BattleOutcome.Ongoing) {
+      boolean attackerDied = avatarPort.applyDamage(attackerId.value(), damage).died();
+      if (attackerDied) {
+        outcome = battle.applyCounterattack(attackerId);
+        if (outcome instanceof BattleOutcome.Lost(int penalty)) {
+          battleObserver.notifyBattleEvent(new BattleLost(battleId, battle.getGuildId(), penalty));
+          battle.getMembers().forEach(m -> avatarPort.applyPenalty(m.value(), penalty));
+          battleRepository.deleteById(battleId);
+        } else {
+          battleRepository.save(battle);
+        }
+      } else {
+        nextTurn(battleId);
+      }
+      return outcome;
+    }
+
+    if (outcome instanceof BattleOutcome.Won(int experienceReward, int moneyReward)) {
+      battleObserver.notifyBattleEvent(
+          new BattleWon(battleId, battle.getGuildId(), experienceReward, moneyReward));
+      battle
+          .getMembers()
+          .forEach(
+              m -> {
+                avatarPort.grantExperience(m.value(), experienceReward);
+                avatarPort.earnMoney(m.value(), moneyReward);
+              });
+      battleRepository.deleteById(battleId);
+    } else if (outcome instanceof BattleOutcome.Lost(int penalty)) {
+      battleObserver.notifyBattleEvent(new BattleLost(battleId, battle.getGuildId(), penalty));
+      battle.getMembers().forEach(m -> avatarPort.applyPenalty(m.value(), penalty));
+      battleRepository.deleteById(battleId);
+    }
+
+    return outcome;
+  }
+
   @Override
   public BattleOutcome dealDamageOnBoss(Id<Battle> battleId, Id<GuildMember> attackerId, int damage)
       throws BattleNotFoundException {

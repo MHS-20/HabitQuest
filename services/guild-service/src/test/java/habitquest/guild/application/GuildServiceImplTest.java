@@ -35,6 +35,7 @@ class GuildServiceImplTest {
   @Mock private GuildObserver guildObserver;
   @Mock private BattleService battleService;
   @Mock private InviteFactory inviteFactory;
+  @Mock private AvatarClientPort avatarPort;
 
   @InjectMocks private GuildServiceImpl guildService;
 
@@ -163,10 +164,12 @@ class GuildServiceImplTest {
   class SendInvite {
 
     @Test
-    @DisplayName("should save guild and publish InviteSent event when leader sends invite")
+    @DisplayName(
+        "should save guild, publish InviteSent event and notify avatar when leader sends invite")
     void shouldSaveAndPublishEvent() throws GuildNotFoundException {
+      Invite invite = invite();
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(inviteFactory.create(GUILD_ID, MEMBER_ID)).thenReturn(invite());
+      when(inviteFactory.create(GUILD_ID, MEMBER_ID)).thenReturn(invite);
 
       guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
 
@@ -177,6 +180,8 @@ class GuildServiceImplTest {
       assertThat(event.guildId().value()).isEqualTo(GUILD_1);
       assertThat(event.targetAvatarId().value()).isEqualTo(MEMBER_1);
       assertThat(event.inviteId().value()).isEqualTo(INVITE_1);
+      verify(avatarPort)
+          .sendInviteToAvatar(INVITE_1, MEMBER_1, GUILD_1, guild.getName(), invite.expiresAt());
     }
 
     @Test

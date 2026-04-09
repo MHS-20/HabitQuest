@@ -66,6 +66,7 @@ public final class MarketplaceFixtures {
   public static final ItemBought ITEM_BOUGHT =
       new ItemBought(MARKETPLACE_MP_ID, SWORD_NAME, AVATAR_ID);
   public static final ItemSold ITEM_SOLD = new ItemSold(MARKETPLACE_MP_ID, SWORD_NAME, AVATAR_ID);
+  public static final String ELITE_SWORD = "Elite Sword";
 
   // Item factories
   public static Weapon sword() {
@@ -73,7 +74,7 @@ public final class MarketplaceFixtures {
   }
 
   public static Weapon eliteSword() {
-    return new Weapon("Elite Sword", "A powerful sword", 80, new Money(200), LEVEL_10);
+    return new Weapon(ELITE_SWORD, "A powerful sword", 80, new Money(200), LEVEL_10);
   }
 
   public static Weapon midSword() {

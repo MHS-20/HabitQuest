@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import common.ddd.Id;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
+import habitquest.guild.domain.battle.DamageResult;
 import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.events.battleEvents.BattleEvent;
 import habitquest.guild.domain.events.battleEvents.BattleLost;
@@ -28,11 +29,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("BattleServiceImpl")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BattleServiceImplTest {
 
   @Mock private BattleRepository battleRepository;
   @Mock private BattleObserver battleObserver;
   @Mock private BattleFactory battleFactory;
+  @Mock private AvatarClientPort avatarPort;
 
   @InjectMocks private BattleServiceImpl battleService;
 
@@ -338,6 +341,113 @@ class BattleServiceImplTest {
       ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
       verify(battleObserver).notifyBattleEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(BattleLost.class);
+    }
+  }
+
+  // ── processDamage ─────────────────────────────────────────────────────────────
+
+  @Nested
+  @DisplayName("processDamage")
+  class ProcessDamage {
+
+    @BeforeEach
+    void stubBattle() {
+      when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
+    }
+
+    @Test
+    @DisplayName("Ongoing + attacker lives → nextTurn, save, no events")
+    void shouldAdvanceTurnWhenOngoingAndAttackerLives() throws BattleNotFoundException {
+      when(avatarPort.applyDamage(BATTLE_MEMBER_ID_1.value(), 10))
+          .thenReturn(new DamageResult(false));
+
+      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
+
+      assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
+      verify(battleRepository, atLeastOnce()).save(battle); // nextTurn lo chiama internamente
+      verifyNoInteractions(battleObserver);
+    }
+
+    @Test
+    @DisplayName(
+        "Ongoing + attacker dies + guild survives → counterattack Ongoing, save, no events")
+    void shouldApplyCounterattackWhenAttackerDiesButGuildSurvives() throws BattleNotFoundException {
+      when(avatarPort.applyDamage(BATTLE_MEMBER_ID_1.value(), 10))
+          .thenReturn(new DamageResult(true));
+
+      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
+
+      assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
+      verify(battleRepository, atLeastOnce()).save(battle);
+      verifyNoInteractions(battleObserver);
+    }
+
+    @Test
+    @DisplayName(
+        "Ongoing + attacker dies + all fallen → Lost, BattleLost event, penalty applicato, deleteById")
+    void shouldPublishLostAndApplyPenaltyWhenAllFallen() throws BattleNotFoundException {
+      // Prima fai cadere il primo membro manualmente per preparare la battaglia
+      battle.applyCounterattack(BATTLE_MEMBER_ID_1); // ora 1 caduto su 2
+      when(avatarPort.applyDamage(BATTLE_MEMBER_ID_2.value(), 10))
+          .thenReturn(new DamageResult(true));
+
+      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_2, 10);
+
+      assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
+      assertThat(((BattleOutcome.Lost) outcome).penalty()).isEqualTo(PENALTY);
+
+      ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
+      verify(battleObserver).notifyBattleEvent(captor.capture());
+      assertThat(captor.getValue()).isInstanceOf(BattleLost.class);
+
+      verify(avatarPort).applyPenalty(BATTLE_MEMBER_ID_1.value(), PENALTY);
+      verify(avatarPort).applyPenalty(BATTLE_MEMBER_ID_2.value(), PENALTY);
+      verify(battleRepository).deleteById(BATTLE_ID);
+    }
+
+    @Test
+    @DisplayName("Boss a zero → Won, BattleWon event, exp+money distribuiti, deleteById")
+    void shouldPublishWonAndGrantRewardsWhenBossDefeated() throws BattleNotFoundException {
+      BattleOutcome outcome =
+          battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, BOSS_HEALTH);
+
+      assertThat(outcome).isInstanceOf(BattleOutcome.Won.class);
+
+      ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
+      verify(battleObserver).notifyBattleEvent(captor.capture());
+      BattleWon event = (BattleWon) captor.getValue();
+      assertThat(event.experienceReward()).isEqualTo(EXP_REWARD);
+      assertThat(event.moneyReward()).isEqualTo(MONEY_REWARD);
+
+      verify(avatarPort).grantExperience(BATTLE_MEMBER_ID_1.value(), EXP_REWARD);
+      verify(avatarPort).grantExperience(BATTLE_MEMBER_ID_2.value(), EXP_REWARD);
+      verify(avatarPort).earnMoney(BATTLE_MEMBER_ID_1.value(), MONEY_REWARD);
+      verify(avatarPort).earnMoney(BATTLE_MEMBER_ID_2.value(), MONEY_REWARD);
+      verify(battleRepository).deleteById(BATTLE_ID);
+      verify(avatarPort, never()).applyDamage(any(), anyInt()); // Won non passa per applyDamage
+    }
+
+    @Test
+    @DisplayName("Boss a zero via Lost diretto → Lost, penalty applicato, deleteById")
+    void shouldApplyPenaltyWhenDirectLost() throws BattleNotFoundException {
+      battle.applyCounterattack(BATTLE_MEMBER_ID_1);
+      battle.applyCounterattack(BATTLE_MEMBER_ID_2);
+
+      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 1);
+
+      assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
+      verify(avatarPort).applyPenalty(BATTLE_MEMBER_ID_1.value(), PENALTY);
+      verify(avatarPort).applyPenalty(BATTLE_MEMBER_ID_2.value(), PENALTY);
+      verify(battleRepository).deleteById(BATTLE_ID);
+    }
+
+    @Test
+    @DisplayName("should throw BattleNotFoundException when battle does not exist")
+    void shouldThrowWhenBattleNotFound() {
+      when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
+
+      assertThatThrownBy(() -> battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10))
+          .isInstanceOf(BattleNotFoundException.class);
     }
   }
 

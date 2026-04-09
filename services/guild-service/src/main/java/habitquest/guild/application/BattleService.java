@@ -54,6 +54,8 @@ public interface BattleService {
       throws BattleNotFoundException;
 
   // --- Combat ---
+  BattleOutcome processDamage(Id<Battle> battleId, Id<GuildMember> attackerId, int damage);
+
   BattleOutcome dealDamageOnBoss(Id<Battle> battleId, Id<GuildMember> attackerId, int damage)
       throws BattleNotFoundException;
 

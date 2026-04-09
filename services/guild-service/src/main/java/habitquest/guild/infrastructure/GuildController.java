@@ -26,12 +26,10 @@ public class GuildController {
 
   private final GuildService guildService;
   private final GuildLogger log;
-  private final AvatarClient avatarClient;
 
-  public GuildController(GuildService guildService, GuildLogger log, AvatarClient avatarClient) {
+  public GuildController(GuildService guildService, GuildLogger log) {
     this.guildService = guildService;
     this.log = log;
-    this.avatarClient = avatarClient;
   }
 
   private Id<Guild> idOfGuild(String id) {
@@ -116,12 +114,6 @@ public class GuildController {
               idOfGuildMember(request.requestorId()),
               idOfGuildMember(request.targetAvatarId()));
       log.info(request, "Invite sent");
-      avatarClient.sendInviteToAvatar(
-          invite.inviteId().value(),
-          request.targetAvatarId(),
-          id,
-          guildService.getGuild(idOfGuild(id)).getName(),
-          invite.expiresAt());
       return ResponseEntity.noContent().build();
     } catch (UnauthorizedGuildOperationException e) {
       log.warn(request, "Unauthorized invite attempt");
