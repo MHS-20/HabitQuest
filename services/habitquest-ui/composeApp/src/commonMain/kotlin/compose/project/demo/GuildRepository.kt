@@ -122,6 +122,11 @@ sealed interface BattleStatsResult {
     data class Error(val message: String) : BattleStatsResult
 }
 
+sealed interface BattleAttackResult {
+    data object Success : BattleAttackResult
+    data class Error(val message: String) : BattleAttackResult
+}
+
 class GuildRepository {
     private val client = HttpClient(createHttpEngine()) {
         install(ContentNegotiation) {
@@ -577,6 +582,42 @@ class GuildRepository {
         }
     }
 
+    suspend fun attackBattle(
+        token: String,
+        battleId: String,
+        attackerAvatarId: String,
+        damage: Int,
+    ): BattleAttackResult {
+        if (battleId.isBlank()) return BattleAttackResult.Error("Battle id cannot be blank")
+        if (attackerAvatarId.isBlank()) return BattleAttackResult.Error("Attacker avatar id cannot be blank")
+        if (damage <= 0) return BattleAttackResult.Error("Damage must be greater than zero")
+
+        val response = runCatching {
+            client.post("${edgeServiceBaseUrl()}/api/v1/battles/$battleId/damage") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+                setBody(
+                    buildJsonObject {
+                        put("damage", JsonPrimitive(damage))
+                        put("attackerAvatarId", JsonPrimitive(attackerAvatarId))
+                    }
+                )
+            }
+        }.getOrElse {
+            return BattleAttackResult.Error("Unable to contact battle-service")
+        }
+
+        return when (response.status) {
+            HttpStatusCode.NoContent, HttpStatusCode.OK -> BattleAttackResult.Success
+            HttpStatusCode.Forbidden -> BattleAttackResult.Error("It's not your turn")
+            HttpStatusCode.BadRequest -> BattleAttackResult.Error("Invalid attack request")
+            HttpStatusCode.NotFound -> BattleAttackResult.Error("Battle not found")
+            HttpStatusCode.Unauthorized -> BattleAttackResult.Error("Session expired, please log in again")
+            else -> BattleAttackResult.Error("Attack error (${response.status.value})")
+        }
+    }
+
     private fun parseBossCollection(body: JsonObject): List<BossData> {
         val directArray = body["bosses"] as? JsonArray
         if (directArray != null) {
@@ -654,8 +695,15 @@ class GuildRepository {
         val statusElement = source["status"]
         val status = when (statusElement) {
             null -> "UNKNOWN"
-            is JsonPrimitive -> statusElement.contentOrNull ?: "UNKNOWN"
-            is JsonObject -> statusElement.keys.firstOrNull()?.uppercase() ?: "UNKNOWN"
+            is JsonPrimitive -> statusElement.contentOrNull?.uppercase() ?: "UNKNOWN"
+            is JsonObject -> {
+                when {
+                    statusElement.isEmpty() -> "ONGOING"
+                    statusElement.containsKey("experienceReward") && statusElement.containsKey("moneyReward") -> "WON"
+                    statusElement.containsKey("penalty") -> "LOST"
+                    else -> statusElement.keys.firstOrNull()?.uppercase() ?: "UNKNOWN"
+                }
+            }
             else -> "UNKNOWN"
         }
 

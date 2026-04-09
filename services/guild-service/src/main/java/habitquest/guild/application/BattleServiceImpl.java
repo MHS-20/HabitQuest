@@ -61,11 +61,13 @@ public class BattleServiceImpl implements BattleService {
       throws BattleNotFoundException {
     Battle battle = getBattleById(battleId);
     battle.markAsFallen(avatarId);
-    battleRepository.save(battle);
     if (battle.getBattleStatus().isLost()) {
       var boss = this.getBoss(battleId);
       battleObserver.notifyBattleEvent(
           new BattleLost(battleId, battle.getGuildId(), boss.penalty().amount()));
+      battleRepository.deleteById(battleId);
+    } else {
+      battleRepository.save(battle);
     }
     return battle.getBattleStatus();
   }
