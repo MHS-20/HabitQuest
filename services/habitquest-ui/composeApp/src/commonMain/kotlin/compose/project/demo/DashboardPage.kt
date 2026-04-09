@@ -39,7 +39,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun DashboardScreen(token: String, avatarState: AvatarUiState) {
+fun DashboardScreen(
+    token: String,
+    avatarState: AvatarUiState,
+    onRefreshStats: () -> Unit,
+) {
     var showContent by remember { mutableStateOf(true) }
     val habitRepository = remember { HabitsApiRepository() }
     val scope = rememberCoroutineScope()
@@ -92,7 +96,10 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState) {
                     )
 
                     is AvatarUiState.Ready -> {
-                        AvatarCard(avatar = state.avatar)
+                        AvatarCard(
+                            avatar = state.avatar,
+                            onRefreshStats = onRefreshStats,
+                        )
                         Spacer(Modifier.height(12.dp))
                     }
                 }
