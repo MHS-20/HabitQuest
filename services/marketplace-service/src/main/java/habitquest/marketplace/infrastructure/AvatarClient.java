@@ -1,6 +1,8 @@
 package habitquest.marketplace.infrastructure;
 
 import common.hexagonal.Adapter;
+import habitquest.marketplace.application.AvatarClientPort;
+import habitquest.marketplace.application.AvatarCommunicationException;
 import habitquest.marketplace.application.MarketplaceLogger;
 import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.Item;
@@ -14,7 +16,7 @@ import org.springframework.web.client.RestClientException;
 
 @Adapter
 @Component
-public class AvatarClient {
+public class AvatarClient implements AvatarClientPort {
 
   public static final String AVATAR_CLIENT = "avatarClient";
   private final RestClient restClient;

@@ -7,14 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import habitquest.marketplace.application.AvatarNotFoundException;
-import habitquest.marketplace.application.MarketplaceLogger;
-import habitquest.marketplace.application.MarketplaceNotFoundException;
-import habitquest.marketplace.application.MarketplaceService;
+import habitquest.marketplace.application.*;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
-import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.*;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +34,6 @@ public class MarketplaceControllerIT {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private MarketplaceService marketplaceService;
-  @MockitoBean private AvatarClient avatarClient;
   @MockitoBean private MarketplaceLogger log;
 
   private ItemCatalog catalog;
@@ -389,20 +384,20 @@ public class MarketplaceControllerIT {
 
   // ── POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy ────────────
 
+  // ── RIMUOVI questa riga ──────────────────────────────────────────────────────
+  @MockitoBean private AvatarClient avatarClient;
+
+  // ── BuyItem ──────────────────────────────────────────────────────────────────
   @Nested
   @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy")
   class BuyItem {
 
     @Test
-    @DisplayName("returns 204 when purchase is successful and level requirement is met")
-    void shouldReturn204AndDelegateOnSuccess() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
-      when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
-          .thenReturn(true);
-      doNothing().when(avatarClient).spendMoney(eq(AVATAR_ID.value()), any(Money.class));
-      doNothing().when(avatarClient).addItemToInventory(eq(AVATAR_ID.value()), any(Item.class));
-      doNothing().when(marketplaceService).buyItem(MARKETPLACE_ID, SWORD_NAME);
+    @DisplayName("returns 204 when purchase is successful")
+    void shouldReturn204OnSuccess() throws Exception {
+      doNothing()
+          .when(marketplaceService)
+          .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
 
       mockMvc
           .perform(
@@ -413,17 +408,15 @@ public class MarketplaceControllerIT {
                   .param("currentLevel", "1"))
           .andExpect(status().isNoContent());
 
-      verify(avatarClient).spendMoney(eq(AVATAR_ID.value()), any(Money.class));
-      verify(avatarClient).addItemToInventory(eq(AVATAR_ID.value()), any(Item.class));
-      verify(marketplaceService).buyItem(MARKETPLACE_ID, SWORD_NAME);
+      verify(marketplaceService).buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
     }
 
     @Test
     @DisplayName("returns 403 when avatar level is below item requirement")
     void shouldReturn403WhenLevelInsufficient() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
-          .thenReturn(false);
+      doThrow(new InsufficientLevelException(SWORD_NAME))
+          .when(marketplaceService)
+          .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
 
       mockMvc
           .perform(
@@ -433,38 +426,14 @@ public class MarketplaceControllerIT {
                       SWORD_NAME)
                   .param("currentLevel", "1"))
           .andExpect(status().isForbidden());
-
-      verifyNoInteractions(avatarClient);
-      verify(marketplaceService, never()).buyItem(any(), any());
-    }
-
-    @Test
-    @DisplayName("does not interact with avatar client when level check fails")
-    void shouldNotCallAvatarClientWhenLevelInsufficient() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
-          .thenReturn(false);
-
-      mockMvc
-          .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      MARKETPLACE_ID.value(),
-                      SWORD_NAME)
-                  .param("currentLevel", "1"))
-          .andExpect(status().isForbidden());
-
-      verifyNoInteractions(avatarClient);
     }
 
     @Test
     @DisplayName("returns 404 when item does not exist or is already bought")
     void shouldReturn404WhenItemNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(UNKNOWN_ITEM), any(Level.class)))
-          .thenReturn(true);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, UNKNOWN_ITEM))
-          .thenThrow(new ItemNotFoundException(UNKNOWN_ITEM));
+      doThrow(new ItemNotFoundException(UNKNOWN_ITEM))
+          .when(marketplaceService)
+          .buyItem(eq(MARKETPLACE_ID), eq(UNKNOWN_ITEM), any(Level.class));
 
       mockMvc
           .perform(
@@ -474,43 +443,16 @@ public class MarketplaceControllerIT {
                       UNKNOWN_ITEM)
                   .param("currentLevel", "1"))
           .andExpect(status().isNotFound());
-
-      verifyNoInteractions(avatarClient);
-    }
-
-    @Test
-    @DisplayName("returns 404 when avatar does not exist")
-    void shouldReturn404WhenAvatarNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
-          .thenReturn(true);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
-      doThrow(new AvatarNotFoundException(AVATAR_ID.value()))
-          .when(avatarClient)
-          .spendMoney(eq(AVATAR_ID.value()), any(Money.class));
-
-      mockMvc
-          .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      MARKETPLACE_ID.value(),
-                      SWORD_NAME)
-                  .param("currentLevel", "1"))
-          .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("returns 502 when avatar service is unreachable")
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.canBuyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class)))
-          .thenReturn(true);
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doThrow(
               new AvatarCommunicationException(
                   "Avatar service unavailable", new RestClientException("timeout")))
-          .when(avatarClient)
-          .spendMoney(eq(AVATAR_ID.value()), any(Money.class));
+          .when(marketplaceService)
+          .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
 
       mockMvc
           .perform(
@@ -525,8 +467,9 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(UNKNOWN_MARKETPLACE_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
+      doThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()))
+          .when(marketplaceService)
+          .buyItem(eq(UNKNOWN_MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
 
       mockMvc
           .perform(
@@ -539,21 +482,14 @@ public class MarketplaceControllerIT {
     }
   }
 
-  // ── POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell ──────
-
+  // ── SellItem ──────────────────────────────────────────────────────────────────
   @Nested
   @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell")
   class SellItem {
 
     @Test
-    @DisplayName("returns 204 and delegates to service and avatar client on successful sale")
-    void shouldReturn204AndDelegateOnSuccess() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
-      doNothing()
-          .when(avatarClient)
-          .removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
-      doNothing().when(avatarClient).earnMoney(eq(AVATAR_ID.value()), any(Money.class));
+    @DisplayName("returns 204 on successful sale")
+    void shouldReturn204OnSuccess() throws Exception {
       doNothing().when(marketplaceService).sellItem(MARKETPLACE_ID, SWORD_NAME);
 
       mockMvc
@@ -564,17 +500,15 @@ public class MarketplaceControllerIT {
                   SWORD_NAME))
           .andExpect(status().isNoContent());
 
-      verify(avatarClient).removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
-      verify(avatarClient).earnMoney(eq(AVATAR_ID.value()), any(Money.class));
       verify(marketplaceService).sellItem(MARKETPLACE_ID, SWORD_NAME);
     }
 
     @Test
     @DisplayName("returns 404 when item has not been bought yet")
     void shouldReturn404WhenItemNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, UNKNOWN_ITEM))
-          .thenThrow(new ItemNotFoundException(UNKNOWN_ITEM));
+      doThrow(new ItemNotFoundException(UNKNOWN_ITEM))
+          .when(marketplaceService)
+          .sellItem(MARKETPLACE_ID, UNKNOWN_ITEM);
 
       mockMvc
           .perform(
@@ -583,38 +517,16 @@ public class MarketplaceControllerIT {
                   MARKETPLACE_ID.value(),
                   UNKNOWN_ITEM))
           .andExpect(status().isNotFound());
-
-      verifyNoInteractions(avatarClient);
-    }
-
-    @Test
-    @DisplayName("returns 404 when avatar does not exist")
-    void shouldReturn404WhenAvatarNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
-      doThrow(new AvatarNotFoundException(AVATAR_ID.value()))
-          .when(avatarClient)
-          .removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
-
-      mockMvc
-          .perform(
-              post(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell",
-                  MARKETPLACE_ID.value(),
-                  SWORD_NAME))
-          .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("returns 502 when avatar service is unreachable")
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
-      when(marketplaceService.getAvatarId(MARKETPLACE_ID)).thenReturn(AVATAR_ID);
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
       doThrow(
               new AvatarCommunicationException(
                   "Avatar service unavailable", new RestClientException("timeout")))
-          .when(avatarClient)
-          .removeItemFromInventory(eq(AVATAR_ID.value()), any(Item.class));
+          .when(marketplaceService)
+          .sellItem(MARKETPLACE_ID, SWORD_NAME);
 
       mockMvc
           .perform(
@@ -628,8 +540,9 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(marketplaceService.getAvatarId(UNKNOWN_MARKETPLACE_ID))
-          .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
+      doThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()))
+          .when(marketplaceService)
+          .sellItem(UNKNOWN_MARKETPLACE_ID, SWORD_NAME);
 
       mockMvc
           .perform(

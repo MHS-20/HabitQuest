@@ -35,7 +35,6 @@ public class GuildControllerIT {
 
   @MockitoBean private GuildService guildService;
   @MockitoBean private GuildLogger log;
-  @MockitoBean private AvatarClient avatarClient;
 
   // ── POST /api/v1/guilds ───────────────────────────────────────────────────────
 
@@ -191,9 +190,6 @@ public class GuildControllerIT {
       Invite mockInvite =
           new Invite(INVITE_ID, GUILD_ID, MEMBER_ID, Instant.now().plusSeconds(86400));
       when(guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID)).thenReturn(mockInvite);
-      // when(guildService.getGuild(GUILD_ID)).thenReturn(GUILD_1);
-      doReturn(guild()).when(guildService).getGuild(GUILD_ID);
-      doNothing().when(avatarClient).sendInviteToAvatar(any(), any(), any(), any(), any());
 
       mockMvc
           .perform(
@@ -206,7 +202,6 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
-      verify(avatarClient).sendInviteToAvatar(any(), eq(MEMBER_1), eq(GUILD_1), any(), any());
     }
 
     @Test

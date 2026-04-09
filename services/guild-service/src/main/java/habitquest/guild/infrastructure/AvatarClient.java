@@ -1,7 +1,10 @@
 package habitquest.guild.infrastructure;
 
 import common.hexagonal.Adapter;
+import habitquest.guild.application.AvatarClientPort;
+import habitquest.guild.application.AvatarCommunicationException;
 import habitquest.guild.application.GuildLogger;
+import habitquest.guild.domain.battle.DamageResult;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.time.Instant;
@@ -12,7 +15,7 @@ import org.springframework.web.client.RestClientException;
 
 @Adapter
 @Component
-public class AvatarClient {
+public class AvatarClient implements AvatarClientPort {
 
   public static final String AVATAR_CLIENT = "avatarClient";
   private final RestClient restClient;
@@ -175,8 +178,6 @@ public class AvatarClient {
   private record AmountRequest(Integer amount) {}
 
   private record AvatarRequest(String avatarId, int amount) {}
-
-  public record DamageResult(boolean died) {}
 
   private record GuildInviteRequest(
       String inviteId, String guildId, String guildName, String expires) {}

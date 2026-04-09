@@ -3,10 +3,7 @@ package habitquest.avatar.infrastructure;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import common.ddd.Id;
-import habitquest.avatar.application.AvatarLogger;
-import habitquest.avatar.application.AvatarNotFoundException;
-import habitquest.avatar.application.AvatarSearchRequest;
-import habitquest.avatar.application.AvatarService;
+import habitquest.avatar.application.*;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
@@ -25,13 +22,10 @@ import org.springframework.web.bind.annotation.*;
 public class AvatarController {
 
   private final AvatarService avatarService;
-  private final MarketplaceClient marketplaceClient;
   private final AvatarLogger log;
 
-  public AvatarController(
-      AvatarService avatarService, MarketplaceClient marketplaceClient, AvatarLogger log) {
+  public AvatarController(AvatarService avatarService, AvatarLogger log) {
     this.avatarService = avatarService;
-    this.marketplaceClient = marketplaceClient;
     this.log = log;
   }
 
@@ -53,7 +47,6 @@ public class AvatarController {
       @RequestBody CreateAvatarRequest request) {
 
     Id<Avatar> id = avatarService.createAvatar(new Id<>(request.id()), request.name());
-    marketplaceClient.createMarketplace(request.id());
     AvatarCreatedResponse body = new AvatarCreatedResponse(id.value());
     log.info(body, "Avatar created");
 

@@ -3,14 +3,10 @@ package habitquest.marketplace.infrastructure;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import common.ddd.Id;
-import habitquest.marketplace.application.AvatarNotFoundException;
-import habitquest.marketplace.application.MarketplaceLogger;
-import habitquest.marketplace.application.MarketplaceNotFoundException;
-import habitquest.marketplace.application.MarketplaceService;
+import habitquest.marketplace.application.*;
 import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
-import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.items.*;
 import habitquest.marketplace.infrastructure.dto.ItemMapper;
 import habitquest.marketplace.infrastructure.dto.ItemResponse;
@@ -21,7 +17,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
 
 @RestController
 @RequestMapping("/api/v1/marketplaces")
@@ -174,108 +169,31 @@ public class MarketplaceController {
       @PathVariable String itemName,
       @RequestParam Integer currentLevel)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
-
-    String avatarId = marketplaceService.getAvatarId(idOfMarketplace(marketplaceId)).value();
-    log.info(
-        currentLevel, "Buy request received from avatar " + avatarId + " for item " + itemName);
-
-    if (!marketplaceService.canBuyItem(
-        idOfMarketplace(marketplaceId), itemName, new Level(currentLevel))) {
-      log.warn(
-          idOfMarketplace(marketplaceId),
-          "Avatar " + avatarId + " cannot buy item '" + itemName + "' due to insufficient level");
-      return ResponseEntity.status(403).build();
-    }
-
-    Item item = marketplaceService.getAvailableItem(idOfMarketplace(marketplaceId), itemName);
-    Money price = item.price();
-    log.info(item, "Starting buy saga for avatar " + avatarId);
-
-    boolean moneySpent = false;
-    boolean inventoryAdded = false;
-    try {
-      avatarClient.spendMoney(avatarId, price);
-      moneySpent = true;
-
-      avatarClient.addItemToInventory(avatarId, item);
-      inventoryAdded = true;
-
-      marketplaceService.buyItem(idOfMarketplace(marketplaceId), itemName);
-      log.info(item, "Buy saga completed for avatar " + avatarId);
-      return ResponseEntity.noContent().build();
-
-    } catch (RestClientException | AvatarCommunicationException ex) {
-      log.error(item, "Buy saga failed for avatar " + avatarId, ex);
-      try {
-        if (inventoryAdded) {
-          avatarClient.removeItemFromInventory(avatarId, item);
-        }
-        if (moneySpent) {
-          avatarClient.earnMoney(avatarId, price);
-        }
-      } catch (RestClientException | AvatarCommunicationException compensationEx) {
-        log.error(item, "Buy saga compensation failed for avatar " + avatarId, compensationEx);
-        throw new AvatarCommunicationException(
-            "Partial failure and compensation failed during buy saga", compensationEx);
-      }
-      throw new AvatarCommunicationException(
-          "Avatar operation failed during buy saga, compensation performed", ex);
-    }
+    marketplaceService.buyItem(idOfMarketplace(marketplaceId), itemName, new Level(currentLevel));
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{marketplaceId}/sold-items/{itemName}/sell")
   public ResponseEntity<Void> sellItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
-
-    String avatarId = marketplaceService.getAvatarId(idOfMarketplace(marketplaceId)).value();
-    Item item = marketplaceService.getSoldItem(idOfMarketplace(marketplaceId), itemName);
-    Money price = item.price();
-
-    log.info(item, "Starting sell saga for avatar " + avatarId);
-
-    boolean removedFromInventory = false;
-    boolean earnedMoney = false;
-    try {
-      avatarClient.removeItemFromInventory(avatarId, item);
-      removedFromInventory = true;
-
-      avatarClient.earnMoney(avatarId, price);
-      earnedMoney = true;
-
-      marketplaceService.sellItem(idOfMarketplace(marketplaceId), itemName);
-      log.info(item, "Sell saga completed for avatar " + avatarId);
-      return ResponseEntity.noContent().build();
-
-    } catch (RestClientException | AvatarCommunicationException ex) {
-      log.error(item, "Sell saga failed for avatar " + avatarId, ex);
-      try {
-        if (earnedMoney) {
-          avatarClient.spendMoney(avatarId, price);
-        }
-        if (removedFromInventory) {
-          avatarClient.addItemToInventory(avatarId, item);
-        }
-      } catch (RestClientException | AvatarCommunicationException compensationEx) {
-        log.error(item, "Sell saga compensation failed for avatar " + avatarId, compensationEx);
-        throw new AvatarCommunicationException(
-            "Partial failure and compensation failed during sell saga", compensationEx);
-      }
-      throw new AvatarCommunicationException(
-          "Avatar operation failed during sell saga, compensation performed", ex);
-    }
+    marketplaceService.sellItem(idOfMarketplace(marketplaceId), itemName);
+    return ResponseEntity.noContent().build();
   }
 
   // ─── Exception handling ──────────────────────────────────────────────────────
-
-  @ExceptionHandler(MarketplaceNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleMarketplaceNotFound(MarketplaceNotFoundException ex) {
+  @ExceptionHandler({
+    ItemNotFoundException.class,
+    AvatarNotFoundException.class,
+    MarketplaceNotFoundException.class
+  })
+  public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
     return ResponseEntity.notFound().build();
   }
 
-  @ExceptionHandler({ItemNotFoundException.class, AvatarNotFoundException.class})
-  public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
-    return ResponseEntity.notFound().build();
+  @ExceptionHandler({InsufficientLevelException.class})
+  public ResponseEntity<ErrorResponse> handleBadOperation(RuntimeException ex) {
+    return ResponseEntity.status(403).body(new ErrorResponse(ex.getMessage()));
   }
 
   @ExceptionHandler(AvatarCommunicationException.class)
