@@ -1,4 +1,4 @@
-package habitquest.guild.infrastructure;
+package habitquest.marketplace.application;
 
 public class AvatarCommunicationException extends RuntimeException {
   private static final long serialVersionUID = 1L;

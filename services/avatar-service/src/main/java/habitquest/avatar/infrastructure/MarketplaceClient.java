@@ -2,6 +2,8 @@ package habitquest.avatar.infrastructure;
 
 import common.hexagonal.Adapter;
 import habitquest.avatar.application.AvatarLogger;
+import habitquest.avatar.application.MarketplaceClientPort;
+import habitquest.avatar.application.MarketplaceCommunicationException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,7 @@ import org.springframework.web.client.RestClientException;
 
 @Adapter
 @Component
-public class MarketplaceClient {
+public class MarketplaceClient implements MarketplaceClientPort {
 
   private final RestClient restClient;
   private final AvatarLogger log;

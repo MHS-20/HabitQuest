@@ -36,7 +36,6 @@ public class BattleControllerIT {
 
   @MockitoBean private BattleService battleService;
   @MockitoBean private GuildService guildService;
-  @MockitoBean private AvatarClient avatarClient;
   @MockitoBean private GuildLogger log;
 
   // ── POST /api/v1/battles ──────────────────────────────────────────────────────
@@ -382,7 +381,6 @@ public class BattleControllerIT {
   }
 
   // ── POST /api/v1/battles/{id}/damage ─────────────────────────────────────────
-
   @Nested
   @DisplayName("POST /api/v1/battles/{id}/damage")
   class DealDamage {
@@ -392,12 +390,11 @@ public class BattleControllerIT {
     }
 
     @Test
-    @DisplayName("grants XP and money to all members when boss is killed (Won)")
-    void shouldGrantRewardsOnWin() throws Exception {
+    @DisplayName("returns 204 when boss is killed (Won)")
+    void shouldReturn204OnWin() throws Exception {
       stubAttackerTurn();
-      when(battleService.dealDamageOnBoss(BATTLE_ID, LEADER_ID, 500))
+      when(battleService.processDamage(BATTLE_ID, LEADER_ID, 500))
           .thenReturn(new BattleOutcome.Won(EXP_REWARD, MONEY_REWARD));
-      when(battleService.getBattleById(BATTLE_ID)).thenReturn(battle());
 
       mockMvc
           .perform(
@@ -405,26 +402,19 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":500,"attackerAvatarId":"avatar-1"}
-                                      """))
+                        {"damage":500,"attackerAvatarId":"avatar-1"}
+                    """))
           .andExpect(status().isNoContent());
 
-      verify(avatarClient).grantExperience(eq(LEADER_ID.value()), eq(EXP_REWARD));
-      verify(avatarClient).earnMoney(eq(LEADER_ID.value()), eq(MONEY_REWARD));
-      verifyNoMoreInteractions(avatarClient);
+      verify(battleService).processDamage(BATTLE_ID, LEADER_ID, 500);
     }
 
     @Test
-    @DisplayName("applies penalty to all members when counterattack triggers Lost")
-    void shouldApplyPenaltyOnLoss() throws Exception {
+    @DisplayName("returns 204 when battle ends in loss")
+    void shouldReturn204OnLoss() throws Exception {
       stubAttackerTurn();
-      when(battleService.dealDamageOnBoss(BATTLE_ID, LEADER_ID, 10))
-          .thenReturn(new BattleOutcome.Ongoing());
-      when(avatarClient.applyDamage(LEADER_ID.value(), 10))
-          .thenReturn(new AvatarClient.DamageResult(true));
-      when(battleService.applyCounterattack(BATTLE_ID, LEADER_ID))
+      when(battleService.processDamage(BATTLE_ID, LEADER_ID, 10))
           .thenReturn(new BattleOutcome.Lost(PENALTY));
-      when(battleService.getBattleById(BATTLE_ID)).thenReturn(battle());
 
       mockMvc
           .perform(
@@ -432,47 +422,18 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":10,"attackerAvatarId":"avatar-1"}
-                                      """))
+                        {"damage":10,"attackerAvatarId":"avatar-1"}
+                    """))
           .andExpect(status().isNoContent());
 
-      verify(avatarClient).applyPenalty(eq(LEADER_ID.value()), eq(PENALTY));
+      verify(battleService).processDamage(BATTLE_ID, LEADER_ID, 10);
     }
 
     @Test
-    @DisplayName(
-        "advances turn and applies damage to attacker when boss survives and attacker lives")
-    void shouldAdvanceTurnWhenOngoingAndAttackerLives() throws Exception {
+    @DisplayName("returns 204 when battle is ongoing")
+    void shouldReturn204WhenOngoing() throws Exception {
       stubAttackerTurn();
-      when(battleService.dealDamageOnBoss(BATTLE_ID, LEADER_ID, 30))
-          .thenReturn(new BattleOutcome.Ongoing());
-      when(avatarClient.applyDamage(LEADER_ID.value(), 30))
-          .thenReturn(new AvatarClient.DamageResult(false));
-
-      mockMvc
-          .perform(
-              post("/api/v1/battles/{id}/damage", BATTLE_ID.value())
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      """
-                                      {"damage":30,"attackerAvatarId":"avatar-1"}
-                                      """))
-          .andExpect(status().isNoContent());
-
-      verify(avatarClient).applyDamage(LEADER_ID.value(), 30);
-      verify(battleService).nextTurn(BATTLE_ID);
-      verify(battleService, never()).applyCounterattack(any(), any());
-    }
-
-    @Test
-    @DisplayName("applies counterattack and advances turn when attacker dies but guild survives")
-    void shouldApplyCounterattackAndAdvanceTurnWhenAttackerDiesButGuildSurvives() throws Exception {
-      stubAttackerTurn();
-      when(battleService.dealDamageOnBoss(BATTLE_ID, LEADER_ID, 30))
-          .thenReturn(new BattleOutcome.Ongoing());
-      when(avatarClient.applyDamage(LEADER_ID.value(), 30))
-          .thenReturn(new AvatarClient.DamageResult(true));
-      when(battleService.applyCounterattack(BATTLE_ID, LEADER_ID))
+      when(battleService.processDamage(BATTLE_ID, LEADER_ID, 30))
           .thenReturn(new BattleOutcome.Ongoing());
 
       mockMvc
@@ -481,12 +442,11 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":30,"attackerAvatarId":"avatar-1"}
-                                      """))
+                        {"damage":30,"attackerAvatarId":"avatar-1"}
+                    """))
           .andExpect(status().isNoContent());
 
-      verify(battleService).applyCounterattack(BATTLE_ID, LEADER_ID);
-      verify(battleService).nextTurn(BATTLE_ID);
+      verify(battleService).processDamage(BATTLE_ID, LEADER_ID, 30);
     }
 
     @Test
@@ -501,11 +461,11 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":30,"attackerAvatarId":"wrong-avatar"}
-                                      """))
+                        {"damage":30,"attackerAvatarId":"wrong-avatar"}
+                    """))
           .andExpect(status().isForbidden());
 
-      verifyNoInteractions(avatarClient);
+      verify(battleService, never()).processDamage(any(), any(), anyInt());
     }
 
     @Test
@@ -517,12 +477,11 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":30,"attackerAvatarId":null}
-                                      """))
+                        {"damage":30,"attackerAvatarId":null}
+                    """))
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(battleService);
-      verifyNoInteractions(avatarClient);
     }
 
     @Test
@@ -537,8 +496,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                      {"damage":10,"attackerAvatarId":"avatar-1"}
-                                      """))
+                        {"damage":10,"attackerAvatarId":"avatar-1"}
+                    """))
           .andExpect(status().isNotFound());
     }
   }

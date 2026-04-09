@@ -29,12 +29,14 @@ class AvatarServiceImplTest {
   @Mock private AvatarFactory avatarFactory;
   @Mock private AvatarRepository avatarRepository;
   @Mock private AvatarObserver avatarObserver;
+  @Mock private MarketplaceClientPort marketplacePort;
 
   private AvatarServiceImpl service;
 
   @BeforeEach
   void setUp() {
-    service = new AvatarServiceImpl(avatarFactory, avatarRepository, avatarObserver);
+    service =
+        new AvatarServiceImpl(avatarFactory, avatarRepository, avatarObserver, marketplacePort);
   }
 
   // ─── createAvatar ────────────────────────────────────────────────────────────

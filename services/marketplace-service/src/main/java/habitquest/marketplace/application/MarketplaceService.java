@@ -33,9 +33,11 @@ public interface MarketplaceService {
 
   Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
-  void buyItem(Id<Marketplace> marketplaceId, String itemName) throws MarketplaceNotFoundException;
+  void buyItem(Id<Marketplace> marketplaceId, String itemName, Level currentLevel)
+      throws MarketplaceNotFoundException, ItemNotFoundException;
 
-  void sellItem(Id<Marketplace> marketplaceId, String itemName) throws MarketplaceNotFoundException;
+  void sellItem(Id<Marketplace> marketplaceId, String itemName)
+      throws MarketplaceNotFoundException, ItemNotFoundException;
 
   boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
       throws MarketplaceNotFoundException;

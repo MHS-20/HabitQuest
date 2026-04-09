@@ -16,19 +16,23 @@ public class AvatarServiceImpl implements AvatarService {
   private final AvatarFactory avatarFactory;
   private final AvatarRepository avatarRepository;
   private final AvatarObserver avatarObserver;
+  private final MarketplaceClientPort marketplacePort;
 
   public AvatarServiceImpl(
       AvatarFactory avatarFactory,
       AvatarRepository avatarRepository,
-      AvatarObserver avatarObserver) {
+      AvatarObserver avatarObserver,
+      MarketplaceClientPort marketplacePort) {
     this.avatarFactory = avatarFactory;
     this.avatarRepository = avatarRepository;
     this.avatarObserver = avatarObserver;
+    this.marketplacePort = marketplacePort;
   }
 
   @Override
   public Id<Avatar> createAvatar(Id<Avatar> id, String name) {
     Avatar avatar = this.avatarFactory.create(id, name);
+    marketplacePort.createMarketplace(id.value());
     avatarRepository.save(avatar);
     return avatar.getId();
   }

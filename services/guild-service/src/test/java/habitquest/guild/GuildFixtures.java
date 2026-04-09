@@ -123,25 +123,22 @@ public final class GuildFixtures {
 
   // Battle factories
   public static Battle battle() {
-    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, new ArrayList<>());
-    b.increaseNumOfTurns(LEADER_ID);
-    return b;
+    return new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 1, new ArrayList<>(List.of(LEADER_ID)));
   }
 
   public static Battle battleWithTwoMembers() {
-    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, BATTLE_MEMBERS);
-    b.increaseNumOfTurns(BATTLE_MEMBER_ID_1);
-    b.increaseNumOfTurns(BATTLE_MEMBER_ID_2);
-    return b;
+    return new Battle(
+        BATTLE_ID,
+        GUILD_ID,
+        BOSS_TYPE,
+        2,
+        new ArrayList<>(List.of(BATTLE_MEMBER_ID_1, BATTLE_MEMBER_ID_2)));
   }
 
   public static Battle fullBattleFixture() {
-    List<Id<GuildMember>> members = new java.util.ArrayList<>();
-    Battle b = new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, 0, members);
-    b.increaseNumOfTurns(MEMBER_ID);
-    b.increaseNumOfTurns(MEMBER_ID_2);
-    b.increaseNumOfTurns(MEMBER_ID_3);
-    return b;
+    List<Id<GuildMember>> members =
+        new java.util.ArrayList<>(List.of(MEMBER_ID, MEMBER_ID_2, MEMBER_ID_3));
+    return new Battle(BATTLE_ID, GUILD_ID, BOSS_TYPE, members.size(), members);
   }
 
   // Invite factories

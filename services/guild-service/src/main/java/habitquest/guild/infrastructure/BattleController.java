@@ -35,17 +35,11 @@ public class BattleController {
 
   private final BattleService battleService;
   private final GuildService guildService;
-  private final AvatarClient avatarClient;
   private final GuildLogger log;
 
-  public BattleController(
-      BattleService battleService,
-      GuildService guildService,
-      AvatarClient avatarClient,
-      GuildLogger log) {
+  public BattleController(BattleService battleService, GuildService guildService, GuildLogger log) {
     this.battleService = battleService;
     this.guildService = guildService;
-    this.avatarClient = avatarClient;
     this.log = log;
   }
 
@@ -249,41 +243,18 @@ public class BattleController {
     }
     log.info(request, "Dealing damage in battle: " + id);
     BattleOutcome outcome =
-        battleService.dealDamageOnBoss(
+        battleService.processDamage(
             idOfBattle(id), idOfGuildMember(request.attackerAvatarId()), request.damage());
-
-    if (outcome instanceof BattleOutcome.Ongoing) {
-      boolean attackerDied =
-          avatarClient.applyDamage(request.attackerAvatarId(), request.damage()).died();
-      if (attackerDied) {
-        outcome =
-            battleService.applyCounterattack(
-                idOfBattle(id), idOfGuildMember(request.attackerAvatarId()));
-      }
-    }
 
     switch (outcome) {
       case BattleOutcome.Won(int exp, int money) -> {
         log.info(new BattleOutcomeLog(id, "WON", exp, money), "Battle won, distributing rewards");
-        battleService
-            .getBattleById(idOfBattle(id))
-            .getMembers()
-            .forEach(
-                m -> {
-                  avatarClient.grantExperience(m.value(), exp);
-                  avatarClient.earnMoney(m.value(), money);
-                });
       }
       case BattleOutcome.Lost(int penalty) -> {
         log.info(new BattleOutcomeLog(id, "LOST", penalty, 0), "Battle lost, applying penalties");
-        battleService
-            .getBattleById(idOfBattle(id))
-            .getMembers()
-            .forEach(m -> avatarClient.applyPenalty(m.value(), penalty));
       }
       case BattleOutcome.Ongoing ignored -> {
         log.info(new BattleCreatedResponse(id), "Battle ongoing, advancing turn");
-        battleService.nextTurn(idOfBattle(id));
       }
     }
 

@@ -18,18 +18,21 @@ public class GuildServiceImpl implements GuildService {
   private final GuildObserver guildObserver;
   private final BattleService battleService;
   private final InviteFactory inviteFactory;
+  private final AvatarClientPort avatarPort;
 
   public GuildServiceImpl(
       GuildFactory guildFactory,
       GuildRepository guildRepository,
       GuildObserver guildObserver,
       BattleService battleService,
-      InviteFactory inviteFactory) {
+      InviteFactory inviteFactory,
+      AvatarClientPort avatarClientPort) {
     this.guildFactory = guildFactory;
     this.guildRepository = guildRepository;
     this.guildObserver = guildObserver;
     this.battleService = battleService;
     this.inviteFactory = inviteFactory;
+    this.avatarPort = avatarClientPort;
   }
 
   @Override
@@ -89,6 +92,12 @@ public class GuildServiceImpl implements GuildService {
     guild.sendInvite(requestorId, invite);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new InviteSent(guildId, targetAvatarId, invite.inviteId()));
+    avatarPort.sendInviteToAvatar(
+        invite.inviteId().value(),
+        targetAvatarId.value(),
+        guildId.value(),
+        guild.getName(),
+        invite.expiresAt());
     return invite;
   }
 
