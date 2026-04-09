@@ -74,6 +74,8 @@ fun GuildScreen(
     var battleStats by remember { mutableStateOf<BattleStatsData?>(null) }
     var battleStatsLoading by remember { mutableStateOf(false) }
     var battleStatsError by remember { mutableStateOf<String?>(null) }
+    var battleAttackLoading by remember { mutableStateOf(false) }
+    var battleAttackError by remember { mutableStateOf<String?>(null) }
 
     suspend fun loadLeaderboard(showLoading: Boolean) {
         if (showLoading) loading = true
@@ -87,6 +89,7 @@ fun GuildScreen(
     suspend fun loadBattleStats(guildId: String) {
         battleStatsLoading = true
         battleStatsError = null
+        battleAttackError = null
         when (val result = repository.fetchBattleStatsByGuild(token, guildId)) {
             is BattleStatsResult.Success -> battleStats = result.stats
             is BattleStatsResult.Error -> {
@@ -119,6 +122,19 @@ fun GuildScreen(
         leaderboard.filter { guild ->
             guild.members.any { member -> member.avatarId == avatarId }
         }
+    }
+
+    val activeBattleGuild = activeBattleGuildId?.let { guildId ->
+        joinedGuilds.firstOrNull { it.id == guildId }
+    } ?: joinedGuilds.firstOrNull()
+    val battleIsActive = battleStats != null && battleStats!!.bossRemainingHealth > 0
+    val currentTurnMemberId = activeBattleGuild?.members?.getOrNull((battleStats?.currentTurn ?: -1))?.avatarId
+    val canAttackNow = battleIsActive && avatarId != null && currentTurnMemberId == avatarId
+    val turnInfo = when {
+        battleStats == null -> null
+        battleIsActive && currentTurnMemberId == avatarId -> "It's your turn"
+        battleIsActive -> "Waiting for avatar: ${currentTurnMemberId ?: "unknown"}"
+        else -> "Battle is ${battleStats?.status?.uppercase() ?: "UNKNOWN"}"
     }
 
     Column(
@@ -541,14 +557,56 @@ fun GuildScreen(
 
         if (showBattleInfoDialog) {
             val guildIdForStats = activeBattleGuildId ?: joinedGuilds.firstOrNull()?.id
+            val normalizedBattleStats = battleStats?.let { stats ->
+                if (stats.bossRemainingHealth > 0) stats.copy(status = "ONGOING") else stats
+            }
             BattleInfoDialog(
                 battleStatsLoading = battleStatsLoading,
                 battleStatsError = battleStatsError,
-                battleStats = battleStats,
+                battleStats = normalizedBattleStats,
                 canRefresh = guildIdForStats != null,
+                canAttack = canAttackNow,
+                attackLoading = battleAttackLoading,
+                attackError = battleAttackError,
+                turnInfo = turnInfo,
                 onRefresh = {
                     if (guildIdForStats != null) {
                         scope.launch { loadBattleStats(guildIdForStats) }
+                    }
+                },
+                onAttack = {
+                    val stats = battleStats
+                    if (stats == null || avatarId == null) {
+                        battleAttackError = "Battle or avatar not available"
+                        return@BattleInfoDialog
+                    }
+                    if (!canAttackNow) {
+                        battleAttackError = "It's not your turn"
+                        return@BattleInfoDialog
+                    }
+                    val damage = (avatar?.strength ?: 10).coerceAtLeast(1)
+                    scope.launch {
+                        battleAttackLoading = true
+                        battleAttackError = null
+                        when (
+                            val result = repository.attackBattle(
+                                token = token,
+                                battleId = stats.battleId,
+                                attackerAvatarId = avatarId,
+                                damage = damage,
+                            )
+                        ) {
+                            is BattleAttackResult.Success -> {
+                                if (guildIdForStats != null) {
+                                    loadBattleStats(guildIdForStats)
+                                }
+                            }
+
+                            is BattleAttackResult.Error -> {
+                                battleAttackError = result.message
+                            }
+                        }
+                        battleAttackLoading = false
                     }
                 },
                 onClose = { showBattleInfoDialog = false },

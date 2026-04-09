@@ -307,7 +307,12 @@ fun BattleInfoDialog(
     battleStatsError: String?,
     battleStats: BattleStatsData?,
     canRefresh: Boolean,
+    canAttack: Boolean,
+    attackLoading: Boolean,
+    attackError: String?,
+    turnInfo: String?,
     onRefresh: () -> Unit,
+    onAttack: () -> Unit,
     onClose: () -> Unit,
 ) {
     AlertDialog(
@@ -323,6 +328,14 @@ fun BattleInfoDialog(
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                 }
 
+                turnInfo?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall)
+                }
+
+                attackError?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+
                 battleStats?.let { stats ->
                     Text("Battle ID: ${stats.battleId}", style = MaterialTheme.typography.bodySmall)
                     Text("Guild ID: ${stats.guildId}", style = MaterialTheme.typography.bodySmall)
@@ -331,6 +344,12 @@ fun BattleInfoDialog(
                     Text("Boss remaining HP: ${stats.bossRemainingHealth}", style = MaterialTheme.typography.bodySmall)
                     Text("Current turn: ${stats.currentTurn}", style = MaterialTheme.typography.bodySmall)
                     Text("Total turns: ${stats.totalTurns}", style = MaterialTheme.typography.bodySmall)
+                }
+
+                if (canAttack && battleStats != null) {
+                    Button(onClick = onAttack, enabled = !attackLoading, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (attackLoading) "Attacking..." else "Attack boss")
+                    }
                 }
             }
         },
