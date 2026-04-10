@@ -10,12 +10,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import habitquest.tracking.application.HabitLogger;
 import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.application.HabitService;
+import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
+import habitquest.tracking.infrastructure.dto.HabitHistoryEventResponse;
+import habitquest.tracking.infrastructure.dto.HabitMapper;
+import habitquest.tracking.infrastructure.dto.HabitResponseAssembler;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,6 +43,7 @@ public class HabitControllerIT {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private HabitService habitService;
+  @MockitoBean private HabitResponseAssembler habitResponseAssembler;
   @MockitoBean private HabitLogger log;
 
   @Nested
@@ -49,6 +55,8 @@ public class HabitControllerIT {
     void shouldReturn201WithId() throws Exception {
       when(habitService.createDailyHabit(any(), anyString(), anyString(), any()))
           .thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -74,6 +82,8 @@ public class HabitControllerIT {
     void shouldDelegateDailyPayloadToService() throws Exception {
       when(habitService.createDailyHabit(any(), anyString(), anyString(), any()))
           .thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -103,6 +113,8 @@ public class HabitControllerIT {
     void shouldDelegateWeeklyPayloadToService() throws Exception {
       when(habitService.createWeeklyHabit(any(), anyString(), anyString(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -130,6 +142,8 @@ public class HabitControllerIT {
     void shouldDelegateMonthlyPayloadToService() throws Exception {
       when(habitService.createMonthlyHabit(any(), anyString(), anyString(), anyInt(), any()))
           .thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -189,6 +203,8 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with habit data when found")
     void shouldReturn200WhenFound() throws Exception {
       when(habitService.getHabitById(HABIT_ID)).thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(HabitMapper.toResponse(hydrateHabitWithQuest())));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}", HABIT_ID.value()))
@@ -296,6 +312,8 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with habit title")
     void shouldReturnTitle() throws Exception {
       when(habitService.getTitle(HABIT_ID)).thenReturn(TITLE);
+      when(habitResponseAssembler.toTitleModel(eq(HABIT_ID.value()), eq(TITLE)))
+          .thenReturn(EntityModel.of(new HabitController.TitleResponse(TITLE)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/title", HABIT_ID.value()))
@@ -312,6 +330,8 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with habit description")
     void shouldReturnDescription() throws Exception {
       when(habitService.getDescription(HABIT_ID)).thenReturn(DESCRIPTION);
+      when(habitResponseAssembler.toDescriptionModel(eq(HABIT_ID.value()), eq(DESCRIPTION)))
+          .thenReturn(EntityModel.of(new HabitController.DescriptionResponse(DESCRIPTION)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/description", HABIT_ID.value()))
@@ -327,8 +347,11 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with habit tags")
     void shouldReturnTags() throws Exception {
-      when(habitService.getTags(HABIT_ID))
-          .thenReturn(List.of(new Tag(TAG_HEALTH), new Tag("fitness")));
+      List<Tag> tags = List.of(new Tag(TAG_HEALTH), new Tag("fitness"));
+      when(habitService.getTags(HABIT_ID)).thenReturn(tags);
+      when(habitResponseAssembler.toTagsModel(eq(HABIT_ID.value()), eq(tags)))
+          .thenReturn(
+              EntityModel.of(new HabitController.TagsResponse(List.of(TAG_HEALTH, "fitness"))));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/tags", HABIT_ID.value()))
@@ -346,6 +369,12 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with recurrence payload")
     void shouldReturnRecurrence() throws Exception {
       when(habitService.getRecurrence(HABIT_ID)).thenReturn(WEEKLY_RECURRENCE);
+      when(habitResponseAssembler.toRecurrenceModel(
+              eq(HABIT_ID.value()), any(HabitController.RecurrenceResponse.class)))
+          .thenReturn(
+              EntityModel.of(
+                  new HabitController.RecurrenceResponse(
+                      "WEEKLY", null, DEFAULT_DAY_OF_WEEK.name())));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/recurrence", HABIT_ID.value()))
@@ -363,6 +392,8 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with last attended date")
     void shouldReturnLastAttendedDate() throws Exception {
       when(habitService.getLastAttendedDate(HABIT_ID)).thenReturn(ATTENDED_AT);
+      when(habitResponseAssembler.toLastAttendedDateModel(eq(HABIT_ID.value()), eq(ATTENDED_AT)))
+          .thenReturn(EntityModel.of(new HabitController.LastAttendedDateResponse(ATTENDED_AT)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/last-attended-date", HABIT_ID.value()))
@@ -379,13 +410,16 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with habit event history")
     void shouldReturnHistory() throws Exception {
       var habit = hydrateHabitWithQuest();
-      when(habitService.getHistory(HABIT_ID))
-          .thenReturn(
-              List.of(
-                  new HabitHistoryEvent(
-                      new HabitAttended(habit, AVATAR_ID),
-                      NEXT_ATTENDED_AT,
-                      "attendedAt=" + NEXT_ATTENDED_AT)));
+      var event =
+          new HabitHistoryEvent(
+              new HabitAttended(habit, AVATAR_ID),
+              NEXT_ATTENDED_AT,
+              "attendedAt=" + NEXT_ATTENDED_AT);
+      when(habitService.getHistory(HABIT_ID)).thenReturn(List.of(event));
+
+      HabitHistoryEventResponse eventResponse = HabitMapper.toResponse(event);
+      when(habitResponseAssembler.toHistoryModel(eq(HABIT_ID.value()), anyList()))
+          .thenReturn(EntityModel.of(new HabitController.HistoryResponse(List.of(eventResponse))));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/history", HABIT_ID.value()))

@@ -1,7 +1,5 @@
 package habitquest.guild.infrastructure;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
 import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.guild.application.GuildLogger;
@@ -10,12 +8,12 @@ import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.*;
 import habitquest.guild.infrastructure.dto.GuildMemberResponse;
 import habitquest.guild.infrastructure.dto.GuildResponse;
+import habitquest.guild.infrastructure.dto.GuildResponseAssembler;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +23,13 @@ import org.springframework.web.bind.annotation.*;
 public class GuildController {
 
   private final GuildService guildService;
+  private final GuildResponseAssembler assembler;
   private final GuildLogger log;
 
-  public GuildController(GuildService guildService, GuildLogger log) {
+  public GuildController(
+      GuildService guildService, GuildResponseAssembler assembler, GuildLogger log) {
     this.guildService = guildService;
+    this.assembler = assembler;
     this.log = log;
   }
 
@@ -56,14 +57,8 @@ public class GuildController {
             .value();
     GuildCreatedResponse body = new GuildCreatedResponse(id);
     log.info(body, "Guild created");
-    EntityModel<GuildCreatedResponse> model =
-        EntityModel.of(
-            body,
-            selfLink(id),
-            linkTo(methodOn(GuildController.class).getGuild(id)).withRel("guild"),
-            linkTo(methodOn(GuildController.class).getMembers(id)).withRel("members"),
-            linkTo(methodOn(GuildController.class).getGlobalRank(id)).withRel("rank"));
-    return ResponseEntity.created(URI.create("/api/v1/guilds/" + id)).body(model);
+    return ResponseEntity.created(URI.create("/api/v1/guilds/" + id))
+        .body(assembler.toCreatedModel(body));
   }
 
   @GetMapping("/{id}")
@@ -71,15 +66,7 @@ public class GuildController {
       throws GuildNotFoundException {
     GuildResponse body = GuildResponse.from(guildService.getGuild(idOfGuild(id)));
     log.info(body, "Guild retrieved");
-    EntityModel<GuildResponse> model =
-        EntityModel.of(
-            body,
-            selfLink(id),
-            linkTo(methodOn(GuildController.class).getMembers(id)).withRel("members"),
-            linkTo(methodOn(GuildController.class).getGlobalRank(id)).withRel("rank"),
-            linkTo(methodOn(GuildController.class).getLeaderboard()).withRel("leaderboard"),
-            linkTo(methodOn(GuildController.class).deleteGuild(id)).withRel("delete"));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(assembler.toModel(body));
   }
 
   @DeleteMapping("/{id}")
@@ -95,12 +82,7 @@ public class GuildController {
     List<GuildMemberResponse> members =
         guildService.getMembers(idOfGuild(id)).stream().map(GuildMemberResponse::from).toList();
     log.info(new MembersCountResponse(id, members.size()), "Guild members retrieved");
-    CollectionModel<GuildMemberResponse> model =
-        CollectionModel.of(
-            members,
-            linkTo(methodOn(GuildController.class).getMembers(id)).withSelfRel(),
-            selfLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(assembler.toMembersModel(members, id));
   }
 
   @PostMapping("/{id}/invites")
@@ -108,11 +90,10 @@ public class GuildController {
       @PathVariable String id, @RequestBody SendInviteRequest request)
       throws GuildNotFoundException {
     try {
-      Invite invite =
-          guildService.sendInvite(
-              idOfGuild(id),
-              idOfGuildMember(request.requestorId()),
-              idOfGuildMember(request.targetAvatarId()));
+      guildService.sendInvite(
+          idOfGuild(id),
+          idOfGuildMember(request.requestorId()),
+          idOfGuildMember(request.targetAvatarId()));
       log.info(request, "Invite sent");
       return ResponseEntity.noContent().build();
     } catch (UnauthorizedGuildOperationException e) {
@@ -191,16 +172,9 @@ public class GuildController {
   @GetMapping("/{id}/rank")
   public ResponseEntity<EntityModel<RankResponse>> getGlobalRank(@PathVariable String id)
       throws GuildNotFoundException {
-    Integer rank = guildService.getGlobalRank(idOfGuild(id));
-    RankResponse body = new RankResponse(rank);
+    RankResponse body = new RankResponse(guildService.getGlobalRank(idOfGuild(id)));
     log.info(body, "Global rank retrieved for guild: " + id);
-    EntityModel<RankResponse> model =
-        EntityModel.of(
-            body,
-            linkTo(methodOn(GuildController.class).getGlobalRank(id)).withSelfRel(),
-            selfLink(id),
-            linkTo(methodOn(GuildController.class).getLeaderboard()).withRel("leaderboard"));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(assembler.toRankModel(body, id));
   }
 
   @GetMapping("/leaderboard")
@@ -208,10 +182,7 @@ public class GuildController {
     List<GuildResponse> leaderboard =
         guildService.getGuildLeaderboard().stream().map(GuildResponse::from).toList();
     log.info(new LeaderboardCountResponse(leaderboard.size()), "Leaderboard retrieved");
-    CollectionModel<GuildResponse> model =
-        CollectionModel.of(
-            leaderboard, linkTo(methodOn(GuildController.class).getLeaderboard()).withSelfRel());
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(assembler.toLeaderboardModel(leaderboard));
   }
 
   @ExceptionHandler(GuildNotFoundException.class)
@@ -231,10 +202,6 @@ public class GuildController {
   public ResponseEntity<Void> handleUnauthorized(UnauthorizedGuildOperationException ex) {
     log.warn(ex, "Unauthorized guild operation");
     return ResponseEntity.status(403).build();
-  }
-
-  private Link selfLink(String id) {
-    return Link.of("/api/v1/guilds/" + id).withSelfRel();
   }
 
   public record CreateGuildRequest(String name, String creatorAvatarId, String creatorNickname) {}

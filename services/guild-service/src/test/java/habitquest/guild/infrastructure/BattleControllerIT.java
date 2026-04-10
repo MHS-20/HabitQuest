@@ -13,6 +13,10 @@ import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossStatus;
 import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.battle.stats.Health;
+import habitquest.guild.infrastructure.BattleController.*;
+import habitquest.guild.infrastructure.dto.BattleResponse;
+import habitquest.guild.infrastructure.dto.BattleResponseAssembler;
+import habitquest.guild.infrastructure.dto.BossResponse;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,7 +41,14 @@ public class BattleControllerIT {
 
   @MockitoBean private BattleService battleService;
   @MockitoBean private GuildService guildService;
+  @MockitoBean private BattleResponseAssembler assembler;
   @MockitoBean private GuildLogger log;
+
+  // ── helper: EntityModel senza link (sufficiente per i test di status/body) ───
+
+  private <T> EntityModel<T> bare(T body) {
+    return EntityModel.of(body);
+  }
 
   // ── POST /api/v1/battles ──────────────────────────────────────────────────────
 
@@ -51,6 +63,7 @@ public class BattleControllerIT {
       when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(avatarMember()));
       when(battleService.createBattle(eq(GUILD_ID), eq(BossType.MINOTAUR), eq(1), any()))
           .thenReturn(BATTLE_ID);
+      when(assembler.toCreatedModel(any())).thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(
@@ -72,6 +85,7 @@ public class BattleControllerIT {
           .thenReturn(List.of(avatarMember(), avatarMember()));
       when(battleService.createBattle(any(Id.class), any(BossType.class), anyInt(), any()))
           .thenReturn(BATTLE_ID);
+      when(assembler.toCreatedModel(any())).thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(
@@ -100,6 +114,7 @@ public class BattleControllerIT {
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(battleService);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -119,6 +134,7 @@ public class BattleControllerIT {
           .andExpect(status().isForbidden());
 
       verifyNoInteractions(battleService);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -138,6 +154,7 @@ public class BattleControllerIT {
           .andExpect(status().isNotFound());
 
       verifyNoInteractions(battleService);
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -151,6 +168,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with battle data when found")
     void shouldReturn200WhenFound() throws Exception {
       when(battleService.getBattleById(BATTLE_ID)).thenReturn(battle());
+      when(assembler.toModel(any(BattleResponse.class)))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc.perform(get("/api/v1/battles/{id}", BATTLE_ID.value())).andExpect(status().isOk());
     }
@@ -164,6 +183,8 @@ public class BattleControllerIT {
       mockMvc
           .perform(get("/api/v1/battles/{id}", UNKNOWN_BATTLE_ID.value()))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -190,6 +211,7 @@ public class BattleControllerIT {
           .andExpect(status().isNoContent());
 
       verify(battleService).deleteBattle(BATTLE_ID);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -209,6 +231,7 @@ public class BattleControllerIT {
           .andExpect(status().isForbidden());
 
       verify(battleService, never()).deleteBattle(any());
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -238,6 +261,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with the active battle for the guild")
     void shouldReturn200() throws Exception {
       when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(battle()));
+      when(assembler.toModelForGuild(any(BattleResponse.class), eq(GUILD_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/guild/{guildId}", GUILD_ID.value()))
@@ -266,6 +291,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with inProgress=true when a battle is running")
     void shouldReturnTrueWhenInProgress() throws Exception {
       when(battleService.hasBattleInProgress(GUILD_ID)).thenReturn(true);
+      when(assembler.toInProgressModel(any(InProgressResponse.class), eq(GUILD_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/guild/{guildId}/in-progress", GUILD_ID.value()))
@@ -277,6 +304,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with inProgress=false when no battle is running")
     void shouldReturnFalseWhenNotInProgress() throws Exception {
       when(battleService.hasBattleInProgress(GUILD_ID)).thenReturn(false);
+      when(assembler.toInProgressModel(any(InProgressResponse.class), eq(GUILD_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/guild/{guildId}/in-progress", GUILD_ID.value()))
@@ -295,6 +324,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with boss data")
     void shouldReturn200() throws Exception {
       when(battleService.getBoss(BATTLE_ID)).thenReturn(BossType.MINOTAUR);
+      when(assembler.toBossModel(any(BossResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/boss", BATTLE_ID.value()))
@@ -325,6 +356,8 @@ public class BattleControllerIT {
     void shouldReturn200() throws Exception {
       when(battleService.getBossRemainingHealth(BATTLE_ID))
           .thenReturn(new BossStatus(new Health(800)));
+      when(assembler.toBossHealthModel(any(BossHealthResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/boss/health", BATTLE_ID.value()))
@@ -354,6 +387,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with current turn number")
     void shouldReturnCurrentTurn() throws Exception {
       when(battleService.getCurrentTurn(BATTLE_ID)).thenReturn(2);
+      when(assembler.toCurrentTurnModel(any(TurnResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/turns/current", BATTLE_ID.value()))
@@ -372,6 +407,8 @@ public class BattleControllerIT {
     @DisplayName("returns 200 with total turn count")
     void shouldReturnTotalTurns() throws Exception {
       when(battleService.getNumOfTurns(BATTLE_ID)).thenReturn(5);
+      when(assembler.toTotalTurnsModel(any(TurnResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/turns/total", BATTLE_ID.value()))
@@ -381,6 +418,7 @@ public class BattleControllerIT {
   }
 
   // ── POST /api/v1/battles/{id}/damage ─────────────────────────────────────────
+
   @Nested
   @DisplayName("POST /api/v1/battles/{id}/damage")
   class DealDamage {
@@ -402,8 +440,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                        {"damage":500,"attackerAvatarId":"avatar-1"}
-                    """))
+                      {"damage":500,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(battleService).processDamage(BATTLE_ID, LEADER_ID, 500);
@@ -422,8 +460,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                        {"damage":10,"attackerAvatarId":"avatar-1"}
-                    """))
+                      {"damage":10,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(battleService).processDamage(BATTLE_ID, LEADER_ID, 10);
@@ -442,8 +480,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                        {"damage":30,"attackerAvatarId":"avatar-1"}
-                    """))
+                      {"damage":30,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNoContent());
 
       verify(battleService).processDamage(BATTLE_ID, LEADER_ID, 30);
@@ -461,8 +499,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                        {"damage":30,"attackerAvatarId":"wrong-avatar"}
-                    """))
+                      {"damage":30,"attackerAvatarId":"wrong-avatar"}
+                      """))
           .andExpect(status().isForbidden());
 
       verify(battleService, never()).processDamage(any(), any(), anyInt());
@@ -477,8 +515,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                        {"damage":30,"attackerAvatarId":null}
-                    """))
+                      {"damage":30,"attackerAvatarId":null}
+                      """))
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(battleService);
@@ -496,8 +534,8 @@ public class BattleControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                        {"damage":10,"attackerAvatarId":"avatar-1"}
-                    """))
+                      {"damage":10,"attackerAvatarId":"avatar-1"}
+                      """))
           .andExpect(status().isNotFound());
     }
   }
@@ -514,6 +552,8 @@ public class BattleControllerIT {
       when(battleService.getBattleStatus(BATTLE_ID)).thenReturn(new BattleOutcome.Ongoing());
       when(battleService.isBattleOver(BATTLE_ID)).thenReturn(false);
       when(battleService.isBattleWon(BATTLE_ID)).thenReturn(false);
+      when(assembler.toStatusModel(any(BattleStatusResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/status", BATTLE_ID.value()))
@@ -529,6 +569,8 @@ public class BattleControllerIT {
           .thenReturn(new BattleOutcome.Won(EXP_REWARD, MONEY_REWARD));
       when(battleService.isBattleOver(BATTLE_ID)).thenReturn(true);
       when(battleService.isBattleWon(BATTLE_ID)).thenReturn(true);
+      when(assembler.toStatusModel(any(BattleStatusResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/status", BATTLE_ID.value()))
@@ -543,6 +585,8 @@ public class BattleControllerIT {
       when(battleService.getBattleStatus(BATTLE_ID)).thenReturn(new BattleOutcome.Lost(PENALTY));
       when(battleService.isBattleOver(BATTLE_ID)).thenReturn(true);
       when(battleService.isBattleWon(BATTLE_ID)).thenReturn(false);
+      when(assembler.toStatusModel(any(BattleStatusResponse.class), eq(BATTLE_ID.value())))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/battles/{id}/status", BATTLE_ID.value()))

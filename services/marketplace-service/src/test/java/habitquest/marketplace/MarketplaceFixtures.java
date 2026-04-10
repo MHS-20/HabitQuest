@@ -11,6 +11,8 @@ import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
 import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.infrastructure.dto.ItemResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,6 +125,19 @@ public final class MarketplaceFixtures {
   public static ItemSold itemSold(
       Id<Marketplace> marketplaceId, String itemName, Id<Avatar> avatarId) {
     return new ItemSold(marketplaceId, itemName, avatarId);
+  }
+
+  public static ItemResponse swordResponse() {
+    return new ItemResponse("WEAPON", SWORD_NAME, "A sturdy iron sword", 30, 50);
+  }
+
+  public static ItemResponse shieldResponse() {
+    return new ItemResponse("ARMOR", SHIELD_NAME, "A sturdy iron shield", 20, 40);
+  }
+
+  public static MarketplaceResponse marketplaceResponse() {
+    return new MarketplaceResponse(
+        MARKETPLACE_ID.value(), List.of(swordResponse(), shieldResponse()));
   }
 
   public static ItemCatalog mockCatalog() {

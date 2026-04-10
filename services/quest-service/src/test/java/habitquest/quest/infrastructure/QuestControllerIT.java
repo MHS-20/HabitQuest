@@ -14,6 +14,10 @@ import habitquest.quest.application.QuestProgressView;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
+import habitquest.quest.domain.Quest;
+import habitquest.quest.domain.Reward;
+import habitquest.quest.infrastructure.dto.QuestResponse;
+import habitquest.quest.infrastructure.dto.QuestResponseAssembler;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +27,8 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +42,7 @@ public class QuestControllerIT {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private QuestService questService;
+  @MockitoBean private QuestResponseAssembler questResponseAssembler;
   @MockitoBean private QuestLogger log;
 
   @Nested
@@ -46,6 +53,8 @@ public class QuestControllerIT {
     @DisplayName("returns 201 with the new quest id")
     void shouldReturn201WithId() throws Exception {
       when(questService.createQuest(QUEST_NAME, Duration.ofDays(14))).thenReturn(fullQuest());
+      when(questResponseAssembler.toCreatedModel(any(Quest.class)))
+          .thenReturn(EntityModel.of(new QuestController.QuestCreatedResponse(QUEST_ID.value())));
 
       mockMvc
           .perform(
@@ -61,6 +70,8 @@ public class QuestControllerIT {
     @DisplayName("delegates name and duration to the service")
     void shouldDelegateNameAndDurationToService() throws Exception {
       when(questService.createQuest(anyString(), any(Duration.class))).thenReturn(fullQuest());
+      when(questResponseAssembler.toCreatedModel(any(Quest.class)))
+          .thenReturn(EntityModel.of(new QuestController.QuestCreatedResponse(QUEST_ID.value())));
 
       mockMvc
           .perform(
@@ -108,6 +119,12 @@ public class QuestControllerIT {
     @DisplayName("returns 200 with all quests")
     void shouldReturn200WithAllQuests() throws Exception {
       when(questService.getAllQuests()).thenReturn(List.of(fullQuest()));
+      when(questResponseAssembler.toCollectionModel(anyList()))
+          .thenReturn(
+              CollectionModel.of(
+                  List.of(
+                      EntityModel.of(
+                          new QuestResponse(QUEST_ID.value(), QUEST_NAME, 2, 5, List.of())))));
 
       mockMvc
           .perform(get("/api/v1/quests"))
@@ -125,6 +142,11 @@ public class QuestControllerIT {
     @DisplayName("returns 200 with quest data when found")
     void shouldReturn200WhenFound() throws Exception {
       when(questService.getQuest(QUEST_ID)).thenReturn(fullQuest());
+      when(questResponseAssembler.toModel(any(Quest.class)))
+          .thenReturn(
+              EntityModel.of(
+                  new QuestResponse(
+                      QUEST_ID.value(), QUEST_NAME, 2, 5, List.of(HABIT_ID_1.value()))));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}", QUEST_ID.value()))
@@ -184,6 +206,8 @@ public class QuestControllerIT {
     @DisplayName("returns 200 with quest name")
     void shouldReturnName() throws Exception {
       when(questService.getName(QUEST_ID)).thenReturn(QUEST_NAME);
+      when(questResponseAssembler.toNameModel(eq(QUEST_ID.value()), eq(QUEST_NAME)))
+          .thenReturn(EntityModel.of(new QuestController.NameResponse(QUEST_NAME)));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/name", QUEST_ID.value()))
@@ -200,6 +224,8 @@ public class QuestControllerIT {
     @DisplayName("returns 200 with quest duration")
     void shouldReturnDuration() throws Exception {
       when(questService.getDuration(QUEST_ID)).thenReturn(Duration.ofDays(3));
+      when(questResponseAssembler.toDurationModel(eq(QUEST_ID.value()), eq(Duration.ofDays(3))))
+          .thenReturn(EntityModel.of(new QuestController.DurationResponse(3L)));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/duration", QUEST_ID.value()))
@@ -216,43 +242,12 @@ public class QuestControllerIT {
     @DisplayName("returns 200 with quest reward")
     void shouldReturnReward() throws Exception {
       when(questService.getReward(QUEST_ID)).thenReturn(DEFAULT_MONEY_REWARD);
+      when(questResponseAssembler.toRewardModel(eq(QUEST_ID.value()), any(Reward.class)))
+          .thenReturn(EntityModel.of(DEFAULT_MONEY_REWARD));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/reward", QUEST_ID.value()))
           .andExpect(status().isOk());
-    }
-  }
-
-  @Nested
-  @DisplayName("GET /api/v1/quests/{id}/habits")
-  class GetHabits {
-
-    @Test
-    @DisplayName("returns 200 with habit data")
-    void shouldReturnHabits() throws Exception {
-      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(morningRunHabit()));
-      mockMvc
-          .perform(get("/api/v1/quests/{id}/habits", QUEST_ID.value()))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.habits[0].id").value(HABIT_ID_1.value()))
-          .andExpect(jsonPath("$.habits[0].title").value(HABIT_TITLE))
-          .andExpect(jsonPath("$.habits[0].description").value(HABIT_DESC))
-          .andExpect(jsonPath("$.habits[0].tags[0]").value(TAG_HEALTH))
-          .andExpect(jsonPath("$.habits[0].recurrence.type").value("DAILY"));
-    }
-
-    @Test
-    @DisplayName("returns 200 with full habit data when all fields are set")
-    void shouldReturnFullHabitData() throws Exception {
-      when(questService.getHabits(QUEST_ID)).thenReturn(List.of(morningRunHabit()));
-
-      mockMvc
-          .perform(get("/api/v1/quests/{id}/habits", QUEST_ID.value()))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.habits[0].id").value(HABIT_ID_1.value()))
-          .andExpect(jsonPath("$.habits[0].title").value(HABIT_TITLE))
-          .andExpect(jsonPath("$.habits[0].description").value(HABIT_DESC))
-          .andExpect(jsonPath("$.habits[0].tags[0]").value(TAG_HEALTH));
     }
   }
 
@@ -409,12 +404,12 @@ public class QuestControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId": "avatar-1",
-                        "habitId": "habit-1",
-                        "attendedOn": "2026-04-03"
-                      }
-                      """))
+                                      {
+                                        "avatarId": "avatar-1",
+                                        "habitId": "habit-1",
+                                        "attendedOn": "2026-04-03"
+                                      }
+                                      """))
           .andExpect(status().isNoContent());
 
       verify(questService)
@@ -436,10 +431,10 @@ public class QuestControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {
-                        "avatarId": "avatar-1"
-                      }
-                      """))
+                                      {
+                                        "avatarId": "avatar-1"
+                                      }
+                                      """))
           .andExpect(status().isNoContent());
 
       verify(questService)
@@ -454,17 +449,33 @@ public class QuestControllerIT {
     @Test
     @DisplayName("returns active quest progress for avatar")
     void shouldReturnProgressList() throws Exception {
+      List<QuestProgressView> progressViews =
+          List.of(
+              new QuestProgressView(
+                  QUEST_ID.value(),
+                  QUEST_NAME,
+                  "IN_PROGRESS",
+                  50,
+                  List.of(
+                      new QuestProgressView.HabitProgressView(
+                          HABIT_ID_1.value(), HABIT_TITLE, 2, 1, 1))));
+
       when(questService.getActiveQuestProgressByAvatar(new Id<>("avatar-1")))
+          .thenReturn(progressViews);
+      when(questResponseAssembler.toProgressModel(eq("avatar-1"), anyList()))
           .thenReturn(
-              List.of(
-                  new QuestProgressView(
-                      QUEST_ID.value(),
-                      QUEST_NAME,
-                      "IN_PROGRESS",
-                      50,
+              EntityModel.of(
+                  new QuestController.AvatarQuestProgressResponse(
+                      "avatar-1",
                       List.of(
-                          new QuestProgressView.HabitProgressView(
-                              HABIT_ID_1.value(), HABIT_TITLE, 2, 1, 1)))));
+                          new QuestController.QuestProgressResponse(
+                              QUEST_ID.value(),
+                              QUEST_NAME,
+                              "IN_PROGRESS",
+                              50,
+                              List.of(
+                                  new QuestController.HabitProgressResponse(
+                                      HABIT_ID_1.value(), HABIT_TITLE, 2, 1, 1)))))));
 
       mockMvc
           .perform(get("/api/v1/quests/progress/{avatarId}", "avatar-1"))

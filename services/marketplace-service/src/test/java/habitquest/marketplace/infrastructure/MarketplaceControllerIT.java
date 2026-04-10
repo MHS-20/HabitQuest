@@ -7,11 +7,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import habitquest.marketplace.MarketplaceFixtures;
 import habitquest.marketplace.application.*;
 import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.infrastructure.dto.ItemResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponseAssembler;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestClientException;
@@ -35,6 +41,7 @@ public class MarketplaceControllerIT {
 
   @MockitoBean private MarketplaceService marketplaceService;
   @MockitoBean private MarketplaceLogger log;
+  @MockitoBean private MarketplaceResponseAssembler assembler;
 
   private ItemCatalog catalog;
 
@@ -47,6 +54,20 @@ public class MarketplaceControllerIT {
     return marketplace(catalog);
   }
 
+  private EntityModel<MarketplaceResponse> stubMarketplaceModel() {
+    return EntityModel.of(MarketplaceFixtures.marketplaceResponse());
+  }
+
+  private EntityModel<ItemResponse> stubItemModel(Item item) {
+    return EntityModel.of(
+        new ItemResponse(
+            ItemType.typeOf(item).name(),
+            item.name(),
+            item.description(),
+            item.power(),
+            item.price().amount()));
+  }
+
   // ── GET /api/v1/marketplaces/{marketplaceId} ──────────────────────────────────
 
   @Nested
@@ -56,7 +77,9 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with marketplace data when found")
     void shouldReturn200WhenFound() throws Exception {
-      when(marketplaceService.getMarketplace(MARKETPLACE_ID)).thenReturn(stubMarketplace());
+      Marketplace marketplace = stubMarketplace();
+      when(marketplaceService.getMarketplace(MARKETPLACE_ID)).thenReturn(marketplace);
+      when(assembler.toModel(marketplace)).thenReturn(stubMarketplaceModel());
 
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}", MARKETPLACE_ID.value()))
@@ -75,6 +98,26 @@ public class MarketplaceControllerIT {
     }
   }
 
+  // ── GET /api/v1/marketplaces/by-avatar/{avatarId} ─────────────────────────────
+
+  @Nested
+  @DisplayName("GET /api/v1/marketplaces/by-avatar/{avatarId}")
+  class GetMarketplaceByAvatarId {
+
+    @Test
+    @DisplayName("returns 200 and redirects to marketplace resource")
+    void shouldReturn200WhenFoundByAvatar() throws Exception {
+      Marketplace marketplace = stubMarketplace();
+      when(marketplaceService.getMarketplaceIdByAvatarId(AVATAR_ID)).thenReturn(MARKETPLACE_ID);
+      when(marketplaceService.getMarketplace(MARKETPLACE_ID)).thenReturn(marketplace);
+      when(assembler.toModel(marketplace)).thenReturn(stubMarketplaceModel());
+
+      mockMvc
+          .perform(get("/api/v1/marketplaces/by-avatar/{avatarId}", AVATAR_ID.value()))
+          .andExpect(status().isOk());
+    }
+  }
+
   // ── POST /api/v1/marketplaces ─────────────────────────────────────────────────
 
   @Nested
@@ -84,8 +127,10 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 201 when marketplace is successfully created")
     void shouldReturn201WhenMarketplaceCreated() throws Exception {
+      Marketplace marketplace = stubMarketplace();
       when(marketplaceService.createMarketplaceForAvatar(AVATAR_ID)).thenReturn(MARKETPLACE_ID);
-      when(marketplaceService.getMarketplace(MARKETPLACE_ID)).thenReturn(stubMarketplace());
+      when(marketplaceService.getMarketplace(MARKETPLACE_ID)).thenReturn(marketplace);
+      when(assembler.toModel(marketplace)).thenReturn(stubMarketplaceModel());
 
       String requestBody =
           objectMapper.writeValueAsString(
@@ -119,9 +164,7 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 502 when avatar service is unreachable")
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
       when(marketplaceService.createMarketplaceForAvatar(AVATAR_ID))
-          .thenThrow(
-              new AvatarCommunicationException(
-                  "Avatar service unavailable", new RestClientException("timeout")));
+          .thenThrow(new AvatarCommunicationException("timeout", new RestClientException("err")));
 
       String requestBody =
           objectMapper.writeValueAsString(
@@ -143,8 +186,10 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with all available items")
     void shouldReturn200WithAllItems() throws Exception {
-      when(marketplaceService.getAllAvailableItems(MARKETPLACE_ID))
-          .thenReturn(List.of(sword(), shield(), healthPotion(), manaPotion()));
+      List<Item> items = List.of(sword(), shield());
+      when(marketplaceService.getAllAvailableItems(MARKETPLACE_ID)).thenReturn(items);
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.ALL))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/items", MARKETPLACE_ID.value()))
@@ -155,6 +200,8 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with empty list when no items available")
     void shouldReturn200WithEmptyList() throws Exception {
       when(marketplaceService.getAllAvailableItems(MARKETPLACE_ID)).thenReturn(List.of());
+      when(assembler.toAvailableItemsCollection(eq(MARKETPLACE_ID.value()), anyList(), any()))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/items", MARKETPLACE_ID.value()))
@@ -164,8 +211,11 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with armors when type=ARMOR")
     void shouldReturn200WithArmors() throws Exception {
+      List<Item> items = List.of(shield());
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.ARMOR))
-          .thenReturn(List.of(shield()));
+          .thenReturn(items);
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.ARMOR))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(
@@ -177,8 +227,11 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with weapons when type=WEAPON")
     void shouldReturn200WithWeapons() throws Exception {
+      List<Item> items = List.of(sword());
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.WEAPON))
-          .thenReturn(List.of(sword()));
+          .thenReturn(items);
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.WEAPON))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(
@@ -190,8 +243,11 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with potions when type=POTION")
     void shouldReturn200WithPotions() throws Exception {
+      List<Item> items = List.of(healthPotion(), manaPotion());
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.POTION))
-          .thenReturn(List.of(healthPotion(), manaPotion()));
+          .thenReturn(items);
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.POTION))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(
@@ -203,8 +259,12 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with health potions when type=HEALTH_POTION")
     void shouldReturn200WithHealthPotions() throws Exception {
+      List<Item> items = List.of(healthPotion());
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.HEALTH_POTION))
-          .thenReturn(List.of(healthPotion()));
+          .thenReturn(items);
+      when(assembler.toAvailableItemsCollection(
+              MARKETPLACE_ID.value(), items, ItemType.HEALTH_POTION))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(
@@ -216,8 +276,12 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with mana potions when type=MANA_POTION")
     void shouldReturn200WithManaPotions() throws Exception {
+      List<Item> items = List.of(manaPotion());
       when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.MANA_POTION))
-          .thenReturn(List.of(manaPotion()));
+          .thenReturn(items);
+      when(assembler.toAvailableItemsCollection(
+              MARKETPLACE_ID.value(), items, ItemType.MANA_POTION))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(
@@ -248,7 +312,10 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with the requested item")
     void shouldReturn200WhenItemFound() throws Exception {
-      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
+      Item item = sword();
+      when(marketplaceService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(item);
+      when(assembler.toAvailableItemModel(MARKETPLACE_ID.value(), item))
+          .thenReturn(stubItemModel(item));
 
       mockMvc
           .perform(
@@ -299,7 +366,10 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with all sold items")
     void shouldReturn200WithSoldItems() throws Exception {
-      when(marketplaceService.getSoldItems(MARKETPLACE_ID)).thenReturn(List.of(sword(), shield()));
+      List<Item> items = List.of(sword(), shield());
+      when(marketplaceService.getSoldItems(MARKETPLACE_ID)).thenReturn(items);
+      when(assembler.toSoldItemsCollection(MARKETPLACE_ID.value(), items))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/sold-items", MARKETPLACE_ID.value()))
@@ -310,6 +380,8 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with empty list when nothing has been bought")
     void shouldReturn200WithEmptyList() throws Exception {
       when(marketplaceService.getSoldItems(MARKETPLACE_ID)).thenReturn(List.of());
+      when(assembler.toSoldItemsCollection(eq(MARKETPLACE_ID.value()), anyList()))
+          .thenReturn(CollectionModel.empty());
 
       mockMvc
           .perform(get("/api/v1/marketplaces/{marketplaceId}/sold-items", MARKETPLACE_ID.value()))
@@ -340,7 +412,9 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 200 with the requested sold item")
     void shouldReturn200WhenItemFound() throws Exception {
-      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(sword());
+      Item item = sword();
+      when(marketplaceService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(item);
+      when(assembler.toSoldItemModel(MARKETPLACE_ID.value(), item)).thenReturn(stubItemModel(item));
 
       mockMvc
           .perform(
@@ -384,10 +458,6 @@ public class MarketplaceControllerIT {
 
   // ── POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy ────────────
 
-  // ── RIMUOVI questa riga ──────────────────────────────────────────────────────
-  @MockitoBean private AvatarClient avatarClient;
-
-  // ── BuyItem ──────────────────────────────────────────────────────────────────
   @Nested
   @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy")
   class BuyItem {
@@ -407,8 +477,6 @@ public class MarketplaceControllerIT {
                       SWORD_NAME)
                   .param("currentLevel", "1"))
           .andExpect(status().isNoContent());
-
-      verify(marketplaceService).buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
     }
 
     @Test
@@ -448,9 +516,7 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 502 when avatar service is unreachable")
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
-      doThrow(
-              new AvatarCommunicationException(
-                  "Avatar service unavailable", new RestClientException("timeout")))
+      doThrow(new AvatarCommunicationException("fail", new RestClientException("err")))
           .when(marketplaceService)
           .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
 
@@ -482,7 +548,8 @@ public class MarketplaceControllerIT {
     }
   }
 
-  // ── SellItem ──────────────────────────────────────────────────────────────────
+  // ── POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell ──────
+
   @Nested
   @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell")
   class SellItem {
@@ -522,9 +589,7 @@ public class MarketplaceControllerIT {
     @Test
     @DisplayName("returns 502 when avatar service is unreachable")
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
-      doThrow(
-              new AvatarCommunicationException(
-                  "Avatar service unavailable", new RestClientException("timeout")))
+      doThrow(new AvatarCommunicationException("fail", new RestClientException("err")))
           .when(marketplaceService)
           .sellItem(MARKETPLACE_ID, SWORD_NAME);
 

@@ -1,8 +1,5 @@
 package habitquest.quest.infrastructure;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import common.ddd.Id;
 import habitquest.quest.application.QuestLogger;
 import habitquest.quest.application.QuestNotFoundException;
@@ -11,15 +8,14 @@ import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.*;
 import habitquest.quest.infrastructure.dto.HabitMapper;
 import habitquest.quest.infrastructure.dto.HabitResponse;
-import habitquest.quest.infrastructure.dto.QuestMapper;
 import habitquest.quest.infrastructure.dto.QuestResponse;
+import habitquest.quest.infrastructure.dto.QuestResponseAssembler;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,10 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuestController {
 
   private final QuestService questService;
+  private final QuestResponseAssembler questResponseAssembler;
   private final QuestLogger log;
 
-  public QuestController(QuestService questService, QuestLogger log) {
+  public QuestController(
+      QuestService questService, QuestResponseAssembler questResponseAssembler, QuestLogger log) {
     this.questService = questService;
+    this.questResponseAssembler = questResponseAssembler;
     this.log = log;
   }
 
@@ -52,47 +51,13 @@ public class QuestController {
         questService.createQuest(request.name(), parseDurationDays(request.durationDays()));
     log.info(created, "Quest created");
 
-    QuestCreatedResponse body = new QuestCreatedResponse(created.getId().value());
-    EntityModel<QuestCreatedResponse> model =
-        EntityModel.of(
-            body,
-            selfLink(created.getId().value()),
-            linkTo(methodOn(QuestController.class).getQuest(created.getId().value()))
-                .withRel("quest"),
-            linkTo(methodOn(QuestController.class).getDuration(created.getId().value()))
-                .withRel("duration"),
-            linkTo(methodOn(QuestController.class).getReward(created.getId().value()))
-                .withRel("reward"),
-            linkTo(methodOn(QuestController.class).getHabits(created.getId().value()))
-                .withRel("habits"));
-
     return ResponseEntity.created(URI.create("/api/v1/quests/" + created.getId().value()))
-        .body(model);
+        .body(questResponseAssembler.toCreatedModel(created));
   }
 
   @GetMapping
   public ResponseEntity<CollectionModel<EntityModel<QuestResponse>>> getAllQuests() {
-    List<EntityModel<QuestResponse>> questModels =
-        questService.getAllQuests().stream()
-            .map(
-                quest ->
-                    EntityModel.of(
-                        QuestMapper.toResponse(quest),
-                        selfLink(quest.getId().value()),
-                        linkTo(methodOn(QuestController.class).getName(quest.getId().value()))
-                            .withRel("name"),
-                        linkTo(methodOn(QuestController.class).getDuration(quest.getId().value()))
-                            .withRel("duration"),
-                        linkTo(methodOn(QuestController.class).getReward(quest.getId().value()))
-                            .withRel("reward"),
-                        linkTo(methodOn(QuestController.class).getHabits(quest.getId().value()))
-                            .withRel("habits")))
-            .toList();
-
-    CollectionModel<EntityModel<QuestResponse>> model =
-        CollectionModel.of(
-            questModels, linkTo(methodOn(QuestController.class).getAllQuests()).withSelfRel());
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toCollectionModel(questService.getAllQuests()));
   }
 
   @GetMapping("/{id}")
@@ -100,19 +65,7 @@ public class QuestController {
       throws QuestNotFoundException {
     Quest quest = questService.getQuest(idOfQuest(id));
     log.info(quest, "Fetched quest");
-
-    QuestResponse dto = QuestMapper.toResponse(quest);
-    EntityModel<QuestResponse> model =
-        EntityModel.of(
-            dto,
-            selfLink(id),
-            linkTo(methodOn(QuestController.class).getName(id)).withRel("name"),
-            linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
-            linkTo(methodOn(QuestController.class).getReward(id)).withRel("reward"),
-            linkTo(methodOn(QuestController.class).getHabits(id)).withRel("habits"),
-            linkTo(methodOn(QuestController.class).deleteQuest(id)).withRel("delete"));
-
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toModel(quest));
   }
 
   @DeleteMapping("/{id}")
@@ -127,9 +80,7 @@ public class QuestController {
       throws QuestNotFoundException {
     String name = questService.getName(idOfQuest(id));
     log.info(idOfQuest(id), "Fetched quest name");
-    EntityModel<NameResponse> model =
-        EntityModel.of(new NameResponse(name), selfLink(id), questLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toNameModel(id, name));
   }
 
   @GetMapping("/{id}/duration")
@@ -137,9 +88,7 @@ public class QuestController {
       throws QuestNotFoundException {
     Duration duration = questService.getDuration(idOfQuest(id));
     log.info(idOfQuest(id), "Fetched quest duration");
-    EntityModel<DurationResponse> model =
-        EntityModel.of(new DurationResponse(duration.toDays()), selfLink(id), questLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toDurationModel(id, duration));
   }
 
   @GetMapping("/{id}/reward")
@@ -147,8 +96,7 @@ public class QuestController {
       throws QuestNotFoundException {
     Reward reward = questService.getReward(idOfQuest(id));
     log.info(reward, "Fetched quest reward");
-    EntityModel<Reward> model = EntityModel.of(reward, selfLink(id), questLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toRewardModel(id, reward));
   }
 
   @GetMapping("/{id}/habits")
@@ -156,10 +104,7 @@ public class QuestController {
       throws QuestNotFoundException {
     List<Habit> habits = questService.getHabits(idOfQuest(id));
     log.info(habits, "Fetched quest habits");
-    List<HabitResponse> habitResponses = habits.stream().map(HabitMapper::toResponse).toList();
-    EntityModel<HabitsResponse> model =
-        EntityModel.of(new HabitsResponse(habitResponses), selfLink(id), questLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toHabitsModel(id, habits));
   }
 
   @GetMapping("/progress/{avatarId}")
@@ -167,32 +112,7 @@ public class QuestController {
       @PathVariable String avatarId) {
     List<QuestProgressView> progress =
         questService.getActiveQuestProgressByAvatar(idOfAvatar(avatarId));
-    List<QuestProgressResponse> items =
-        progress.stream()
-            .map(
-                p ->
-                    new QuestProgressResponse(
-                        p.questId(),
-                        p.questName(),
-                        p.status(),
-                        p.completionPercentage(),
-                        p.habits().stream()
-                            .map(
-                                h ->
-                                    new HabitProgressResponse(
-                                        h.habitId(),
-                                        h.title(),
-                                        h.requiredOccurrences(),
-                                        h.attendedOccurrences(),
-                                        h.remainingOccurrences()))
-                            .toList()))
-            .toList();
-
-    EntityModel<AvatarQuestProgressResponse> model =
-        EntityModel.of(
-            new AvatarQuestProgressResponse(avatarId, items),
-            linkTo(methodOn(QuestController.class).getActiveQuestProgress(avatarId)).withSelfRel());
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(questResponseAssembler.toProgressModel(avatarId, progress));
   }
 
   @PatchMapping("/{id}/name")
@@ -283,6 +203,8 @@ public class QuestController {
     return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(ex.getMessage()));
   }
 
+  // ─── private helpers ────────────────────────────────────────────────────────
+
   private static Id<Quest> idOfQuest(String id) {
     return new Id<>(id);
   }
@@ -295,22 +217,6 @@ public class QuestController {
     return new Id<>(id);
   }
 
-  private Link selfLink(String id) {
-    try {
-      return linkTo(methodOn(QuestController.class).getQuest(id)).withSelfRel();
-    } catch (QuestNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private Link questLink(String id) {
-    try {
-      return linkTo(methodOn(QuestController.class).getQuest(id)).withRel("quest");
-    } catch (QuestNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   private static Duration parseDurationDays(Integer durationDays) {
     if (durationDays == null) {
       throw new IllegalArgumentException("Duration days cannot be null");
@@ -320,6 +226,8 @@ public class QuestController {
     }
     return Duration.ofDays(durationDays);
   }
+
+  // ─── Request / Response records ─────────────────────────────────────────────
 
   public record CreateQuestRequest(String name, Integer durationDays) {}
 

@@ -23,6 +23,22 @@ public enum ItemType {
     return filter;
   }
 
+  public static ItemType typeOf(Item item) {
+    if (item instanceof Armor) {
+      return ARMOR;
+    }
+    if (item instanceof Weapon) {
+      return WEAPON;
+    }
+    if (item instanceof HealthPotion) {
+      return HEALTH_POTION;
+    }
+    if (item instanceof ManaPotion) {
+      return MANA_POTION;
+    }
+    throw new IllegalArgumentException("Unknown item type: " + item.getClass().getSimpleName());
+  }
+
   @JsonCreator
   public static ItemType fromString(String value) {
     return valueOf(value.toUpperCase(Locale.getDefault()));

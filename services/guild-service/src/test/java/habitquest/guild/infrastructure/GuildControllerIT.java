@@ -12,6 +12,9 @@ import habitquest.guild.application.GuildLogger;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.*;
+import habitquest.guild.infrastructure.GuildController.*;
+import habitquest.guild.infrastructure.dto.GuildResponse;
+import habitquest.guild.infrastructure.dto.GuildResponseAssembler;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,7 +39,18 @@ public class GuildControllerIT {
   @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private GuildService guildService;
+  @MockitoBean private GuildResponseAssembler assembler;
   @MockitoBean private GuildLogger log;
+
+  // ── helper: modelli senza link (sufficiente per i test di status/body) ────────
+
+  private <T> EntityModel<T> bare(T body) {
+    return EntityModel.of(body);
+  }
+
+  private <T> CollectionModel<T> bareCollection(Iterable<T> items) {
+    return CollectionModel.of(items);
+  }
 
   // ── POST /api/v1/guilds ───────────────────────────────────────────────────────
 
@@ -46,6 +62,7 @@ public class GuildControllerIT {
     @DisplayName("returns 201 with the new guild id")
     void shouldReturn201WithId() throws Exception {
       when(guildService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK)).thenReturn(GUILD_ID);
+      when(assembler.toCreatedModel(any())).thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(
@@ -63,6 +80,7 @@ public class GuildControllerIT {
     @DisplayName("delegates all fields to the service")
     void shouldDelegateToService() throws Exception {
       when(guildService.createGuild(anyString(), any(Id.class), anyString())).thenReturn(GUILD_ID);
+      when(assembler.toCreatedModel(any())).thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(
@@ -93,6 +111,8 @@ public class GuildControllerIT {
                           LEADER_1, LEADER_NICK)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Guild name cannot be blank"));
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -106,6 +126,7 @@ public class GuildControllerIT {
     @DisplayName("returns 200 with guild data when found")
     void shouldReturn200WhenFound() throws Exception {
       when(guildService.getGuild(GUILD_ID)).thenReturn(guild());
+      when(assembler.toModel(any(GuildResponse.class))).thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/guilds/{id}", GUILD_1))
@@ -120,6 +141,8 @@ public class GuildControllerIT {
           .thenThrow(new GuildNotFoundException(UNKNOWN_GUILD));
 
       mockMvc.perform(get("/api/v1/guilds/{id}", UNKNOWN_GUILD)).andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -137,6 +160,7 @@ public class GuildControllerIT {
       mockMvc.perform(delete("/api/v1/guilds/{id}", GUILD_1)).andExpect(status().isNoContent());
 
       verify(guildService).deleteGuild(GUILD_ID);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -149,6 +173,8 @@ public class GuildControllerIT {
       mockMvc
           .perform(delete("/api/v1/guilds/{id}", UNKNOWN_GUILD))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -162,6 +188,8 @@ public class GuildControllerIT {
     @DisplayName("returns 200 with member list")
     void shouldReturn200WithMembers() throws Exception {
       when(guildService.getMembers(GUILD_ID)).thenReturn(List.of(member()));
+      when(assembler.toMembersModel(anyList(), eq(GUILD_1)))
+          .thenAnswer(inv -> bareCollection(inv.getArgument(0)));
 
       mockMvc.perform(get("/api/v1/guilds/{id}/members", GUILD_1)).andExpect(status().isOk());
     }
@@ -175,6 +203,8 @@ public class GuildControllerIT {
       mockMvc
           .perform(get("/api/v1/guilds/{id}/members", UNKNOWN_GUILD))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -202,6 +232,7 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -221,6 +252,8 @@ public class GuildControllerIT {
                           "{\"requestorId\":\"%s\",\"targetAvatarId\":\"%s\"}",
                           "not-a-leader", MEMBER_1)))
           .andExpect(status().isForbidden());
+
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -239,6 +272,8 @@ public class GuildControllerIT {
                           "{\"requestorId\":\"%s\",\"targetAvatarId\":\"%s\"}",
                           LEADER_1, MEMBER_1)))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -258,6 +293,8 @@ public class GuildControllerIT {
                           LEADER_1, MEMBER_1)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Avatar is already a member"));
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -282,6 +319,7 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -299,6 +337,8 @@ public class GuildControllerIT {
                       String.format(
                           "{\"avatarId\":\"%s\",\"nickname\":\"%s\"}", MEMBER_1, MEMBER_NICK)))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -317,6 +357,8 @@ public class GuildControllerIT {
                           "{\"avatarId\":\"%s\",\"nickname\":\"%s\"}", MEMBER_1, MEMBER_NICK)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Invite not found or not yours"));
+
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -335,6 +377,8 @@ public class GuildControllerIT {
                           "{\"avatarId\":\"%s\",\"nickname\":\"%s\"}", MEMBER_1, MEMBER_NICK)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Guild has reached maximum capacity"));
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -357,6 +401,7 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).removeMember(GUILD_ID, LEADER_ID, MEMBER_ID);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -373,6 +418,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"requestorId\":\"not-a-leader\"}"))
           .andExpect(status().isForbidden());
+
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -388,6 +435,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(String.format("{\"requestorId\":\"%s\"}", LEADER_1)))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -407,6 +456,7 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).leaveGuild(GUILD_ID, MEMBER_ID);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -420,6 +470,8 @@ public class GuildControllerIT {
           .perform(post("/api/v1/guilds/{id}/members/{memberId}/leave", GUILD_1, MEMBER_1))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Last owner cannot leave"));
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -443,6 +495,7 @@ public class GuildControllerIT {
           .andExpect(status().isNoContent());
 
       verify(guildService).promoteMember(GUILD_ID, LEADER_ID, MEMBER_ID, OFFICER_ROLE);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -459,6 +512,8 @@ public class GuildControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{\"roleName\":\"OFFICER\",\"requestorId\":\"not-a-leader\"}"))
           .andExpect(status().isForbidden());
+
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -473,6 +528,7 @@ public class GuildControllerIT {
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(guildService);
+      verifyNoInteractions(assembler);
     }
 
     @Test
@@ -489,6 +545,8 @@ public class GuildControllerIT {
                   .content(
                       String.format("{\"roleName\":\"OFFICER\",\"requestorId\":\"%s\"}", LEADER_1)))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -502,6 +560,8 @@ public class GuildControllerIT {
     @DisplayName("returns 200 with global rank")
     void shouldReturnRank() throws Exception {
       when(guildService.getGlobalRank(GUILD_ID)).thenReturn(3);
+      when(assembler.toRankModel(any(RankResponse.class), eq(GUILD_1)))
+          .thenAnswer(inv -> bare(inv.getArgument(0)));
 
       mockMvc
           .perform(get("/api/v1/guilds/{id}/rank", GUILD_1))
@@ -518,6 +578,8 @@ public class GuildControllerIT {
       mockMvc
           .perform(get("/api/v1/guilds/{id}/rank", UNKNOWN_GUILD))
           .andExpect(status().isNotFound());
+
+      verifyNoInteractions(assembler);
     }
   }
 
@@ -531,6 +593,8 @@ public class GuildControllerIT {
     @DisplayName("returns 200 with ordered guild list")
     void shouldReturnLeaderboard() throws Exception {
       when(guildService.getGuildLeaderboard()).thenReturn(List.of(guild()));
+      when(assembler.toLeaderboardModel(anyList()))
+          .thenAnswer(inv -> bareCollection(inv.getArgument(0)));
 
       mockMvc.perform(get("/api/v1/guilds/leaderboard")).andExpect(status().isOk());
     }
@@ -539,6 +603,8 @@ public class GuildControllerIT {
     @DisplayName("returns 200 with empty list when no guilds exist")
     void shouldReturnEmptyListWhenNoGuilds() throws Exception {
       when(guildService.getGuildLeaderboard()).thenReturn(List.of());
+      when(assembler.toLeaderboardModel(anyList()))
+          .thenAnswer(inv -> bareCollection(inv.getArgument(0)));
 
       mockMvc.perform(get("/api/v1/guilds/leaderboard")).andExpect(status().isOk());
     }

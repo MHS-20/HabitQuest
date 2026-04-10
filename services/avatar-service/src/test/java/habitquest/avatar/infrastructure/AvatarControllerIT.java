@@ -14,12 +14,15 @@ import habitquest.avatar.application.AvatarService;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
+import habitquest.avatar.infrastructure.dto.AvatarResponseAssembler;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +37,7 @@ public class AvatarControllerIT {
 
   @MockitoBean private AvatarService avatarService;
   @MockitoBean private AvatarLogger avatarLogger;
+  @MockitoBean private AvatarResponseAssembler avatarResponseAssembler;
 
   // ── POST /api/v1/avatars ──────────────────────────────────────────────────────
 
@@ -45,6 +49,8 @@ public class AvatarControllerIT {
     @DisplayName("returns 201 with the new avatar id")
     void shouldReturn201WithId() throws Exception {
       when(avatarService.createAvatar(AVATAR_ID, AVATAR_NAME)).thenReturn(AVATAR_ID);
+      when(avatarResponseAssembler.toCreatedModel(AVATAR_1))
+          .thenReturn(EntityModel.of(new AvatarController.AvatarCreatedResponse(AVATAR_1)));
 
       mockMvc
           .perform(
@@ -59,6 +65,8 @@ public class AvatarControllerIT {
     @DisplayName("delegates name to the service")
     void shouldDelegateNameToService() throws Exception {
       when(avatarService.createAvatar(any(Id.class), anyString())).thenReturn(AVATAR_ID);
+      when(avatarResponseAssembler.toCreatedModel(AVATAR_1))
+          .thenReturn(EntityModel.of(new AvatarController.AvatarCreatedResponse(AVATAR_1)));
 
       mockMvc
           .perform(
@@ -80,7 +88,9 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with avatar data when found")
     void shouldReturn200WhenFound() throws Exception {
-      when(avatarService.getAvatarById(AVATAR_ID)).thenReturn(readOnlyAvatar());
+      Avatar avatar = readOnlyAvatar();
+      when(avatarService.getAvatarById(AVATAR_ID)).thenReturn(avatar);
+      when(avatarResponseAssembler.toModel(avatar)).thenReturn(EntityModel.of(avatarResponse()));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}", AVATAR_1))
@@ -97,7 +107,7 @@ public class AvatarControllerIT {
       mockMvc.perform(get("/api/v1/avatars/{id}", UNKNOWN_AVATAR)).andExpect(status().isNotFound());
     }
 
-    // ── GET /api/v1/avatars/search ──────────────────────────────────────────────
+    // ── POST /api/v1/avatars/search ─────────────────────────────────────────────
 
     @Nested
     @DisplayName("POST /api/v1/avatars/search")
@@ -106,7 +116,10 @@ public class AvatarControllerIT {
       @Test
       @DisplayName("returns 200 with matching avatars")
       void shouldReturn200WithResults() throws Exception {
-        when(avatarService.searchAvatars(any())).thenReturn(List.of(readOnlyAvatar()));
+        Avatar avatar = readOnlyAvatar();
+        when(avatarService.searchAvatars(any())).thenReturn(List.of(avatar));
+        when(avatarResponseAssembler.toCollectionModel(eq(List.of(avatar)), any()))
+            .thenReturn(CollectionModel.of(List.of(EntityModel.of(avatarResponse()))));
 
         mockMvc
             .perform(
@@ -114,8 +127,8 @@ public class AvatarControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"name":"Hero","minLevel":null,"maxLevel":null}
-                        """))
+                                        {"name":"Hero","minLevel":null,"maxLevel":null}
+                                        """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$._embedded.avatarResponseList[0].name").value(AVATAR_NAME));
       }
@@ -124,6 +137,8 @@ public class AvatarControllerIT {
       @DisplayName("returns 200 with empty list when no avatars match")
       void shouldReturn200WithEmptyList() throws Exception {
         when(avatarService.searchAvatars(any())).thenReturn(List.of());
+        when(avatarResponseAssembler.toCollectionModel(eq(List.of()), any()))
+            .thenReturn(CollectionModel.of(List.of()));
 
         mockMvc
             .perform(
@@ -131,8 +146,8 @@ public class AvatarControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"name":"unknown","minLevel":null,"maxLevel":null}
-                        """))
+                                        {"name":"unknown","minLevel":null,"maxLevel":null}
+                                        """))
             .andExpect(status().isOk());
       }
 
@@ -140,6 +155,8 @@ public class AvatarControllerIT {
       @DisplayName("delegates search criteria to the service")
       void shouldDelegateCriteriaToService() throws Exception {
         when(avatarService.searchAvatars(any())).thenReturn(List.of());
+        when(avatarResponseAssembler.toCollectionModel(eq(List.of()), any()))
+            .thenReturn(CollectionModel.of(List.of()));
 
         mockMvc
             .perform(
@@ -147,8 +164,8 @@ public class AvatarControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"name":"Hero","minLevel":1,"maxLevel":10}
-                        """))
+                                        {"name":"Hero","minLevel":1,"maxLevel":10}
+                                        """))
             .andExpect(status().isOk());
 
         verify(avatarService).searchAvatars(any());
@@ -166,8 +183,8 @@ public class AvatarControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"name":null,"minLevel":10,"maxLevel":1}
-                        """))
+                                        {"name":null,"minLevel":10,"maxLevel":1}
+                                        """))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("minLevel cannot be greater than maxLevel"));
       }
@@ -251,6 +268,8 @@ public class AvatarControllerIT {
     @DisplayName("returns 200 with money amount")
     void shouldReturnMoney() throws Exception {
       when(avatarService.getMoney(AVATAR_ID)).thenReturn(new Money(250));
+      when(avatarResponseAssembler.toMoneyModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.MoneyResponse(250)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/money", AVATAR_1))
@@ -343,9 +362,10 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with current level number")
     void shouldReturnLevel() throws Exception {
-      // Valori 3/50/200 sono specifici di questa assertion: restano inline
       Level level = new Level(3, new Experience(50), new Experience(200));
       when(avatarService.getLevel(AVATAR_ID)).thenReturn(level);
+      when(avatarResponseAssembler.toLevelModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.LevelResponse(3, 50, 200)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/level", AVATAR_1))
@@ -365,9 +385,10 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with current and max health")
     void shouldReturnHealth() throws Exception {
-      // Valori 75/100 sono specifici di questa assertion: restano inline
       AvatarHealth health = new AvatarHealth(new Health(75), new Health(100));
       when(avatarService.getHealth(AVATAR_ID)).thenReturn(health);
+      when(avatarResponseAssembler.toHealthModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.HealthResponse(75, 100)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/health", AVATAR_1))
@@ -430,9 +451,10 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with current and max mana")
     void shouldReturnMana() throws Exception {
-      // Valori 30/50 sono specifici di questa assertion: restano inline
       AvatarMana mana = new AvatarMana(new Mana(30), new Mana(50));
       when(avatarService.getMana(AVATAR_ID)).thenReturn(mana);
+      when(avatarResponseAssembler.toManaModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.ManaResponse(30, 50)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/mana", AVATAR_1))
@@ -531,6 +553,8 @@ public class AvatarControllerIT {
     @DisplayName("returns 200 with experience amount")
     void shouldReturnExperience() throws Exception {
       when(avatarService.getExperience(AVATAR_ID)).thenReturn(new Experience(350));
+      when(avatarResponseAssembler.toExperienceModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.ExperienceResponse(350)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/experience", AVATAR_1))
@@ -567,8 +591,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
-                      """))
+                                      {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
+                                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarService).addToInventory(eq(AVATAR_ID), any(Weapon.class));
@@ -583,8 +607,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"type":"UNKNOWN","name":"???","description":"???","power":0}
-                      """))
+                                      {"type":"UNKNOWN","name":"???","description":"???","power":0}
+                                      """))
           .andExpect(status().isBadRequest());
     }
   }
@@ -606,8 +630,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
-                      """))
+                                      {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
+                                      """))
           .andExpect(status().isNoContent());
     }
   }
@@ -624,6 +648,8 @@ public class AvatarControllerIT {
       Inventory inventory = new Inventory(INVENTORY_ID);
       inventory.addItem(SWORD);
       when(avatarService.getInventory(AVATAR_ID)).thenReturn(inventory);
+      when(avatarResponseAssembler.toInventoryModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.InventoryResponse(AVATAR_1, List.of())));
 
       mockMvc.perform(get("/api/v1/avatars/{id}/inventory", AVATAR_1)).andExpect(status().isOk());
     }
@@ -640,6 +666,9 @@ public class AvatarControllerIT {
     void shouldReturnEquippedItems() throws Exception {
       EquippedItems equippedItems = new EquippedItems(EQUIPPED_ID);
       when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems);
+      when(avatarResponseAssembler.toEquippedItemsModel(any(), eq(AVATAR_1)))
+          .thenReturn(
+              EntityModel.of(new AvatarController.EquippedItemsResponse(AVATAR_1, List.of())));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_1))
@@ -675,8 +704,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
-                      """))
+                                      {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
+                                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
@@ -695,8 +724,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
-                      """))
+                                      {"type":"WEAPON","name":"Iron Sword","description":"A basic sword","power":15}
+                                      """))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Item not in inventory"));
     }
@@ -719,8 +748,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
-                      """))
+                                      {"type":"ARMOR","name":"Iron Shield","description":"A basic shield","power":5}
+                                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
@@ -829,9 +858,10 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 200 with avatar stats")
     void shouldReturnStats() throws Exception {
-      // Valori 10/8/12 sono specifici di questa assertion: restano inline
       AvatarStats stats = new AvatarStats(STATS_ID, 10, 8, 12);
       when(avatarService.getAvatarStats(AVATAR_ID)).thenReturn(stats);
+      when(avatarResponseAssembler.toStatsModel(any(), eq(AVATAR_1)))
+          .thenReturn(EntityModel.of(new AvatarController.StatsResponse(10, 8, 12)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/stats", AVATAR_1))
@@ -870,8 +900,8 @@ public class AvatarControllerIT {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                      {"inviteId":"invite-1","guildId":"guild-1","guildName":"Guild"}
-                      """))
+                                      {"inviteId":"invite-1","guildId":"guild-1","guildName":"Guild"}
+                                      """))
           .andExpect(status().isNoContent());
 
       verify(avatarService).addPendingInvite(eq(AVATAR_ID), any(Invite.class));

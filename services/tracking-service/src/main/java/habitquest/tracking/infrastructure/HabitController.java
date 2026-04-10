@@ -1,7 +1,5 @@
 package habitquest.tracking.infrastructure;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
 import common.ddd.Id;
 import habitquest.tracking.application.HabitLogger;
 import habitquest.tracking.application.HabitNotFoundException;
@@ -16,6 +14,7 @@ import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import habitquest.tracking.infrastructure.dto.HabitHistoryEventResponse;
 import habitquest.tracking.infrastructure.dto.HabitMapper;
 import habitquest.tracking.infrastructure.dto.HabitResponse;
+import habitquest.tracking.infrastructure.dto.HabitResponseAssembler;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,19 +31,14 @@ import org.springframework.web.bind.annotation.*;
 public class HabitController {
 
   private final HabitService habitService;
+  private final HabitResponseAssembler habitResponseAssembler;
   private final HabitLogger log;
 
-  public HabitController(HabitService habitService, HabitLogger log) {
+  public HabitController(
+      HabitService habitService, HabitResponseAssembler habitResponseAssembler, HabitLogger log) {
     this.habitService = habitService;
+    this.habitResponseAssembler = habitResponseAssembler;
     this.log = log;
-  }
-
-  private Id<Habit> idOfHabit(String id) {
-    return new Id<>(id);
-  }
-
-  private Id<Avatar> idOfAvatar(String id) {
-    return new Id<>(id);
   }
 
   // ─── Habit CRUD ─────────────────────────────────────────────────────────────
@@ -105,22 +98,8 @@ public class HabitController {
         };
     log.info(created, "Habit created");
 
-    HabitCreatedResponse body = new HabitCreatedResponse(created.getId().value());
-    EntityModel<HabitCreatedResponse> model =
-        EntityModel.of(
-            body,
-            selfLink(created.getId().value()),
-            linkTo(methodOn(HabitController.class).getHabit(created.getId().value()))
-                .withRel("habit"),
-            linkTo(methodOn(HabitController.class).getTags(created.getId().value()))
-                .withRel("tags"),
-            linkTo(methodOn(HabitController.class).getRecurrence(created.getId().value()))
-                .withRel("recurrence"),
-            linkTo(methodOn(HabitController.class).getHistory(created.getId().value()))
-                .withRel("history"));
-
     return ResponseEntity.created(URI.create("/api/v1/habits/" + created.getId().value()))
-        .body(model);
+        .body(habitResponseAssembler.toCreatedModel(created));
   }
 
   @GetMapping("/{id}")
@@ -128,20 +107,7 @@ public class HabitController {
       throws HabitNotFoundException {
     Habit habit = habitService.getHabitById(idOfHabit(id));
     log.info(habit, "Fetched habit");
-
-    EntityModel<HabitResponse> model =
-        EntityModel.of(
-            HabitMapper.toResponse(habit),
-            selfLink(id),
-            linkTo(methodOn(HabitController.class).getTitle(id)).withRel("title"),
-            linkTo(methodOn(HabitController.class).getDescription(id)).withRel("description"),
-            linkTo(methodOn(HabitController.class).getTags(id)).withRel("tags"),
-            linkTo(methodOn(HabitController.class).getRecurrence(id)).withRel("recurrence"),
-            linkTo(methodOn(HabitController.class).getLastAttendedDate(id))
-                .withRel("lastAttendedDate"),
-            linkTo(methodOn(HabitController.class).getHistory(id)).withRel("history"),
-            linkTo(methodOn(HabitController.class).deleteHabit(id)).withRel("delete"));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toModel(habit));
   }
 
   @GetMapping("/avatar/{avatarId}")
@@ -179,9 +145,7 @@ public class HabitController {
       throws HabitNotFoundException {
     String title = habitService.getTitle(idOfHabit(id));
     log.info(idOfHabit(id), "Fetched habit title");
-    EntityModel<TitleResponse> model =
-        EntityModel.of(new TitleResponse(title), selfLink(id), habitLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toTitleModel(id, title));
   }
 
   @GetMapping("/{id}/description")
@@ -189,9 +153,7 @@ public class HabitController {
       throws HabitNotFoundException {
     String description = habitService.getDescription(idOfHabit(id));
     log.info(idOfHabit(id), "Fetched habit description");
-    EntityModel<DescriptionResponse> model =
-        EntityModel.of(new DescriptionResponse(description), selfLink(id), habitLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toDescriptionModel(id, description));
   }
 
   @GetMapping("/{id}/tags")
@@ -199,13 +161,7 @@ public class HabitController {
       throws HabitNotFoundException {
     List<Tag> tags = habitService.getTags(idOfHabit(id));
     log.info(idOfHabit(id), "Fetched habit tags");
-    EntityModel<TagsResponse> model =
-        EntityModel.of(
-            new TagsResponse(tags.stream().map(Tag::name).toList()),
-            selfLink(id),
-            habitLink(id),
-            linkTo(methodOn(HabitController.class).updateTags(id, null)).withRel("update"));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toTagsModel(id, tags));
   }
 
   @GetMapping("/{id}/recurrence")
@@ -214,13 +170,7 @@ public class HabitController {
     RecurrenceResponse recurrence =
         HabitMapper.toRecurrenceResponse(habitService.getRecurrence(idOfHabit(id)));
     log.info(recurrence, "Fetched habit recurrence");
-    EntityModel<RecurrenceResponse> model =
-        EntityModel.of(
-            recurrence,
-            selfLink(id),
-            habitLink(id),
-            linkTo(methodOn(HabitController.class).updateRecurrence(id, null)).withRel("update"));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toRecurrenceModel(id, recurrence));
   }
 
   @GetMapping("/{id}/last-attended-date")
@@ -228,13 +178,7 @@ public class HabitController {
       @PathVariable String id) throws HabitNotFoundException {
     LocalDateTime date = habitService.getLastAttendedDate(idOfHabit(id));
     log.info(idOfHabit(id), "Fetched habit last attended date");
-    EntityModel<LastAttendedDateResponse> model =
-        EntityModel.of(
-            new LastAttendedDateResponse(date),
-            selfLink(id),
-            habitLink(id),
-            linkTo(methodOn(HabitController.class).attendHabit(id, null)).withRel("attend"));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toLastAttendedDateModel(id, date));
   }
 
   @GetMapping("/{id}/history")
@@ -243,9 +187,7 @@ public class HabitController {
     List<HabitHistoryEventResponse> history =
         habitService.getHistory(idOfHabit(id)).stream().map(HabitMapper::toResponse).toList();
     log.info(idOfHabit(id), "Fetched habit history");
-    EntityModel<HistoryResponse> model =
-        EntityModel.of(new HistoryResponse(history), selfLink(id), habitLink(id));
-    return ResponseEntity.ok(model);
+    return ResponseEntity.ok(habitResponseAssembler.toHistoryModel(id, history));
   }
 
   // ─── Updaters ───────────────────────────────────────────────────────────────
@@ -320,21 +262,14 @@ public class HabitController {
     return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(ex.getMessage()));
   }
 
-  // ─── HATEOAS helpers ────────────────────────────────────────────────────────
-  private Link selfLink(String id) {
-    try {
-      return linkTo(methodOn(HabitController.class).getHabit(id)).withSelfRel();
-    } catch (HabitNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+  // ─── private helpers ────────────────────────────────────────────────────────
+
+  private Id<Habit> idOfHabit(String id) {
+    return new Id<>(id);
   }
 
-  private Link habitLink(String id) {
-    try {
-      return linkTo(methodOn(HabitController.class).getHabit(id)).withRel("habit");
-    } catch (HabitNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+  private Id<Avatar> idOfAvatar(String id) {
+    return new Id<>(id);
   }
 
   // ─── Request / Response records ─────────────────────────────────────────────

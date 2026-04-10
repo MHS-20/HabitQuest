@@ -13,7 +13,10 @@ import habitquest.avatar.domain.items.Armor;
 import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Weapon;
+import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
+import habitquest.avatar.infrastructure.AvatarController.*;
+import habitquest.avatar.infrastructure.dto.AvatarResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,6 +98,20 @@ public final class AvatarFixtures {
 
   public static Avatar avatarAtLevel4() {
     return avatarAtLevel(4, 100);
+  }
+
+  public static AvatarResponse avatarResponse() {
+    return new AvatarResponse(
+        AVATAR_1,
+        AVATAR_NAME,
+        new MoneyResponse(0),
+        new LevelResponse(1, 0, DEFAULT_XP_TO_NEXT),
+        new HealthResponse(DEFAULT_HEALTH, DEFAULT_HEALTH),
+        new ManaResponse(DEFAULT_MANA, DEFAULT_MANA),
+        new StatsResponse(DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
+        new InventoryResponse(AVATAR_1, List.of()),
+        new EquippedItemsResponse(AVATAR_1, List.of()),
+        new ArrayList<>(List.of(Spell.FIREBALL.getName())));
   }
 
   // Prevent instantiation
