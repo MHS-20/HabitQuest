@@ -32,6 +32,7 @@ jobs:
         run: |
           echo "SERVICE=${{ github.event.client_payload.service }}" >> $GITHUB_ENV
           echo "IMAGE=${{ github.event.client_payload.image }}" >> $GITHUB_ENV
+          echo "SERVICE_SHORT=${SERVICE%-service}" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,7 +41,8 @@ jobs:
 
       - name: Install semantic-release
         run: |
-          npm install -g --save-dev semantic-release \
+          cd services/${{ env.SERVICE }}
+          npm install --save-dev semantic-release \
             @semantic-release/git \
             @semantic-release/changelog \
             @semantic-release/github \
@@ -55,9 +57,9 @@ jobs:
           SERVICE: ${{ env.SERVICE }}
         run: |
           cd services/$SERVICE
-          npx semantic-release-monorepo --tag-format "${SERVICE}-v\${version}" 2>&1 | tee release_output.log
+          npx semantic-release -e semantic-release-monorepo 2>&1 | tee release_output.log
           if grep -q "Created tag" release_output.log; then
-            VERSION=$(grep -oP "${SERVICE}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
+            VERSION=$(grep -oP "${SERVICE_SHORT}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "Detected Version: $VERSION"
           else
