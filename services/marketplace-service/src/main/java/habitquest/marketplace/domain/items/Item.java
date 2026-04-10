@@ -7,6 +7,8 @@ public sealed interface Item extends ValueObject permits Weapon, Armor, Potion {
 
   BaseItem baseItem();
 
+  ItemType itemType();
+
   default String name() {
     return baseItem().name();
   }

@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install semantic-release
         run: |
@@ -57,7 +57,7 @@ jobs:
           SERVICE: ${{ env.SERVICE }}
         run: |
           cd services/$SERVICE
-          npx semantic-release -e semantic-release-monorepo 2>&1 | tee release_output.log
+          npx semantic-release 2>&1 | tee release_output.log
           if grep -q "Created tag" release_output.log; then
             VERSION=$(grep -oP "${SERVICE_SHORT}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
             echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -87,15 +87,15 @@ jobs:
           docker tag $IMAGE:latest $IMAGE:$VERSION
           docker push $IMAGE:$VERSION
 
-      - name: Trigger Update Manifest workflow
-        if: github.ref == 'refs/heads/main'
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: update_manifest
-          client-payload: |
-            {
-              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE }}/${{ env.SERVICE }}",
-              "app_name": "${{ env.SERVICE }}",
-              "app_version": "${{ steps.semantic.outputs.version }}"
-            }
+#      - name: Trigger Update Manifest workflow
+#        if: github.ref == 'refs/heads/main'
+#        uses: peter-evans/repository-dispatch@v3
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          event-type: update_manifest
+#          client-payload: |
+#            {
+#              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE }}/${{ env.SERVICE }}",
+#              "app_name": "${{ env.SERVICE }}",
+#              "app_version": "${{ steps.semantic.outputs.version }}"
+#            }

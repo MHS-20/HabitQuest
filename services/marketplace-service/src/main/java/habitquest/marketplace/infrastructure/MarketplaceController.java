@@ -97,7 +97,6 @@ public class MarketplaceController {
             : marketplaceService.getAvailableItemsByType(idOfMarketplace(marketplaceId), type);
 
     log.info(items, "Fetched available items");
-
     return ResponseEntity.ok(assembler.toAvailableItemsCollection(marketplaceId, items, type));
   }
 

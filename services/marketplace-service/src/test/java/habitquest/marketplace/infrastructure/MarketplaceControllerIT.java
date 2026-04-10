@@ -61,7 +61,7 @@ public class MarketplaceControllerIT {
   private EntityModel<ItemResponse> stubItemModel(Item item) {
     return EntityModel.of(
         new ItemResponse(
-            ItemType.typeOf(item).name(),
+            item.itemType().name(),
             item.name(),
             item.description(),
             item.power(),

@@ -6,41 +6,22 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public enum ItemType {
-  ALL(item -> true),
-  ARMOR(item -> item instanceof Armor),
-  WEAPON(item -> item instanceof Weapon),
-  POTION(item -> item instanceof Potion),
-  HEALTH_POTION(item -> item instanceof HealthPotion),
-  MANA_POTION(item -> item instanceof ManaPotion);
-
-  private final Predicate<Item> filter;
-
-  ItemType(Predicate<Item> filter) {
-    this.filter = filter;
-  }
+  ALL,
+  ARMOR,
+  WEAPON,
+  POTION,
+  HEALTH_POTION,
+  MANA_POTION;
 
   public Predicate<Item> filter() {
-    return filter;
-  }
-
-  public static ItemType typeOf(Item item) {
-    if (item instanceof Armor) {
-      return ARMOR;
+    if (this == ALL) {
+      return item -> true;
     }
-    if (item instanceof Weapon) {
-      return WEAPON;
-    }
-    if (item instanceof HealthPotion) {
-      return HEALTH_POTION;
-    }
-    if (item instanceof ManaPotion) {
-      return MANA_POTION;
-    }
-    throw new IllegalArgumentException("Unknown item type: " + item.getClass().getSimpleName());
+    return item -> item.itemType() == this;
   }
 
   @JsonCreator
   public static ItemType fromString(String value) {
-    return valueOf(value.toUpperCase(Locale.getDefault()));
+    return valueOf(value.toUpperCase(Locale.ROOT));
   }
 }
