@@ -1,6 +1,7 @@
 .DS_Store
 *.zip
 .venv
+local.properties
 
 HELP.md
 .gradle
