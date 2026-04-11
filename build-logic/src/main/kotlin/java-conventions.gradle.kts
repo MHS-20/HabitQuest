@@ -6,6 +6,11 @@ plugins {
     pmd
 }
 
+val catalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
+private val checkstyle    = catalog.findVersion("checkstyle").get().requiredVersion
+private val pmd = catalog.findVersion("pmd").get().requiredVersion
+private val spotbugs     = catalog.findVersion("spotbugs").get().requiredVersion
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
@@ -24,12 +29,12 @@ spotless {
 }
 
 checkstyle {
-    toolVersion = "13.2.0"
+    toolVersion = checkstyle
     configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
 }
 
 pmd {
-    toolVersion = "7.21.0"
+    toolVersion = pmd
 }
 
 
@@ -43,7 +48,7 @@ tasks.withType<Checkstyle>().configureEach {
 }
 
 // configure<com.github.spotbugs.snom.SpotBugsExtension> {
-//     toolVersion = "4.9.7"
+//     toolVersion = "$spotbugs"
 // }
 
 tasks.register("checkQuality") {

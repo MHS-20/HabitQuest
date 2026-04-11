@@ -5,12 +5,11 @@ plugins {
 description = "notification-service"
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-mail")
-    implementation("org.springframework.boot:spring-boot-starter-json")
+    implementation(libs.spring.starter)
+    implementation(libs.spring.starter.mail)
+    implementation(libs.spring.starter.json)
 
-    testImplementation("org.springframework.kafka:spring-kafka-test")
-    testImplementation("com.icegreen:greenmail:2.1.2")
-    testImplementation("org.awaitility:awaitility")
-
+    testImplementation(libs.spring.kafka.test)
+    testImplementation(libs.greenmail)
+    testImplementation(libs.awaitility)
 }
