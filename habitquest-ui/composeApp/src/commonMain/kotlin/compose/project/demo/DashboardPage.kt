@@ -46,6 +46,7 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState, onRefreshStats: (
 
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
+  var tagsInput by remember { mutableStateOf("") }
   var recurrenceType by remember { mutableStateOf(CreateHabitRecurrenceType.DAILY) }
   var dayOfWeek by remember { mutableStateOf("MONDAY") }
   var dayOfMonth by remember { mutableStateOf("1") }
@@ -138,6 +139,19 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState, onRefreshStats: (
                     habitMessage = null
                   },
                   label = { Text("Description") },
+                  modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(
+                  value = tagsInput,
+                  onValueChange = {
+                    tagsInput = it
+                    habitMessage = null
+                  },
+                  label = { Text("Tags (comma separated)") },
+                  singleLine = true,
                   modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -244,6 +258,9 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState, onRefreshStats: (
                     return@TextButton
                   }
 
+                  val normalizedTags =
+                    tagsInput.split(',').map { it.trim() }.filter { it.isNotBlank() }.distinct()
+
                   scope.launch {
                     isCreatingHabit = true
                     habitMessage = null
@@ -257,12 +274,14 @@ fun DashboardScreen(token: String, avatarState: AvatarUiState, onRefreshStats: (
                           recurrenceType = recurrenceType,
                           dayOfWeek = normalizedDayOfWeek,
                           dayOfMonth = normalizedDayOfMonth,
+                          tags = normalizedTags,
                         )
                     ) {
                       is CreateHabitResult.Success -> {
                         habitMessage = "Habit created (id: ${result.habitId})"
                         title = ""
                         description = ""
+                        tagsInput = ""
                         showCreateHabitDialog = false
                       }
 
