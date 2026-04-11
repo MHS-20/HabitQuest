@@ -6,6 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -75,6 +76,12 @@ sealed interface DeleteHabitResult {
   data object Success : DeleteHabitResult
 
   data class Error(val message: String) : DeleteHabitResult
+}
+
+sealed interface UpdateHabitResult {
+  data object Success : UpdateHabitResult
+
+  data class Error(val message: String) : UpdateHabitResult
 }
 
 sealed interface HabitHistoryResult {
@@ -228,6 +235,45 @@ class HabitsApiRepository {
     }
   }
 
+  suspend fun updateHabit(
+    token: String,
+    habitId: String,
+    title: String,
+    description: String,
+  ): UpdateHabitResult {
+    if (habitId.isBlank()) {
+      return UpdateHabitResult.Error("Habit not found")
+    }
+
+    val titleResult =
+      patchHabitField(
+        token = token,
+        habitId = habitId,
+        endpoint = "title",
+        payloadKey = "title",
+        payloadValue = title,
+        errorPrefix = "Update title",
+      )
+    if (titleResult != null) {
+      return UpdateHabitResult.Error(titleResult)
+    }
+
+    val descriptionResult =
+      patchHabitField(
+        token = token,
+        habitId = habitId,
+        endpoint = "description",
+        payloadKey = "description",
+        payloadValue = description,
+        errorPrefix = "Update description",
+      )
+    if (descriptionResult != null) {
+      return UpdateHabitResult.Error(descriptionResult)
+    }
+
+    return UpdateHabitResult.Success
+  }
+
   suspend fun fetchHistoryByAvatar(token: String, avatarId: String): HabitHistoryResult {
     val response =
       runCatching {
@@ -259,6 +305,40 @@ class HabitsApiRepository {
       HttpStatusCode.Unauthorized ->
         HabitHistoryResult.Error("Session expired, please log in again")
       else -> HabitHistoryResult.Error("Habit history read error (${response.status.value})")
+    }
+  }
+
+  private suspend fun patchHabitField(
+    token: String,
+    habitId: String,
+    endpoint: String,
+    payloadKey: String,
+    payloadValue: String,
+    errorPrefix: String,
+  ): String? {
+    val response =
+      runCatching {
+          client.patch("${edgeServiceBaseUrl()}/api/v1/habits/$habitId/$endpoint") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            setBody(buildJsonObject { put(payloadKey, JsonPrimitive(payloadValue)) })
+          }
+        }
+        .getOrElse {
+          return "Unable to contact habit-service"
+        }
+
+    return when (response.status) {
+      HttpStatusCode.NoContent,
+      HttpStatusCode.OK -> null
+      HttpStatusCode.Unauthorized -> "Session expired, please log in again"
+      HttpStatusCode.NotFound -> "Habit not found"
+      HttpStatusCode.BadRequest -> {
+        val body = runCatching { response.body<JsonObject>() }.getOrNull()
+        body?.get("message")?.jsonPrimitive?.contentOrNull ?: "$errorPrefix failed"
+      }
+
+      else -> "$errorPrefix failed (${response.status.value})"
     }
   }
 }
