@@ -6,13 +6,11 @@ plugins {
     pmd
 }
 
-
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
-
 
 spotless {
     java {
@@ -25,27 +23,32 @@ spotless {
     }
 }
 
-tasks.named("compileJava") {
-    dependsOn("spotlessApply")
-}
-
 checkstyle {
     toolVersion = "13.2.0"
     configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
 }
 
-tasks.withType<Checkstyle>().configureEach {
+pmd {
+    toolVersion = "7.21.0"
+}
+
+
+tasks.named("compileJava") {
     dependsOn("spotlessApply")
 }
 
 
-pmd {
-    toolVersion = "7.21.0"
+tasks.withType<Checkstyle>().configureEach {
+    dependsOn("spotlessApply")
 }
 
 // configure<com.github.spotbugs.snom.SpotBugsExtension> {
 //     toolVersion = "4.9.7"
 // }
+
+tasks.register("checkQuality") {
+    dependsOn("checkstyleMain", "checkstyleTest", "pmdMain", "pmdTest", "spotlessCheck")
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()
