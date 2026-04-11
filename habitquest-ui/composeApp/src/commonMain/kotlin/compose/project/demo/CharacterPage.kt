@@ -143,7 +143,11 @@ fun CharacterScreen(
             Text(
               text = message,
               color =
-                if (message.startsWith("Equip") || message.startsWith("Unequip")) {
+                if (
+                  message.startsWith("Equip") ||
+                    message.startsWith("Unequip") ||
+                    message.startsWith("Use potion")
+                ) {
                   MaterialTheme.colorScheme.primary
                 } else {
                   MaterialTheme.colorScheme.error
@@ -164,6 +168,8 @@ fun CharacterScreen(
               inventoryItems.forEach { item ->
                 val isEquippable =
                   item.type.equals("WEAPON", true) || item.type.equals("ARMOR", true)
+                val isPotion =
+                  item.type.equals("HEALTH_POTION", true) || item.type.equals("MANA_POTION", true)
                 val isEquipped = equippedItemNames.contains(item.name)
                 Card(
                   modifier = Modifier.fillMaxWidth(),
@@ -244,6 +250,42 @@ fun CharacterScreen(
                           Text(if (isEquipped) "Unequip..." else "Equip...")
                         } else {
                           Text(if (isEquipped) "Unequip" else "Equip")
+                        }
+                      }
+                      Spacer(Modifier.height(8.dp))
+                    }
+                    if (isPotion) {
+                      Button(
+                        onClick = {
+                          scope.launch {
+                            inventoryActionItemName = item.name
+                            inventoryActionMessage = null
+                            when (
+                              val result = avatarRepository.usePotion(token, state.avatar.id, item)
+                            ) {
+                              AvatarInventoryActionResult.Success -> {
+                                inventoryActionMessage = "Use potion completed: ${item.name}"
+                                onAvatarRefresh()
+                                reloadInventoryState(state.avatar.id)
+                              }
+
+                              is AvatarInventoryActionResult.Error -> {
+                                inventoryActionMessage = result.message
+                              }
+                            }
+                            inventoryActionItemName = null
+                          }
+                        },
+                        enabled =
+                          inventoryActionItemName == null || inventoryActionItemName == item.name,
+                        modifier = Modifier.fillMaxWidth(),
+                      ) {
+                        if (inventoryActionItemName == item.name) {
+                          CircularProgressIndicator(strokeWidth = 2.dp)
+                          Spacer(Modifier.width(8.dp))
+                          Text("Using potion...")
+                        } else {
+                          Text("Use potion")
                         }
                       }
                       Spacer(Modifier.height(8.dp))

@@ -188,6 +188,27 @@ class AvatarRepository {
     )
   }
 
+  suspend fun usePotion(
+    token: String,
+    avatarId: String,
+    item: AvatarInventoryItem,
+  ): AvatarInventoryActionResult {
+    val potionPath =
+      when (item.type.uppercase()) {
+        "HEALTH_POTION" -> "health/potion"
+        "MANA_POTION" -> "mana/potion"
+        else -> return AvatarInventoryActionResult.Error("Unsupported potion type: ${item.type}")
+      }
+
+    return sendPotionAction(
+      token = token,
+      avatarId = avatarId,
+      path = potionPath,
+      potionName = item.name,
+      errorPrefix = "Use potion",
+    )
+  }
+
   private suspend fun sendInventoryAction(
     token: String,
     avatarId: String,
@@ -224,6 +245,45 @@ class AvatarRepository {
       HttpStatusCode.Unauthorized ->
         AvatarInventoryActionResult.Error("Session expired, please log in again")
       HttpStatusCode.NotFound -> AvatarInventoryActionResult.Error("Item not found")
+      HttpStatusCode.BadRequest -> {
+        val body = runCatching { response.body<JsonObject>() }.getOrNull()
+        val message = body?.get("message")?.jsonPrimitive?.contentOrNull
+        AvatarInventoryActionResult.Error(message ?: "$errorPrefix failed")
+      }
+
+      else -> AvatarInventoryActionResult.Error("$errorPrefix failed (${response.status.value})")
+    }
+  }
+
+  private suspend fun sendPotionAction(
+    token: String,
+    avatarId: String,
+    path: String,
+    potionName: String,
+    errorPrefix: String,
+  ): AvatarInventoryActionResult {
+    if (avatarId.isBlank()) {
+      return AvatarInventoryActionResult.Error("Invalid user")
+    }
+
+    val response =
+      runCatching {
+          client.post("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/$path") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            setBody(buildJsonObject { put("potionName", JsonPrimitive(potionName)) })
+          }
+        }
+        .getOrElse {
+          return AvatarInventoryActionResult.Error("Unable to contact avatar-service")
+        }
+
+    return when (response.status) {
+      HttpStatusCode.NoContent,
+      HttpStatusCode.OK -> AvatarInventoryActionResult.Success
+      HttpStatusCode.Unauthorized ->
+        AvatarInventoryActionResult.Error("Session expired, please log in again")
+      HttpStatusCode.NotFound -> AvatarInventoryActionResult.Error("Potion not found")
       HttpStatusCode.BadRequest -> {
         val body = runCatching { response.body<JsonObject>() }.getOrNull()
         val message = body?.get("message")?.jsonPrimitive?.contentOrNull
