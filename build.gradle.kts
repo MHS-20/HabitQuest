@@ -20,7 +20,7 @@ allprojects {
     }
 }
 
-tasks.register("checkAll") {
+tasks.register("checkQuality") {
     dependsOn(subprojects
         .filter { it.path != ":services" && it.path != ":habitquest-ui" }
         .map { "${it.path}:checkQuality" })

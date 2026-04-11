@@ -25,6 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinMultiplatform}")
     implementation("com.android.tools.build:gradle:${androidGradle}")
     implementation("org.jetbrains.compose:compose-gradle-plugin:${composeMultiplatform}")
+    implementation("org.jetbrains.kotlin:compose-compiler-gradle-plugin:${kotlinMultiplatform}")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:${detekt}")
 
     implementation(kotlin("stdlib-jdk8"))

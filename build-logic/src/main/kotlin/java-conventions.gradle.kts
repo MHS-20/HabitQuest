@@ -42,7 +42,6 @@ tasks.named("compileJava") {
     dependsOn("spotlessApply")
 }
 
-
 tasks.withType<Checkstyle>().configureEach {
     dependsOn("spotlessApply")
 }

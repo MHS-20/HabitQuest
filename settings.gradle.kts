@@ -2,6 +2,13 @@ import org.gradle.kotlin.dsl.mavenCentral
 
 pluginManagement {
     includeBuild("build-logic")
+
+    val spotlessVersion = file("gradle/libs.versions.toml")
+        .readLines()
+        .first { it.startsWith("spotless") }
+        .substringAfter("\"")
+        .substringBefore("\"")
+
     repositories {
         google {
             mavenContent {
@@ -15,9 +22,8 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("com.diffplug.spotless") version "7.0.2"
+        id("com.diffplug.spotless") version spotlessVersion
     }
-
 }
 
 rootProject.name = "habitquest"
@@ -62,7 +68,7 @@ plugins {
 gitHooks {
     commitMsg { conventionalCommits() }
     preCommit {
-        tasks("checkAll")
+        tasks("checkQuality")
     }
     createHooks(true)
 }
