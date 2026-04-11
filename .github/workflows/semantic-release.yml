@@ -60,7 +60,8 @@ jobs:
           npx semantic-release 2>&1 | tee release_output.log
           if grep -q "Created tag" release_output.log; then
             # VERSION=$(grep -oP "${SERVICE_SHORT}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
-            VERSION=$(sed -n "s/.*${SERVICE_SHORT}-v\([0-9.]*\).*/\1/p" release_output.log | head -1)
+            # VERSION=$(sed -n "s/.*${SERVICE_SHORT}-v\([0-9.]*\).*/\1/p" release_output.log | head -1)
+            VERSION=$(node -p "require('./package.json').version")
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "Detected Version: $VERSION"
           else
