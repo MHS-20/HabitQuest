@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +39,11 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
   var uiState by remember { mutableStateOf<HabitsUiState>(HabitsUiState.Loading) }
   var attendingHabitId by remember { mutableStateOf<String?>(null) }
   var deletingHabitId by remember { mutableStateOf<String?>(null) }
+  var updatingHabitId by remember { mutableStateOf<String?>(null) }
   var pendingDeleteHabit by remember { mutableStateOf<HabitListItem?>(null) }
+  var pendingEditHabit by remember { mutableStateOf<HabitListItem?>(null) }
+  var editTitle by remember { mutableStateOf("") }
+  var editDescription by remember { mutableStateOf("") }
   var actionMessage by remember { mutableStateOf<String?>(null) }
 
   suspend fun loadHabits(showLoading: Boolean) {
@@ -71,7 +76,11 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
       Text(
         text = message,
         color =
-          if (message.startsWith("Habit completed") || message.startsWith("Habit deleted")) {
+          if (
+            message.startsWith("Habit completed") ||
+              message.startsWith("Habit deleted") ||
+              message.startsWith("Habit updated")
+          ) {
             MaterialTheme.colorScheme.primary
           } else {
             MaterialTheme.colorScheme.error
@@ -92,6 +101,7 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
                 habit = habit,
                 isAttending = attendingHabitId == habit.id,
                 isDeleting = deletingHabitId == habit.id,
+                isUpdating = updatingHabitId == habit.id,
                 onAttend = {
                   scope.launch {
                     attendingHabitId = habit.id
@@ -109,6 +119,11 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
                     }
                     attendingHabitId = null
                   }
+                },
+                onEdit = {
+                  pendingEditHabit = habit
+                  editTitle = habit.title
+                  editDescription = habit.description
                 },
                 onDelete = { pendingDeleteHabit = habit },
               )
@@ -150,6 +165,72 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
         dismissButton = { TextButton(onClick = { pendingDeleteHabit = null }) { Text("Cancel") } },
       )
     }
+
+    pendingEditHabit?.let { habit ->
+      AlertDialog(
+        onDismissRequest = {
+          if (updatingHabitId == null) {
+            pendingEditHabit = null
+          }
+        },
+        title = { Text("Edit habit") },
+        text = {
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+              value = editTitle,
+              onValueChange = { editTitle = it },
+              label = { Text("Title") },
+              singleLine = true,
+              modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+              value = editDescription,
+              onValueChange = { editDescription = it },
+              label = { Text("Description") },
+              modifier = Modifier.fillMaxWidth(),
+            )
+          }
+        },
+        confirmButton = {
+          TextButton(
+            enabled = updatingHabitId == null && editTitle.isNotBlank(),
+            onClick = {
+              scope.launch {
+                updatingHabitId = habit.id
+                actionMessage = null
+                when (
+                  val result =
+                    habitRepository.updateHabit(
+                      token = token,
+                      habitId = habit.id,
+                      title = editTitle.trim(),
+                      description = editDescription.trim(),
+                    )
+                ) {
+                  UpdateHabitResult.Success -> {
+                    actionMessage = "Habit updated: ${editTitle.trim()}"
+                    pendingEditHabit = null
+                    loadHabits(showLoading = false)
+                  }
+
+                  is UpdateHabitResult.Error -> {
+                    actionMessage = result.message
+                  }
+                }
+                updatingHabitId = null
+              }
+            },
+          ) {
+            Text(if (updatingHabitId == habit.id) "Saving..." else "Save")
+          }
+        },
+        dismissButton = {
+          TextButton(enabled = updatingHabitId == null, onClick = { pendingEditHabit = null }) {
+            Text("Cancel")
+          }
+        },
+      )
+    }
   }
 }
 
@@ -158,7 +239,9 @@ private fun HabitRow(
   habit: HabitListItem,
   isAttending: Boolean,
   isDeleting: Boolean,
+  isUpdating: Boolean,
   onAttend: () -> Unit,
+  onEdit: () -> Unit,
   onDelete: () -> Unit,
 ) {
   val tagsText = habit.tags.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "No tags"
@@ -204,7 +287,7 @@ private fun HabitRow(
       Spacer(Modifier.height(10.dp))
       Button(
         onClick = onAttend,
-        enabled = !isAttending && !isDeleting,
+        enabled = !isAttending && !isDeleting && !isUpdating,
         modifier = Modifier.fillMaxWidth(),
       ) {
         if (isAttending) {
@@ -217,8 +300,22 @@ private fun HabitRow(
       }
       Spacer(Modifier.height(8.dp))
       Button(
+        onClick = onEdit,
+        enabled = !isAttending && !isDeleting && !isUpdating,
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        if (isUpdating) {
+          CircularProgressIndicator(strokeWidth = 2.dp)
+          Spacer(Modifier.width(8.dp))
+          Text("Saving...")
+        } else {
+          Text("Edit")
+        }
+      }
+      Spacer(Modifier.height(8.dp))
+      Button(
         onClick = onDelete,
-        enabled = !isAttending && !isDeleting,
+        enabled = !isAttending && !isDeleting && !isUpdating,
         modifier = Modifier.fillMaxWidth(),
         colors =
           androidx.compose.material3.ButtonDefaults.buttonColors(
