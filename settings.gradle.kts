@@ -1,8 +1,28 @@
+import org.gradle.kotlin.dsl.mavenCentral
+
 pluginManagement {
     includeBuild("build-logic")
+    repositories {
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        id("com.diffplug.spotless") version "7.0.2"
+    }
+
 }
 
 rootProject.name = "habitquest"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(
     "services:tracking-service",
@@ -11,8 +31,28 @@ include(
     "services:marketplace-service",
     "services:quest-service",
     "services:guild-service",
-    "services:edge-service"
+    "services:edge-service",
+    "habitquest-ui:composeApp"
 )
+
+dependencyResolutionManagement {
+    repositories {
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+    }
+
+    versionCatalogs {
+        create("uiLibs") {
+            from(files("gradle/ui.versions.toml"))
+        }
+    }
+}
 
 plugins {
     id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.10"

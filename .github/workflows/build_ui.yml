@@ -3,11 +3,11 @@ name: Build and Package Multiplatform UI
 on:
   push:
     paths:
-      - 'services/habitquest-ui/**'
+      - 'habitquest-ui/**'
       - '.github/workflows/build_ui.yml'
   pull_request:
     paths:
-      - 'services/habitquest-ui/**'
+      - 'habitquest-ui/**'
       - '.github/workflows/build_ui.yml'
 
 jobs:
@@ -91,21 +91,21 @@ jobs:
         run: chmod +x ./services/habitquest-ui/gradlew
 
       - name: Run Gradle build (KMP targets)
-        # Exclude Android release assemble to avoid requiring Android SDK on Linux runners.
+        # Exclude Android release assemble to avoid requiring Android SDK on Linux runners
         run: |
-          cd services/habitquest-ui && ./gradlew --no-daemon clean build -x :composeApp:assembleRelease
+          ./gradlew --no-daemon clean build -x :habitquest-ui:composeApp:assembleRelease
 
       - name: Build Kotlin/JS production bundle
         run: |
-          cd services/habitquest-ui && ./gradlew --no-daemon :composeApp:jsBrowserProductionWebpack || true
+          ./gradlew --no-daemon :habitquest-ui:composeApp:jsBrowserProductionWebpack || true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
-            services/habitquest-ui/build/**
-            services/habitquest-ui/composeApp/build/**
+            habitquest-ui/build/**
+            habitquest-ui/composeApp/build/**
 
   lint-reports:
     name: Upload Lint & Reports (if any)
@@ -125,5 +125,5 @@ jobs:
         with:
           name: lint-reports
           path: |
-            services/habitquest-ui/build/reports/**
-            services/habitquest-ui/composeApp/build/reports/**
+            habitquest-ui/build/reports/**
+            habitquest-ui/composeApp/build/reports/**

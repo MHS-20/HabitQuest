@@ -1,0 +1,91 @@
+kotlin version: 2.3.0
+error message: org.jetbrains.kotlin.backend.common.CompilationException: Back-end: Please report this problem https://kotl.in/issue
+/mnt/agent/work/4fd181cf5e814865/compose/foundation/foundation/src/commonMain/kotlin/androidx/compose/foundation/text/contextmenu/modifier/TextContextMenuModifier.kt:131:1
+Problem with `private class FilterTextContextMenuDataComponentsNode : Node, TraversableNode {
+  constructor(filter: Function1<TextContextMenuComponent, Boolean>) /* primary */ {
+    super/*Node*/()
+    { // BLOCK
+      <this>.#filter = filter
+    }
+  }
+
+  fun <set-filter>(<set-?>: Function1<TextContextMenuComponent, Boolean>) {
+    <this>.#filter = <set-?>
+  }
+
+  fun <get-filter>(): Function1<TextContextMenuComponent, Boolean> {
+    return <this>.#filter
+  }
+
+  private field filter: Function1<TextContextMenuComponent, Boolean>
+  override fun <get-traverseKey>(): Any {
+    return TextContextMenuDataTraverseKey_getInstance()
+  }
+
+  /* fake */ override fun <get-node>(): Node
+
+  /* fake */ override fun <get-coroutineScope>(): CoroutineScope
+
+  /* fake */ override fun <get-isAttached>(): Boolean
+
+  @Suppress(names = ["GetterSetterNames"])
+  /* fake */ override fun <get-shouldAutoInvalidate>(): Boolean
+
+  /* fake */ override fun onAttach()
+
+  /* fake */ override fun onDetach()
+
+  /* fake */ override fun onReset()
+
+  /* fake */ override fun sideEffect(effect: Function0<Unit>)
+
+  /* fake */ override fun onDensityChange()
+
+  /* fake */ override fun onLayoutDirectionChange()
+
+  /* fake */ override operator fun equals(other: Any?): Boolean
+
+  /* fake */ override fun hashCode(): Int
+
+  /* fake */ override fun toString(): String
+
+}
+
+`
+Details: Internal error in declaration transformer: java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at java.base/java.lang.invoke.DirectMethodHandle.allocateInstance(DirectMethodHandle.java:501)
+	at java.base/java.lang.invoke.DirectMethodHandle$Holder.newInvokeSpecial(DirectMethodHandle$Holder)
+	at java.base/java.lang.invoke.Invokers$Holder.linkToTargetMethod(Invokers$Holder)
+	at org.jetbrains.kotlin.backend.common.DeclarationTransformer.transformFlatRestricted(Lower.kt:237)
+	at org.jetbrains.kotlin.backend.common.DeclarationTransformer.access$transformFlatRestricted(Lower.kt:211)
+	at org.jetbrains.kotlin.backend.common.DeclarationTransformer$Visitor.visitFunction(Lower.kt:251)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorVoid.visitSimpleFunction(IrVisitorVoid.kt:144)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorVoid.visitSimpleFunction(IrVisitorVoid.kt:140)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorVoid.visitSimpleFunction(IrVisitorVoid.kt:18)
+	at org.jetbrains.kotlin.ir.declarations.IrSimpleFunction.accept(IrSimpleFunction.kt:39)
+	at org.jetbrains.kotlin.backend.common.DeclarationTransformer$Visitor.visitClass(Lower.kt:293)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorVoid.visitClass(IrVisitorVoid.kt:44)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorVoid.visitClass(IrVisitorVoid.kt:18)
+	at org.jetbrains.kotlin.ir.declarations.IrClass.accept(IrClass.kt:72)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorsKt.acceptVoid(IrVisitors.kt:11)
+	at org.jetbrains.kotlin.backend.common.DeclarationTransformer.lower(Lower.kt:221)
+	at org.jetbrains.kotlin.backend.common.FileLoweringPass.lower(Lower.kt:42)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt.makeIrModulePhase$lambda$1(PhaseBuilders.kt:95)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt$$Lambda/0x00007f212a299c18.invoke(Unknown Source)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt$createSimpleNamedCompilerPhase$1.phaseBody(PhaseBuilders.kt:58)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:102)
+	at org.jetbrains.kotlin.ir.backend.js.CompilerWithICKt.lowerPreservingTags(compilerWithIC.kt:117)
+	at org.jetbrains.kotlin.ir.backend.js.JsIrCompilerWithIC.compile(compilerWithIC.kt:96)
+	at org.jetbrains.kotlin.ir.backend.js.ic.CacheUpdater.compileDirtyFiles(CacheUpdater.kt:689)
+	at org.jetbrains.kotlin.ir.backend.js.ic.CacheUpdater.loadIrAndMakeIrFragmentGenerators(CacheUpdater.kt:789)
+	at org.jetbrains.kotlin.ir.backend.js.ic.CacheUpdater.actualizeCaches(CacheUpdater.kt:821)
+	at org.jetbrains.kotlin.cli.js.IcCachesKt.prepareIcCaches(IcCaches.kt:101)
+	at org.jetbrains.kotlin.cli.pipeline.web.WebBackendPipelinePhase.executePhase(WebBackendPipelinePhase.kt:70)
+	at org.jetbrains.kotlin.cli.pipeline.web.WebBackendPipelinePhase.executePhase(WebBackendPipelinePhase.kt:31)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:102)
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+	... 32 more
+
+
