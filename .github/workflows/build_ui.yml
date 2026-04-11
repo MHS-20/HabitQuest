@@ -88,12 +88,12 @@ jobs:
             node-${{ runner.os }}-modules-
 
       - name: Grant execute permission for Gradle wrapper
-        run: chmod +x ./services/habitquest-ui/gradlew
+        run: chmod +x gradlew
 
       - name: Run Gradle build (KMP targets)
         # Exclude Android release assemble to avoid requiring Android SDK on Linux runners
         run: |
-          ./gradlew --no-daemon clean build -x :habitquest-ui:composeApp:assembleRelease
+          ./gradlew --no-daemon clean :habitquest-ui:build -x :habitquest-ui:composeApp:assembleRelease
 
       - name: Build Kotlin/JS production bundle
         run: |
