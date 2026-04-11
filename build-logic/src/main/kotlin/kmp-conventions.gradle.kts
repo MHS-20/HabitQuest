@@ -3,6 +3,10 @@ import io.gitlab.arturbosch.detekt.Detekt
 plugins {
     id("com.diffplug.spotless")
     id("io.gitlab.arturbosch.detekt")
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.application")
+    id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val uiCatalog = extensions.getByType<VersionCatalogsExtension>().named("uiLibs")
@@ -10,6 +14,7 @@ private val detektVersion = uiCatalog.findVersion("detekt").get().requiredVersio
 
 spotless {
     kotlin {
+        //target("**/*.kt")
         target("src/**/*.kt")
         targetExclude("**/build/**", "**/generated/**")
         ktfmt().googleStyle()

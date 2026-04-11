@@ -2,14 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-plugins {
-  id("kmp-conventions")
-  alias(uiLibs.plugins.kotlinMultiplatform)
-  alias(uiLibs.plugins.androidApplication)
-  alias(uiLibs.plugins.composeMultiplatform)
-  alias(uiLibs.plugins.composeCompiler)
-  alias(uiLibs.plugins.composeHotReload)
-}
+plugins { id("kmp-conventions") }
 
 group = "habitquest.ui"
 
@@ -94,11 +87,11 @@ dependencies { debugImplementation(uiLibs.compose.uiTooling) }
 
 compose.desktop {
   application {
-    mainClass = "habitquest.ui.MainKt"
+    mainClass = "compose.project.demo.MainKt"
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-      packageName = "habitquest-ui"
+      packageName = "compose.project.demo"
       packageVersion = "1.0.0"
     }
   }
