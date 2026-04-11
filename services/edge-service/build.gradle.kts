@@ -1,5 +1,5 @@
 plugins {
-    id("org.springframework.boot")
+    id("spring-conventions")
 }
 
 description = "Edge Service for habitquest"

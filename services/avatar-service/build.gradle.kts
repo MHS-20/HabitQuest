@@ -1,8 +1,9 @@
 plugins {
-    id("org.springframework.boot")
+    id("spring-conventions")
 }
 
 description = "avatar-service"
+
 val testArchUnit: String by rootProject.extra
 
 dependencies {
