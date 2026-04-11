@@ -96,6 +96,24 @@ public class HabitController {
               throw new IllegalArgumentException(
                   "Unknown recurrence type: " + request.recurrenceType());
         };
+
+    List<Tag> tags =
+        request.tags() == null
+            ? List.of()
+            : request.tags().stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(tag -> !tag.isBlank())
+                .map(Tag::new)
+                .toList();
+    if (!tags.isEmpty()) {
+      try {
+        created = habitService.updateTags(created.getId(), tags);
+      } catch (HabitNotFoundException ex) {
+        throw new IllegalStateException("Created habit not found while applying tags", ex);
+      }
+    }
+
     log.info(created, "Habit created");
 
     return ResponseEntity.created(URI.create("/api/v1/habits/" + created.getId().value()))
@@ -281,6 +299,7 @@ public class HabitController {
       String recurrenceType,
       DayOfWeek dayOfWeek,
       Integer dayOfMonth,
+      List<String> tags,
       String associatedQuestId,
       String sourceHabitId) {}
 

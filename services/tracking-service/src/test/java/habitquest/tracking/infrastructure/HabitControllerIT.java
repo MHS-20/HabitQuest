@@ -193,6 +193,65 @@ public class HabitControllerIT {
       verify(habitService, never())
           .createMonthlyHabit(eq(AVATAR_ID), anyString(), anyString(), anyInt(), any());
     }
+
+    @Test
+    @DisplayName("applies tags when provided during creation")
+    void shouldApplyTagsWhenProvided() throws Exception {
+      when(habitService.createDailyHabit(any(), anyString(), anyString(), any()))
+          .thenReturn(hydrateHabitWithQuest());
+      when(habitService.updateTags(eq(HABIT_ID), anyList())).thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+
+      mockMvc
+          .perform(
+              post("/api/v1/habits")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"DAILY",
+                                        "tags":["  %s  ","", "%s"]
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION, TAG_HEALTH, TAG_MINDSET)))
+          .andExpect(status().isCreated());
+
+      verify(habitService)
+          .updateTags(
+              eq(HABIT_ID),
+              argThat(tags -> tags.equals(List.of(new Tag(TAG_HEALTH), new Tag(TAG_MINDSET)))));
+    }
+
+    @Test
+    @DisplayName("does not apply tags when request has no tags")
+    void shouldNotApplyTagsWhenMissing() throws Exception {
+      when(habitService.createDailyHabit(any(), anyString(), anyString(), any()))
+          .thenReturn(hydrateHabitWithQuest());
+      when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
+          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+
+      mockMvc
+          .perform(
+              post("/api/v1/habits")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                                      {
+                                        "avatarId":"%s",
+                                        "title":"%s",
+                                        "description":"%s",
+                                        "recurrenceType":"DAILY"
+                                      }
+                                      """
+                          .formatted(AVATAR_1, TITLE, DESCRIPTION)))
+          .andExpect(status().isCreated());
+
+      verify(habitService, never()).updateTags(any(), anyList());
+    }
   }
 
   @Nested

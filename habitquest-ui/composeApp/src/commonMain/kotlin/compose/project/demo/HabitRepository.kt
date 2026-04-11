@@ -104,6 +104,7 @@ class HabitsApiRepository {
     recurrenceType: CreateHabitRecurrenceType,
     dayOfWeek: String?,
     dayOfMonth: Int?,
+    tags: List<String>,
   ): CreateHabitResult {
     val response =
       runCatching {
@@ -122,6 +123,7 @@ class HabitsApiRepository {
                 if (dayOfMonth != null) {
                   put("dayOfMonth", JsonPrimitive(dayOfMonth))
                 }
+                put("tags", JsonArray(tags.map(::JsonPrimitive)))
               }
             )
           }
