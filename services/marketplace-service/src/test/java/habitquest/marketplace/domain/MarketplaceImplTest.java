@@ -62,29 +62,29 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnAvailableArmors() {
-      assertThat(marketplace.getAvailableItemsByType(ItemType.ARMOR)).containsExactly(shield());
+      assertThat(marketplace.getAvailableItemsByType(ItemFilter.ARMOR)).containsExactly(shield());
     }
 
     @Test
     void shouldReturnAvailableWeapons() {
-      assertThat(marketplace.getAvailableItemsByType(ItemType.WEAPON)).containsExactly(sword());
+      assertThat(marketplace.getAvailableItemsByType(ItemFilter.WEAPON)).containsExactly(sword());
     }
 
     @Test
     void shouldReturnAllAvailablePotions() {
-      assertThat(marketplace.getAvailableItemsByType(ItemType.POTION))
+      assertThat(marketplace.getAvailableItemsByType(ItemFilter.POTION))
           .containsExactlyInAnyOrder(hpPotion(), mpPotion());
     }
 
     @Test
     void shouldReturnAvailableHealthPotions() {
-      assertThat(marketplace.getAvailableItemsByType(ItemType.HEALTH_POTION))
+      assertThat(marketplace.getAvailableItemsByType(ItemFilter.HEALTH_POTION))
           .containsExactly(hpPotion());
     }
 
     @Test
     void shouldReturnAvailableManaPotions() {
-      assertThat(marketplace.getAvailableItemsByType(ItemType.MANA_POTION))
+      assertThat(marketplace.getAvailableItemsByType(ItemFilter.MANA_POTION))
           .containsExactly(mpPotion());
     }
 
@@ -99,7 +99,7 @@ class MarketplaceImplTest {
     @Test
     void shouldExcludeBoughtItemsFromAvailableItemsByType() {
       marketplace.buyItem(SWORD_NAME);
-      assertThat(marketplace.getAvailableItemsByType(ItemType.WEAPON)).isEmpty();
+      assertThat(marketplace.getAvailableItemsByType(ItemFilter.WEAPON)).isEmpty();
     }
   }
 

@@ -7,32 +7,16 @@ import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.Recurrence;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @InBoundPort
 public interface HabitService {
-  Habit createDailyHabit(
+  Habit createHabit(
       Id<Avatar> avatarId,
       String title,
       String description,
-      String associatedQuestId,
-      String sourceHabitId);
-
-  Habit createWeeklyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      DayOfWeek dayOfWeek,
-      String associatedQuestId,
-      String sourceHabitId);
-
-  Habit createMonthlyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      Integer dayOfMonth,
+      Recurrence recurrence,
       String associatedQuestId,
       String sourceHabitId);
 

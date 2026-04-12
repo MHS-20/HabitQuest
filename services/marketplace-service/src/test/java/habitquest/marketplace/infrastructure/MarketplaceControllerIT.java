@@ -13,6 +13,7 @@ import habitquest.marketplace.domain.ItemCatalog;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.infrastructure.dto.ItemMapper;
 import habitquest.marketplace.infrastructure.dto.ItemResponse;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponseAssembler;
@@ -59,13 +60,7 @@ public class MarketplaceControllerIT {
   }
 
   private EntityModel<ItemResponse> stubItemModel(Item item) {
-    return EntityModel.of(
-        new ItemResponse(
-            item.itemType().name(),
-            item.name(),
-            item.description(),
-            item.power(),
-            item.price().amount()));
+    return EntityModel.of(ItemMapper.toResponse(item));
   }
 
   // ── GET /api/v1/marketplaces/{marketplaceId} ──────────────────────────────────
@@ -188,7 +183,7 @@ public class MarketplaceControllerIT {
     void shouldReturn200WithAllItems() throws Exception {
       List<Item> items = List.of(sword(), shield());
       when(marketplaceService.getAllAvailableItems(MARKETPLACE_ID)).thenReturn(items);
-      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.ALL))
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemFilter.ALL))
           .thenReturn(CollectionModel.empty());
 
       mockMvc
@@ -212,9 +207,9 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with armors when type=ARMOR")
     void shouldReturn200WithArmors() throws Exception {
       List<Item> items = List.of(shield());
-      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.ARMOR))
+      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemFilter.ARMOR))
           .thenReturn(items);
-      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.ARMOR))
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemFilter.ARMOR))
           .thenReturn(CollectionModel.empty());
 
       mockMvc
@@ -228,9 +223,9 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with weapons when type=WEAPON")
     void shouldReturn200WithWeapons() throws Exception {
       List<Item> items = List.of(sword());
-      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.WEAPON))
+      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemFilter.WEAPON))
           .thenReturn(items);
-      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.WEAPON))
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemFilter.WEAPON))
           .thenReturn(CollectionModel.empty());
 
       mockMvc
@@ -244,9 +239,9 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with potions when type=POTION")
     void shouldReturn200WithPotions() throws Exception {
       List<Item> items = List.of(healthPotion(), manaPotion());
-      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.POTION))
+      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemFilter.POTION))
           .thenReturn(items);
-      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemType.POTION))
+      when(assembler.toAvailableItemsCollection(MARKETPLACE_ID.value(), items, ItemFilter.POTION))
           .thenReturn(CollectionModel.empty());
 
       mockMvc
@@ -260,10 +255,10 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with health potions when type=HEALTH_POTION")
     void shouldReturn200WithHealthPotions() throws Exception {
       List<Item> items = List.of(healthPotion());
-      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.HEALTH_POTION))
+      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemFilter.HEALTH_POTION))
           .thenReturn(items);
       when(assembler.toAvailableItemsCollection(
-              MARKETPLACE_ID.value(), items, ItemType.HEALTH_POTION))
+              MARKETPLACE_ID.value(), items, ItemFilter.HEALTH_POTION))
           .thenReturn(CollectionModel.empty());
 
       mockMvc
@@ -277,10 +272,10 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with mana potions when type=MANA_POTION")
     void shouldReturn200WithManaPotions() throws Exception {
       List<Item> items = List.of(manaPotion());
-      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemType.MANA_POTION))
+      when(marketplaceService.getAvailableItemsByType(MARKETPLACE_ID, ItemFilter.MANA_POTION))
           .thenReturn(items);
       when(assembler.toAvailableItemsCollection(
-              MARKETPLACE_ID.value(), items, ItemType.MANA_POTION))
+              MARKETPLACE_ID.value(), items, ItemFilter.MANA_POTION))
           .thenReturn(CollectionModel.empty());
 
       mockMvc

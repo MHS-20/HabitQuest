@@ -4,7 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.Item;
-import habitquest.marketplace.domain.items.ItemType;
+import habitquest.marketplace.domain.items.ItemFilter;
 import habitquest.marketplace.infrastructure.MarketplaceController;
 import java.util.List;
 import org.springframework.hateoas.*;
@@ -22,7 +22,9 @@ public class MarketplaceResponseAssembler {
     return EntityModel.of(
         dto,
         selfMarketplaceLink(marketplaceId),
-        linkTo(methodOn(MarketplaceController.class).getAvailableItems(marketplaceId, ItemType.ALL))
+        linkTo(
+                methodOn(MarketplaceController.class)
+                    .getAvailableItems(marketplaceId, ItemFilter.ALL))
             .withRel("items"),
         linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
             .withRel("sold-items"));
@@ -38,14 +40,16 @@ public class MarketplaceResponseAssembler {
         linkTo(methodOn(MarketplaceController.class).getAvailableItem(marketplaceId, item.name()))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
-        linkTo(methodOn(MarketplaceController.class).getAvailableItems(marketplaceId, ItemType.ALL))
+        linkTo(
+                methodOn(MarketplaceController.class)
+                    .getAvailableItems(marketplaceId, ItemFilter.ALL))
             .withRel("items"),
         linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name(), 0))
             .withRel("buy"));
   }
 
   public CollectionModel<EntityModel<ItemResponse>> toAvailableItemsCollection(
-      String marketplaceId, List<Item> items, ItemType type) {
+      String marketplaceId, List<Item> items, ItemFilter type) {
 
     List<EntityModel<ItemResponse>> itemModels =
         items.stream().map(item -> toAvailableItemModel(marketplaceId, item)).toList();

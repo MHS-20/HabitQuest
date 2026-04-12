@@ -42,7 +42,7 @@ public class MarketplaceImpl implements Marketplace {
   }
 
   @Override
-  public List<Item> getAvailableItemsByType(ItemType type) {
+  public List<Item> getAvailableItemsByType(ItemFilter type) {
     return catalog.getItemsByType(type).stream()
         .filter(item -> !soldItems.contains(item.name()))
         .toList();

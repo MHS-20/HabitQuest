@@ -73,7 +73,7 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemType type)
+  public List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemFilter type)
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId).getAvailableItemsByType(type);
   }
