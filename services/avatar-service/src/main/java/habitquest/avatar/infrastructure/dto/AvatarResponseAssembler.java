@@ -88,7 +88,7 @@ public class AvatarResponseAssembler
   }
 
   public EntityModel<AvatarController.InventoryResponse> toInventoryModel(
-      Inventory inventory, String id) {
+      List<Item> inventory, String id) {
     AvatarController.InventoryResponse dto = AvatarMapper.toResponse(inventory);
 
     return EntityModel.of(
