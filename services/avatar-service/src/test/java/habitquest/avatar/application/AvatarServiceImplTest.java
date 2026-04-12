@@ -401,7 +401,7 @@ class AvatarServiceImplTest {
 
       service.addToInventory(AVATAR_ID, SWORD);
 
-      assertThat(avatar.getInventory().getItems()).contains(SWORD);
+      assertThat(avatar.getInventory()).contains(SWORD);
       verify(avatarRepository).save(avatar);
     }
 
@@ -414,7 +414,7 @@ class AvatarServiceImplTest {
 
       service.removeItem(AVATAR_ID, SWORD);
 
-      assertThat(avatar.getInventory().getItems()).doesNotContain(SWORD);
+      assertThat(avatar.getInventory()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
     }
 
@@ -428,7 +428,7 @@ class AvatarServiceImplTest {
       service.equipItem(AVATAR_ID, SWORD);
 
       assertThat(avatar.getEquippedItems().getItems()).contains(SWORD);
-      assertThat(avatar.getInventory().getItems()).doesNotContain(SWORD);
+      assertThat(avatar.getInventory()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
     }
 
@@ -442,7 +442,7 @@ class AvatarServiceImplTest {
 
       service.unequipItem(AVATAR_ID, SWORD);
 
-      assertThat(avatar.getInventory().getItems()).contains(SWORD);
+      assertThat(avatar.getInventory()).contains(SWORD);
       assertThat(avatar.getEquippedItems().getItems()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
     }
