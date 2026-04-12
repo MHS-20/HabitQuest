@@ -7,10 +7,7 @@ import habitquest.tracking.application.HabitService;
 import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
-import habitquest.tracking.domain.reminder.DailyRecurrence;
-import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
-import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import habitquest.tracking.infrastructure.dto.HabitHistoryEventResponse;
 import habitquest.tracking.infrastructure.dto.HabitMapper;
 import habitquest.tracking.infrastructure.dto.HabitResponse;
@@ -19,8 +16,6 @@ import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,25 +44,18 @@ public class HabitController {
     log.info(request, "Creating habit");
 
     Id<Avatar> avatarId = idOfAvatar(request.avatarId());
-    String title = request.title();
-    String description = request.description();
-    String questId = request.associatedQuestId();
-    String sourceId = request.sourceHabitId();
 
+    Recurrence recurrence =
+        HabitMapper.toRecurrence(
+            request.recurrenceType(), request.dayOfWeek(), request.dayOfMonth());
     Habit created =
-        switch (Objects.requireNonNull(request.recurrenceType()).toUpperCase(Locale.ITALIAN)) {
-          case "DAILY" ->
-              habitService.createDailyHabit(avatarId, title, description, questId, sourceId);
-          case "WEEKLY" ->
-              habitService.createWeeklyHabit(
-                  avatarId, title, description, request.dayOfWeek(), questId, sourceId);
-          case "MONTHLY" ->
-              habitService.createMonthlyHabit(
-                  avatarId, title, description, request.dayOfMonth(), questId, sourceId);
-          default ->
-              throw new IllegalArgumentException(
-                  "Unknown recurrence type: " + request.recurrenceType());
-        };
+        habitService.createHabit(
+            avatarId,
+            request.title(),
+            request.description(),
+            recurrence,
+            request.associatedQuestId(),
+            request.sourceHabitId());
 
 
     List<Tag> tags =
@@ -216,7 +204,9 @@ public class HabitController {
       @PathVariable String id, @RequestBody UpdateRecurrenceRequest request)
       throws HabitNotFoundException {
     log.info(request, "Updating recurrence for habit " + id);
-    habitService.updateRecurrence(idOfHabit(id), request.toRecurrence());
+    habitService.updateRecurrence(
+        idOfHabit(id),
+        HabitMapper.toRecurrence(request.type, request.dayOfWeek, request.dayOfMonth));
     return ResponseEntity.noContent().build();
   }
 
@@ -286,16 +276,7 @@ public class HabitController {
     }
   }
 
-  public record UpdateRecurrenceRequest(String type, DayOfWeek dayOfWeek, Integer dayOfMonth) {
-    public Recurrence toRecurrence() {
-      return switch (type.toUpperCase(Locale.ITALIAN)) {
-        case "DAILY" -> new DailyRecurrence();
-        case "WEEKLY" -> new WeeklyRecurrence(dayOfWeek);
-        case "MONTHLY" -> new MonthlyRecurrence(dayOfMonth);
-        default -> throw new IllegalArgumentException("Unknown recurrence type: " + type);
-      };
-    }
-  }
+  public record UpdateRecurrenceRequest(String type, DayOfWeek dayOfWeek, Integer dayOfMonth) {}
 
   public record AttendRequest(LocalDateTime date) {}
 

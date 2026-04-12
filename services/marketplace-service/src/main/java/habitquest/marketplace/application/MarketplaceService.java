@@ -20,7 +20,7 @@ public interface MarketplaceService {
   List<Item> getAllAvailableItems(Id<Marketplace> marketplaceId)
       throws MarketplaceNotFoundException;
 
-  List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemType type)
+  List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemFilter type)
       throws MarketplaceNotFoundException;
 
   Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)

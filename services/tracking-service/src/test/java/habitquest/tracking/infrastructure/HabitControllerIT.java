@@ -53,7 +53,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 201 with the new habit id")
     void shouldReturn201WithId() throws Exception {
-      when(habitService.createDailyHabit(any(), anyString(), anyString(), any(), any()))
+      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
@@ -78,9 +78,9 @@ public class HabitControllerIT {
     }
 
     @Test
-    @DisplayName("delegates DAILY payload to createDailyHabit")
+    @DisplayName("delegates DAILY payload to service with DailyRecurrence")
     void shouldDelegateDailyPayloadToService() throws Exception {
-      when(habitService.createDailyHabit(any(), anyString(), anyString(), any(), any()))
+      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
@@ -102,17 +102,14 @@ public class HabitControllerIT {
           .andExpect(status().isCreated());
 
       verify(habitService)
-          .createDailyHabit(eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION), isNull(), isNull());
-      verify(habitService, never())
-          .createWeeklyHabit(eq(AVATAR_ID), anyString(), anyString(), any(), any(), any());
-      verify(habitService, never())
-          .createMonthlyHabit(eq(AVATAR_ID), anyString(), anyString(), anyInt(), any(), any());
+          .createHabit(
+              eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION), eq(DAILY_RECURRENCE), isNull(), isNull());
     }
 
     @Test
-    @DisplayName("delegates WEEKLY payload to createWeeklyHabit")
+    @DisplayName("delegates WEEKLY payload to service with WeeklyRecurrence")
     void shouldDelegateWeeklyPayloadToService() throws Exception {
-      when(habitService.createWeeklyHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
@@ -135,13 +132,14 @@ public class HabitControllerIT {
           .andExpect(status().isCreated());
 
       verify(habitService)
-          .createWeeklyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_WEEK, null, null);
+          .createHabit(
+              eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION), eq(WEEKLY_RECURRENCE), isNull(), isNull());
     }
 
     @Test
-    @DisplayName("delegates MONTHLY payload to createMonthlyHabit")
+    @DisplayName("delegates MONTHLY payload to service with MonthlyRecurrence")
     void shouldDelegateMonthlyPayloadToService() throws Exception {
-      when(habitService.createMonthlyHabit(any(), anyString(), anyString(), anyInt(), any(), any()))
+      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
@@ -164,7 +162,13 @@ public class HabitControllerIT {
           .andExpect(status().isCreated());
 
       verify(habitService)
-          .createMonthlyHabit(AVATAR_ID, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH, null, null);
+          .createHabit(
+              eq(AVATAR_ID),
+              eq(TITLE),
+              eq(DESCRIPTION),
+              eq(MONTHLY_RECURRENCE),
+              isNull(),
+              isNull());
     }
 
     @Test
@@ -187,12 +191,7 @@ public class HabitControllerIT {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Unknown recurrence type: YEARLY"));
 
-      verify(habitService, never())
-          .createDailyHabit(eq(AVATAR_ID), anyString(), anyString(), any(), any());
-      verify(habitService, never())
-          .createWeeklyHabit(eq(AVATAR_ID), anyString(), anyString(), any(), any(), any());
-      verify(habitService, never())
-          .createMonthlyHabit(eq(AVATAR_ID), anyString(), anyString(), anyInt(), any(), any());
+      verify(habitService, never()).createHabit(any(), any(), any(), any(), any(), any());
     }
 
     @Test
