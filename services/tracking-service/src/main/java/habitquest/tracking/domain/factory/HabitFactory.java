@@ -18,34 +18,20 @@ public class HabitFactory implements Factory {
     this.idGenerator = idGenerator;
   }
 
-  public Habit createDailyHabit(Id<Avatar> avatarId, String title, String description) {
-    return createDailyHabit(avatarId, title, description, Optional.empty());
-  }
-
-  public Habit createDailyHabit(
-      Id<Avatar> avatarId, String title, String description, Optional<String> associatedQuestId) {
-    return createDailyHabit(avatarId, title, description, associatedQuestId, Optional.empty());
-  }
-
   public Habit createDailyHabit(
       Id<Avatar> avatarId,
       String title,
       String description,
-      Optional<String> associatedQuestId,
-      Optional<String> sourceHabitId) {
+      String associatedQuestId,
+      String sourceHabitId) {
     return new Habit(
         new Id<>(this.idGenerator.nextId()),
         avatarId,
         title,
         description,
         new DailyRecurrence(),
-        associatedQuestId,
-        sourceHabitId);
-  }
-
-  public Habit createWeeklyHabit(
-      Id<Avatar> avatarId, String title, String description, DayOfWeek dayOfWeek) {
-    return createWeeklyHabit(avatarId, title, description, dayOfWeek, Optional.empty());
+        Optional.ofNullable(associatedQuestId),
+        Optional.ofNullable(sourceHabitId));
   }
 
   public Habit createWeeklyHabit(
@@ -53,31 +39,16 @@ public class HabitFactory implements Factory {
       String title,
       String description,
       DayOfWeek dayOfWeek,
-      Optional<String> associatedQuestId) {
-    return createWeeklyHabit(
-        avatarId, title, description, dayOfWeek, associatedQuestId, Optional.empty());
-  }
-
-  public Habit createWeeklyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      DayOfWeek dayOfWeek,
-      Optional<String> associatedQuestId,
-      Optional<String> sourceHabitId) {
+      String associatedQuestId,
+      String sourceHabitId) {
     return new Habit(
         new Id<>(this.idGenerator.nextId()),
         avatarId,
         title,
         description,
         new WeeklyRecurrence(dayOfWeek),
-        associatedQuestId,
-        sourceHabitId);
-  }
-
-  public Habit createMonthlyHabit(
-      Id<Avatar> avatarId, String title, String description, Integer dayOfMonth) {
-    return createMonthlyHabit(avatarId, title, description, dayOfMonth, Optional.empty());
+        Optional.ofNullable(associatedQuestId),
+        Optional.ofNullable(sourceHabitId));
   }
 
   public Habit createMonthlyHabit(
@@ -85,25 +56,15 @@ public class HabitFactory implements Factory {
       String title,
       String description,
       Integer dayOfMonth,
-      Optional<String> associatedQuestId) {
-    return createMonthlyHabit(
-        avatarId, title, description, dayOfMonth, associatedQuestId, Optional.empty());
-  }
-
-  public Habit createMonthlyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      Integer dayOfMonth,
-      Optional<String> associatedQuestId,
-      Optional<String> sourceHabitId) {
+      String associatedQuestId,
+      String sourceHabitId) {
     return new Habit(
         new Id<>(this.idGenerator.nextId()),
         avatarId,
         title,
         description,
         new MonthlyRecurrence(dayOfMonth),
-        associatedQuestId,
-        sourceHabitId);
+        Optional.ofNullable(associatedQuestId),
+        Optional.ofNullable(sourceHabitId));
   }
 }

@@ -13,11 +13,6 @@ import java.util.List;
 
 @InBoundPort
 public interface HabitService {
-  Habit createDailyHabit(Id<Avatar> avatarId, String title, String description);
-
-  Habit createDailyHabit(
-      Id<Avatar> avatarId, String title, String description, String associatedQuestId);
-
   Habit createDailyHabit(
       Id<Avatar> avatarId,
       String title,
@@ -26,32 +21,12 @@ public interface HabitService {
       String sourceHabitId);
 
   Habit createWeeklyHabit(
-      Id<Avatar> avatarId, String title, String description, DayOfWeek dayOfWeek);
-
-  Habit createWeeklyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      DayOfWeek dayOfWeek,
-      String associatedQuestId);
-
-  Habit createWeeklyHabit(
       Id<Avatar> avatarId,
       String title,
       String description,
       DayOfWeek dayOfWeek,
       String associatedQuestId,
       String sourceHabitId);
-
-  Habit createMonthlyHabit(
-      Id<Avatar> avatarId, String title, String description, Integer dayOfMonth);
-
-  Habit createMonthlyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      Integer dayOfMonth,
-      String associatedQuestId);
 
   Habit createMonthlyHabit(
       Id<Avatar> avatarId,
