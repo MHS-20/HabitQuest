@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /** Tracks per-avatar progress for a quest template during a concrete active time window. */
-public class ActiveQuests implements Aggregate<Id<ActiveQuests>> {
+public final class ActiveQuests implements Aggregate<Id<ActiveQuests>> {
 
   public enum Status {
     IN_PROGRESS,

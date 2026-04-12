@@ -55,14 +55,13 @@ public final class GuildFixtures {
   public static final Id<Battle> BATTLE_ID = new Id<>(BATTLE_1);
   public static final Id<Battle> UNKNOWN_BATTLE_ID = new Id<>(UNKNOWN_BATTLE);
 
-  public static final List<Id<GuildMember>> GUILD_MEMBERS =
-      new ArrayList<>(List.of(LEADER_ID, MEMBER_ID));
+  public static final List<Id<GuildMember>> GUILD_MEMBERS = List.of(LEADER_ID, MEMBER_ID);
 
   public static final Id<GuildMember> LEADER_HTTP = new Id<>(LEADER_HTTP_ID);
   public static final Id<GuildMember> BATTLE_MEMBER_ID_1 = new Id<>(BATTLE_MEMBER_1);
   public static final Id<GuildMember> BATTLE_MEMBER_ID_2 = new Id<>(BATTLE_MEMBER_2);
   public static final List<Id<GuildMember>> BATTLE_MEMBERS =
-      new ArrayList<>(List.of(BATTLE_MEMBER_ID_1, BATTLE_MEMBER_ID_2));
+      List.of(BATTLE_MEMBER_ID_1, BATTLE_MEMBER_ID_2);
 
   // Guild metadata
   public static final String GUILD_NAME = "MyGuild";

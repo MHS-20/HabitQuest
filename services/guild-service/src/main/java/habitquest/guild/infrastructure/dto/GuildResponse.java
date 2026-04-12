@@ -6,6 +6,10 @@ import java.util.List;
 public record GuildResponse(
     String id, String name, Integer globalRank, List<GuildMemberResponse> members) {
 
+  public GuildResponse {
+    members = List.copyOf(members);
+  }
+
   public static GuildResponse from(Guild guild) {
     return new GuildResponse(
         guild.getId().value(),

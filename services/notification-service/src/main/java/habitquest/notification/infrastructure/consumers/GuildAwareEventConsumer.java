@@ -26,7 +26,15 @@ public class GuildAwareEventConsumer extends AvatarAwareEventConsumer {
     members.forEach(avatarId -> sendToAvatar(avatarId, subject, body));
   }
 
-  public GuildMemberRepository getGuildMemberRepository() {
-    return guildMemberRepository;
+  protected void addMember(String guildId, String memberId) {
+    guildMemberRepository.addMember(guildId, memberId);
+  }
+
+  protected void removeMember(String guildId, String memberId) {
+    guildMemberRepository.removeMember(guildId, memberId);
+  }
+
+  protected void removeGuild(String guildId) {
+    guildMemberRepository.removeGuild(guildId);
   }
 }

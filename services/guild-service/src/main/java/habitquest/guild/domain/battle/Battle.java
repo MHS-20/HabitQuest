@@ -32,7 +32,7 @@ public class Battle implements Aggregate<Id<Battle>> {
     this.numOfTurns = numOfTurns;
     this.currentTurn = 0;
     this.bossRemainingHealth = new BossStatus(boss.stats().health());
-    this.memberIds = members;
+    this.memberIds = new ArrayList<>(members);
     this.fallenAvatarIds = new HashSet<>();
     this.battleStatus = new BattleOutcome.Ongoing();
   }

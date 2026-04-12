@@ -25,12 +25,11 @@ public class UserEventConsumer extends AvatarAwareEventConsumer {
               "Received UserRegistered: avatarId={}, email={}",
               message.avatarId(),
               message.email());
-      super.getUserEmailRepository().save(message.avatarId(), message.email());
-      super.getNotificationService()
-          .send(
-              message.email(),
-              "Welcome to HabitQuest!",
-              "Your account has been created successfully. Enjoy your adventure!");
+      saveEmail(message.avatarId(), message.email());
+      sendNotification(
+          message.email(),
+          "Welcome to HabitQuest!",
+          "Your account has been created successfully. Enjoy your adventure!");
     };
   }
 

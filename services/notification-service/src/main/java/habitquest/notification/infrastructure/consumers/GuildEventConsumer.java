@@ -29,7 +29,7 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
           message.leaderId(),
           "Guild created!",
           "The guild " + message.name() + " has been created successfully!");
-      super.getGuildMemberRepository().addMember(message.guildId(), message.leaderId());
+      addMember(message.guildId(), message.leaderId());
     };
   }
 
@@ -41,7 +41,7 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
           message.guildId(),
           "Guild deleted",
           "The guild " + message.guildId() + " has been deleted.");
-      super.getGuildMemberRepository().removeGuild(message.guildId());
+      removeGuild(message.guildId());
     };
   }
 
@@ -53,7 +53,7 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
               "Received GuildJoined: guildId={}, memberId={}",
               message.guildId(),
               message.memberId());
-      super.getGuildMemberRepository().addMember(message.guildId(), message.memberId());
+      addMember(message.guildId(), message.memberId());
       sendToAvatar(
           message.memberId(),
           "Welcome to the guild!",
@@ -67,7 +67,7 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
       logger()
           .info(
               "Received GuildLeft: guildId={}, memberId={}", message.guildId(), message.memberId());
-      super.getGuildMemberRepository().removeMember(message.guildId(), message.memberId());
+      removeMember(message.guildId(), message.memberId());
       sendToAvatar(
           message.memberId(),
           "You left the guild",
@@ -83,7 +83,7 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
               "Received RemovedFromGuild: guildId={}, memberId={}",
               message.guildId(),
               message.memberId());
-      super.getGuildMemberRepository().removeMember(message.guildId(), message.memberId());
+      removeMember(message.guildId(), message.memberId());
       sendToAvatar(
           message.memberId(),
           "You have been removed from the guild",

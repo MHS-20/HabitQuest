@@ -33,7 +33,7 @@ public class MarketplaceImpl implements Marketplace {
   }
 
   public List<Item> getCatalogItems() {
-    return this.catalog.getAllItems();
+    return Collections.unmodifiableList(this.catalog.getAllItems());
   }
 
   @Override
@@ -59,7 +59,7 @@ public class MarketplaceImpl implements Marketplace {
 
   @Override
   public Set<String> getSoldItemNames() {
-    return soldItems;
+    return Collections.unmodifiableSet(soldItems);
   }
 
   @Override

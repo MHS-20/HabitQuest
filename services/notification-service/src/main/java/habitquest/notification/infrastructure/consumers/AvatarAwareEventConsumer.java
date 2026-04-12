@@ -22,11 +22,11 @@ public abstract class AvatarAwareEventConsumer implements EventConsumer {
             () -> logger().warn("No email found for avatarId={}, notification not sent", avatarId));
   }
 
-  public UserEmailRepository getUserEmailRepository() {
-    return userEmailRepository;
+  protected void saveEmail(String avatarId, String email) {
+    userEmailRepository.save(avatarId, email);
   }
 
-  public NotificationService getNotificationService() {
-    return notificationService;
+  protected void sendNotification(String email, String subject, String body) {
+    notificationService.send(email, subject, body);
   }
 }
