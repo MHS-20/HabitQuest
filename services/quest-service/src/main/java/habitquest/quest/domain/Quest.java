@@ -7,6 +7,7 @@ import habitquest.quest.domain.reminder.MonthlyRecurrence;
 import habitquest.quest.domain.reminder.WeeklyRecurrence;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Quest implements Aggregate<Id<Quest>> {
@@ -60,7 +61,7 @@ public class Quest implements Aggregate<Id<Quest>> {
   }
 
   public List<Habit> getHabits() {
-    return habits;
+    return Collections.unmodifiableList(habits);
   }
 
   public void addHabit(Habit habit) {
