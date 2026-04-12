@@ -15,7 +15,6 @@ import habitquest.tracking.domain.events.HabitObserver;
 import habitquest.tracking.domain.events.HabitUpdated;
 import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -52,51 +51,20 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
-  public Habit createDailyHabit(
-      Id<Avatar> avatarId,
-      String name,
-      String description,
-      String associatedQuestId,
-      String sourceHabitId) {
-    Habit habit =
-        habitFactory.createDailyHabit(
-            avatarId, name, description, associatedQuestId, sourceHabitId);
-    Habit saved = habitRepository.save(habit);
-    appendHistory(new HabitCreated(saved, saved.getAvatarId()), "daily recurrence");
-    return saved;
-  }
-
-  @Override
-  public Habit createWeeklyHabit(
+  public Habit createHabit(
       Id<Avatar> avatarId,
       String title,
       String description,
-      DayOfWeek dayOfWeek,
+      Recurrence recurrence,
       String associatedQuestId,
       String sourceHabitId) {
     Habit habit =
-        habitFactory.createWeeklyHabit(
-            avatarId, title, description, dayOfWeek, associatedQuestId, sourceHabitId);
+        habitFactory.createHabit(
+            avatarId, title, description, recurrence, associatedQuestId, sourceHabitId);
     Habit saved = habitRepository.save(habit);
     appendHistory(
-        new HabitCreated(saved, saved.getAvatarId()), "weekly recurrence day=" + dayOfWeek);
-    return saved;
-  }
-
-  @Override
-  public Habit createMonthlyHabit(
-      Id<Avatar> avatarId,
-      String title,
-      String description,
-      Integer dayOfMonth,
-      String associatedQuestId,
-      String sourceHabitId) {
-    Habit habit =
-        habitFactory.createMonthlyHabit(
-            avatarId, title, description, dayOfMonth, associatedQuestId, sourceHabitId);
-    Habit saved = habitRepository.save(habit);
-    appendHistory(
-        new HabitCreated(saved, saved.getAvatarId()), "monthly recurrence day=" + dayOfMonth);
+        new HabitCreated(saved, saved.getAvatarId()),
+        "recurrence=" + recurrence.getClass().getSimpleName());
     return saved;
   }
 

@@ -1,6 +1,6 @@
 package habitquest.avatar.domain.stats;
 
-public record BaseStat(Integer value) implements AvatarStat {
+public record BaseStat(Integer value) {
   public BaseStat {
     if (value < 0) {
       throw new IllegalArgumentException("Stat value cannot be negative");

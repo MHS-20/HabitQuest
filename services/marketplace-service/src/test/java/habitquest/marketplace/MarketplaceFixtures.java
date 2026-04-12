@@ -148,12 +148,12 @@ public final class MarketplaceFixtures {
     var mp = mpPotion();
 
     when(catalog.getAllItems()).thenReturn(List.of(sword, shield, hp, mp));
-    when(catalog.getItemsByType(ItemType.ALL)).thenReturn(List.of(sword, shield, hp, mp));
-    when(catalog.getItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield));
-    when(catalog.getItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword));
-    when(catalog.getItemsByType(ItemType.POTION)).thenReturn(List.of(hp, mp));
-    when(catalog.getItemsByType(ItemType.HEALTH_POTION)).thenReturn(List.of(hp));
-    when(catalog.getItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(mp));
+    when(catalog.getItemsByType(ItemFilter.ALL)).thenReturn(List.of(sword, shield, hp, mp));
+    when(catalog.getItemsByType(ItemFilter.ARMOR)).thenReturn(List.of(shield));
+    when(catalog.getItemsByType(ItemFilter.WEAPON)).thenReturn(List.of(sword));
+    when(catalog.getItemsByType(ItemFilter.POTION)).thenReturn(List.of(hp, mp));
+    when(catalog.getItemsByType(ItemFilter.HEALTH_POTION)).thenReturn(List.of(hp));
+    when(catalog.getItemsByType(ItemFilter.MANA_POTION)).thenReturn(List.of(mp));
     when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(sword));
     when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(shield));
     when(catalog.getItem(HP_POTION_NAME)).thenReturn(Optional.of(hp));

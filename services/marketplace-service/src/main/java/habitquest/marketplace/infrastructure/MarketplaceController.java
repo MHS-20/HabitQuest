@@ -88,11 +88,11 @@ public class MarketplaceController {
 
   @GetMapping("/{marketplaceId}/items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getAvailableItems(
-      @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemType type)
+      @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemFilter type)
       throws MarketplaceNotFoundException {
 
     List<Item> items =
-        type == ItemType.ALL
+        type == ItemFilter.ALL
             ? marketplaceService.getAllAvailableItems(idOfMarketplace(marketplaceId))
             : marketplaceService.getAvailableItemsByType(idOfMarketplace(marketplaceId), type);
 

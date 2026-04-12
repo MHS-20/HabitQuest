@@ -33,6 +33,7 @@ public class Habit implements Aggregate<Id<Habit>> {
     this.recurrence = recurrence;
     this.associatedQuestId = associatedQuestId;
     this.sourceHabitId = sourceHabitId;
+    this.tags = new ArrayList<>();
   }
 
   public Habit(

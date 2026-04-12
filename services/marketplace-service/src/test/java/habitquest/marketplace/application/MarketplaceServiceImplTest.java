@@ -136,42 +136,43 @@ class MarketplaceServiceImplTest {
     @Test
     void shouldReturnArmors() {
       givenMarketplaceExists();
-      when(marketplace.getAvailableItemsByType(ItemType.ARMOR)).thenReturn(List.of(shield));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.ARMOR))
+      when(marketplace.getAvailableItemsByType(ItemFilter.ARMOR)).thenReturn(List.of(shield));
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemFilter.ARMOR))
           .containsExactly(shield);
     }
 
     @Test
     void shouldReturnWeapons() {
       givenMarketplaceExists();
-      when(marketplace.getAvailableItemsByType(ItemType.WEAPON)).thenReturn(List.of(sword));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.WEAPON))
+      when(marketplace.getAvailableItemsByType(ItemFilter.WEAPON)).thenReturn(List.of(sword));
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemFilter.WEAPON))
           .containsExactly(sword);
     }
 
     @Test
     void shouldReturnPotions() {
       givenMarketplaceExists();
-      when(marketplace.getAvailableItemsByType(ItemType.POTION))
+      when(marketplace.getAvailableItemsByType(ItemFilter.POTION))
           .thenReturn(List.of(hpPotion, mpPotion));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.POTION))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemFilter.POTION))
           .containsExactlyInAnyOrder(hpPotion, mpPotion);
     }
 
     @Test
     void shouldReturnHealthPotions() {
       givenMarketplaceExists();
-      when(marketplace.getAvailableItemsByType(ItemType.HEALTH_POTION))
+      when(marketplace.getAvailableItemsByType(ItemFilter.HEALTH_POTION))
           .thenReturn(List.of(hpPotion));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.HEALTH_POTION))
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemFilter.HEALTH_POTION))
           .containsExactly(hpPotion);
     }
 
     @Test
     void shouldReturnManaPotions() {
       givenMarketplaceExists();
-      when(marketplace.getAvailableItemsByType(ItemType.MANA_POTION)).thenReturn(List.of(mpPotion));
-      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemType.MANA_POTION))
+      when(marketplace.getAvailableItemsByType(ItemFilter.MANA_POTION))
+          .thenReturn(List.of(mpPotion));
+      assertThat(service.getAvailableItemsByType(MARKETPLACE_MP_ID, ItemFilter.MANA_POTION))
           .containsExactly(mpPotion);
     }
 
@@ -179,7 +180,7 @@ class MarketplaceServiceImplTest {
     void shouldThrowWhenMarketplaceNotFound() {
       givenMarketplaceNotFound(MISSING_MARKETPLACE_ID);
       assertThatThrownBy(
-              () -> service.getAvailableItemsByType(MISSING_MARKETPLACE_ID, ItemType.ALL))
+              () -> service.getAvailableItemsByType(MISSING_MARKETPLACE_ID, ItemFilter.ALL))
           .isInstanceOf(MarketplaceNotFoundException.class);
     }
   }
