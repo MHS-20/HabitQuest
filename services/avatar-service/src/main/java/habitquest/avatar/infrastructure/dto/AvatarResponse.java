@@ -13,4 +13,9 @@ public record AvatarResponse(
     StatsResponse stats,
     InventoryResponse inventory,
     EquippedItemsResponse equippedItems,
-    List<String> spells) {}
+    List<String> spells) {
+
+  public AvatarResponse {
+    spells = spells != null ? List.copyOf(spells) : List.of();
+  }
+}

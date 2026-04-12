@@ -79,7 +79,7 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public Inventory getInventory(Id<Avatar> avatarId) throws AvatarNotFoundException {
+  public List<Item> getInventory(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getInventory();
   }
 
@@ -178,7 +178,7 @@ public class AvatarServiceImpl implements AvatarService {
       throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     HealthPotion potion =
-        avatar.getInventory().getItems().stream()
+        avatar.getInventory().stream()
             .filter(item -> item instanceof HealthPotion)
             .map(item -> (HealthPotion) item)
             .filter(p -> p.name().equals(potionName))
@@ -193,7 +193,7 @@ public class AvatarServiceImpl implements AvatarService {
   public void useManaPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     ManaPotion potion =
-        avatar.getInventory().getItems().stream()
+        avatar.getInventory().stream()
             .filter(item -> item instanceof ManaPotion)
             .map(item -> (ManaPotion) item)
             .filter(p -> p.name().equals(potionName))

@@ -637,7 +637,6 @@ public class AvatarControllerIT {
   }
 
   // ── GET /api/v1/avatars/{id}/inventory ───────────────────────────────────────
-
   @Nested
   @DisplayName("GET /api/v1/avatars/{id}/inventory")
   class GetInventory {
@@ -647,16 +646,15 @@ public class AvatarControllerIT {
     void shouldReturnInventory() throws Exception {
       Inventory inventory = new Inventory(INVENTORY_ID);
       inventory.addItem(SWORD);
-      when(avatarService.getInventory(AVATAR_ID)).thenReturn(inventory);
+      when(avatarService.getInventory(AVATAR_ID)).thenReturn(inventory.getItems());
       when(avatarResponseAssembler.toInventoryModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.InventoryResponse(AVATAR_1, List.of())));
+          .thenReturn(EntityModel.of(new AvatarController.InventoryResponse(List.of())));
 
       mockMvc.perform(get("/api/v1/avatars/{id}/inventory", AVATAR_1)).andExpect(status().isOk());
     }
   }
 
   // ── GET /api/v1/avatars/{id}/equipped-items ──────────────────────────────────
-
   @Nested
   @DisplayName("GET /api/v1/avatars/{id}/equipped-items")
   class GetEquippedItems {

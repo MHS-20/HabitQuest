@@ -151,7 +151,7 @@ public class AvatarController {
   public ResponseEntity<EntityModel<InventoryResponse>> getInventory(@PathVariable String id)
       throws AvatarNotFoundException {
 
-    Inventory inventory = avatarService.getInventory(idOf(id));
+    List<Item> inventory = avatarService.getInventory(idOf(id));
     EntityModel<InventoryResponse> model = assembler.toInventoryModel(inventory, id);
     log.info(model.getContent(), "Avatar inventory retrieved for id: " + id);
 
@@ -401,7 +401,6 @@ public class AvatarController {
   }
 
   // ─── Record ──────────────────────────────────────────────────────────────────
-
   public record CreateAvatarRequest(String id, String name) {}
 
   public record UpdateNameRequest(String name) {}
@@ -420,9 +419,17 @@ public class AvatarController {
 
   public record ExperienceResponse(Integer amount) {}
 
-  public record EquippedItemsResponse(String id, List<ItemResponse> items) {}
+  public record EquippedItemsResponse(String id, List<ItemResponse> items) {
+    public EquippedItemsResponse {
+      items = List.copyOf(items);
+    }
+  }
 
-  public record InventoryResponse(String id, List<ItemResponse> items) {}
+  public record InventoryResponse(List<ItemResponse> items) {
+    public InventoryResponse {
+      items = List.copyOf(items);
+    }
+  }
 
   public record StatsResponse(Integer strength, Integer defense, Integer intelligence) {}
 

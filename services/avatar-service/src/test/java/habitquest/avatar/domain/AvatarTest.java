@@ -272,7 +272,7 @@ class AvatarTest {
     @DisplayName("addItemToInventory stores the item")
     void addItem() {
       avatar.addItemToInventory(sword);
-      assertThat(avatar.getInventory().getItems()).contains(sword);
+      assertThat(avatar.getInventory()).contains(sword);
     }
 
     @Test
@@ -280,7 +280,7 @@ class AvatarTest {
     void removeItem() {
       avatar.addItemToInventory(sword);
       avatar.removeItemFromInventory(sword);
-      assertThat(avatar.getInventory().getItems()).doesNotContain(sword);
+      assertThat(avatar.getInventory()).doesNotContain(sword);
     }
 
     @Test
@@ -296,7 +296,7 @@ class AvatarTest {
       avatar.addItemToInventory(sword);
       avatar.equipItem(sword);
       assertThat(avatar.getEquippedItems().getItems()).contains(sword);
-      assertThat(avatar.getInventory().getItems()).doesNotContain(sword);
+      assertThat(avatar.getInventory()).doesNotContain(sword);
     }
 
     @Test
@@ -311,7 +311,7 @@ class AvatarTest {
       avatar.addItemToInventory(sword);
       avatar.equipItem(sword);
       avatar.unequipItem(sword);
-      assertThat(avatar.getInventory().getItems()).contains(sword);
+      assertThat(avatar.getInventory()).contains(sword);
       assertThat(avatar.getEquippedItems().getItems()).doesNotContain(sword);
     }
   }

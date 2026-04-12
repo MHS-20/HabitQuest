@@ -1,7 +1,7 @@
 plugins {
     java
     id("com.diffplug.spotless")
-    // id("com.github.spotbugs")
+    id("com.github.spotbugs")
     checkstyle
     pmd
 }
@@ -9,7 +9,6 @@ plugins {
 val catalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 private val checkstyle    = catalog.findVersion("checkstyle").get().requiredVersion
 private val pmd = catalog.findVersion("pmd").get().requiredVersion
-private val spotbugs     = catalog.findVersion("spotbugs").get().requiredVersion
 
 java {
     toolchain {
@@ -46,9 +45,9 @@ tasks.withType<Checkstyle>().configureEach {
     dependsOn("spotlessApply")
 }
 
-// configure<com.github.spotbugs.snom.SpotBugsExtension> {
-//     toolVersion = "$spotbugs"
-// }
+tasks.named("check") {
+    dependsOn("spotbugsMain", "spotbugsTest")
+}
 
 tasks.register("checkQuality") {
     dependsOn("checkstyleMain", "checkstyleTest", "pmdMain", "pmdTest", "spotlessCheck")
