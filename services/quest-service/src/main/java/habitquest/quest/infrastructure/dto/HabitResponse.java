@@ -10,4 +10,9 @@ public record HabitResponse(
     List<String> tags,
     RecurrenceResponse recurrence,
     LocalDate nextRecurrenceDate,
-    LocalDate lastAttendedDate) {}
+    LocalDate lastAttendedDate) {
+
+  public HabitResponse {
+    tags = List.copyOf(tags);
+  }
+}

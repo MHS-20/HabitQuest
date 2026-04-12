@@ -38,7 +38,7 @@ public abstract class BaseConsumerIntegrationTest {
   private static final int SMTP_PORT = 3025;
   private static final Duration EMAIL_TIMEOUT = Duration.ofSeconds(5);
 
-  protected static GreenMail greenMail;
+  static GreenMail greenMail;
 
   @Autowired protected StreamBridge streamBridge;
   @Autowired protected UserEmailRepository userEmailRepository;
@@ -61,11 +61,11 @@ public abstract class BaseConsumerIntegrationTest {
 
   @BeforeAll
   static void setupMail() {
-    if (greenMail == null) {
-      greenMail = new GreenMail(new ServerSetup(SMTP_PORT, "localhost", ServerSetup.PROTOCOL_SMTP));
-      // greenMail.setUser("test@habitquest.it", "test");
-      greenMail.start();
-    }
+    // if (greenMail == null) {
+    greenMail = new GreenMail(new ServerSetup(SMTP_PORT, "localhost", ServerSetup.PROTOCOL_SMTP));
+    // greenMail.setUser("test@habitquest.it", "test");
+    greenMail.start();
+    // }
   }
 
   @AfterAll

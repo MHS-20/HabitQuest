@@ -117,11 +117,8 @@ public class MarketplaceController {
   @GetMapping("/{marketplaceId}/sold-items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getSoldItems(
       @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
     List<Item> items = marketplaceService.getSoldItems(idOfMarketplace(marketplaceId));
-
     log.info(items, "Fetched sold items");
-
     return ResponseEntity.ok(assembler.toSoldItemsCollection(marketplaceId, items));
   }
 
@@ -129,11 +126,8 @@ public class MarketplaceController {
   public ResponseEntity<EntityModel<ItemResponse>> getSoldItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException {
-
     Item item = marketplaceService.getSoldItem(idOfMarketplace(marketplaceId), itemName);
-
     log.info(item, "Fetched sold item");
-
     return ResponseEntity.ok(assembler.toSoldItemModel(marketplaceId, item));
   }
 
@@ -145,9 +139,7 @@ public class MarketplaceController {
       @PathVariable String itemName,
       @RequestParam Integer currentLevel)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
-
     marketplaceService.buyItem(idOfMarketplace(marketplaceId), itemName, new Level(currentLevel));
-
     return ResponseEntity.noContent().build();
   }
 
@@ -155,9 +147,7 @@ public class MarketplaceController {
   public ResponseEntity<Void> sellItem(
       @PathVariable String marketplaceId, @PathVariable String itemName)
       throws MarketplaceNotFoundException, ItemNotFoundException, AvatarCommunicationException {
-
     marketplaceService.sellItem(idOfMarketplace(marketplaceId), itemName);
-
     return ResponseEntity.noContent().build();
   }
 

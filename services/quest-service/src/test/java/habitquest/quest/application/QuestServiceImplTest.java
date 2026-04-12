@@ -424,7 +424,6 @@ class QuestServiceImplTest {
     void appliesDamageOnQuestExpiration() {
       Quest quest = fullQuest();
       LocalDate startedOn = LocalDate.of(2026, 4, 3);
-      LocalDate today = LocalDate.of(2026, 4, 6);
       ActiveQuests active =
           ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
       // Not attending any habits so quest will expire incomplete
@@ -461,7 +460,6 @@ class QuestServiceImplTest {
     void handlesFailedDamageApplication() {
       Quest quest = fullQuest();
       LocalDate startedOn = LocalDate.of(2026, 4, 3);
-      LocalDate today = LocalDate.of(2026, 4, 6);
       ActiveQuests active =
           ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
 

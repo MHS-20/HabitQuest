@@ -22,11 +22,10 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
     return message -> {
       logger()
           .info("Received QuestCreated: questId={}, name={}", message.questId(), message.name());
-      //      sendToAvatar(
-      //          message.avatarId(),
-      //          "New quest available!",
-      //          "A new quest has been created: \"" + message.name() + "\". Join now to
-      // participate!");
+      sendToAvatar(
+          message.avatarId(),
+          "New quest available!",
+          "A new quest has been created: \"" + message.name() + "\". Join now to participate!");
     };
   }
 
@@ -49,10 +48,10 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
   public Consumer<QuestNotCompletedMessage> questNotCompleted() {
     return message -> {
       logger().info("Received QuestNotCompleted:");
-      //      sendToAvatar(
-      //          message.avatarId(),
-      //          "Quest not completed",
-      //          "Unfortunately you did not complete the quest in time. Try again next time!");
+      sendToAvatar(
+          message.avatarId(),
+          "Quest not completed",
+          "Unfortunately you did not complete the quest in time. Try again next time!");
     };
   }
 

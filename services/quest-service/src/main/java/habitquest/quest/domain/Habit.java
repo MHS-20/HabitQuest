@@ -4,6 +4,8 @@ import common.ddd.Aggregate;
 import common.ddd.Id;
 import habitquest.quest.domain.reminder.Recurrence;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Habit implements Aggregate<Id<Habit>> {
@@ -19,7 +21,7 @@ public class Habit implements Aggregate<Id<Habit>> {
     this.id = id;
     this.title = title;
     this.description = description;
-    this.tags = tags;
+    this.tags = new ArrayList<>(tags);
     this.recurrence = recurrence;
   }
 
@@ -48,7 +50,7 @@ public class Habit implements Aggregate<Id<Habit>> {
   }
 
   public List<Tag> getTags() {
-    return tags;
+    return Collections.unmodifiableList(tags);
   }
 
   public String getTitle() {
@@ -60,7 +62,7 @@ public class Habit implements Aggregate<Id<Habit>> {
   }
 
   public void setTags(List<Tag> tags) {
-    this.tags = tags;
+    this.tags = new ArrayList<>(tags);
   }
 
   public void setTitle(String title) {
