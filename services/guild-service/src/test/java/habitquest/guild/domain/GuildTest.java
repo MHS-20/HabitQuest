@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Guild")
 class GuildTest {
 
-  private GuildMember leader;
   private Guild guild;
 
   @BeforeEach
@@ -23,7 +22,6 @@ class GuildTest {
   }
 
   // ── Creation ─────────────────────────────────────────────────────────────────
-
   @Nested
   @DisplayName("creation")
   class Creation {

@@ -9,6 +9,10 @@ public record QuestProgressView(
     int completionPercentage,
     List<HabitProgressView> habits) {
 
+  public QuestProgressView {
+    habits = List.copyOf(habits);
+  }
+
   public record HabitProgressView(
       String habitId,
       String title,

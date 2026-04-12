@@ -212,8 +212,6 @@ public class GuildController {
 
   public record AcceptInviteRequest(String avatarId, String nickname) {}
 
-  public record AddMemberRequest(String avatarId, String nickname, String roleName) {}
-
   public record PromoteMemberRequest(String roleName, String requestorId) {}
 
   public record GuildCreatedResponse(String id) {}

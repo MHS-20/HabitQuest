@@ -228,7 +228,6 @@ public class QuestController {
   }
 
   // ─── Request / Response records ─────────────────────────────────────────────
-
   public record CreateQuestRequest(String name, Integer durationDays) {}
 
   public record UpdateNameRequest(String name) {}
@@ -244,7 +243,11 @@ public class QuestController {
       String title,
       String description,
       List<String> tags,
-      RecurrenceRequest recurrence) {}
+      RecurrenceRequest recurrence) {
+    public AddHabitRequest {
+      tags = tags != null ? List.copyOf(tags) : List.of();
+    }
+  }
 
   public record RecurrenceRequest(String type, Integer dayOfMonth, String dayOfWeek) {}
 
@@ -258,16 +261,28 @@ public class QuestController {
 
   public record DurationResponse(Long durationDays) {}
 
-  public record HabitsResponse(List<HabitResponse> habits) {}
+  public record HabitsResponse(List<HabitResponse> habits) {
+    public HabitsResponse {
+      habits = habits != null ? List.copyOf(habits) : List.of();
+    }
+  }
 
-  public record AvatarQuestProgressResponse(String avatarId, List<QuestProgressResponse> quests) {}
+  public record AvatarQuestProgressResponse(String avatarId, List<QuestProgressResponse> quests) {
+    public AvatarQuestProgressResponse {
+      quests = quests != null ? List.copyOf(quests) : List.of();
+    }
+  }
 
   public record QuestProgressResponse(
       String questId,
       String questName,
       String status,
       Integer completionPercentage,
-      List<HabitProgressResponse> habits) {}
+      List<HabitProgressResponse> habits) {
+    public QuestProgressResponse {
+      habits = habits != null ? List.copyOf(habits) : List.of();
+    }
+  }
 
   public record HabitProgressResponse(
       String habitId,
