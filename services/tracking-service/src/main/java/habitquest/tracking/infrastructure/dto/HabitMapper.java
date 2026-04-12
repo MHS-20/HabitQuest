@@ -8,6 +8,8 @@ import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import habitquest.tracking.infrastructure.HabitController.RecurrenceResponse;
+import java.time.DayOfWeek;
+import java.util.Locale;
 
 public class HabitMapper {
 
@@ -36,6 +38,15 @@ public class HabitMapper {
         event.details());
   }
 
+  public static Recurrence toRecurrence(String type, DayOfWeek dayOfWeek, Integer dayOfMonth) {
+    return switch (type.toUpperCase(Locale.ROOT)) {
+      case "DAILY" -> new DailyRecurrence();
+      case "WEEKLY" -> new WeeklyRecurrence(dayOfWeek);
+      case "MONTHLY" -> new MonthlyRecurrence(dayOfMonth);
+      default -> throw new IllegalArgumentException("Unknown recurrence type: " + type);
+    };
+  }
+
   public static RecurrenceResponse toRecurrenceResponse(Recurrence recurrence) {
     if (recurrence == null) {
       return null;
@@ -44,8 +55,6 @@ public class HabitMapper {
       case DailyRecurrence r -> new RecurrenceResponse("DAILY", null, null);
       case WeeklyRecurrence r -> new RecurrenceResponse("WEEKLY", null, r.dayOfWeek().name());
       case MonthlyRecurrence r -> new RecurrenceResponse("MONTHLY", r.dayOfMonth(), null);
-      default ->
-          throw new IllegalArgumentException("Unknown recurrence type: " + recurrence.getClass());
     };
   }
 }

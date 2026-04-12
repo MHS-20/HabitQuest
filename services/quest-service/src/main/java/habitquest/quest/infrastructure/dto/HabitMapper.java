@@ -35,8 +35,6 @@ public class HabitMapper {
       case DailyRecurrence r -> new RecurrenceResponse("DAILY", null, null);
       case WeeklyRecurrence r -> new RecurrenceResponse("WEEKLY", null, r.dayOfWeek().name());
       case MonthlyRecurrence r -> new RecurrenceResponse("MONTHLY", r.dayOfMonth(), null);
-      default ->
-          throw new IllegalArgumentException("Unknown recurrence type: " + recurrence.getClass());
     };
   }
 

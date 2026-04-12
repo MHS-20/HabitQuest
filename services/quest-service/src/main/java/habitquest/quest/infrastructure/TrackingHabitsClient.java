@@ -7,8 +7,8 @@ import habitquest.quest.application.TrackingHabitsClientPort;
 import habitquest.quest.domain.Avatar;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.Quest;
+import habitquest.quest.domain.reminder.DailyRecurrence;
 import habitquest.quest.domain.reminder.MonthlyRecurrence;
-import habitquest.quest.domain.reminder.Recurrence;
 import habitquest.quest.domain.reminder.WeeklyRecurrence;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -44,22 +44,22 @@ public class TrackingHabitsClient implements TrackingHabitsClientPort {
 
   private static CreateTrackingHabitRequest toRequest(
       Id<Avatar> avatarId, Id<Quest> questId, Habit habit) {
-    Recurrence recurrence = habit.getRecurrence();
-    String recurrenceType = "DAILY";
-    String dayOfWeek = null;
-    Integer dayOfMonth = null;
+    return switch (habit.getRecurrence()) {
+      case DailyRecurrence d -> request(avatarId, questId, habit, "DAILY", null, null);
+      case WeeklyRecurrence w ->
+          request(avatarId, questId, habit, "WEEKLY", w.dayOfWeek().name(), null);
+      case MonthlyRecurrence m ->
+          request(avatarId, questId, habit, "MONTHLY", null, m.dayOfMonth());
+    };
+  }
 
-    if (recurrence instanceof WeeklyRecurrence weekly) {
-      recurrenceType = "WEEKLY";
-      dayOfWeek = weekly.dayOfWeek().name();
-    } else if (recurrence instanceof MonthlyRecurrence monthly) {
-      recurrenceType = "MONTHLY";
-      dayOfMonth = monthly.dayOfMonth();
-    } else {
-      // Fallback to DAILY when recurrence is missing or unsupported in quest payload.
-      recurrenceType = "DAILY";
-    }
-
+  private static CreateTrackingHabitRequest request(
+      Id<Avatar> avatarId,
+      Id<Quest> questId,
+      Habit habit,
+      String recurrenceType,
+      String dayOfWeek,
+      Integer dayOfMonth) {
     return new CreateTrackingHabitRequest(
         avatarId.value(),
         habit.getTitle(),

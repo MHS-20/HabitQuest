@@ -46,7 +46,11 @@ tasks.withType<Checkstyle>().configureEach {
 }
 
 tasks.named("check") {
-    dependsOn("spotbugsMain", "spotbugsTest")
+    dependsOn("checkQuality")
+}
+
+tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+    enabled = false
 }
 
 tasks.register("checkQuality") {

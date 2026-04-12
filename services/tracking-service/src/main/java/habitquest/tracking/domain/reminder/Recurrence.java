@@ -3,6 +3,7 @@ package habitquest.tracking.domain.reminder;
 import common.ddd.ValueObject;
 import java.time.LocalDateTime;
 
-public interface Recurrence extends ValueObject {
+public sealed interface Recurrence extends ValueObject
+    permits DailyRecurrence, WeeklyRecurrence, MonthlyRecurrence {
   LocalDateTime nextAfter(LocalDateTime current);
 }

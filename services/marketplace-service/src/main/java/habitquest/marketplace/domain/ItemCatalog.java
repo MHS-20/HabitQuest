@@ -22,8 +22,8 @@ public class ItemCatalog {
     return Optional.ofNullable(items.get(name));
   }
 
-  public List<Item> getItemsByType(ItemType type) {
-    return items.values().stream().filter(type.filter()).toList();
+  public List<Item> getItemsByType(ItemFilter type) {
+    return items.values().stream().filter(type.predicate()).toList();
   }
 
   public List<Item> getAllItems() {

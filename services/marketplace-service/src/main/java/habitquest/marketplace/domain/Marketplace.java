@@ -10,7 +10,7 @@ import java.util.Set;
 public interface Marketplace extends Aggregate<Id<Marketplace>> {
   List<Item> getCatalogItems();
 
-  List<Item> getAvailableItemsByType(ItemType type);
+  List<Item> getAvailableItemsByType(ItemFilter type);
 
   List<Item> getAllAvailableItems();
 
