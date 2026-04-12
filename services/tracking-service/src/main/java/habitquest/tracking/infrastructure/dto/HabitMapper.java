@@ -8,7 +8,6 @@ import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import habitquest.tracking.infrastructure.HabitController.RecurrenceResponse;
-import java.util.List;
 
 public class HabitMapper {
 
@@ -20,7 +19,7 @@ public class HabitMapper {
         habit.getAvatarId().value(),
         habit.getTitle(),
         habit.getDescription(),
-        habit.getTags() != null ? habit.getTags().stream().map(Tag::name).toList() : List.of(),
+        habit.getTags().stream().map(Tag::name).toList(),
         toRecurrenceResponse(habit.getRecurrence()),
         habit.getLastAttendedDate(),
         habit.nextRecurrence(),

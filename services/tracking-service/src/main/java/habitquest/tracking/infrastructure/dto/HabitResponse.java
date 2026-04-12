@@ -14,4 +14,9 @@ public record HabitResponse(
     LocalDateTime lastAttendedDate,
     LocalDateTime nextRecurrenceDate,
     String associatedQuestId,
-    String sourceHabitId) {}
+    String sourceHabitId) {
+
+  public HabitResponse {
+    tags = List.copyOf(tags);
+  }
+}
