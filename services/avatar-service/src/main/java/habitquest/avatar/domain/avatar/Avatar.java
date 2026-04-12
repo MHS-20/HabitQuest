@@ -8,6 +8,7 @@ import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Avatar implements Aggregate<Id<Avatar>> {
@@ -63,7 +64,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     this.health = health;
     this.mana = mana;
     this.avatarStats = avatarStats;
-    this.spells = spells;
+    this.spells = new ArrayList<>(spells);
     this.pendingInvites = new ArrayList<>();
   }
 
@@ -72,21 +73,25 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     return this.id;
   }
 
+  public Id<Guild> getGuildId() {
+    return guildId;
+  }
+
   // --- Getters ---
   public String getName() {
     return name;
   }
 
   public List<Invite> getPendingInvites() {
-    return pendingInvites;
+    return Collections.unmodifiableList(pendingInvites);
   }
 
   public Money getMoney() {
     return money;
   }
 
-  public Inventory getInventory() {
-    return inventory;
+  public List<Item> getInventory() {
+    return Collections.unmodifiableList(inventory.getItems());
   }
 
   public EquippedItems getEquippedItems() {
@@ -110,7 +115,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
   }
 
   public List<Spell> getSpells() {
-    return spells;
+    return Collections.unmodifiableList(spells);
   }
 
   // --- Metodi di dominio ---

@@ -7,7 +7,7 @@ import habitquest.avatar.domain.avatar.Experience;
 import habitquest.avatar.domain.avatar.Level;
 import habitquest.avatar.domain.avatar.Money;
 import habitquest.avatar.domain.items.EquippedItems;
-import habitquest.avatar.domain.items.Inventory;
+import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.AvatarController.*;
@@ -59,9 +59,9 @@ public final class AvatarMapper {
         stats.getStrength().value(), stats.getDefense().value(), stats.getIntelligence().value());
   }
 
-  public static InventoryResponse toResponse(Inventory inventory) {
-    List<ItemResponse> items = inventory.getItems().stream().map(ItemMapper::toResponse).toList();
-    return new InventoryResponse(inventory.getId().value(), items);
+  public static InventoryResponse toResponse(List<Item> inventory) {
+    List<ItemResponse> items = inventory.stream().map(ItemMapper::toResponse).toList();
+    return new InventoryResponse(items);
   }
 
   public static EquippedItemsResponse toResponse(EquippedItems equippedItems) {
