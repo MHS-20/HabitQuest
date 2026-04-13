@@ -48,6 +48,7 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
   var editTitle by remember { mutableStateOf("") }
   var editDescription by remember { mutableStateOf("") }
   var actionMessage by remember { mutableStateOf<String?>(null) }
+  var searchQuery by remember { mutableStateOf("") }
   var editRecurrenceType by remember { mutableStateOf(CreateHabitRecurrenceType.DAILY) }
   var editDayOfWeek by remember { mutableStateOf("MONDAY") }
   var editDayOfMonth by remember { mutableStateOf("1") }
@@ -82,6 +83,14 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
   ) {
     Text("My habits", style = MaterialTheme.typography.headlineSmall)
 
+    OutlinedTextField(
+      value = searchQuery,
+      onValueChange = { searchQuery = it },
+      label = { Text("Search by name or tags") },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth(),
+    )
+
     actionMessage?.let { message ->
       Text(
         text = message,
@@ -102,11 +111,24 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
       HabitsUiState.Loading -> Text("Loading habits...")
       is HabitsUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
       is HabitsUiState.Ready -> {
+        val normalizedQuery = searchQuery.trim()
+        val filteredHabits =
+          if (normalizedQuery.isBlank()) {
+            state.habits
+          } else {
+            state.habits.filter { habit ->
+              habit.title.contains(normalizedQuery, ignoreCase = true) ||
+                habit.tags.any { tag -> tag.contains(normalizedQuery, ignoreCase = true) }
+            }
+          }
+
         if (state.habits.isEmpty()) {
           Text("No habits found")
+        } else if (filteredHabits.isEmpty()) {
+          Text("No matching habits")
         } else {
           LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(state.habits, key = { it.id }) { habit ->
+            items(filteredHabits, key = { it.id }) { habit ->
               HabitRow(
                 habit = habit,
                 isAttending = attendingHabitId == habit.id,
