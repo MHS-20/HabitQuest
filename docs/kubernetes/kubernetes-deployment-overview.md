@@ -1,54 +1,54 @@
 # HabitQuest Deployment on Kubernetes
 
-Il deployment dell'applicazione HabitQuest su Kubernetes è stato organizzato seguendo una chiara separazione delle responsabilità attraverso tre layer principali:
+The deployment of the HabitQuest application on Kubernetes has been organized following a clear separation of responsibilities through three main layers:
 
-- **Application Layer**: servizi applicativi del dominio business
-- **Platform Layer**: infrastruttura di base (message broker, ingress controller)
-- **Observability Layer**: stack completo per monitoring, logging e tracing
+- **Application Layer**: application services for the business domain
+- **Platform Layer**: base infrastructure (message broker, ingress controller)
+- **Observability Layer**: complete stack for monitoring, logging and tracing
 
-Namespace Utilizzati:
+Namespaces Used:
 ```
 default                  # Servizi applicativi
 prometheus-system        # Prometheus e Tempo
 logging                  # Loki, Fluent Bit, Grafana
 ```
 
-## Deployment dei Layer
+## Layer Deployment
 ### 1. Platform Layer
-Il platform layer deve essere deployato per primo in quanto fornisce l'infrastruttura di base:
+The platform layer must be deployed first as it provides the base infrastructure:
 
-- **Kafka**: Message broker con modalità KRaft (senza Zookeeper)
-- **Kafka UI**: Interfaccia web per gestione e monitoring
+- **Kafka**: Message broker with KRaft mode (without Zookeeper)
+- **Kafka UI**: Web interface for management and monitoring
 
 ### 2. Observability Layer
-Lo stack di osservabilità viene deployato successivamente:
+The observability stack is deployed next:
 
-- **Prometheus**: Raccolta metriche
+- **Prometheus**: Metrics collection
 - **Tempo**: Distributed tracing
-- **Loki**: Aggregazione log
-- **Fluent Bit**: Shipping log dai pod
-- **Grafana**: Visualizzazione unificata
+- **Loki**: Log aggregation
+- **Fluent Bit**: Log shipping from pods
+- **Grafana**: Unified visualization
 
 ### 3. Application Layer
-Infine, i servizi applicativi vengono deployati con ordinamento basato sulle dipendenze:
-**Ordine di deployment**:
+Finally, the application services are deployed with dependency-based ordering:
+**Deployment order**:
 
-1. `avatar-service`, `tracking-service` (servizi core senza dipendenze REST)
-2. `guild-service`, `marketplace-service`, `quest-service` (dipendono da avatar-service)
-3. `notification-service` (consumer Kafka)
+1. `avatar-service`, `tracking-service` (core services with no REST dependencies)
+2. `guild-service`, `marketplace-service`, `quest-service` (depend on avatar-service)
+3. `notification-service` (Kafka consumer)
 4. `edge-service` (API Gateway)
 
-## Configurazione di Rete
+## Network Configuration
 ### Service Discovery
 
-I servizi comunicano tramite DNS interno Kubernetes:
+Services communicate via Kubernetes internal DNS:
 ```
 <service-name>.<namespace>:<port>
-# Esempio:
+# Example:
 avatar-service.default:8081
 ```
 
-### Porte Esposte
+### Exposed Ports
 
 | Servizio | Porta | Tipo |
 |----------|-------|------|
@@ -63,5 +63,6 @@ avatar-service.default:8081
 
 ## Riferimenti
 
-- [Documentazione Application Layer](./kubernetes-application-layer.md)
-- [Documentazione Observability Layer](./kubernetes-observability-layer.md)
+
+- [Application Layer Documentation](./kubernetes-application-layer.md)
+- [Observability Layer Documentation](./kubernetes-observability-layer.md)

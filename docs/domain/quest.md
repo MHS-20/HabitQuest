@@ -1,69 +1,68 @@
-# Dominio: Quest
-Una quest è una sfida strutturata che un Avatar può affrontare: 
-consiste in un insieme di abitudini da rispettare entro una finestra temporale definita, 
-con una ricompensa in palio per chi la porta a termine.
+# Domain: Quest
+A quest is a structured challenge that an Avatar can undertake:
+it consists of a set of habits to be respected within a defined time window,
+with a reward at stake for those who complete it.
 
-Una quest è composta da:
+A quest is composed of:
 
-- **Nome**: il titolo della missione.
-- **Durata**: la finestra temporale entro cui deve essere completata (espressa in giorni).
-- **Abitudini richieste**: la lista delle abitudini che l'Avatar deve rispettare durante la quest. Ogni abitudine ha un titolo, una descrizione, tag opzionali e una propria **ricorrenza** (giornaliera, settimanale o mensile), che determina quante volte dovrà essere completata nell'arco della durata totale.
-- **Ricompensa**: al momento è modellata come una **ricompensa in denaro**.
+- **Name**: the mission title.
+- **Duration**: the time window within which it must be completed (expressed in days).
+- **Required habits**: the list of habits that the Avatar must respect during the quest. Each habit has a title, a description, optional tags and its own **recurrence** (daily, weekly or monthly), which determines how many times it will need to be completed over the total duration.
+- **Reward**: currently modeled as a **monetary reward**.
 
-Il sistema calcola automaticamente il **numero totale di esecuzioni richieste** per ogni abitudine,
-tenendo conto della durata e della ricorrenza.
+The system automatically calculates the **total number of required completions** for each habit,
+taking into account the duration and the recurrence.
 
 ## Quests & ActiveQuests
-La quest vive su due livelli distinti, la **definizione della quest** e il **progresso attivo** di ogni Avatar che ha aderito alla quest.
-**La Quest (template)** è la definizione astratta: ha un nome, una durata, un elenco di abitudini richieste e una ricompensa. 
-Esiste indipendentemente da chi sta partecipando e dal loro progresso.
-Può essere intrapresa da più Avatar contemporaneamente.
+The quest exists on two distinct levels: the **quest definition** and the **active progress** of each Avatar who has joined the quest.
+**The Quest (template)** is the abstract definition: it has a name, a duration, a list of required habits and a reward.
+It exists independently of who is participating and their progress.
+It can be undertaken by multiple Avatars simultaneously.
 
-**L'ActiveQuests** è l'istanza concreta di una quest per uno specifico Avatar: 
-nasce quando un specifico Avatar aderisce alla missione, tiene traccia di quante volte ogni abitudine è stata rispettata, e si conclude quando la missione è completata o scaduta. 
+**ActiveQuests** is the concrete instance of a quest for a specific Avatar:
+it is created when a specific Avatar joins the mission, keeps track of how many times each habit has been respected, and concludes when the mission is completed or expired.
 
-## Adesione
-Quando un Avatar decide di partecipare a una quest, il sistema:
+## Joining
+When an Avatar decides to participate in a quest, the system:
 
-1. Crea un'istanza **ActiveQuests** dedicata a quell'Avatar, con la data di inizio pari al giorno in cui aderisce e la data di fine calcolata aggiungendo la durata della quest.
-2. Calcola le **occorrenze richieste** per ogni abitudine nel periodo specificato.
-3. Vengono create le abitudini corrispondenti nel profilo dell'Avatar, collegandole alla quest. In questo modo l'Avatar troverà le nuove abitudini già pronte nel suo tracker quotidiano.
+1. Creates an **ActiveQuests** instance dedicated to that Avatar, with the start date equal to the day they join and the end date calculated by adding the quest duration.
+2. Calculates the **required occurrences** for each habit in the specified period.
+3. The corresponding habits are created in the Avatar's profile, linking them to the quest. This way the Avatar will find the new habits already ready in their daily tracker.
 
-Se l'Avatar ha già aderito alla stessa quest in precedenza, l'adesione è idempotente: 
-viene restituita l'istanza esistente senza crearne una nuova.
+If the Avatar has already joined the same quest previously, joining is idempotent:
+the existing instance is returned without creating a new one.
 
-## Progressione & Completamento
-Ogni volta che si registra il completamento di un'abitudine associata a una quest, 
-si aggiorna il conteggio delle presenze nell'`ActiveQuests` corrispondente.
+## Progression & Completion
+Every time the completion of a habit associated with a quest is recorded,
+the attendance count in the corresponding `ActiveQuests` is updated.
 
-Il sistema applica alcune regole di validità:
+The system applies some validity rules:
 
-- Una presenza viene accettata solo se la quest è ancora `IN_PROGRESS`.
-- La data di completamento deve ricadere all'interno della finestra temporale della quest (non prima della data di inizio, non oltre quella di fine).
-- Non vengono conteggiate presenze in eccesso rispetto al numero richiesto per quella abitudine.
+- An attendance is accepted only if the quest is still `IN_PROGRESS`.
+- The completion date must fall within the quest's time window (not before the start date, not beyond the end date).
+- Attendances in excess of the required number for that habit are not counted.
 
-Ogni volta che viene registrata una presenza, il sistema verifica se tutte le abitudini hanno raggiunto il numero di occorrenze richieste. 
-In quel caso, la quest viene marcata come **COMPLETED** e viene generato l'evento `QuestCompleted`.
+Every time an attendance is recorded, the system checks whether all habits have reached the required number of occurrences.
+In that case, the quest is marked as **COMPLETED** and the `QuestCompleted` event is generated.
 
-### Scadenza 
-Quando si interroga il progresso di un Avatar, il sistema aggiorna automaticamente lo stato delle quest attive: 
-se la data odierna è successiva alla data di fine e la quest è ancora in corso, lo stato passa a **EXPIRED**. 
-La quest scade senza ricompensa.
+### Expiration
+When an Avatar's progress is queried, the system automatically updates the state of active quests:
+if today's date is later than the end date and the quest is still in progress, the state transitions to **EXPIRED**.
+The quest expires without a reward.
 
-| Stato | Significato |
+| State | Meaning |
 |---|---|
-| `IN_PROGRESS` | La quest è attiva, le presenze vengono conteggiate |
-| `COMPLETED` | Tutte le abitudini richieste sono state rispettate entro la scadenza |
-| `EXPIRED` | Il tempo è scaduto prima del completamento |
+| `IN_PROGRESS` | The quest is active, attendances are counted |
+| `COMPLETED` | All required habits have been respected within the deadline |
+| `EXPIRED` | Time ran out before completion |
 
-## Eventi di dominio
-Ogni momento significativo nella vita di una quest genera un evento:
+## Domain Events
+Every significant moment in the life of a quest generates an event:
 
-| Evento | Quando si genera |
+| Event | When it is generated |
 |---|---|
-| `QuestCreated` | Alla creazione di una nuova quest nel catalogo |
-| `QuestJoined` | Quando un Avatar aderisce a una quest |
-| `QuestCompleted` | Quando un Avatar porta a termine tutte le abitudini richieste |
-| `QuestLeft` | Quando un Avatar abbandona una quest (previsto nel modello, logica da implementare) |
-| `QuestNotCompleted` | Segnalazione di quest non completata (previsto nel modello, logica da implementare) |
-
+| `QuestCreated` | At the creation of a new quest in the catalog |
+| `QuestJoined` | When an Avatar joins a quest |
+| `QuestCompleted` | When an Avatar completes all required habits |
+| `QuestLeft` | When an Avatar abandons a quest (defined in the model, logic to be implemented) |
+| `QuestNotCompleted` | Notification of an incomplete quest (defined in the model, logic to be implemented) |
