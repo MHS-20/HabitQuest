@@ -241,32 +241,14 @@ Feature: Guild management
 
 ```
 
-## Messaging Feature
-
-```gherkin
-Feature: Guild chat system
-
-  Scenario: Send a message
-    Given an authenticated guild member
-    When the member sends a chat message
-    Then the system stores the message
-    And broadcasts it in real time to other guild members
-
-  Scenario: Unauthorized chat access
-    Given a user who is not a guild member
-    When the user attempts to access the guild chat
-    Then the system denies access
-
-```
-
-## Shop Feature
+## Marketplace Feature
 
 ```gherkin
 Feature: Marketplace management
 
   Scenario: View item catalog
     Given an authenticated user
-    When the user requests the shop catalog
+    When the user requests the marketplace catalog
     Then the system returns the list of available items
 
   Scenario: Purchase item with sufficient currency
@@ -345,7 +327,7 @@ Feature: Habit management
 
   Scenario: Create a new habit
     Given an authenticated user
-    When the user creates a habit with title, frequency, and difficulty
+    When the user creates a habit with title, recurrence, and difficulty
     Then the habit is stored
     And it becomes active in the user's habit plan
 
