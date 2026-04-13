@@ -11,10 +11,10 @@ nav:
     - Quality Attribute Scenarios: ddd/specifications/quality_attributes_scenarios.md
   - Domain Overview:
     - Avatar: domain/avatar.md
-    - Gilde: domain/guild.md
-    - Battaglie: domain/battle.md
+    - Guild: domain/guild.md
+    - Battle: domain/battle.md
     - Marketplace: domain/marketplace.md
-    - Abitudini: domain/habit.md
+    - Habit: domain/habit.md
     - Quest: domain/quest.md
   - Architecture & Implementation:
     - Interactions: implementation/interactions/interactions.md
