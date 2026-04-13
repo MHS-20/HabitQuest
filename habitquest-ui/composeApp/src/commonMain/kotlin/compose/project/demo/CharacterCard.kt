@@ -1,4 +1,4 @@
-package compose.project.demo
+package compose.project.demo.contexts.avatar.presentation.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import compose.project.demo.contexts.avatar.domain.model.AvatarData
 
 @Composable
 fun AvatarCard(avatar: AvatarData, onRefreshStats: (() -> Unit)? = null) {
