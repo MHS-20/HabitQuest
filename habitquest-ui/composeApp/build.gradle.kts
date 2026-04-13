@@ -21,13 +21,23 @@ kotlin {
   jvm()
 
   js {
-    browser()
+    browser {
+      testTask {
+        // Skip browser JS tests locally unless Chrome is explicitly configured.
+        enabled = providers.environmentVariable("CHROME_BIN").isPresent
+      }
+    }
     binaries.executable()
   }
 
   @OptIn(ExperimentalWasmDsl::class)
   wasmJs {
-    browser()
+    browser {
+      testTask {
+        // Keep wasm browser tests opt-in for environments with a configured browser.
+        enabled = providers.environmentVariable("CHROME_BIN").isPresent
+      }
+    }
     binaries.executable()
   }
 
