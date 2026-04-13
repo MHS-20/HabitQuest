@@ -1,65 +1,63 @@
-# Dominio: Habit
-Un'**Abitudine** rappresenta un'azione che un utente si impegna a compiere con una certa regolarità. 
-Ogni abitudine appartiene a un **Avatar** e ha le seguenti caratteristiche:
+# Domain: Habit
+A **Habit** represents an action that a user commits to performing with a certain regularity.
+Each habit belongs to an **Avatar** and has the following characteristics:
 
-- **Titolo** e **Descrizione**
-- **Ricorrenza**: cadenza con cui l'abitudine deve essere eseguita.
-- **Tag**: etichette opzionali per categorizzare l'abitudine.
-- **Data dell'ultima esecuzione**: tiene traccia di quando l'abitudine è stata rispettata per l'ultima volta.
-- **Quest associata** _(opzionale)_: un collegamento a una quest specifica del sistema Quest.
+- **Title** and **Description**
+- **Recurrence**: the frequency with which the habit must be performed.
+- **Tags**: optional labels to categorize the habit.
+- **Last completion date**: keeps track of when the habit was last respected.
+- **Associated Quest** _(optional)_: a link to a specific quest in the Quest system.
 
-Titolo, descrizione, tag e ricorrenza possono essere aggiornati in qualsiasi momento.
+Title, description, tags and recurrence can be updated at any time.
 
-## Ricorrenza
-Ogni abitudine ha una **ricorrenza** che definisce ogni quanto deve essere completata. 
-Esistono tre tipi:
+## Recurrence
+Each habit has a **recurrence** that defines how often it must be completed.
+There are three types:
 
-- **Giornaliera**: l'abitudine deve essere completata ogni giorno.
-- **Settimanale**: l'abitudine deve essere completata una volta alla settimana, in un giorno specifico.
-- **Mensile**: l'abitudine deve essere completata una volta al mese, in un giorno specifico del mese.
+- **Daily**: the habit must be completed every day.
+- **Weekly**: the habit must be completed once a week, on a specific day.
+- **Monthly**: the habit must be completed once a month, on a specific day of the month.
 
-La ricorrenza serve al sistema per calcolare automaticamente quando un'abitudine avrebbe dovuto essere eseguita e rilevare eventuali **abitudini mancate**.
+The recurrence allows the system to automatically calculate when a habit should have been performed and detect any **missed habits**.
 
-## Completamento
-Quando un utente rispetta la propria abitudine, il sistema registra la data di completamento. 
-Questo innesca due effetti collaterali verso gli altri servizi:
+## Completion
+When a user respects their habit, the system records the completion date.
+This triggers two side effects towards other services:
 
-1. **L'Avatar guadagna punti esperienza**.
-2. **Se c'è una Quest associata**, il sistema notifica il Quest Service registrando la partecipazione dell'Avatar all'abitudine in quella data. Il Quest Service potrà così aggiornare il progresso della missione.
+1. **The Avatar gains experience points**.
+2. **If there is an associated Quest**, the system notifies the Quest Service by recording the Avatar's attendance to the habit on that date. The Quest Service can then update the mission progress.
 
-Un'abitudine può essere eliminata. 
-L'evento di eliminazione viene registrato nello .
+A habit can be deleted.
+The deletion event is recorded in the.
 
----
+## Detection of Overdue Habits
+An automatic component checks **every minute** all active habits and verifies whether any are **overdue**,
+meaning habits whose expected deadline has already passed but have not yet been completed.
 
-## Il rilevamento delle abitudini scadute
-Un componente automatico controlla **ogni minuto** tutte le abitudini attive e verifica se ce ne sono di **scadute**, 
-ovvero abitudini la cui scadenza attesa è già passata ma che non sono ancora state completate.
+The conditions that make a habit "overdue" are:
+- It has never been completed (the user has never respected it since they created it).
+- The next expected deadline, calculated based on the last completion and the recurrence, has already passed.
 
-Le condizioni che rendono un'abitudine "scaduta" sono:
-- Non è mai stata completata (l'utente non l'ha mai rispettata da quando l'ha creata).
-- La prossima scadenza attesa, calcolata in base all'ultima esecuzione e alla ricorrenza, è già passata.
+When an overdue habit is detected, the system generates a dedicated event.
+However, it avoids duplicating the report: if the habit has already been marked as overdue with the same information, no new event is generated.
 
-Quando viene rilevata un'abitudine scaduta, il sistema genera un evento apposito. 
-Tuttavia evita di duplicare la segnalazione: se l'abitudine è già stata marcata come scaduta con le stesse informazioni, non viene generato un nuovo evento.
+## The History
+Each habit maintains a **historical log** of all events that have concerned it, with the exact moment and a textual detail (e.g. the updated value, the chosen recurrence type, the completion date).
+This history can be consulted both for a single habit and aggregated by Avatar, in reverse chronological order (most recent first).
 
-## Lo storico
-Ogni abitudine mantiene un **registro storico** di tutti gli eventi che l'hanno riguardata, con il momento esatto e un dettaglio testuale (es. il valore aggiornato, il tipo di ricorrenza scelto, la data di completamento).
-Questo storico è consultabile sia per singola abitudine che aggregato per Avatar, in ordine cronologico inverso (dal più recente).
+At the time of creation, the event is recorded in the history.
+Every modification of title, description or tags, or even the deletion of the habit, generates an event in the history.
+Every completion or missed completion generates an event in the history.
 
-Al momento della creazione, l'evento viene registrato nello storico.
-Ogni modifica di titolo, descrizione o tag, o anche l'eliminazione dell'abitudine, genera un evento nello storico.
-Ogni completamento o mancato completamento genera un evento nello storico.
+## Domain Events
+Every significant event that happens to a habit is signaled in the domain.
+Events are both recorded in the habit's **internal history**
+and published on a **notification channel**.
 
-## Gli eventi di dominio
-Ogni evento significativo che accade a un'abitudine viene segnalato nel dominio. 
-Gli eventi vengono sia registrati nello **storico interno** dell'abitudine, 
-sia pubblicati su un **canale di notifica**.
-
-| Evento | Quando si genera | Viene pubblicato esternamente? |
+| Event | When it is generated | Is it published externally? |
 |---|---|---|
-| `HabitCreated` | Alla creazione dell'abitudine | No (solo storico) |
-| `HabitUpdated` | A ogni modifica di titolo, descrizione, tag o ricorrenza | No (solo storico) |
-| `HabitAttended` | Quando l'utente completa l'abitudine | ✅ Sì |
-| `HabitNotAttended` | Quando il sistema rileva l'abitudine scaduta | ✅ Sì |
-| `HabitDeleted` | Quando l'abitudine viene eliminata | ✅ Sì |
+| `HabitCreated` | At habit creation | No (history only) |
+| `HabitUpdated` | At every modification of title, description, tags or recurrence | No (history only) |
+| `HabitAttended` | When the user completes the habit | ✅ Yes |
+| `HabitNotAttended` | When the system detects the overdue habit | ✅ Yes |
+| `HabitDeleted` | When the habit is deleted | ✅ Yes |

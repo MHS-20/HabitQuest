@@ -1,66 +1,53 @@
-# Application Layer - Deployment Kubernetes
+# Application Layer - Kubernetes Deployment
 
-## Panoramica
-L'Application Layer contiene tutti i microservizi che implementano la logica di business di HabitQuest. 
-Ogni servizio è configurato tramite Kustomize seguendo il pattern di **Externalized Configuration**.
+## Overview
+The Application Layer contains all the microservices that implement the business logic of HabitQuest.
+Each service is configured via Kustomize following the **Externalized Configuration** pattern.
 
-## Architettura dei Servizi
-```
-application/
-├── avatar-service/        # Gestione avatar e profili utente
-├── edge-service/          # API Gateway (Spring Cloud Gateway)
-├── guild-service/         # Gestione guild e team
-├── marketplace-service/   # Marketplace oggetti e premi
-├── notification-service/  # Invio notifiche email (Kafka consumer)
-├── quest-service/         # Gestione quest e sfide
-├── tracking-service/      # Tracciamento abitudini
-└── deployApplication.sh   # Script orchestrazione deployment
-```
+## Externalized Configuration Pattern
+Each service applies the **Externalized Configuration** pattern via Kustomize:
 
-## Pattern di Externalized Configuration
-Ogni servizio applica il pattern **Externalized Configuration** tramite Kustomize:
+1. **Base Resources**: The base Kubernetes resources (Deployment, Service) are defined in each individual service project (`services/<service-name>/k8s`)
+2. **Environment Overlays**: Environment-specific configurations are applied as **patches** via Kustomize
+The base resources contain the fundamental configurations that do not vary across different environments, such as health checks,
+while the patches introduce environment-specific environment variables, resource limits, and network configurations.
 
-1. **Base Resources**: Le risorse Kubernetes base (Deployment, Service) sono definite nel progetto del singolo servizio (`services/<nome-servizio>/k8s`)
-2. **Environment Overlays**: Le configurazioni specifiche per ambiente vengono applicate come **patch** tramite Kustomize
-Le risorse base contengono le configurazioni fondamentali che non variano tra ambienti diversi, come gli health checks,
-mentre le patch introducono le variabili d'ambiente, i limiti di risorse e le configurazioni di rete specifiche per l'ambiente di deployment.
-
-- Le risorse base rimangono nel progetto del servizio
-- Le configurazioni specifiche dell'ambiente sono centralizzate
-- Facile gestione di ambienti multipli (dev, staging, prod)
-- Nessuna duplicazione di YAML
+- Base resources remain in the service project
+- Environment-specific configurations are centralized
+- Easy management of multiple environments (dev, staging, prod)
+- No YAML duplication
 
 ### File kustomization.yml
-Il file `kustomization.yml` è il punto centrale che orchestra:
+The `kustomization.yml` file is the central entry point that orchestrates:
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Riferimento alle risorse base nel repository del servizio
+# Reference to base resources in the service repository
 resources:
 - ../../../../services/quest-service/k8s
 
-# Patch da applicare alle risorse base
+# Patches to apply to base resources
 patches:
 - path: patch-env.yml
 - path: patch-resources.yml
 
-# Gestione immagini container
+# Container image management
 images:
 - name: quest-service
   newName: quest-service
   newTag: latest
 
-# Configurazione repliche
+# Replica configuration
 replicas:
 - count: 1
   name: quest-service
 ```
 
 ### 2. File patch-env.yml
-**Scopo**: Externalizza tutta la configurazione applicativa tramite variabili d'ambiente.
-**Esempio** (`quest-service/patch-env.yml`):
+**Purpose**: Externalizes all application configuration via environment variables.
+**Example** (`quest-service/patch-env.yml`):
 
 ```yaml
 apiVersion: apps/v1
@@ -77,7 +64,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
 
-            # Service Discovery - altri microservizi
+            # Service Endpoints
             - name: AVATAR_SERVICE_URI
               value: http://avatar-service:8081
             - name: TRACKING_SERVICE_URI
@@ -93,8 +80,8 @@ spec:
 ```
 
 ### 3. File patch-resources.yml
-**Scopo**: Definisce i limiti di risorse compute per garantire stabilità e prevenire resource starvation.
-**Esempio** (`quest-service/patch-resources.yml`):
+**Purpose**: Defines compute resource limits to ensure stability and prevent resource starvation.
+**Example** (`quest-service/patch-resources.yml`):
 
 ```yaml
 apiVersion: apps/v1

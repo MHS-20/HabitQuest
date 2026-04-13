@@ -48,11 +48,11 @@ https://mhs-20.github.io/HabitQuest/
 ## Option 1: Docker Compose
 Run these commands: 
 ```bash
+./gradlew :services:bootJar
 docker compose down --remove-orphans
 docker compose build
 docker compose up -d
-cd ./services/habitquest-ui
-./gradlew composeApp:run
+./gradlew :habitquest-ui:composeApp:run
 ```
 NOTE: the observability stack is not deployed with docker compose, use minikube for that.
 
@@ -71,9 +71,9 @@ NOTE: this tools needs to be installed on the system:
 
 Just run these commands:
 ```bash
+./gradlew :services:bootJar
 ./deploy.sh
-cd ./services/habitquest-ui
-./gradlew composeApp:run
+./gradlew :habitquest-ui:composeApp:run
 ```
 
 To see some metrics in Grafana, run E2E tests or load tests: 

@@ -1,45 +1,45 @@
-# Gestione della saga nel `MarketplaceController`
-Nel controller del Marketplace, le operazioni di acquisto (`buyItem`) e vendita (`sellItem`) coordinano due sistemi distinti: 
-il servizio `AvatarClient` (sistema esterno) e il `MarketplaceService` (dominio locale).
+# Saga Management in `MarketplaceController`
+In the Marketplace controller, the purchase (`buyItem`) and sale (`sellItem`) operations coordinate two distinct systems:
+the `AvatarClient` service (external system) and the `MarketplaceService` (local domain).
 
-## Saga di acquisto (`buyItem`)
-L'operazione si articola in tre passi in sequenza, con due flag booleani — `moneySpent` e `inventoryAdded` — che tracciano lo stato di avanzamento per poter costruire il rollback esatto.
+## Purchase saga (`buyItem`)
+The operation is organized into three sequential steps, with two boolean flags — `moneySpent` and `inventoryAdded` — that track the progress state in order to build the exact rollback.
 
-- **Passo 0 — pre-condizione:** prima di avviare la saga, viene verificato che l'avatar abbia il livello sufficiente tramite `canBuyItem()`. Si tratta di un guard sincrono: se fallisce, si risponde immediatamente con `403 Forbidden` senza toccare nessun sistema.
-- **Passo 1 — `spendMoney`:** viene chiamato `avatarClient.spendMoney()`. Se ha successo, il flag `moneySpent` viene impostato a `true`.
-- **Passo 2 — `addItemToInventory`:** viene aggiunto l'oggetto all'inventario dell'avatar. Se ha successo, `inventoryAdded` diventa `true`.
-- **Passo 3 — `buyItem`:** solo dopo aver completato entrambe le operazioni remote, il marketplace viene aggiornato localmente tramite `marketplaceService.buyItem()`.
+- **Step 0 — pre-condition:** before starting the saga, it is verified that the avatar has a sufficient level via `canBuyItem()`. This is a synchronous guard: if it fails, a `403 Forbidden` is returned immediately without touching any system.
+- **Step 1 — `spendMoney`:** `avatarClient.spendMoney()` is called. If successful, the `moneySpent` flag is set to `true`.
+- **Step 2 — `addItemToInventory`:** the item is added to the avatar's inventory. If successful, `inventoryAdded` becomes `true`.
+- **Step 3 — `buyItem`:** only after completing both remote operations, the marketplace is updated locally via `marketplaceService.buyItem()`.
 
-**Compensazione (rollback)**: se un qualsiasi passo lancia `RestClientException` o `AvatarCommunicationException`, 
-il blocco `catch` esegue il rollback **selettivo** usando i flag:
+**Compensation (rollback)**: if any step throws a `RestClientException` or `AvatarCommunicationException`,
+the `catch` block performs **selective** rollback using the flags:
 
-- se `inventoryAdded` è `true` : chiama `removeItemFromInventory`
-- se `moneySpent` è `true` : chiama `earnMoney`
+- if `inventoryAdded` is `true`: calls `removeItemFromInventory`
+- if `moneySpent` is `true`: calls `earnMoney`
 
-La compensazione stessa può fallire (catch annidato): 
-in quel caso viene sollevata un'eccezione con un messaggio che segnala l'inconsistenza residua, e il chiamante riceve `502 Bad Gateway`.
+The compensation itself can fail (nested catch):
+in that case an exception is raised with a message signaling the residual inconsistency, and the caller receives `502 Bad Gateway`.
 
-## Saga di vendita (`sellItem`)
-Stessa struttura, passi invertiti.
+## Sale saga (`sellItem`)
+Same structure, reversed steps.
 
-- **Passo 1 — `removeItemFromInventory`:** l'oggetto viene rimosso dall'inventario dell'avatar. Se ha successo, `removedFromInventory` diventa `true`.
-- **Passo 2 — `earnMoney`:** l'avatar riceve il denaro dalla vendita. Se ha successo, `earnedMoney` diventa `true`.
-- **Passo 3 — `sellItem`:** il marketplace viene aggiornato localmente tramite `marketplaceService.sellItem()`.
+- **Step 1 — `removeItemFromInventory`:** the item is removed from the avatar's inventory. If successful, `removedFromInventory` becomes `true`.
+- **Step 2 — `earnMoney`:** the avatar receives the money from the sale. If successful, `earnedMoney` becomes `true`.
+- **Step 3 — `sellItem`:** the marketplace is updated locally via `marketplaceService.sellItem()`.
 
-**Compensazione (rollback)**: se un qualsiasi passo lancia `RestClientException` o `AvatarCommunicationException`,il blocco `catch` esegue il rollback **selettivo** usando i flag:
+**Compensation (rollback)**: if any step throws a `RestClientException` or `AvatarCommunicationException`, the `catch` block performs **selective** rollback using the flags:
 
-- se `earnedMoney` è `true` → chiama `spendMoney`
-- se `removedFromInventory` è `true` → chiama `addItemToInventory`
+- if `earnedMoney` is `true` → calls `spendMoney`
+- if `removedFromInventory` is `true` → calls `addItemToInventory`
 
 
-## Garanzie e limiti della soluzione
-| Proprietà | Valore |
+## Guarantees and limits of the solution
+| Property | Value |
 |---|---|
-| Tipo di saga | Choreography-based con orchestrazione inline nel controller |
-| Consistenza garantita | Eventual consistency — non atomicità forte |
-| Idempotenza | Non garantita |
-| Durabilità | Nessuna — crash durante la compensazione lascia lo stato inconsistente |
-| Logging | Ogni passo è tracciato via `MarketplaceLogger` |
+| Saga type | Choreography-based with inline orchestration in the controller |
+| Guaranteed consistency | Eventual consistency — no strong atomicity |
+| Idempotency | Not guaranteed |
+| Durability | None — a crash during compensation leaves the state inconsistent |
+| Logging | Every step is tracked via `MarketplaceLogger` |
 
-Il punto debole principale è l'assenza di **persistenza della saga**: se il server crasha tra un passo e il successivo, nessun meccanismo automatico riprende la compensazione. 
-In un sistema di produzione si considererebbe l'uso di un saga log persistente, oppure si delegherebbe l'orchestrazione a un message broker con garanzie di consegna.
+The main weak point is the absence of **saga persistence**: if the server crashes between one step and the next, no automatic mechanism resumes the compensation.
+In a production system one would consider the use of a persistent saga log, or delegate orchestration to a message broker with delivery guarantees.

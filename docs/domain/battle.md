@@ -1,115 +1,115 @@
-## Dominio: Battaglie
+## Domain: Battles
 
-Una **Battaglia** è un evento cooperativo in cui i membri di una gilda affrontano insieme un **Boss**. 
-È un'attività a turni dove i giocatori si alternano per attaccare il boss e cercare di sconfiggerlo prima che tutti i membri cadano in battaglia.
+A **Battle** is a cooperative event in which the members of a guild face a **Boss** together.
+It is a turn-based activity where players take turns attacking the boss and trying to defeat it before all members fall in battle.
 
-### Il Boss Nemico
-Il boss è il nemico che la gilda deve sconfiggere.
+### The Enemy Boss
+The boss is the enemy that the guild must defeat.
 
-Ogni Boss ha le seguenti caratteristiche:
+Each Boss has the following characteristics:
 
-- **Nome**: identificativo del boss (es. "Minotaur")
-- **Statistiche di combattimento**:
-    - **Salute (Health)**: punti vita totali del boss (es. 100 HP)
-    - **Forza (Strength)**: capacità offensiva (es. 150)
-    - **Difesa (Defense)**: capacità difensiva (es. 50)
+- **Name**: boss identifier (e.g. "Minotaur")
+- **Combat stats**:
+    - **Health**: total hit points of the boss (e.g. 100 HP)
+    - **Strength**: offensive capability (e.g. 150)
+    - **Defense**: defensive capability (e.g. 50)
 
-Ogni Boss comporta Ricompense e Penalità:
+Each Boss entails Rewards and Penalties:
 
-- **Ricompensa in Denaro**: monete che la gilda ottiene sconfiggendo il boss (es. 100 monete)
-- **Ricompensa in Esperienza**: punti esperienza assegnati singolarmente (es. 200 XP)
-- **Penalità**: danno/perdita subita se la gilda perde (es. -50 monete)
+- **Money Reward**: coins the guild obtains by defeating the boss (e.g. 100 coins)
+- **Experience Reward**: experience points assigned individually (e.g. 200 XP)
+- **Penalty**: damage/loss suffered if the guild loses (e.g. -50 coins)
 
-Ogni gilda può avere una sola battaglia attiva alla volta.
-Solo il leader può decidere di avviare una battaglia scegliendo un boss contro cui combattere.
-I boss sono predefiniti staticamente nel sistema, ma supporta facilmente l'aggiunta di nuovi tipi di boss.
+Each guild can have only one active battle at a time.
+Only the leader can decide to start a battle by choosing a boss to fight.
+Bosses are statically predefined in the system, but it easily supports the addition of new boss types.
 
-### Meccaniche di Battaglia
+### Battle Mechanics
 
-#### Sistema a Turni
-La battaglia funziona con un **sistema a turni rotativi**:
+#### Turn-Based System
+The battle works with a **rotating turn system**:
 
-1. Quando la battaglia inizia, si definisce il **numero di turni** basato sui membri partecipanti
-2. Esiste sempre un **turno corrente** che identifica quale membro può agire
-3. Dopo ogni azione, il turno passa al membro successivo (rotazione circolare)
-4. Se un membro è caduto, viene automaticamente saltato nella rotazione
+1. When the battle starts, the **number of turns** is defined based on the participating members
+2. There is always a **current turn** that identifies which member can act
+3. After each action, the turn passes to the next member (circular rotation)
+4. If a member has fallen, they are automatically skipped in the rotation
 
-#### Stati della Battaglia
-Una battaglia può trovarsi in tre stati:
+#### Battle States
+A battle can be in three states:
 
-1. **In Corso (Ongoing)**
-    - La battaglia è attiva
-    - I membri possono compiere azioni
-    - Né il boss né tutti i membri sono stati sconfitti
+1. **Ongoing**
+    - The battle is active
+    - Members can perform actions
+    - Neither the boss nor all members have been defeated
 
-2. **Vinta (Won)**
-    - Il boss è stato ridotto a 0 HP
-    - La gilda riceve le ricompense in esperienza e denaro
-    - La battaglia termina
+2. **Won**
+    - The boss has been reduced to 0 HP
+    - The guild receives experience and money rewards
+    - The battle ends
 
-3. **Persa (Lost)**
-    - Tutti i membri della gilda sono caduti
-    - La gilda subisce la penalità del boss
-    - La battaglia termina
+3. **Lost**
+    - All guild members have fallen
+    - The guild suffers the boss penalty
+    - The battle ends
 
-#### Meccanica del Danno
-**Danno al Boss:**
+#### Damage Mechanics
+**Damage to the Boss:**
 
-- Durante il suo turno, un membro può infliggere danno al boss
-- Il danno riduce la salute rimanente del boss
-- Quando la salute arriva a 0, la battaglia è vinta
+- During their turn, a member can deal damage to the boss
+- Damage reduces the boss's remaining health
+- When health reaches 0, the battle is won
 
-**Contrattacco del Boss:**
+**Boss Counterattack:**
 
-- Il boss contrattacca in automatico chi lo attacca
-- Il danno del contrattacco può far cadere il membro della gilda
-- I membri caduti non possono più partecipare alla battaglia
+- The boss automatically counterattacks whoever attacks it
+- Counterattack damage can cause the guild member to fall
+- Fallen members can no longer participate in the battle
 
-#### Membri Caduti
-Quando un membro cade:
+#### Fallen Members
+When a member falls:
 
-- Viene aggiunto alla lista dei **membri caduti**
-- Non può più compiere azioni
-- Viene saltato nella rotazione dei turni
-- Se **tutti** i membri cadono, la battaglia è persa
+- They are added to the list of **fallen members**
+- They can no longer perform actions
+- They are skipped in the turn rotation
+- If **all** members fall, the battle is lost
 
-### Partecipazione Dinamica
-La battaglia supporta l'ingresso e l'uscita dinamica di membri:
+### Dynamic Participation
+The battle supports dynamic joining and leaving of members:
 
-Aumento dei Partecipanti:
+Increase in Participants:
 
-- Un nuovo membro può unirsi a una battaglia in corso
-- Il numero di turni aumenta
-- Il nuovo membro viene aggiunto alla rotazione
+- A new member can join an ongoing battle
+- The number of turns increases
+- The new member is added to the rotation
 
-Riduzione dei Partecipanti:
+Reduction in Participants:
 
-- Un membro può lasciare la battaglia
-- Il numero di turni diminuisce
-- Il membro viene rimosso dalla rotazione e dalla lista dei caduti
+- A member can leave the battle
+- The number of turns decreases
+- The member is removed from the rotation and from the fallen list
 
-### Evento di Battaglia
-I possibili eventi legati alla battaglia sono:
+### Battle Events
+The possible events related to the battle are:
 
-- **BattleStarted**: la battaglia è iniziata
-- **AttackPerformed**: un membro ha attaccato
-- **SpellCasted**: è stata lanciata una magia
-- **BattleWon**: la battaglia è stata vinta
-- **BattleLost**: la battaglia è stata persa
+- **BattleStarted**: the battle has started
+- **AttackPerformed**: a member has attacked
+- **SpellCasted**: a spell has been cast
+- **BattleWon**: the battle has been won
+- **BattleLost**: the battle has been lost
 
-### Invarianti delle Battaglie
-1. **Una Battaglia per Gilda**: ogni gilda può avere al massimo una battaglia attiva
-2. **Salute Non Negativa**: la salute del boss non può scendere sotto zero (si ferma a 0)
-3. **Turno Valido**: il turno corrente deve sempre puntare a un membro esistente e non caduto
-4. **Minimo Turni**: deve esserci almeno 1 turno (almeno un partecipante)
-5. **Condizione di Vittoria**: battaglia vinta se e solo se salute boss = 0
-6. **Condizione di Sconfitta**: battaglia persa se e solo se tutti i membri sono caduti
-7. **Immutabilità Boss**: le caratteristiche del boss (tranne la salute rimanente) non cambiano durante la battaglia
+### Battle Invariants
+1. **One Battle per Guild**: each guild can have at most one active battle
+2. **Non-Negative Health**: the boss's health cannot drop below zero (it stops at 0)
+3. **Valid Turn**: the current turn must always point to an existing and non-fallen member
+4. **Minimum Turns**: there must be at least 1 turn (at least one participant)
+5. **Victory Condition**: battle won if and only if boss health = 0
+6. **Defeat Condition**: battle lost if and only if all members have fallen
+7. **Boss Immutability**: the boss's characteristics (except remaining health) do not change during the battle
 
-### Transizioni di Stato Valide
-**Per le Battaglie:**
+### Valid State Transitions
+**For Battles:**
 
-- Creata → In Corso (automatico)
-- In Corso → Vinta (boss sconfitto)
-- In Corso → Persa (tutti caduti)
-- Vinta/Persa → Cancellata
+- Created → Ongoing (automatic)
+- Ongoing → Won (boss defeated)
+- Ongoing → Lost (all fallen)
+- Won/Lost → Cancelled
