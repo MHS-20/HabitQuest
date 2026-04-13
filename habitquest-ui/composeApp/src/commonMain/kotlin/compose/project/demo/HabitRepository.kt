@@ -242,6 +242,9 @@ class HabitsApiRepository {
     habitId: String,
     title: String,
     description: String,
+    recurrenceType: CreateHabitRecurrenceType,
+    dayOfWeek: String?,
+    dayOfMonth: Int?,
   ): UpdateHabitResult {
     if (habitId.isBlank()) {
       return UpdateHabitResult.Error("Habit not found")
@@ -271,6 +274,18 @@ class HabitsApiRepository {
       )
     if (descriptionResult != null) {
       return UpdateHabitResult.Error(descriptionResult)
+    }
+
+    val recurrenceResult =
+      patchHabitRecurrence(
+        token = token,
+        habitId = habitId,
+        recurrenceType = recurrenceType,
+        dayOfWeek = dayOfWeek,
+        dayOfMonth = dayOfMonth,
+      )
+    if (recurrenceResult != null) {
+      return UpdateHabitResult.Error(recurrenceResult)
     }
 
     return UpdateHabitResult.Success
@@ -341,6 +356,49 @@ class HabitsApiRepository {
       }
 
       else -> "$errorPrefix failed (${response.status.value})"
+    }
+  }
+
+  private suspend fun patchHabitRecurrence(
+    token: String,
+    habitId: String,
+    recurrenceType: CreateHabitRecurrenceType,
+    dayOfWeek: String?,
+    dayOfMonth: Int?,
+  ): String? {
+    val response =
+      runCatching {
+          client.patch("${edgeServiceBaseUrl()}/api/v1/habits/$habitId/recurrence") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            setBody(
+              buildJsonObject {
+                put("type", JsonPrimitive(recurrenceType.name))
+                if (recurrenceType == CreateHabitRecurrenceType.WEEKLY && dayOfWeek != null) {
+                  put("dayOfWeek", JsonPrimitive(dayOfWeek))
+                }
+                if (recurrenceType == CreateHabitRecurrenceType.MONTHLY && dayOfMonth != null) {
+                  put("dayOfMonth", JsonPrimitive(dayOfMonth))
+                }
+              }
+            )
+          }
+        }
+        .getOrElse {
+          return "Unable to contact habit-service"
+        }
+
+    return when (response.status) {
+      HttpStatusCode.NoContent,
+      HttpStatusCode.OK -> null
+      HttpStatusCode.Unauthorized -> "Session expired, please log in again"
+      HttpStatusCode.NotFound -> "Habit not found"
+      HttpStatusCode.BadRequest -> {
+        val body = runCatching { response.body<JsonObject>() }.getOrNull()
+        body?.get("message")?.jsonPrimitive?.contentOrNull ?: "Update recurrence failed"
+      }
+
+      else -> "Update recurrence failed (${response.status.value})"
     }
   }
 }
