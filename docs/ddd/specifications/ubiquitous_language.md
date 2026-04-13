@@ -12,7 +12,7 @@
 
 # Habit
 - **Habit**: A recurring commitment defined by the user.  
-- **Frequency**: Time-based rule that determines when a habit must be completed.  
+- **Recurrence**: Time-based rule that determines when a habit must be completed.  
 - **Difficulty**: Parameter that influences the amount of XP gained.  
 - **Tag**: Categorical label associated with a habit.  
 - **Completion**: Action indicating that the habit has been fulfilled.  
