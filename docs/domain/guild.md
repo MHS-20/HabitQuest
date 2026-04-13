@@ -1,71 +1,71 @@
-# Dominio: Gilde
+# Domain: Guilds
 
-Una **Gilda** è un gruppo di giocatori che si uniscono per collaborare e affrontare sfide comuni. 
-È un'entità sociale che permette ai giocatori di:
+A **Guild** is a group of players who come together to collaborate and face common challenges.
+It is a social entity that allows players to:
 
-- Unire le forze per combattere nemici dei boss
-- Competere con altre gilde tramite una classifica globale
-- Organizzarsi attraverso ruoli e gerarchie
-- Invitare nuovi membri e gestire l'appartenenza
+- Join forces to fight boss enemies
+- Compete with other guilds via a global leaderboard
+- Organize themselves through roles and hierarchies
+- Invite new members and manage membership
 
-Ogni membro della gilda è identificato da:
+Each guild member is identified by:
 
-- Un **ID Avatar** univoco che lo identifica nel sistema
-- Un **Nickname** visibile agli altri membri
-- Un **Ruolo** all'interno della gilda
+- A unique **Avatar ID** that identifies them in the system
+- A **Nickname** visible to other members
+- A **Role** within the guild
 
-### Struttura Organizzativa
-Ogni gilda ha una struttura gerarchica con tre ruoli:
+### Organizational Structure
+Each guild has a hierarchical structure with three roles:
 
-1. **Leader** (Capo della Gilda)
-    - Colui che ha creato la gilda
-    - Ha il pieno controllo sulla gilda
-    - Può invitare nuovi membri
-    - Può rimuovere membri
-    - Può promuovere membri ad altri ruoli
+1. **Leader** (Guild Master)
+   - The one who created the guild
+   - Has full control over the guild
+   - Can invite new members
+   - Can remove members
+   - Can promote members to other roles
 
-2. **Officer** (Ufficiale)
-    - Ruolo intermedio di fiducia
-    - Ottenuto tramite promozione dal Leader
-    - Non ha poteri amministrativi particolari
+2. **Officer**
+   - Intermediate role of trust
+   - Obtained through promotion by the Leader
+   - Has no particular administrative powers
 
-3. **Member** (Membro)
-    - Ruolo base di tutti i nuovi membri
-    - Può partecipare alle battaglie
-    - Può lasciare la gilda volontariamente
+3. **Member**
+   - Base role of all new members
+   - Can participate in battles
+   - Can leave the guild voluntarily
 
-### Sistema di Inviti
-Il processo di ingresso in una gilda funziona attraverso un sistema di inviti:
+### Invite System
+The process of joining a guild works through an invite system:
 
-1. Solo il **Leader** può inviare inviti
-2. Un invito è composto da:
-    - ID univoco dell'invito
-    - ID della gilda che invita
-    - ID dell'avatar da invitare
-    - Data di scadenza dell'invito
+1. Only the **Leader** can send invites
+2. An invite is composed of:
+   - Unique invite ID
+   - ID of the inviting guild
+   - ID of the avatar to invite
+   - Invite expiration date
 
-3. Gli inviti rimangono **pendenti** fino a quando:
-    - Il giocatore invitato non accetta
-    - Scadono (tramite la data di scadenza)
-    - Vengono rifiutati
+3. Invites remain **pending** until:
+   - The invited player accepts
+   - They expire (via the expiration date)
+   - They are rejected
 
-4. Quando un invito viene accettato:
-    - L'invito viene rimosso dalla lista degli inviti pendenti
-    - Il giocatore diventa membro della gilda con ruolo **Member**
+4. When an invite is accepted:
+   - The invite is removed from the pending invites list
+   - The player becomes a guild member with the **Member** role
 
-### Transizioni di Stato Valide
-**Per le Gilde**:
+### Valid State Transitions
+**For Guilds**:
 
-- Creata → Attiva (con membri)
-- Attiva → Con battaglia in corso
-- Attiva → Cancellata
+- Created → Active (with members)
+- Active → With ongoing battle
+- Active → Cancelled
 
-### Invarianti delle Gilde
-1. **Unicità del Leader**: ogni gilda ha esattamente un Leader al momento della creazione
-2. **Autorizzazione**: solo il Leader può:
-    - Inviare inviti
-    - Rimuovere membri
-    - Promuovere membri
-3. **Prevenzione Duplicati**: non è possibile invitare un avatar che è già membro della gilda
-4. **Validità Inviti**: un invito può essere accettato solo dal destinatario corretto
-5. **Immutabilità ID**: l'ID della gilda non può essere modificato dopo la creazione
+### Guild Invariants
+1. **Leader Uniqueness**: each guild has exactly one Leader at the time of creation
+2. **Authorization**: only the Leader can:
+   - Send invites
+   - Remove members
+   - Promote members
+3. **Duplicate Prevention**: it is not possible to invite an avatar who is already a guild member
+4. **Invite Validity**: an invite can only be accepted by the correct recipient
+5. **ID Immutability**: the guild ID cannot be modified after creation

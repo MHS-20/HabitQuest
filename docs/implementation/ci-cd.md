@@ -1,171 +1,126 @@
-# Report Tecnico — Pipeline CI/CD con GitHub Actions
+# CI/CD Pipeline with GitHub Actions
 
-## Introduzione
+## Introduction
 
-Il sistema di Continuous Integration e Continuous Delivery è interamente gestito tramite **GitHub Actions** e si articola in cinque workflow distinti. 
-I workflow non sono isolati: comunicano tra loro tramite il meccanismo di **`repository_dispatch`**, formando una pipeline event-driven end-to-end che va dal commit del codice fino al deploy dell'infrastruttura su AWS EKS.
-
-Il flusso complessivo segue questa catena:
-
-```
-[Push / PR]
-    │
-    ▼
-┌───────────────────────────────┐
-│ build.yml                     │
-│-------------------------------│
-│ Commit Lint                   │
-│ K8s Validation                │
-│ Detect Changes                │
-│ Build & Test (servizi)        │
-│ Package + Scan + Push GHCR    │
-│ (main) dispatch semantic_rel  │
-└───────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────┐
-│ semantic-release.yml          │
-│-------------------------------│
-│ Calcolo Tag SemVer            │
-│ Retag immagine Docker GHCR    │
-│ (main) dispatch update_manif  │
-└───────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────┐
-│ update_manifest.yml           │
-│-------------------------------│
-│ Aggiorna kustomization.yaml   │
-│ Apre PR su main               │
-└───────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────┐
-│ provision.yml                 │
-│-------------------------------│
-│ Terraform su AWS              │
-│ Deploy su EKS                 │
-└───────────────────────────────┘
-```
-
+The Continuous Integration and Continuous Delivery system is entirely managed through **GitHub Actions** and is organized into five distinct workflows.
+The workflows are not isolated: they communicate with each other via the **`repository_dispatch`** mechanism, forming an end-to-end event-driven pipeline that goes from code commit all the way to infrastructure deployment on AWS EKS.
 
 ## Workflow 1 — `build.yml`: Build and Package
 
-Questo è il workflow principale, il punto di ingresso dell'intera pipeline. Viene eseguito ad ogni `push` e ad ogni `pull_request` su qualsiasi branch.
+This is the main workflow, the entry point of the entire pipeline. It is executed on every `push` and every `pull_request` on any branch.
 
 ### Validation
-Prima di qualsiasi operazione sul codice, due job paralleli operano come **gate di qualità**:
+Before any operation on the code, two parallel jobs act as **quality gates**:
 
-- **`commit-lint`**: verifica che il messaggio di ogni commit rispetti la specifica **Conventional Commits**, prerequisito per il calcolo automatico del versioning semantico nel workflow successivo. Il job è saltato per i commit di Dependabot.
-- **`k8s-validate`**: installa `kustomize` e `kubeconform` e valida i manifest Kubernetes presenti nel repository. `kustomize build k8s` genera il manifest finale (comprensivo degli overlay) e `kubeconform` verifica la correttezza strutturale in modalità strict contro lo schema ufficiale Kubernetes. Questo previene il deploy di manifest malformati.
+- **`commit-lint`**: verifies that every commit message complies with the **Conventional Commits** specification, a prerequisite for automatic semantic versioning calculation in the next workflow. The job is skipped for Dependabot commits.
+- **`k8s-validate`**: installs `kustomize` and `kubeconform` and validates the Kubernetes manifests present in the repository. `kustomize build k8s` generates the final manifest (including overlays) and `kubeconform` verifies structural correctness in strict mode against the official Kubernetes schema. This prevents the deployment of malformed manifests.
 
-### Rilevamento dei Servizi Modificati
-Uno degli aspetti più rilevanti del workflow è l'**approccio incrementale**: non tutti i microservizi vengono ricompilati ad ogni push, ma solo quelli effettivamente modificati.
-Il job `detect-changes` utilizza un filtro sul path per analizzare i file cambiati nel commit e produce la lista dei soli servizi toccati. Questo output viene passato ai job successivi.
+### Modified Services Detection
+One of the most significant aspects of the workflow is the **incremental approach**: not all microservices are recompiled on every push, but only those that have actually been modified.
+The `detect-changes` job uses a path filter to analyze the files changed in the commit and produces the list of only the affected services. This output is passed to the subsequent jobs.
 
-### Build e Test
-Il job `build` riceve la lista dei servizi modificati e avvia una **build matrix**: si esegue un job parallelo per ogni servizio modificato.
-Per ogni servizio:
+### Build and Test
+The `build` job receives the list of modified services and launches a **build matrix**: a parallel job is executed for each modified service.
+For each service:
 
-1. Viene configurato il JDK 21
-2. Viene eseguita la build Gradle, che include compilazione, test ed altri controlli di qualità (lint, checkstyle, etc.)
-3. Il JAR prodotto viene caricato come **artifact** di GitHub Actions, identificato univocamente per nome di servizio.
-4. Il job `build-aggregate` funge da punto di sincronizzazione: raccoglie i risultati di tutti i job paralleli e fallisce l'intera pipeline se anche uno solo ha prodotto un errore, garantendo che il passaggio successivo avvenga solo con tutti i build verdi.
+1. JDK 21 is configured
+2. The Gradle build is executed, which includes compilation, tests and other quality checks (lint, checkstyle, etc.)
+3. The produced JAR is uploaded as a GitHub Actions **artifact**, uniquely identified by service name.
+4. The `build-aggregate` job acts as a synchronization point: it collects the results of all parallel jobs and fails the entire pipeline if even one has produced an error, ensuring that the next step only proceeds when all builds are green.
 
-### Package, Scan e Publish
-Questo job, anch'esso in matrix, si occupa della containerizzazione e della pubblicazione delle immagini. 
-Esegue solo se `build-aggregate` ha avuto successo.
+### Package, Scan and Publish
+This job, also in matrix, handles containerization and image publishing.
+It runs only if `build-aggregate` has succeeded.
 
-Per ogni servizio:
+For each service:
 
-1. **Download dell'artifact**: recupera il JAR prodotto dal job precedente.
-2. **Autenticazione su GHCR**: accede al GitHub Container Registry usando il token automatico `GITHUB_TOKEN`.
-3. **Build dell'immagine Docker**: costruisce l'immagine usando il `Dockerfile` del singolo servizio, taggandola con lo SHA del commit (`github.sha`), che garantisce unicità e tracciabilità tra commit e immagine.
-4. **Vulnerability Scan con Grype**: prima del push, l'immagine viene scansionata con **Grype** alla ricerca di vulnerabilità note. Il report viene prodotto in formato SARIF e caricato su GitHub Security, visibile nella tab *Security* del repository.
-5. **Push dell'immagine**: l'immagine viene pubblicata su GHCR con due tag: lo **SHA del commit** (per la tracciabilità) e **`latest`** (per riferimento rapido).
-6. **Trigger del workflow successivo**: se il push è avvenuto sul branch `main`, viene emesso un evento `repository_dispatch` di tipo `microservice_semantic_release`, passando come payload il nome del servizio e il path dell'immagine su GHCR.
+1. **Artifact download**: retrieves the JAR produced by the previous job.
+2. **Authentication on GHCR**: accesses the GitHub Container Registry using the automatic `GITHUB_TOKEN`.
+3. **Docker image build**: builds the image using the individual service's `Dockerfile`, tagging it with the commit SHA (`github.sha`), which guarantees uniqueness and traceability between commit and image.
+4. **Vulnerability Scan with Grype**: before pushing, the image is scanned with **Grype** for known vulnerabilities. The report is produced in SARIF format and uploaded to GitHub Security, visible in the repository's *Security* tab.
+5. **Image push**: the image is published on GHCR with two tags: the **commit SHA** (for traceability) and **`latest`** (for quick reference).
+6. **Next workflow trigger**: if the push occurred on the `main` branch, a `repository_dispatch` event of type `microservice_semantic_release` is emitted, passing the service name and the image path on GHCR as payload.
 
 
 ## Workflow 2 — `build_ui.yml`: Build and Package Multiplatform UI
-Questo workflow è dedicato esclusivamente al frontend **HabitQuest UI**, sviluppato con **Kotlin Multiplatform (KMP)** e Compose Multiplatform. 
-È attivato solo su push o PR che toccano la directory `services/habitquest-ui/`.
+This workflow is dedicated exclusively to the **HabitQuest UI** frontend, developed with **Kotlin Multiplatform (KMP)** and Compose Multiplatform.
+It is triggered only on push or PR that touch the `services/habitquest-ui/` directory.
 
-Il workflow si articola in quattro job in sequenza:
+The workflow is organized into four sequential jobs:
 
-1. **`commit-lint`**: stessa validazione Conventional Commits del workflow backend.
-2. **`static-scan`**: scansione statica delle vulnerabilità nel codice sorgente (non nell'immagine) tramite `anchore/scan-action`, con upload del report SARIF su GitHub Security.
-3. **`build`**: il job centrale esegue il build KMP con Gradle. Poiché i target KMP includono anche Kotlin/JS, vengono configurati sia il JDK 21 che Node.js 18.
-4. **`lint-reports`**: scarica gli artifact del build e ri-carica separatamente i soli report di lint, rendendoli facilmente accessibili nella UI di GitHub Actions.
+1. **`commit-lint`**: same Conventional Commits validation as the backend workflow.
+2. **`static-scan`**: static vulnerability scan of the source code (not the image) via `anchore/scan-action`, with SARIF report upload to GitHub Security.
+3. **`build`**: the central job executes the KMP build with Gradle. Since KMP targets also include Kotlin/JS, both JDK 21 and Node.js 18 are configured.
+4. **`lint-reports`**: downloads the build artifacts and re-uploads only the lint reports separately, making them easily accessible in the GitHub Actions UI.
 
 
 ## Workflow 3 — `semantic-release.yml`: Semantic Release
-Questo workflow è attivato esclusivamente da un evento `repository_dispatch` emesso da `build.yml` al termine di un push su `main`.
+This workflow is triggered exclusively by a `repository_dispatch` event emitted by `build.yml` at the end of a push on `main`.
 
-### Calcolo del Versioning Semantico
-Il workflow utilizza **`semantic-release`** con il plugin **`semantic-release-monorepo`**, che adatta il comportamento standard di semantic-release ai repository monorepo.
-Ogni servizio ha il proprio scope di versioning indipendente, con tag nel formato `<nome-servizio>-v<MAJOR>.<MINOR>.<PATCH>`.
+### Semantic Versioning Calculation
+The workflow uses **`semantic-release`** with the **`semantic-release-monorepo`** plugin, which adapts the standard semantic-release behavior to monorepo repositories.
+Each service has its own independent versioning scope, with tags in the format `<service-name>-v<MAJOR>.<MINOR>.<PATCH>`.
 
-Il versioning è calcolato automaticamente analizzando i messaggi di commit dall'ultimo tag:
+Versioning is calculated automatically by analyzing commit messages since the last tag:
 
-- `feat:` → incremento **MINOR**
-- `fix:` → incremento **PATCH**
-- `!` → incremento **MAJOR**
+- `feat:` → **MINOR** increment
+- `fix:` → **PATCH** increment
+- `!` → **MAJOR** increment
 
-### Retag dell'Immagine Docker
-Dopodiché semantic-release si occupa di creare un nuovo tag su git e sul docker registry:
+### Docker Image Retag
+Afterwards, semantic-release takes care of creating a new tag on git and on the docker registry:
 
-1. Viene effettuato il pull dell'immagine `latest` da GHCR.
-2. L'immagine viene retaggata con la versione semantica calcolata (es. `2.3.1`).
-3. La nuova versione viene pushata su GHCR, affiancando i tag SHA e `latest` già esistenti.
-Se invece non ci sono cambiamenti rilevanti (es. solo commit `chore:` o `docs:`), nessun tag viene creato e il workflow si conclude senza emettere eventi successivi.
+1. The `latest` image is pulled from GHCR.
+2. The image is retagged with the calculated semantic version (e.g. `2.3.1`).
+3. The new version is pushed to GHCR, alongside the already existing SHA and `latest` tags.
+   If there are no relevant changes instead (e.g. only `chore:` or `docs:` commits), no tag is created and the workflow concludes without emitting subsequent events.
 
-Al termine, se è stato calcolato una nuova version, viene emesso un secondo `repository_dispatch` di tipo `update_manifest` con payload contenente nome del servizio, path dell'immagine e versione semantica.
-Ogni immagine è taggata con lo **SHA del commit** che l'ha generata, garantendo tracciabilità bidirezionale: da un'immagine in esecuzione nel cluster è sempre possibile risalire al commit esatto che l'ha prodotta.
-Il tag semantico aggiuntivo fornisce invece leggibilità umana e permette di comunicare le versioni in modo significativo.
+At the end, if a new version has been calculated, a second `repository_dispatch` of type `update_manifest` is emitted with a payload containing the service name, image path and semantic version.
+Each image is tagged with the **commit SHA** that generated it, guaranteeing bidirectional traceability: from an image running in the cluster it is always possible to trace back to the exact commit that produced it.
+The additional semantic tag instead provides human readability and allows versions to be communicated in a meaningful way.
 
 ## Workflow 4 — `update_manifest.yml`: Update Manifest
-Questo workflow, attivato da `repository_dispatch`, si rifà in parte al principio delle **GitOps**: 
-l'unica fonte di verità per lo stato del cluster Kubernetes è il repository Git. 
-Aggiornare i manifest in Git equivale a dichiarare l'intenzione di deploy.
-Tuttavia il deploy completamente automatico è stato disabilitato (commentato nel file), 
-per evitare di incorre in costi su AWS, ma l'infrastruttura è sarebbe pronta per rilasciare una nuova versione ad ogni push su `main`.
+This workflow, triggered by `repository_dispatch`, partly draws on the **GitOps** principle:
+the only source of truth for the state of the Kubernetes cluster is the Git repository.
+Updating the manifests in Git is equivalent to declaring the intention to deploy.
+However, fully automatic deployment has been disabled (commented out in the file),
+to avoid incurring costs on AWS, but the infrastructure would be ready to release a new version on every push to `main`.
 
-### Aggiornamento del Manifest Kustomize
-Il job `update` modifica il tag dell'immagine nel file `kustomization.yaml` del servizio interessato.
-Invece di committare direttamente su `main` (approccio commentato nel file), il workflow apre una **Pull Request** sul branch `chore/auto-updates`. 
-Questo introduce un gate di revisione umana (o di approvazione ArgoCD) prima che la modifica raggiunga il branch principale e venga applicata al cluster.
+### Kustomize Manifest Update
+The `update` job modifies the image tag in the `kustomization.yaml` file of the affected service.
+Instead of committing directly to `main` (approach commented out in the file), the workflow opens a **Pull Request** on the `chore/auto-updates` branch.
+This introduces a human review gate (or ArgoCD approval) before the change reaches the main branch and is applied to the cluster.
 
 ## Workflow 5 — `provision.yml`: Terraform Provisioning
-Questo workflow gestisce il provisioning dell'infrastruttura cloud e il deploy dei componenti di piattaforma su Kubernetes. 
-Il trigger su `workflow_run` lo collega automaticamente al completamento di `Update Manifest`.
-Il gruppo di concorrenza `deploy` con `cancel-in-progress: true` garantisce che non possano essere eseguiti due deploy contemporaneamente.
+This workflow manages the provisioning of the cloud infrastructure and the deployment of platform components on Kubernetes.
+The `workflow_run` trigger links it automatically to the completion of `Update Manifest`.
+The `deploy` concurrency group with `cancel-in-progress: true` ensures that two deployments cannot run simultaneously.
 
-### Autenticazione con OIDC
-L'autenticazione su AWS avviene tramite **OpenID Connect (OIDC)**, senza la necessità di memorizzare AWS Access Key come secret statici. 
-GitHub Actions assume temporaneamente un ruolo IAM (`github-actions-terraform-role`), ottenendo credenziali a vita limitata.
+### Authentication with OIDC
+Authentication on AWS is done via **OpenID Connect (OIDC)**, without the need to store AWS Access Keys as static secrets.
+GitHub Actions temporarily assumes an IAM role (`github-actions-terraform-role`), obtaining short-lived credentials.
 
-### Provisioning con Terraform
-La sequenza Terraform standard viene eseguita nella directory `./terraform`:
+### Provisioning with Terraform
+The standard Terraform sequence is executed in the `./terraform` directory:
 
-1. **`terraform init`**: inizializza il backend remoto (Terraform Cloud, configurato tramite `TF_API_TOKEN`).
-2. **`terraform validate`**: verifica la sintassi e la coerenza dei file `.tf`.
-3. **`terraform plan`**: calcola il diff tra lo stato attuale dell'infrastruttura e quello desiderato, producendo un piano.
-4. **`terraform apply`**: applica il piano in modo non interattivo (`-auto-approve`).
-L'ARN del ruolo IAM viene passato come variabile Terraform (`TF_VAR_terraform_role_arn`), mantenendo la configurazione esternalizzata.
+1. **`terraform init`**: initializes the remote backend (Terraform Cloud, configured via `TF_API_TOKEN`).
+2. **`terraform validate`**: verifies the syntax and consistency of `.tf` files.
+3. **`terraform plan`**: calculates the diff between the current state of the infrastructure and the desired state, producing a plan.
+4. **`terraform apply`**: applies the plan non-interactively (`-auto-approve`).
+   The IAM role ARN is passed as a Terraform variable (`TF_VAR_terraform_role_arn`), keeping the configuration externalized.
 
-### Deploy su EKS
-Dopo il provisioning infrastrutturale, vengono installati `kubectl` e `helm` sul runner, 
-e viene configurato l'accesso al cluster EKS tramite `aws eks update-kubeconfig`. Vengono quindi eseguiti due script shell:
+### Deploy on EKS
+After the infrastructure provisioning, `kubectl` and `helm` are installed on the runner,
+and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two shell scripts are then executed:
 
-- **`deployPlatform.sh`**: installa i componenti di piattaforma (probabilmente Ingress Controller, cert-manager, e simili).
-- **`deployObservability.sh`**: installa lo stack di osservabilità (Prometheus, Grafana, Loki, Tempo).
+- **`deployPlatform.sh`**: installs the platform components (likely Ingress Controller, cert-manager, and similar).
+- **`deployObservability.sh`**: installs the observability stack (Prometheus, Grafana, Loki, Tempo).
 
-## Integrazione Complessiva
-| Workflow | Responsabilità | Trigger                                     |
+## Overall Integration
+| Workflow | Responsibility | Trigger                                     |
 |---|---|---------------------------------------------|
 | `build.yml` | CI: build, test, scan, publish | Push / PR                                   |
-| `build_ui.yml` | CI: frontend KMP | Push su `services/habitquest-ui/`           |
-| `semantic-release.yml` | Versioning automatico | `repository_dispatch` da build              |
-| `update_manifest.yml` | GitOps: aggiornamento manifest | `repository_dispatch` da semantic-release   |
-| `provision.yml` | IaC: infrastruttura e deploy | Manuale / `workflow_run` di update-manifest |
-
+| `build_ui.yml` | CI: frontend KMP | Push on `services/habitquest-ui/`           |
+| `semantic-release.yml` | Automatic versioning | `repository_dispatch` from build              |
+| `update_manifest.yml` | GitOps: manifest update | `repository_dispatch` from semantic-release   |
+| `provision.yml` | IaC: infrastructure and deploy | Manual / `workflow_run` from update-manifest |

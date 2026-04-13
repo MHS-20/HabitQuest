@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.mavenCentral
-
 pluginManagement {
     includeBuild("build-logic")
 

@@ -1,17 +1,17 @@
-# Observability Layer - Deployment Kubernetes
+# Observability Layer - Kubernetes Deployment
 
-L'Observability Layer implementa lo stack completo per **monitoring**, **logging** e **distributed tracing** dell'applicazione HabitQuest. 
-Segue i principi dei **Three Pillars of Observability**: Metrics, Logs e Traces.
+The Observability Layer implements the complete stack for **monitoring**, **logging** and **distributed tracing** of the HabitQuest application.
+It follows the principles of the **Three Pillars of Observability**: Metrics, Logs and Traces.
 
 ## Three Pillars of Observability
 ### 1. Metrics (Prometheus)
 
-- Misurazioni numeriche time-series (CPU, memoria, request rate, latency)  
-- Prometheus scraping di `/actuator/prometheus`, metriche esposte tramite Spring Boot Actuator
+- Numerical time-series measurements (CPU, memory, request rate, latency)
+- Prometheus scraping of `/actuator/prometheus`, metrics exposed via Spring Boot Actuator
 - Namespace `prometheus-system`
 
-Prometheus usa **Kubernetes Service Discovery** per trovare automaticamente i pod da scrapare:
-**Annotation richieste nei pod**:
+Prometheus uses **Kubernetes Service Discovery** to automatically find the pods to scrape:
+**Required pod annotations**:
 ```yaml
 metadata:
   annotations:
@@ -21,43 +21,43 @@ metadata:
 ```
 
 ### 2. Logs (Loki + Fluent Bit)
-- Stream di logs presi da stdout dall'applicazione  
-- Fluent Bit è presente come DaemonSet su ogni node, raccoglie i log e li invia a Loki.
-- Loki è l'aggregatore di log, permette di fare raccogliere e fare query
+- Log streams collected from application stdout
+- Fluent Bit runs as a DaemonSet on every node, collects logs and forwards them to Loki.
+- Loki is the log aggregator, allowing logs to be collected and queried
 - Namespace `logging`
 
-**Metadati aggiunti ad ogni log**:
+**Metadata added to each log**:
 
 - `namespace`: Kubernetes namespace
 - `pod`: Pod name
 - `container`: Container name
-- `labels`: Tutti i label Kubernetes del pod
+- `labels`: All Kubernetes labels of the pod
 
 
 ### 3. Traces (Tempo)
-- Traccia il flusso distribuito delle richieste attraverso i vari microservizi
-- Spring Boot invia traces usando lo standard OpenTelemetry
+- Traces the distributed flow of requests across the various microservices
+- Spring Boot sends traces using the OpenTelemetry standard
 - Namespace `prometheus-system`
 
-I servizi Spring Boot inviano traces a Tempo tramite configurazione:
+Spring Boot services send traces to Tempo via configuration:
 ```yaml
 env:
   - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
     value: http://tempo.prometheus-system:4318/v1/traces
 ```
 
-Spring Boot Micrometer produce le traces automaticamente:
+Spring Boot Micrometer produces traces automatically:
 
-1. Instrumenta le richieste HTTP
-2. Propaga trace context
-3. Invia spans a Tempo via OTLP
+1. Instruments HTTP requests
+2. Propagates trace context
+3. Sends spans to Tempo via OTLP
 
 ### 4. Grafana
-- Visualizzazione unificata di metriche, log e traces
-- Dashboard impostate per i principali aspetti dell'applicazione
+- Unified visualization of metrics, logs and traces
+- Dashboards configured for the main aspects of the application
 - Namespace `logging`
 
-Dashboard disponibili:
+Available dashboards:
 
 - `circuit-breaker.json`: Resilience4j circuit breakers statuses and metrics
 - `http-rest-controllers.json`: REST endpoint performance and http traffic
@@ -66,4 +66,4 @@ Dashboard disponibili:
 - `spring-cloud-gateway.json`: Gateway routing metrics
 - `traces.json`: Distributed tracing visualization
 
-Tutti i componenti dello stack di osservabilità vengono deployati usando Helm charts parametrizzati.
+All components of the observability stack are deployed using parameterized Helm charts.

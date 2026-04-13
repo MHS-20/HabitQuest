@@ -1,104 +1,104 @@
-# Dominio: Marketplace
-Il Marketplace è il negozio virtuale del gioco HabitQuest. 
-Ogni avatar del gioco ha il proprio marketplace personale, in cui può acquistare e vendere oggetti — armi, armature e pozioni — usando la valuta di gioco. 
-Il servizio gestisce interamente questo ciclo di vita: dalla consultazione del catalogo disponibile, all'acquisto e alla restituzione degli oggetti, fino alla notifica degli eventi significativi.
+# Domain: Marketplace
+The Marketplace is the virtual shop of the HabitQuest game.
+Each avatar in the game has their own personal marketplace, where they can buy and sell items — weapons, armor and potions — using the in-game currency.
+The service entirely manages this lifecycle: from browsing the available catalog, to purchasing and returning items, to notifying significant events.
 
-Il marketplace non gestisce direttamente l'avatar (che appartiene a un altro servizio), 
-ma ogni marketplace è **associato in modo univoco a un avatar**: 
-non esiste un marketplace condiviso tra più avatar, né un avatar che ne possiede più di uno.
+The marketplace does not directly manage the avatar (which belongs to another service),
+but each marketplace is **uniquely associated with an avatar**:
+there is no marketplace shared between multiple avatars, nor an avatar that owns more than one.
 
-Il **Marketplace** tiene traccia di due informazioni fondamentali:
+The **Marketplace** keeps track of two fundamental pieces of information:
 
-- quali oggetti sono **disponibili** all'acquisto (cioè presenti nel catalogo ma non ancora comprati),
-- quali oggetti sono stati **acquistati** (cioè sono in possesso dell'avatar).
+- which items are **available** for purchase (i.e. present in the catalog but not yet bought),
+- which items have been **purchased** (i.e. are in the avatar's possession).
 
-Per un dato marketplace **un oggetto può essere in uno solo dei due stati**: disponibile oppure acquistato.
-Il marketplace nasce con un insieme predefinito di oggetti acquistabili (ItemCatalog).
-La distinzione tra "disponibili" e "acquistati" è gestita dal marketplace stesso, non dal catalogo.
+For a given marketplace **an item can be in only one of the two states**: available or purchased.
+The marketplace is created with a predefined set of purchasable items (ItemCatalog).
+The distinction between "available" and "purchased" is managed by the marketplace itself, not by the catalog.
 
-### Oggetti (Item)
-Gli oggetti sono **value object**: non hanno un'identità propria, ma sono identificati dal loro nome. 
+### Items
+Items are **value objects**: they have no identity of their own, but are identified by their name.
 
-Ogni oggetto ha:
+Each item has:
 
-- un **nome** univoco (usato come chiave in tutte le operazioni),
-- una **descrizione**,
-- un **prezzo** in monete,
-- un **livello minimo richiesto** per poterlo acquistare,
-- una **statistica specifica** che varia a seconda del tipo.
+- a **unique name** (used as a key in all operations),
+- a **description**,
+- a **price** in coins,
+- a **minimum level required** to be able to purchase it,
+- a **specific stat** that varies depending on the type.
 
-Non esistono oggetti senza requisito di livello.
-Esistono tre famiglie di oggetti:
+There are no items without a level requirement.
+There are three item families:
 
-- **Armi (Weapon):** conferiscono un valore di potere d'attacco.
-- **Armature (Armor):** conferiscono un valore di potere difensivo.
-- **Pozioni (Potion):** si dividono in due sottotipi:
-    - *Health Potion* — ripristina punti vita (HP).
-    - *Mana Potion* — ripristina punti mana (MP).
+- **Weapons:** grant an attack power value.
+- **Armor:** grants a defensive power value.
+- **Potions:** divided into two subtypes:
+  - *Health Potion* — restores hit points (HP).
+  - *Mana Potion* — restores mana points (MP).
 
-### Denaro
-Il **Money** è il valore monetario usato nel marketplace. 
-È un value object che garantisce che l'importo sia sempre non negativo. 
-Supporta operazioni di addizione e sottrazione, ma impedisce di scendere sotto zero (la sottrazione di un importo maggiore del disponibile è un'operazione illegale).
+### Money
+**Money** is the monetary value used in the marketplace.
+It is a value object that guarantees the amount is always non-negative.
+It supports addition and subtraction operations, but prevents dropping below zero (subtracting an amount greater than the available balance is an illegal operation).
 
-## Dinamiche e logica di business
+## Dynamics and Business Logic
 
-### Acquisto di un oggetto
-Quando un avatar vuole acquistare un oggetto, il sistema verifica che:
+### Purchasing an Item
+When an avatar wants to purchase an item, the system verifies that:
 
-1. L'oggetto esiste nel catalogo del marketplace.
-2. L'oggetto non è già stato acquistato (non è nello stato "sold")
-3. L'avatar ha un livello sufficiente per acquistare l'oggetto.
+1. The item exists in the marketplace catalog.
+2. The item has not already been purchased (it is not in the "sold" state).
+3. The avatar has a sufficient level to purchase the item.
 
-Se entrambe le condizioni sono soddisfatte, l'oggetto passa dallo stato "disponibile" allo stato "acquistato".
-Un oggetto **non può essere acquistato due volte**: tentare di comprare qualcosa già in possesso dell'avatar è un'operazione non permessa.
+If both conditions are satisfied, the item transitions from the "available" state to the "purchased" state.
+An item **cannot be purchased twice**: attempting to buy something already in the avatar's possession is a forbidden operation.
 
-### Vendita di un oggetto
-La vendita permette all'avatar di **restituire** un oggetto precedentemente acquistato, 
-rendendolo nuovamente disponibile nel catalogo e ricevendo in cambio il suo valore monetario.
+### Selling an Item
+Selling allows the avatar to **return** a previously purchased item,
+making it available again in the catalog and receiving its monetary value in exchange.
 
-Il sistema verifica che:
+The system verifies that:
 
-1. L'oggetto esiste nel catalogo.
-2. L'oggetto è effettivamente nello stato "acquistato" dall'avatar.
+1. The item exists in the catalog.
+2. The item is effectively in the "purchased" state by the avatar.
 
-Se le condizioni sono rispettate, l'oggetto torna disponibile. 
-Tentare di vendere un oggetto che non si possiede non è permesso.
+If the conditions are met, the item becomes available again.
+Attempting to sell an item that is not owned is not permitted.
 
-### Consultazione del catalogo
-Il marketplace espone diverse modalità di consultazione:
+### Browsing the Catalog
+The marketplace exposes several browsing modes:
 
-- **Tutti gli oggetti disponibili** — quelli nel catalogo che non sono ancora stati comprati.
-- **Oggetti disponibili per tipo** — filtrando per Arma, Armatura, Pozione, ecc.
-- **Un singolo oggetto disponibile per nome** — se esiste e non è stato comprato.
-- **Tutti gli oggetti acquistati** — quelli attualmente in possesso dell'avatar.
-- **Un singolo oggetto acquistato per nome**.
+- **All available items** — those in the catalog that have not yet been bought.
+- **Available items by type** — filtering by Weapon, Armor, Potion, etc.
+- **A single available item by name** — if it exists and has not been bought.
+- **All purchased items** — those currently in the avatar's possession.
+- **A single purchased item by name**.
 
-## Eventi di dominio
-Quando si verificano operazioni rilevanti nel marketplace, il sistema emette **eventi di dominio** che informano il resto del sistema di quanto accaduto. 
-Gli eventi sono immutabili e portano con sé tutte le informazioni necessarie per essere elaborati da altri servizi.
+## Domain Events
+When relevant operations occur in the marketplace, the system emits **domain events** that inform the rest of the system of what has happened.
+Events are immutable and carry all the information necessary to be processed by other services.
 
 ### ItemBought
-Emesso quando un avatar acquista con successo un oggetto. Contiene:
+Emitted when an avatar successfully purchases an item. Contains:
 
-- l'identificativo del marketplace,
-- il nome dell'oggetto acquistato,
-- l'identificativo dell'avatar.
+- the marketplace identifier,
+- the name of the purchased item,
+- the avatar identifier.
 
-Questo evento segnala al sistema che l'avatar ha ottenuto un nuovo oggetto e che lo stato del marketplace è cambiato.
+This event signals to the system that the avatar has obtained a new item and that the marketplace state has changed.
 
 ### ItemSold
-Emesso quando un avatar restituisce un oggetto precedentemente acquistato. 
-Contiene le stesse informazioni di ItemBought (marketplace, nome oggetto, avatar).
-Questo evento segnala che l'oggetto è tornato disponibile nel marketplace dell'avatar.
+Emitted when an avatar returns a previously purchased item.
+Contains the same information as ItemBought (marketplace, item name, avatar).
+This event signals that the item has become available again in the avatar's marketplace.
 
-## Struttura del dominio
-| Concetto | Natura | Responsabilità |
+## Domain Structure
+| Concept | Nature | Responsibility |
 |---|---|---|
-| Marketplace | Aggregato | Gestisce lo stato degli oggetti (disponibili / acquistati) per un avatar |
-| ItemCatalog | Componente del dominio | Contiene la lista statica di tutti gli oggetti vendibili |
-| Item (Weapon, Armor, Potion) | Value Object | Descrive le caratteristiche di un oggetto |
-| Money | Value Object | Rappresenta un importo monetario non negativo |
-| Level | Value Object | Rappresenta un livello di gioco (≥ 1) |
-| Avatar | Riferimento esterno | Identifica il proprietario del marketplace |
-| ItemBought / ItemSold | Eventi di dominio | Notificano il sistema delle transazioni avvenute |
+| Marketplace | Aggregate | Manages the state of items (available / purchased) for an avatar |
+| ItemCatalog | Domain component | Contains the static list of all sellable items |
+| Item (Weapon, Armor, Potion) | Value Object | Describes the characteristics of an item |
+| Money | Value Object | Represents a non-negative monetary amount |
+| Level | Value Object | Represents a game level (≥ 1) |
+| Avatar | External reference | Identifies the owner of the marketplace |
+| ItemBought / ItemSold | Domain events | Notify the system of completed transactions |

@@ -1,111 +1,111 @@
-# Dominio: Avatar
-L'Avatar è il cuore del progetto. 
-Rappresenta il personaggio di gioco associato a ciascun utente: un avatar è un'entità che cresce, combatte, guadagna esperienza, accumula oggetti e impara magie man mano che l'utente interagisce con l'applicazione.
-L'avatar incapsula regole di business precise che determinano cosa può accadere al personaggio, in quali condizioni e con quali conseguenze.
+# Domain: Avatar
+The Avatar is the heart of the project.
+It represents the game character associated with each user: an avatar is an entity that grows, fights, gains experience, accumulates items and learns spells as the user interacts with the application.
+The avatar encapsulates precise business rules that determine what can happen to the character, under what conditions and with what consequences.
 
-## Struttura dell'Avatar
-Alla creazione, ogni avatar parte con uno stato iniziale ben definito:
+## Avatar Structure
+At creation, each avatar starts with a well-defined initial state:
 
-| Attributo | Valore iniziale |
+| Attribute | Initial value |
 |---|---|
-| Livello | 1 |
-| Esperienza | 0 / 100 |
-| Salute | 100 / 100 |
+| Level | 1 |
+| Experience | 0 / 100 |
+| Health | 100 / 100 |
 | Mana | 50 / 50 |
-| Denaro | 100 monete |
-| Statistiche (Forza / Difesa / Intelligenza) | 10 / 10 / 10 |
-| Inventario | vuoto |
-| Oggetti equipaggiati | nessuno |
-| Magie conosciute | nessuna |
+| Money | 100 coins |
+| Stats (Strength / Defense / Intelligence) | 10 / 10 / 10 |
+| Inventory | empty |
+| Equipped items | none |
+| Known spells | none |
 
-## Progressione: Esperienza e Livello
-L'avatar accumula **esperienza** (XP) svolgendo attività nel gioco. 
-Quando l'esperienza raggiunge o supera la soglia richiesta per il livello corrente, avviene automaticamente il **level up**.
-La soglia di esperienza necessaria per salire di livello cresce ad ogni avanzamento: passare dal livello 1 al 2 richiede 100 XP, ma la soglia successiva si raddoppia ogni volta, rendendo la progressione via via più impegnativa.
+## Progression: Experience and Level
+The avatar accumulates **experience** (XP) by performing activities in the game.
+When the experience reaches or exceeds the threshold required for the current level, a **level up** occurs automatically.
+The experience threshold required to level up grows with each advancement: going from level 1 to 2 requires 100 XP, but the next threshold doubles each time, making progression increasingly challenging.
 
-Quando l'avatar sale di livello accadono automaticamente tre cose:
+When the avatar levels up, three things happen automatically:
 
-- La **salute massima** aumenta di 10 punti.
-- Il **mana massimo** aumenta di 5 punti.
-- L'avatar riceve un bonus di **100 monete**.
+- **Maximum health** increases by 10 points.
+- **Maximum mana** increases by 5 points.
+- The avatar receives a bonus of **100 coins**.
 
-Inoltre, ad alcuni livelli specifici il personaggio **impara automaticamente una nuova magia** (vedi sezione Magie).
+Additionally, at certain specific levels the character **automatically learns a new spell** (see Spells section).
 
 
-## Salute e Morte
-La **salute** rappresenta la vitalità del personaggio. 
-Ha un valore corrente e un valore massimo. 
-Il personaggio può ricevere danni (che abbassano la salute corrente) o essere curato (che la ripristina, senza mai superare il massimo).
-Quando la salute raggiunge zero, l'avatar muore. La morte ha conseguenze significative:
+## Health and Death
+**Health** represents the character's vitality.
+It has a current value and a maximum value.
+The character can receive damage (which lowers current health) or be healed (which restores it, never exceeding the maximum).
+When health reaches zero, the avatar dies. Death has significant consequences:
 
-- La salute e il mana vengono **completamente ripristinati**.
-- L'esperienza accumulata nel livello corrente viene **azzerata** (ma il livello rimane invariato).
-- Vengono **perdute 100 monete**.
+- Health and mana are **completely restored**.
+- The experience accumulated in the current level is **reset** (but the level remains unchanged).
+- **100 coins are lost**.
 
-La morte è quindi una penalità che non fa retrocedere di livello, ma azzera i progressi recenti in termini di XP e infligge un costo economico.
+Death is therefore a penalty that does not cause a level regression, but resets recent XP progress and inflicts an economic cost.
 
-## Mana e Magie
-Il **mana** è la risorsa necessaria per lanciare le magie. Come la salute, ha un valore corrente e un massimo. 
-Si consuma quando si usa una magia e può essere ripristinato tramite pozioni.
-Le **magie** disponibili nel gioco sono attualmente tre, ognuna con caratteristiche diverse:
+## Mana and Spells
+**Mana** is the resource needed to cast spells. Like health, it has a current value and a maximum.
+It is consumed when a spell is used and can be restored via potions.
+The **spells** available in the game are currently three, each with different characteristics:
 
-| Magia | Potere | Mana richiesto | Livello richiesto |
+| Spell | Power | Mana required | Level required |
 |---|---|---|---|
 | Fireball | 10 | 5 | 5 |
 | Blizzard | 15 | 7 | 10 |
 | Thunder | 20 | 10 | 15 |
 
-Un avatar impara una magia automaticamente quando raggiunge il livello richiesto.
-Non è possibile conoscere due volte la stessa magia, né lanciare una magia che non si conosce. 
-Per lanciare una magia è necessario avere mana sufficiente; in caso contrario, l'operazione viene rifiutata.
+An avatar learns a spell automatically when reaching the required level.
+It is not possible to know the same spell twice, nor to cast a spell that is not known.
+To cast a spell, sufficient mana is required; otherwise, the operation is rejected.
 
 
-## Statistiche (Stats)
-L'avatar ha tre statistiche che ne descrivono le capacità combattive e magiche:
+## Stats
+The avatar has three statistics that describe its combat and magical capabilities:
 
-- **Forza (Strength):** influenza la capacità di attacco fisico.
-- **Difesa (Defense):** influenza la resistenza ai danni.
-- **Intelligenza (Intelligence):** influenza l'efficacia delle magie.
+- **Strength:** influences physical attack capability.
+- **Defense:** influences damage resistance.
+- **Intelligence:** influences the effectiveness of spells.
 
-Ciascuna statistica può essere incrementata manualmente di un punto alla volta, spendendo punti abilità guadagnati ogni volta che si livello. 
-Ogni incremento viene notificato al resto del sistema tramite un evento (vedi sezione Eventi).
+Each statistic can be manually incremented one point at a time, by spending skill points earned every time a level is gained.
+Each increment is notified to the rest of the system via an event (see Events section).
 
 
-## Inventario e Oggetti Equipaggiati
-L'avatar dispone di due contenitori distinti per gli oggetti:
+## Inventory and Equipped Items
+The avatar has two distinct containers for items:
 
-- **Inventario:** gli oggetti che il personaggio porta con sé ma non sta usando.
-- **Oggetti equipaggiati:** gli oggetti attivamente indossati o impugnati.
+- **Inventory:** items that the character carries but is not using.
+- **Equipped items:** items actively worn or wielded.
 
-Gli oggetti esistenti nel dominio sono di quattro tipi:
+The items existing in the domain are of four types:
 
-- **Arma (Weapon):** ha un valore di potere d'attacco.
-- **Armatura (Armor):** ha un valore di potere difensivo.
-- **Pozione di salute (HealthPotion):** ha un valore di potere curativo per la salute.
-- **Pozione di mana (ManaPotion):** ha un valore di potere rigenerante per il mana.
+- **Weapon:** has an attack power value.
+- **Armor:** has a defensive power value.
+- **Health Potion:** has a healing power value for health.
+- **Mana Potion:** has a regenerative power value for mana.
 
-Le regole di gestione degli oggetti sono: per **equipaggiare** un oggetto, questo deve trovarsi nell'inventario. 
-Quando viene equipaggiato, viene rimosso dall'inventario e spostato negli oggetti equipaggiati. 
-Quando viene de-equipaggiato, torna nell'inventario. 
-Non è possibile de-equipaggiare un oggetto che non è equipaggiato o equipaggiare un oggetto già equipaggiato.
-Gli oggetti non equipaggiati possono essere venduti per denaro.
+The item management rules are: to **equip** an item, it must be in the inventory.
+When equipped, it is removed from the inventory and moved to the equipped items.
+When unequipped, it returns to the inventory.
+It is not possible to unequip an item that is not equipped or equip an item that is already equipped.
+Unequipped items can be sold for money.
 
-## Denaro
-Il denaro è una risorsa numerica non negativa. 
-L'avatar può guadagnarlo (ad esempio salendo di livello) o spenderlo (ad esempio acquistando oggetti). 
-Non è possibile spendere più denaro di quanto se ne possegga, né raggiungere un ammontare negativo. 
-Come penalità per la morte, vengono sempre sottratte 100 monete ma il saldo non può scendere sotto zero.
-Gli oggetti non equipaggiati possono essere venduti per denaro.
-Se si tenta di acquistare un oggetto senza avere denaro sufficiente, l'operazione viene rifiutata.
+## Money
+Money is a non-negative numerical resource.
+The avatar can earn it (for example by leveling up) or spend it (for example by purchasing items).
+It is not possible to spend more money than is owned, nor to reach a negative amount.
+As a death penalty, 100 coins are always deducted but the balance cannot drop below zero.
+Unequipped items can be sold for money.
+If an attempt is made to purchase an item without sufficient money, the operation is rejected.
 
-## Eventi di Dominio
-Alcune azioni importanti generano **eventi** che vengono propagati al resto del sistema. 
-Gli eventi attualmente previsti sono:
+## Domain Events
+Some important actions generate **events** that are propagated to the rest of the system.
+The currently defined events are:
 
-- **LevelUpped:** emesso quando l'avatar sale di livello. Contiene il nuovo livello raggiunto.
-- **Dead:** emesso quando l'avatar muore. Segnala al sistema che il personaggio ha esaurito la salute.
-- **NewSpellLearned:** emesso quando l'avatar impara una nuova magia automaticamente al raggiungimento del livello richiesto.
-- **SkillPointAssigned:** emesso quando viene incrementata una statistica (Forza, Difesa o Intelligenza). Contiene la statistica aggiornata.
+- **LevelUpped:** emitted when the avatar levels up. Contains the new level reached.
+- **Dead:** emitted when the avatar dies. Signals to the system that the character has run out of health.
+- **NewSpellLearned:** emitted when the avatar automatically learns a new spell upon reaching the required level.
+- **SkillPointAssigned:** emitted when a stat is incremented (Strength, Defense or Intelligence). Contains the updated stat.
 
-Questi eventi vengono gestiti da un osservatore interno che li registra nei log e li inoltra a un sistema di notifica. 
-Alcuni eventi possono essere segnalati ad altri servizi del sistema, altrimenti vengono solamente notificati all'utente.
+These events are handled by an internal observer that logs them and forwards them to a notification system.
+Some events may be signaled to other services in the system, otherwise they are only notified to the user.

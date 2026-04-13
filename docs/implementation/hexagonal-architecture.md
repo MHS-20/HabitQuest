@@ -1,7 +1,7 @@
 # Hexagonal Architecture & DDD
 
-In questo progetto, l'architettura esagonale viene realizzata attraverso **tre annotazioni custom** che fungono da marcatori semantici, 
-abbinate alle interfacce del package `application` e alle loro implementazioni concrete nel package `infrastructure` (adapter).
+In this project, the hexagonal architecture is realized through **three custom annotations** that act as semantic markers,
+paired with the interfaces of the `application` package and their concrete implementations in the `infrastructure` package (adapter).
 
 ```
 common/
@@ -12,34 +12,34 @@ common/
 
 habitquest/tracking/
 ├── domain/         ← Core
-├── application/    ← Porte (InBound + OutBound)
+├── application/    ← Ports (InBound + OutBound)
 └── infrastructure/ ← Adapters
 ```
 
-| Annotazione | Ruolo | Chi la usa |
+| Annotation | Role | Who uses it |
 |---|---|---|
-| `@InBoundPort` | Espone le operazioni che il dominio mette a disposizione del mondo esterno | Interfacce di servizio (`HabitService`) |
-| `@OutBoundPort` | Definisce le dipendenze che il dominio richiede all'infrastruttura | Interfacce di repository, notifier, logger |
-| `@Adapter` | Implementazione concreta di una porta, che collega il dominio a una tecnologia specifica | `HabitServiceImpl`, implementazioni infrastrutturali |
+| `@InBoundPort` | Exposes the operations that the domain makes available to the outside world | Service interfaces (`HabitService`) |
+| `@OutBoundPort` | Defines the dependencies that the domain requires from the infrastructure | Repository, notifier, logger interfaces |
+| `@Adapter` | Concrete implementation of a port, connecting the domain to a specific technology | `HabitServiceImpl`, infrastructural implementations |
 
 
-## Struttura Esagonale dei Microservizi
-Questa architettura è sistematicamente applicata ad in ogni microservizio del progetto.
-Il pattern da seguire è il seguente:
+## Hexagonal Structure of Microservices
+This architecture is systematically applied to every microservice in the project.
+The pattern to follow is:
 
-**1. InBoundPort** — un'interfaccia `@InBoundPort` per ogni use-case principale del servizio (es. `QuestService`, `AvatarService`), che espone le operazioni sul dominio.
-**2. OutBoundPort** — un'interfaccia `@OutBoundPort` per ogni dipendenza esterna:
-    - `XyzRepository` (persistenza)
-    - `XyzNotifier` (messaggistica verso altri servizi)
-    - `XyzRestClient` (chiamate HTTP verso altri microservizi)
-    - `XyzLogger` (logging disaccoppiato)
-**3. Adapter** — un'implementazione `@Adapter @Service` dell'InBoundPort, più le implementazioni `@Adapter @Component` di tutti gli OutBoundPort nel layer infrastrutturale (Notifier, Repository, RestClient, Logger).
-**4. Observer** — un'interfaccia `XyzObserver` nel dominio e una sua implementazione `XyzObserverImpl` nel layer application, che fa da dispatcher degli eventi verso il `XyzNotifier`.
+**1. InBoundPort** — one `@InBoundPort` interface for each main use-case of the service (e.g. `QuestService`, `AvatarService`), which exposes operations on the domain.
+**2. OutBoundPort** — one `@OutBoundPort` interface for each external dependency:
+- `XyzRepository` (persistence)
+- `XyzNotifier` (messaging towards other services)
+- `XyzRestClient` (HTTP calls towards other microservices)
+- `XyzLogger` (decoupled logging)
+**3. Adapter** — one `@Adapter @Service` implementation of the InBoundPort, plus the `@Adapter @Component` implementations of all OutBoundPorts in the infrastructural layer (Notifier, Repository, RestClient, Logger).
+**4. Observer** — an `XyzObserver` interface in the domain and its `XyzObserverImpl` implementation in the application layer, which acts as a dispatcher of events towards the `XyzNotifier`.
 
 
-## Integrazione con il DDD
-Tutta la struttura si appoggia sulle **marker interface del DDD** definite in `common.ddd`. 
-Queste interfacce non aggiungono comportamento, ma rendono espliciti i ruoli dei tipi nel modello:
+## Integration with DDD
+The entire structure relies on the **DDD marker interfaces** defined in `common.ddd`.
+These interfaces add no behavior, but make the roles of types in the model explicit:
 
 ```java
 public interface Aggregate<T> extends Entity<T> { T getId(); }
@@ -49,10 +49,10 @@ public interface Factory {}
 public interface ValueObject {}
 ```
 
-In generale è presente almeno un Aggregate per ogni microservizio, che permette di accedere a tutti i valori di dominio e contiene il cuore della logica di business.
-In più sono presenti numerosi Value Objects, Entities e Domain Events.
-Gli eventi di dominio sono tutti **Java records immutabili** che implementano una stessa interfaccia, ad esempio `HabitEvent extends DomainEvent`.
-Ogni evento trasporta lo stato rilevante al momento della sua creazione.
+In general, there is at least one Aggregate per microservice, which allows access to all domain values and contains the core of the business logic.
+Additionally, numerous Value Objects, Entities and Domain Events are present.
+Domain events are all **immutable Java records** that implement the same interface, for example `HabitEvent extends DomainEvent`.
+Each event carries the relevant state at the moment of its creation.
 
 ```java
 public interface HabitEvent extends DomainEvent {}
@@ -63,4 +63,3 @@ public record HabitAttended(Habit habit, Id<Avatar> avatarId)  implements HabitE
 public record HabitDeleted(Id<Habit> habitId, Id<Avatar> avatarId) implements HabitEvent {}
 public record HabitNotAttended(Habit habit, Id<Avatar> avatarId) implements HabitEvent {}
 ```
-
