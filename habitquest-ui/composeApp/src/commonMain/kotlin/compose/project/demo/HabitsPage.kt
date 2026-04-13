@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -45,6 +48,13 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
   var editTitle by remember { mutableStateOf("") }
   var editDescription by remember { mutableStateOf("") }
   var actionMessage by remember { mutableStateOf<String?>(null) }
+  var editRecurrenceType by remember { mutableStateOf(CreateHabitRecurrenceType.DAILY) }
+  var editDayOfWeek by remember { mutableStateOf("MONDAY") }
+  var editDayOfMonth by remember { mutableStateOf("1") }
+
+  fun recurrenceTypeFrom(habit: HabitListItem): CreateHabitRecurrenceType =
+    runCatching { CreateHabitRecurrenceType.valueOf(habit.recurrenceType.trim().uppercase()) }
+      .getOrElse { CreateHabitRecurrenceType.DAILY }
 
   suspend fun loadHabits(showLoading: Boolean) {
     val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
@@ -124,6 +134,9 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
                   pendingEditHabit = habit
                   editTitle = habit.title
                   editDescription = habit.description
+                  editRecurrenceType = recurrenceTypeFrom(habit)
+                  editDayOfWeek = habit.recurrenceDayOfWeek ?: "MONDAY"
+                  editDayOfMonth = (habit.recurrenceDayOfMonth ?: 1).toString()
                 },
                 onDelete = { pendingDeleteHabit = habit },
               )
@@ -189,12 +202,79 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
               label = { Text("Description") },
               modifier = Modifier.fillMaxWidth(),
             )
+            Row(modifier = Modifier.fillMaxWidth()) {
+              OutlinedButton(
+                onClick = { editRecurrenceType = CreateHabitRecurrenceType.DAILY },
+                modifier = Modifier.weight(1f),
+              ) {
+                Text("Daily")
+              }
+              Spacer(Modifier.width(8.dp))
+              OutlinedButton(
+                onClick = { editRecurrenceType = CreateHabitRecurrenceType.WEEKLY },
+                modifier = Modifier.weight(1f),
+              ) {
+                Text("Weekly")
+              }
+              Spacer(Modifier.width(8.dp))
+              OutlinedButton(
+                onClick = { editRecurrenceType = CreateHabitRecurrenceType.MONTHLY },
+                modifier = Modifier.weight(1f),
+              ) {
+                Text("Monthly")
+              }
+            }
+            Text("Recurrence: ${editRecurrenceType.name}")
+            if (editRecurrenceType == CreateHabitRecurrenceType.WEEKLY) {
+              OutlinedTextField(
+                value = editDayOfWeek,
+                onValueChange = { editDayOfWeek = it.uppercase() },
+                label = { Text("Day Of Week (e.g. MONDAY)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+              )
+            }
+            if (editRecurrenceType == CreateHabitRecurrenceType.MONTHLY) {
+              OutlinedTextField(
+                value = editDayOfMonth,
+                onValueChange = { editDayOfMonth = it },
+                label = { Text("Day Of Month (1-31)") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+              )
+            }
           }
         },
         confirmButton = {
           TextButton(
             enabled = updatingHabitId == null && editTitle.isNotBlank(),
             onClick = {
+              val normalizedDayOfWeek =
+                if (editRecurrenceType == CreateHabitRecurrenceType.WEEKLY)
+                  editDayOfWeek.trim().uppercase()
+                else null
+              val normalizedDayOfMonth =
+                if (editRecurrenceType == CreateHabitRecurrenceType.MONTHLY)
+                  editDayOfMonth.toIntOrNull()
+                else null
+
+              if (
+                editRecurrenceType == CreateHabitRecurrenceType.WEEKLY &&
+                  normalizedDayOfWeek !in allowedDaysOfWeek
+              ) {
+                actionMessage = "Invalid Day Of Week"
+                return@TextButton
+              }
+
+              if (
+                editRecurrenceType == CreateHabitRecurrenceType.MONTHLY &&
+                  (normalizedDayOfMonth == null || normalizedDayOfMonth !in 1..31)
+              ) {
+                actionMessage = "Day Of Month must be between 1 and 31"
+                return@TextButton
+              }
+
               scope.launch {
                 updatingHabitId = habit.id
                 actionMessage = null
@@ -205,6 +285,9 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
                       habitId = habit.id,
                       title = editTitle.trim(),
                       description = editDescription.trim(),
+                      recurrenceType = editRecurrenceType,
+                      dayOfWeek = normalizedDayOfWeek,
+                      dayOfMonth = normalizedDayOfMonth,
                     )
                 ) {
                   UpdateHabitResult.Success -> {
@@ -342,3 +425,6 @@ private sealed interface HabitsUiState {
 
   data class Error(val message: String) : HabitsUiState
 }
+
+private val allowedDaysOfWeek =
+  setOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
