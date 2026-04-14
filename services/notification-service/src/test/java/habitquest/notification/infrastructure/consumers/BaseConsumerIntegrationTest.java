@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
-import habitquest.notification.infrastructure.repository.GuildMemberRepository;
-import habitquest.notification.infrastructure.repository.UserEmailRepository;
+import habitquest.notification.application.port.out.GuildMemberRepository;
+import habitquest.notification.application.port.out.UserEmailRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;

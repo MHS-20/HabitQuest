@@ -3,12 +3,11 @@ package habitquest.tracking.infrastructure.dto;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import habitquest.tracking.application.HabitNotFoundException;
+import habitquest.tracking.application.exceptions.HabitNotFoundException;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
-import habitquest.tracking.infrastructure.HabitController;
-import habitquest.tracking.infrastructure.dto.HabitRequestsDto.*;
 import habitquest.tracking.infrastructure.dto.HabitResponsesDto.*;
+import habitquest.tracking.infrastructure.inbound.HabitController;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.hateoas.EntityModel;

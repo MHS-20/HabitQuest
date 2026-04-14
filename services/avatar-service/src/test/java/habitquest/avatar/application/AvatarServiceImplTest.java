@@ -6,6 +6,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
+import habitquest.avatar.application.exceptions.AvatarNotFoundException;
+import habitquest.avatar.application.port.out.AvatarRepository;
+import habitquest.avatar.application.port.out.MarketplaceClientPort;
+import habitquest.avatar.application.service.AvatarSearchRequest;
+import habitquest.avatar.application.service.AvatarServiceImpl;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;

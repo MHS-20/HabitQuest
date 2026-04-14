@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class EquippedItems implements Entity<Id<EquippedItems>> {
   private final Id<EquippedItems> id;
-  private List<Equipment> items;
+  private final List<Equipment> items;
 
   public EquippedItems(Id<EquippedItems> id) {
     this.id = id;

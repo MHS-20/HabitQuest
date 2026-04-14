@@ -1,7 +1,7 @@
 package habitquest.guild;
 
-import habitquest.guild.application.BattleRepository;
-import habitquest.guild.application.GuildRepository;
+import habitquest.guild.application.port.out.BattleRepository;
+import habitquest.guild.application.port.out.GuildRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;

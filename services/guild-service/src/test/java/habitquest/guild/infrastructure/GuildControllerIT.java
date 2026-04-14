@@ -8,12 +8,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.guild.application.GuildLogger;
-import habitquest.guild.application.GuildNotFoundException;
-import habitquest.guild.application.GuildService;
+import habitquest.guild.application.exceptions.GuildNotFoundException;
+import habitquest.guild.application.port.in.GuildService;
+import habitquest.guild.application.port.out.GuildLogger;
 import habitquest.guild.domain.guild.*;
 import habitquest.guild.infrastructure.dto.GuildResponseAssembler;
 import habitquest.guild.infrastructure.dto.GuildResponsesDto.*;
+import habitquest.guild.infrastructure.inbound.GuildController;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

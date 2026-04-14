@@ -60,7 +60,7 @@ resilience4j:
         retry-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
-          - habitquest.quest.infrastructure.TrackingHabitCommunicationException
+          - habitquest.quest.infrastructure.exceptions.TrackingHabitCommunicationException
 
   circuit-breaker:
     default-config: default
@@ -77,7 +77,7 @@ resilience4j:
         record-exceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
-          - habitquest.quest.infrastructure.TrackingHabitCommunicationException
+          - habitquest.quest.infrastructure.exceptions.TrackingHabitCommunicationException
 
 ############ OBSERVABILITY #############
 logging:

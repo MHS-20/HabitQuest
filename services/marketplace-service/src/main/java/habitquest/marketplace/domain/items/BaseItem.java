@@ -1,6 +1,6 @@
 package habitquest.marketplace.domain.items;
 
-import habitquest.marketplace.domain.Money;
+import habitquest.marketplace.domain.marketplace.Money;
 import java.util.Objects;
 
 public record BaseItem(

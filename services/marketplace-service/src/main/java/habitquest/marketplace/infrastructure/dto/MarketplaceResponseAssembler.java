@@ -2,12 +2,11 @@ package habitquest.marketplace.infrastructure.dto;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.Item;
 import habitquest.marketplace.domain.items.ItemFilter;
-import habitquest.marketplace.infrastructure.MarketplaceController;
-import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
+import habitquest.marketplace.domain.marketplace.Marketplace;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
+import habitquest.marketplace.infrastructure.inbound.MarketplaceController;
 import java.util.List;
 import org.springframework.hateoas.*;
 import org.springframework.stereotype.Component;
