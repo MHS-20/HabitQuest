@@ -1,9 +1,10 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.avatar;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.AvatarAwareEventConsumer;
+import habitquest.notification.infrastructure.consumers.avatar.AvatarMessages.*;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -76,14 +77,4 @@ public class AvatarEventConsumer extends AvatarAwareEventConsumer {
           "You learned a new spell: " + message.spellName() + "! " + message.description());
     };
   }
-
-  public record LevelUppedMessage(String avatarId, Integer newLevel, Instant occurredOn) {}
-
-  public record DeadMessage(String avatarId, Instant occurredOn) {}
-
-  public record SkillPointAssignedMessage(
-      String avatarId, String statType, Integer newValue, Instant occurredOn) {}
-
-  public record NewSpellLearnedMessage(
-      String avatarId, String spellName, String description, Instant occurredOn) {}
 }

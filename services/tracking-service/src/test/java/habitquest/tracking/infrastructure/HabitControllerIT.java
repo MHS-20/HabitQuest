@@ -17,9 +17,10 @@ import habitquest.tracking.domain.events.HabitHistoryEvent;
 import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
-import habitquest.tracking.infrastructure.dto.HabitHistoryEventResponse;
 import habitquest.tracking.infrastructure.dto.HabitMapper;
+import habitquest.tracking.infrastructure.dto.HabitRequestsDto.*;
 import habitquest.tracking.infrastructure.dto.HabitResponseAssembler;
+import habitquest.tracking.infrastructure.dto.HabitResponsesDto.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +57,7 @@ public class HabitControllerIT {
       when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
-          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+          .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -83,7 +84,7 @@ public class HabitControllerIT {
       when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
-          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+          .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -112,7 +113,7 @@ public class HabitControllerIT {
       when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
-          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+          .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -142,7 +143,7 @@ public class HabitControllerIT {
       when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
-          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+          .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -372,7 +373,7 @@ public class HabitControllerIT {
     void shouldReturnTitle() throws Exception {
       when(habitService.getTitle(HABIT_ID)).thenReturn(TITLE);
       when(habitResponseAssembler.toTitleModel(eq(HABIT_ID.value()), eq(TITLE)))
-          .thenReturn(EntityModel.of(new HabitController.TitleResponse(TITLE)));
+          .thenReturn(EntityModel.of(new TitleResponse(TITLE)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/title", HABIT_ID.value()))
@@ -390,7 +391,7 @@ public class HabitControllerIT {
     void shouldReturnDescription() throws Exception {
       when(habitService.getDescription(HABIT_ID)).thenReturn(DESCRIPTION);
       when(habitResponseAssembler.toDescriptionModel(eq(HABIT_ID.value()), eq(DESCRIPTION)))
-          .thenReturn(EntityModel.of(new HabitController.DescriptionResponse(DESCRIPTION)));
+          .thenReturn(EntityModel.of(new DescriptionResponse(DESCRIPTION)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/description", HABIT_ID.value()))
@@ -409,8 +410,7 @@ public class HabitControllerIT {
       List<Tag> tags = List.of(new Tag(TAG_HEALTH), new Tag("fitness"));
       when(habitService.getTags(HABIT_ID)).thenReturn(tags);
       when(habitResponseAssembler.toTagsModel(eq(HABIT_ID.value()), eq(tags)))
-          .thenReturn(
-              EntityModel.of(new HabitController.TagsResponse(List.of(TAG_HEALTH, "fitness"))));
+          .thenReturn(EntityModel.of(new TagsResponse(List.of(TAG_HEALTH, "fitness"))));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/tags", HABIT_ID.value()))
@@ -429,11 +429,9 @@ public class HabitControllerIT {
     void shouldReturnRecurrence() throws Exception {
       when(habitService.getRecurrence(HABIT_ID)).thenReturn(WEEKLY_RECURRENCE);
       when(habitResponseAssembler.toRecurrenceModel(
-              eq(HABIT_ID.value()), any(HabitController.RecurrenceResponse.class)))
+              eq(HABIT_ID.value()), any(RecurrenceResponse.class)))
           .thenReturn(
-              EntityModel.of(
-                  new HabitController.RecurrenceResponse(
-                      "WEEKLY", null, DEFAULT_DAY_OF_WEEK.name())));
+              EntityModel.of(new RecurrenceResponse("WEEKLY", null, DEFAULT_DAY_OF_WEEK.name())));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/recurrence", HABIT_ID.value()))
@@ -452,7 +450,7 @@ public class HabitControllerIT {
     void shouldReturnLastAttendedDate() throws Exception {
       when(habitService.getLastAttendedDate(HABIT_ID)).thenReturn(ATTENDED_AT);
       when(habitResponseAssembler.toLastAttendedDateModel(eq(HABIT_ID.value()), eq(ATTENDED_AT)))
-          .thenReturn(EntityModel.of(new HabitController.LastAttendedDateResponse(ATTENDED_AT)));
+          .thenReturn(EntityModel.of(new LastAttendedDateResponse(ATTENDED_AT)));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/last-attended-date", HABIT_ID.value()))
@@ -478,7 +476,7 @@ public class HabitControllerIT {
 
       HabitHistoryEventResponse eventResponse = HabitMapper.toResponse(event);
       when(habitResponseAssembler.toHistoryModel(eq(HABIT_ID.value()), anyList()))
-          .thenReturn(EntityModel.of(new HabitController.HistoryResponse(List.of(eventResponse))));
+          .thenReturn(EntityModel.of(new HistoryResponse(List.of(eventResponse))));
 
       mockMvc
           .perform(get("/api/v1/habits/{id}/history", HABIT_ID.value()))

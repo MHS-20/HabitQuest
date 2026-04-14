@@ -13,9 +13,9 @@ import habitquest.guild.domain.battle.boss.BossType;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import habitquest.guild.domain.guild.UnauthorizedGuildOperationException;
-import habitquest.guild.infrastructure.dto.BattleResponse;
+import habitquest.guild.infrastructure.dto.BattleRequestsDto.*;
 import habitquest.guild.infrastructure.dto.BattleResponseAssembler;
-import habitquest.guild.infrastructure.dto.BossResponse;
+import habitquest.guild.infrastructure.dto.BattleResponsesDto.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -239,24 +239,4 @@ public class BattleController {
     log.warn(error, "Unauthorized guild operation");
     return ResponseEntity.status(403).body(error);
   }
-
-  public record CreateBattleRequest(String guildId, String bossType, String requesterId) {}
-
-  public record DeleteBattleRequest(String guildId, String requesterId) {}
-
-  public record DamageRequest(Integer damage, String attackerAvatarId) {}
-
-  public record BattleCreatedResponse(String id) {}
-
-  public record BossHealthResponse(int remainingHealth) {}
-
-  public record TurnResponse(Integer turn) {}
-
-  public record InProgressResponse(boolean inProgress) {}
-
-  public record BattleStatusResponse(BattleOutcome status, boolean isOver, boolean isWon) {}
-
-  public record ErrorResponse(String message) {}
-
-  private record BattleOutcomeLog(String battleId, String outcome, int primary, int secondary) {}
 }

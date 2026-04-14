@@ -6,6 +6,8 @@ import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.Item;
 import habitquest.marketplace.domain.items.ItemFilter;
 import habitquest.marketplace.infrastructure.MarketplaceController;
+import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
 import java.util.List;
 import org.springframework.hateoas.*;
 import org.springframework.stereotype.Component;

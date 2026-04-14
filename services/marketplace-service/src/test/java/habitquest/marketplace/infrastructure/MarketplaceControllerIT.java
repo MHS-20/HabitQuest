@@ -14,9 +14,9 @@ import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
 import habitquest.marketplace.infrastructure.dto.ItemMapper;
-import habitquest.marketplace.infrastructure.dto.ItemResponse;
-import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponseAssembler;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -128,8 +128,7 @@ public class MarketplaceControllerIT {
       when(assembler.toModel(marketplace)).thenReturn(stubMarketplaceModel());
 
       String requestBody =
-          objectMapper.writeValueAsString(
-              new MarketplaceController.CreateMarketplaceRequest(AVATAR_ID.value()));
+          objectMapper.writeValueAsString(new CreateMarketplaceRequest(AVATAR_ID.value()));
 
       mockMvc
           .perform(
@@ -146,8 +145,7 @@ public class MarketplaceControllerIT {
           .thenThrow(new AvatarNotFoundException(AVATAR_ID.value()));
 
       String requestBody =
-          objectMapper.writeValueAsString(
-              new MarketplaceController.CreateMarketplaceRequest(AVATAR_ID.value()));
+          objectMapper.writeValueAsString(new CreateMarketplaceRequest(AVATAR_ID.value()));
 
       mockMvc
           .perform(
@@ -162,8 +160,7 @@ public class MarketplaceControllerIT {
           .thenThrow(new AvatarCommunicationException("timeout", new RestClientException("err")));
 
       String requestBody =
-          objectMapper.writeValueAsString(
-              new MarketplaceController.CreateMarketplaceRequest(AVATAR_ID.value()));
+          objectMapper.writeValueAsString(new CreateMarketplaceRequest(AVATAR_ID.value()));
 
       mockMvc
           .perform(

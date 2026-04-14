@@ -1,9 +1,10 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.tracking;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.AvatarAwareEventConsumer;
+import habitquest.notification.infrastructure.consumers.tracking.HabitMessages.*;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -59,10 +60,4 @@ public class HabitEventConsumer extends AvatarAwareEventConsumer {
           "You missed the habit \"" + message.habitId() + "\" today. Don't give up!");
     };
   }
-
-  public record HabitDeletedMessage(String habitId, String avatarId, Instant occurredOn) {}
-
-  public record HabitAttendedMessage(String habitId, String avatarId, Instant occurredOn) {}
-
-  public record HabitNotAttendedMessage(String habitId, String avatarId, Instant occurredOn) {}
 }

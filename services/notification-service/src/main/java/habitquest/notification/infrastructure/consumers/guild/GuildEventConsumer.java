@@ -1,10 +1,11 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.guild;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.GuildAwareEventConsumer;
+import habitquest.notification.infrastructure.consumers.guild.GuildMessages.*;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.GuildMemberRepository;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -125,21 +126,4 @@ public class GuildEventConsumer extends GuildAwareEventConsumer {
           "You've received an invitation to join the guild " + message.guildId() + ".");
     };
   }
-
-  public record GuildCreatedMessage(
-      String guildId, String leaderId, String name, Instant occurredOn) {}
-
-  public record GuildDeletedMessage(String guildId, Instant occurredOn) {}
-
-  public record GuildJoinedMessage(String guildId, String memberId, Instant occurredOn) {}
-
-  public record GuildLeftMessage(String guildId, String memberId, Instant occurredOn) {}
-
-  public record RemovedFromGuildMessage(String guildId, String memberId, Instant occurredOn) {}
-
-  public record RoleAssignedMessage(
-      String guildId, String memberId, String roleName, Instant occurredOn) {}
-
-  public record InviteSentMessage(
-      String guildId, String targetAvatarId, String inviteId, Instant occurredOn) {}
 }

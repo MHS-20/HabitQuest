@@ -1,9 +1,10 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.users;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.AvatarAwareEventConsumer;
+import habitquest.notification.infrastructure.consumers.users.UserMessages.*;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,4 @@ public class UserEventConsumer extends AvatarAwareEventConsumer {
           "Your account has been created successfully. Enjoy your adventure!");
     };
   }
-
-  public record UserRegisteredMessage(String avatarId, String email, Instant occurredOn) {}
 }

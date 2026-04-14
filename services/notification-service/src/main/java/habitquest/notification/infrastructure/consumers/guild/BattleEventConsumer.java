@@ -1,6 +1,7 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.guild;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.GuildAwareEventConsumer;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.GuildMemberRepository;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
