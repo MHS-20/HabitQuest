@@ -50,9 +50,23 @@ jobs:
           sarif_file: report.sarif
 
   build:
-    name: Build and Test (Kotlin Multiplatform)
-    runs-on: ubuntu-22.04
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.runs-on }}
     needs: [ commit-lint, static-scan ]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: web
+            runs-on: ubuntu-22.04
+            artifact-name: build-artifacts-web
+          - platform: android
+            runs-on: ubuntu-22.04
+            artifact-name: build-artifacts-android
+          - platform: ios
+            runs-on: macos-latest
+            artifact-name: build-artifacts-ios
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -65,9 +79,20 @@ jobs:
           cache: gradle
 
       - name: Set up Node (for Kotlin/JS)
+        if: matrix.platform == 'web'
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      - name: Set up Android SDK
+        if: matrix.platform == 'android'
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        if: matrix.platform == 'android'
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Cache Gradle and Gradle Wrapper
         uses: actions/cache@v4
@@ -75,11 +100,12 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-build-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/build.gradle*') }}
+          key: gradle-${{ runner.os }}-${{ matrix.platform }}-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/build.gradle*') }}
           restore-keys: |
-            gradle-${{ runner.os }}-build-
+            gradle-${{ runner.os }}-${{ matrix.platform }}-
 
       - name: Cache node modules
+        if: matrix.platform == 'web'
         uses: actions/cache@v4
         with:
           path: ~/.npm
@@ -90,40 +116,44 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x gradlew
 
-      - name: Run Gradle build (KMP targets)
-        # Exclude Android release assemble to avoid requiring Android SDK on Linux runners
+      - name: Build web bundle
+        if: matrix.platform == 'web'
         run: |
-          ./gradlew --no-daemon clean :habitquest-ui:build -x :habitquest-ui:composeApp:assembleRelease
+          ./gradlew --no-daemon :kotlinUpgradeYarnLock
+          ./gradlew --no-daemon :habitquest-ui:composeApp:jsBrowserProductionWebpack
 
-      - name: Build Kotlin/JS production bundle
+      - name: Build Android app
+        if: matrix.platform == 'android'
         run: |
-          ./gradlew --no-daemon :habitquest-ui:composeApp:jsBrowserProductionWebpack || true
+          ./gradlew --no-daemon :habitquest-ui:composeApp:assembleDebug
 
-      - name: Upload build artifacts
+      - name: Build iOS app
+        if: matrix.platform == 'ios'
+        run: |
+          ./gradlew --no-daemon :habitquest-ui:composeApp:linkDebugFrameworkIosSimulatorArm64
+
+      - name: Upload web build artifacts
+        if: matrix.platform == 'web'
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
+          name: ${{ matrix.artifact-name }}
           path: |
             habitquest-ui/build/**
             habitquest-ui/composeApp/build/**
 
-  lint-reports:
-    name: Upload Lint & Reports (if any)
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: build_outputs/
-
-      - name: Upload lint reports
+      - name: Upload Android build artifacts
+        if: matrix.platform == 'android'
         uses: actions/upload-artifact@v4
         with:
-          name: lint-reports
+          name: ${{ matrix.artifact-name }}
           path: |
-            habitquest-ui/build/reports/**
+            habitquest-ui/composeApp/build/outputs/**
             habitquest-ui/composeApp/build/reports/**
+
+      - name: Upload iOS build artifacts
+        if: matrix.platform == 'ios'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            habitquest-ui/composeApp/build/bin/iosSimulatorArm64/**
