@@ -2,6 +2,7 @@ package habitquest.avatar.domain.avatar;
 
 import common.ddd.Aggregate;
 import common.ddd.Id;
+import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Item;
@@ -214,7 +215,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     this.inventory.removeItem(item);
   }
 
-  public void equipItem(Item item) {
+  public void equipItem(Equipment item) {
     if (!this.inventory.getItems().contains(item)) {
       throw new IllegalStateException("Cannot equip an item not in inventory");
     }
@@ -222,7 +223,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     this.inventory.removeItem(item);
   }
 
-  public void unequipItem(Item item) {
+  public void unequipItem(Equipment item) {
     this.equippedItems.unequip(item);
     this.inventory.addItem(item);
   }

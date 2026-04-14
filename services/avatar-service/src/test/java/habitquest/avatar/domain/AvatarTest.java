@@ -4,7 +4,7 @@ import static habitquest.avatar.AvatarFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 
 import habitquest.avatar.domain.avatar.Avatar;
-import habitquest.avatar.domain.items.Item;
+import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.domain.spells.Spell;
 import org.junit.jupiter.api.BeforeEach;
@@ -266,7 +266,7 @@ class AvatarTest {
   @DisplayName("inventory")
   class InventoryOperations {
 
-    private final Item sword = new Weapon("Sword", "A sharp blade", 15);
+    private final Equipment sword = new Weapon("Sword", "A sharp blade", 15);
 
     @Test
     @DisplayName("addItemToInventory stores the item")

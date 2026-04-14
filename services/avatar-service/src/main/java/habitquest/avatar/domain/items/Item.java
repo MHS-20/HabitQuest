@@ -2,7 +2,7 @@ package habitquest.avatar.domain.items;
 
 import common.ddd.ValueObject;
 
-public sealed interface Item extends ValueObject permits Weapon, Armor, Potion {
+public sealed interface Item extends ValueObject permits Equipment, Potion {
 
   BaseItem baseItem();
 
