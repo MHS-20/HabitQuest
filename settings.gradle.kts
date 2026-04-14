@@ -1,12 +1,6 @@
 pluginManagement {
     includeBuild("build-logic")
 
-    val spotlessVersion = file("gradle/libs.versions.toml")
-        .readLines()
-        .first { it.startsWith("spotless") }
-        .substringAfter("\"")
-        .substringBefore("\"")
-
     repositories {
         google {
             mavenContent {
@@ -19,9 +13,6 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    plugins {
-        id("com.diffplug.spotless") version spotlessVersion
-    }
 }
 
 rootProject.name = "habitquest"
@@ -29,6 +20,7 @@ rootProject.name = "habitquest"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(
+    "common",
     "services:tracking-service",
     "services:notification-service",
     "services:avatar-service",
@@ -41,13 +33,6 @@ include(
 
 dependencyResolutionManagement {
     repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
         mavenCentral()
     }
 

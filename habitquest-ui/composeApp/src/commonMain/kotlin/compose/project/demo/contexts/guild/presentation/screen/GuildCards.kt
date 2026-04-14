@@ -18,57 +18,63 @@ import androidx.compose.ui.unit.dp
 import compose.project.demo.contexts.guild.infrastructure.repository.GuildData
 
 @Composable
-fun GuildCard(guild: GuildData, isLeader: Boolean = false) {
-  Card(
-    modifier = Modifier.fillMaxWidth(),
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-  ) {
-    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Text(guild.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-      Text("ID: ${guild.id}", style = MaterialTheme.typography.bodySmall)
-      Text(
-        "Global rank: ${guild.globalRank?.toString() ?: "-"}",
-        style = MaterialTheme.typography.bodySmall,
-      )
-      Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
+fun GuildCard(
+    guild: GuildData,
+    isLeader: Boolean = false,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(guild.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("ID: ${guild.id}", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Global rank: ${guild.globalRank?.toString() ?: "-"}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
 
-      if (guild.members.isNotEmpty()) {
-        Spacer(Modifier.height(4.dp))
-        guild.members.forEach { member ->
-          Text(
-            "- ${member.nickname} (${member.role}) [${member.avatarId}]",
-            style = MaterialTheme.typography.bodySmall,
-          )
+            if (guild.members.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                guild.members.forEach { member ->
+                    Text(
+                        "- ${member.nickname} (${member.role}) [${member.avatarId}]",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+
+            if (isLeader) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Leader",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
-      }
-
-      if (isLeader) {
-        Spacer(Modifier.height(4.dp))
-        Text(
-          "Leader",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.primary,
-        )
-      }
     }
-  }
 }
 
 @Composable
-fun GuildLeaderboardRow(guild: GuildData, onInviteClick: () -> Unit) {
-  Card(
-    modifier = Modifier.fillMaxWidth(),
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-  ) {
-    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Text(guild.name, style = MaterialTheme.typography.titleMedium)
-      Text("ID: ${guild.id}", style = MaterialTheme.typography.bodySmall)
-      Text(
-        "Rank: ${guild.globalRank?.toString() ?: "-"}",
-        style = MaterialTheme.typography.bodySmall,
-      )
-      Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
-      Button(onClick = onInviteClick, modifier = Modifier.fillMaxWidth()) { Text("Invite avatar") }
+fun GuildLeaderboardRow(
+    guild: GuildData,
+    onInviteClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(guild.name, style = MaterialTheme.typography.titleMedium)
+            Text("ID: ${guild.id}", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Rank: ${guild.globalRank?.toString() ?: "-"}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text("Members: ${guild.members.size}", style = MaterialTheme.typography.bodySmall)
+            Button(onClick = onInviteClick, modifier = Modifier.fillMaxWidth()) { Text("Invite avatar") }
+        }
     }
-  }
 }

@@ -28,71 +28,91 @@ import compose.project.demo.contexts.habits.domain.model.HabitHistoryResult
 import compose.project.demo.contexts.habits.infrastructure.repository.HabitsApiRepository
 
 @Composable
-fun HabitHistoryScreen(token: String, avatarState: AvatarUiState) {
-  val habitRepository = remember { HabitsApiRepository() }
-  var uiState by remember { mutableStateOf<HabitHistoryUiState>(HabitHistoryUiState.Loading) }
+fun HabitHistoryScreen(
+    token: String,
+    avatarState: AvatarUiState,
+) {
+    val habitRepository = remember { HabitsApiRepository() }
+    var uiState by remember { mutableStateOf<HabitHistoryUiState>(HabitHistoryUiState.Loading) }
 
-  LaunchedEffect(token, avatarState) {
-    val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
-    uiState =
-      when {
-        token.isBlank() -> HabitHistoryUiState.Error("Invalid session")
-        avatar == null -> HabitHistoryUiState.Error("Avatar not available")
-        else ->
-          when (val result = habitRepository.fetchHistoryByAvatar(token, avatar.id)) {
-            is HabitHistoryResult.Success -> HabitHistoryUiState.Ready(result.items)
-            is HabitHistoryResult.Error -> HabitHistoryUiState.Error(result.message)
-          }
-      }
-  }
+    LaunchedEffect(token, avatarState) {
+        val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
+        uiState =
+            when {
+                token.isBlank() -> {
+                    HabitHistoryUiState.Error("Invalid session")
+                }
 
-  Column(
-    modifier =
-      Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    Text("Habit history", style = MaterialTheme.typography.headlineSmall)
+                avatar == null -> {
+                    HabitHistoryUiState.Error("Avatar not available")
+                }
 
-    when (val state = uiState) {
-      HabitHistoryUiState.Loading -> Text("Loading history...")
-      is HabitHistoryUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
-      is HabitHistoryUiState.Ready -> {
-        if (state.items.isEmpty()) {
-          Text("No history events")
-        } else {
-          LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(state.items, key = { "${it.occurredAt}-${it.eventType}-${it.habitId}" }) { item ->
-              HabitHistoryRow(item)
+                else -> {
+                    when (val result = habitRepository.fetchHistoryByAvatar(token, avatar.id)) {
+                        is HabitHistoryResult.Success -> HabitHistoryUiState.Ready(result.items)
+                        is HabitHistoryResult.Error -> HabitHistoryUiState.Error(result.message)
+                    }
+                }
             }
-          }
-        }
-      }
     }
-  }
+
+    Column(
+        modifier =
+            Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text("Habit history", style = MaterialTheme.typography.headlineSmall)
+
+        when (val state = uiState) {
+            HabitHistoryUiState.Loading -> {
+                Text("Loading history...")
+            }
+
+            is HabitHistoryUiState.Error -> {
+                Text(state.message, color = MaterialTheme.colorScheme.error)
+            }
+
+            is HabitHistoryUiState.Ready -> {
+                if (state.items.isEmpty()) {
+                    Text("No history events")
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(state.items, key = { "${it.occurredAt}-${it.eventType}-${it.habitId}" }) { item ->
+                            HabitHistoryRow(item)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun HabitHistoryRow(item: HabitHistoryItem) {
-  Card(
-    modifier = Modifier.fillMaxWidth(),
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-  ) {
-    Column(modifier = Modifier.padding(12.dp)) {
-      Text(item.eventType, style = MaterialTheme.typography.titleMedium)
-      Spacer(Modifier.height(4.dp))
-      Text("Date: ${item.occurredAt}", style = MaterialTheme.typography.bodySmall)
-      Text("Habit ID: ${item.habitId}", style = MaterialTheme.typography.bodySmall)
-      if (item.details.isNotBlank()) {
-        Text("Details: ${item.details}", style = MaterialTheme.typography.bodySmall)
-      }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(item.eventType, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text("Date: ${item.occurredAt}", style = MaterialTheme.typography.bodySmall)
+            Text("Habit ID: ${item.habitId}", style = MaterialTheme.typography.bodySmall)
+            if (item.details.isNotBlank()) {
+                Text("Details: ${item.details}", style = MaterialTheme.typography.bodySmall)
+            }
+        }
     }
-  }
 }
 
 private sealed interface HabitHistoryUiState {
-  data object Loading : HabitHistoryUiState
+    data object Loading : HabitHistoryUiState
 
-  data class Ready(val items: List<HabitHistoryItem>) : HabitHistoryUiState
+    data class Ready(
+        val items: List<HabitHistoryItem>,
+    ) : HabitHistoryUiState
 
-  data class Error(val message: String) : HabitHistoryUiState
+    data class Error(
+        val message: String,
+    ) : HabitHistoryUiState
 }
