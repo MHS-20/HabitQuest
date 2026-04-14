@@ -1,6 +1,8 @@
 package habitquest.marketplace.infrastructure.dto;
 
 import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
 
 public final class ItemMapper {
 

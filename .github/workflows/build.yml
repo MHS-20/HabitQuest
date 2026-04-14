@@ -213,3 +213,20 @@ jobs:
             echo "One or more package jobs failed"
             exit 1
           fi
+
+  final-status:
+    name: Final Pipeline Status
+    runs-on: ubuntu-22.04
+    needs:
+      - commit-lint
+      - k8s-validate
+      - build-aggregate
+      - package-aggregate
+    if: always() && (
+      needs.commit-lint.result == 'failure' ||
+      needs.k8s-validate.result == 'failure' ||
+      needs.build-aggregate.result == 'failure' ||
+      needs.package-aggregate.result == 'failure'
+      )
+    steps:
+      - run: exit 1

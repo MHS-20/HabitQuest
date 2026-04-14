@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import habitquest.notification.infrastructure.consumers.quest.QuestMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,9 +34,7 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenQuestCompleted_thenCongratulationsEmailSent() throws Exception {
-    publish(
-        "quest.completed",
-        new QuestEventConsumer.QuestCompletedMessage(QUEST_1, AVATAR_1, Instant.now()));
+    publish("quest.completed", new QuestCompletedMessage(QUEST_1, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -55,9 +54,7 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenQuestJoined_thenEmailSent() throws Exception {
-    publish(
-        "quest.joined",
-        new QuestEventConsumer.QuestJoinedMessage(QUEST_1, AVATAR_1, Instant.now()));
+    publish("quest.joined", new QuestJoinedMessage(QUEST_1, AVATAR_1, Instant.now()));
     MimeMessage[] mails = waitForEmails(1);
     assertThat(subjectOf(mails[0])).isEqualTo("You joined a quest!");
     assertThat(bodyOf(mails[0])).contains(QUEST_1);
@@ -65,8 +62,7 @@ class QuestEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenQuestLeft_thenEmailSent() throws Exception {
-    publish(
-        "quest.left", new QuestEventConsumer.QuestLeftMessage(QUEST_1, AVATAR_1, Instant.now()));
+    publish("quest.left", new QuestLeftMessage(QUEST_1, AVATAR_1, Instant.now()));
     MimeMessage[] mails = waitForEmails(1);
     assertThat(subjectOf(mails[0])).isEqualTo("You left the quest");
   }

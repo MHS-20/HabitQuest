@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import habitquest.notification.infrastructure.consumers.guild.BattleEventConsumer;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import java.util.stream.Stream;

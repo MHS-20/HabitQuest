@@ -1,9 +1,10 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.quest;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.AvatarAwareEventConsumer;
+import habitquest.notification.infrastructure.consumers.quest.QuestMessages.*;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -82,15 +83,4 @@ public class QuestEventConsumer extends AvatarAwareEventConsumer {
           "You left the quest \"" + message.questId() + "\".");
     };
   }
-
-  public record QuestCreatedMessage(
-      String questId, String avatarId, String name, Instant occurredOn) {}
-
-  public record QuestCompletedMessage(String questId, String avatarId, Instant occurredOn) {}
-
-  public record QuestNotCompletedMessage(String avatarId, Instant occurredOn) {}
-
-  public record QuestJoinedMessage(String questId, String avatarId, Instant occurredOn) {}
-
-  public record QuestLeftMessage(String questId, String avatarId, Instant occurredOn) {}
 }

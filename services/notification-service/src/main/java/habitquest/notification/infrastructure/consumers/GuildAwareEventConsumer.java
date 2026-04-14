@@ -5,7 +5,7 @@ import habitquest.notification.infrastructure.repository.GuildMemberRepository;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
 import java.util.Set;
 
-public class GuildAwareEventConsumer extends AvatarAwareEventConsumer {
+public abstract class GuildAwareEventConsumer extends AvatarAwareEventConsumer {
 
   private final GuildMemberRepository guildMemberRepository;
 

@@ -37,7 +37,6 @@ public class HabitController {
   }
 
   // ─── Habit CRUD ─────────────────────────────────────────────────────────────
-
   @PostMapping
   public ResponseEntity<EntityModel<HabitCreatedResponse>> createHabit(
       @RequestBody CreateHabitRequest request) {
@@ -76,7 +75,6 @@ public class HabitController {
     }
 
     log.info(created, "Habit created");
-
     return ResponseEntity.created(URI.create("/api/v1/habits/" + created.getId().value()))
         .body(habitResponseAssembler.toCreatedModel(created));
   }
@@ -206,7 +204,7 @@ public class HabitController {
     log.info(request, "Updating recurrence for habit " + id);
     habitService.updateRecurrence(
         idOfHabit(id),
-        HabitMapper.toRecurrence(request.type, request.dayOfWeek, request.dayOfMonth));
+        HabitMapper.toRecurrence(request.type(), request.dayOfWeek(), request.dayOfMonth()));
     return ResponseEntity.noContent().build();
   }
 
@@ -244,7 +242,6 @@ public class HabitController {
   }
 
   // ─── private helpers ────────────────────────────────────────────────────────
-
   private Id<Habit> idOfHabit(String id) {
     return new Id<>(id);
   }
@@ -252,47 +249,4 @@ public class HabitController {
   private Id<Avatar> idOfAvatar(String id) {
     return new Id<>(id);
   }
-
-  // ─── Request / Response records ─────────────────────────────────────────────
-
-  public record CreateHabitRequest(
-      String avatarId,
-      String title,
-      String description,
-      String recurrenceType,
-      DayOfWeek dayOfWeek,
-      Integer dayOfMonth,
-      List<String> tags,
-      String associatedQuestId,
-      String sourceHabitId) {}
-
-  public record UpdateTitleRequest(String title) {}
-
-  public record UpdateDescriptionRequest(String description) {}
-
-  public record UpdateTagsRequest(List<String> tags) {
-    public UpdateTagsRequest {
-      tags = tags != null ? List.copyOf(tags) : List.of();
-    }
-  }
-
-  public record UpdateRecurrenceRequest(String type, DayOfWeek dayOfWeek, Integer dayOfMonth) {}
-
-  public record AttendRequest(LocalDateTime date) {}
-
-  public record HabitCreatedResponse(String id) {}
-
-  public record TitleResponse(String title) {}
-
-  public record DescriptionResponse(String description) {}
-
-  public record TagsResponse(List<String> tags) {}
-
-  public record HistoryResponse(List<HabitHistoryEventResponse> history) {}
-
-  public record LastAttendedDateResponse(LocalDateTime date) {}
-
-  public record ErrorResponse(String message) {}
-
-  public record RecurrenceResponse(String type, Integer dayOfMonth, String dayOfWeek) {}
 }

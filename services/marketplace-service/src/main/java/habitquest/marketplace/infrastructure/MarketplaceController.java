@@ -8,9 +8,9 @@ import habitquest.marketplace.domain.Avatar;
 import habitquest.marketplace.domain.ItemNotFoundException;
 import habitquest.marketplace.domain.Marketplace;
 import habitquest.marketplace.domain.items.*;
-import habitquest.marketplace.infrastructure.dto.ItemResponse;
-import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponseAssembler;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -175,10 +175,4 @@ public class MarketplaceController {
 
     return ResponseEntity.status(502).body(new ErrorResponse(ex.getMessage()));
   }
-
-  // ─── Request / Response records ─────────────────────────────────────────────
-
-  public record ErrorResponse(String message) {}
-
-  public record CreateMarketplaceRequest(String avatarId) {}
 }
