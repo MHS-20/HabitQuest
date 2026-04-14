@@ -11,14 +11,14 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun AchievementsScreen() {
-  Box(
-    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-    contentAlignment = Alignment.Center,
-  ) {
-    Text(
-      text = "⭐ Achievements Page",
-      style = MaterialTheme.typography.headlineMedium,
-      color = MaterialTheme.colorScheme.onBackground,
-    )
-  }
+    Box(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "⭐ Achievements Page",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
 }
