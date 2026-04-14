@@ -54,7 +54,7 @@ tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
 }
 
 tasks.register("checkQuality") {
-    dependsOn("checkstyleMain", "checkstyleTest", "pmdMain", "pmdTest", "spotlessCheck")
+    dependsOn("test", "checkstyleMain", "checkstyleTest", "pmdMain", "pmdTest", "spotlessCheck")
 }
 
 tasks.withType<Test> {

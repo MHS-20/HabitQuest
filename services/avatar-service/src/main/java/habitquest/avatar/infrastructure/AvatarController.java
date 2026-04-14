@@ -268,7 +268,7 @@ public class AvatarController {
   public ResponseEntity<Void> equipItem(@PathVariable String id, @RequestBody ItemRequest request)
       throws AvatarNotFoundException {
 
-    avatarService.equipItem(idOf(id), ItemMapper.toDomain(request));
+    avatarService.equipItem(idOf(id), ItemMapper.toEquipment(request));
     log.info(request, "Item equipped for avatar id: " + id);
     return ResponseEntity.noContent().build();
   }
@@ -277,7 +277,7 @@ public class AvatarController {
   public ResponseEntity<Void> unequipItem(@PathVariable String id, @RequestBody ItemRequest request)
       throws AvatarNotFoundException {
 
-    avatarService.unequipItem(idOf(id), ItemMapper.toDomain(request));
+    avatarService.unequipItem(idOf(id), ItemMapper.toEquipment(request));
     log.info(request, "Item unequipped for avatar id: " + id);
     return ResponseEntity.noContent().build();
   }
