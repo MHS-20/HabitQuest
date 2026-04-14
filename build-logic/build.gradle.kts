@@ -13,6 +13,7 @@ private val kotlinMultiplatform  = uiCatalog.findVersion("kotlin").get().require
 private val androidGradle        = uiCatalog.findVersion("agp").get().requiredVersion
 private val composeMultiplatform = uiCatalog.findVersion("composeMultiplatform").get().requiredVersion
 private val detekt               = uiCatalog.findVersion("detekt").get().requiredVersion
+private val ktlint    = uiCatalog.findVersion("ktlintPlugin").get().requiredVersion
 
 dependencies {
     // --- Spring / Services ---
@@ -29,6 +30,7 @@ dependencies {
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:${detekt}")
 
     implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jlleitschuh.gradle:ktlint-gradle:${ktlint}")
 }
 
 repositories {

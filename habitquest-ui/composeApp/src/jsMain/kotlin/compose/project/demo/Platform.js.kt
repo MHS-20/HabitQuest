@@ -4,7 +4,7 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.js.Js
 
 class JsPlatform : Platform {
-  override val name: String = "Web with Kotlin/JS"
+    override val name: String = "Web with Kotlin/JS"
 }
 
 actual fun getPlatform(): Platform = JsPlatform()
