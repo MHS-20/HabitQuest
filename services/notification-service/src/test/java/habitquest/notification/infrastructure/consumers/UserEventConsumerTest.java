@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import habitquest.notification.infrastructure.consumers.users.UserMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,7 @@ class UserEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenUserRegistered_thenEmailIsMappedAndWelcomeMailIsSent() throws Exception {
     publish(
         "userRegistered-in-0",
-        new UserEventConsumer.UserRegisteredMessage(
-            "avatar-1", "mario@example.com", Instant.now()));
+        new UserRegisteredMessage("avatar-1", "mario@example.com", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -33,8 +33,7 @@ class UserEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenUserRegistered_thenAvatarIdIsMappedToEmail() {
     publish(
         "userRegistered-in-0",
-        new UserEventConsumer.UserRegisteredMessage(
-            "avatar-42", "luigi@example.com", Instant.now()));
+        new UserRegisteredMessage("avatar-42", "luigi@example.com", Instant.now()));
     waitForEmails(1);
     assertThat(userEmailRepository.findEmailByUserId("avatar-42"))
         .isPresent()

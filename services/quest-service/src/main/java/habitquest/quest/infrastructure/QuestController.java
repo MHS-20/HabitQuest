@@ -7,9 +7,9 @@ import habitquest.quest.application.QuestProgressView;
 import habitquest.quest.application.QuestService;
 import habitquest.quest.domain.*;
 import habitquest.quest.infrastructure.dto.HabitMapper;
-import habitquest.quest.infrastructure.dto.HabitResponse;
-import habitquest.quest.infrastructure.dto.QuestResponse;
+import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
 import habitquest.quest.infrastructure.dto.QuestResponseAssembler;
+import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -226,70 +226,4 @@ public class QuestController {
     }
     return Duration.ofDays(durationDays);
   }
-
-  // ─── Request / Response records ─────────────────────────────────────────────
-  public record CreateQuestRequest(String name, Integer durationDays) {}
-
-  public record UpdateNameRequest(String name) {}
-
-  public record UpdateDurationRequest(Integer durationDays) {}
-
-  public record UpdateRewardRequest(Integer experience, Integer money) {}
-
-  public record RemoveHabitRequest(String habitId, String title) {}
-
-  public record AddHabitRequest(
-      String habitId,
-      String title,
-      String description,
-      List<String> tags,
-      RecurrenceRequest recurrence) {
-    public AddHabitRequest {
-      tags = tags != null ? List.copyOf(tags) : List.of();
-    }
-  }
-
-  public record RecurrenceRequest(String type, Integer dayOfMonth, String dayOfWeek) {}
-
-  public record RecordAttendanceRequest(String avatarId, String habitId, String attendedOn) {}
-
-  public record JoinQuestRequest(String avatarId, String joinedOn) {}
-
-  public record QuestCreatedResponse(String id) {}
-
-  public record NameResponse(String name) {}
-
-  public record DurationResponse(Long durationDays) {}
-
-  public record HabitsResponse(List<HabitResponse> habits) {
-    public HabitsResponse {
-      habits = habits != null ? List.copyOf(habits) : List.of();
-    }
-  }
-
-  public record AvatarQuestProgressResponse(String avatarId, List<QuestProgressResponse> quests) {
-    public AvatarQuestProgressResponse {
-      quests = quests != null ? List.copyOf(quests) : List.of();
-    }
-  }
-
-  public record QuestProgressResponse(
-      String questId,
-      String questName,
-      String status,
-      Integer completionPercentage,
-      List<HabitProgressResponse> habits) {
-    public QuestProgressResponse {
-      habits = habits != null ? List.copyOf(habits) : List.of();
-    }
-  }
-
-  public record HabitProgressResponse(
-      String habitId,
-      String title,
-      Integer requiredOccurrences,
-      Integer attendedOccurrences,
-      Integer remainingOccurrences) {}
-
-  public record ErrorResponse(String message) {}
 }

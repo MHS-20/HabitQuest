@@ -16,8 +16,9 @@ import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
-import habitquest.quest.infrastructure.dto.QuestResponse;
+import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
 import habitquest.quest.infrastructure.dto.QuestResponseAssembler;
+import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +55,7 @@ public class QuestControllerIT {
     void shouldReturn201WithId() throws Exception {
       when(questService.createQuest(QUEST_NAME, Duration.ofDays(14))).thenReturn(fullQuest());
       when(questResponseAssembler.toCreatedModel(any(Quest.class)))
-          .thenReturn(EntityModel.of(new QuestController.QuestCreatedResponse(QUEST_ID.value())));
+          .thenReturn(EntityModel.of(new QuestCreatedResponse(QUEST_ID.value())));
 
       mockMvc
           .perform(
@@ -71,7 +72,7 @@ public class QuestControllerIT {
     void shouldDelegateNameAndDurationToService() throws Exception {
       when(questService.createQuest(anyString(), any(Duration.class))).thenReturn(fullQuest());
       when(questResponseAssembler.toCreatedModel(any(Quest.class)))
-          .thenReturn(EntityModel.of(new QuestController.QuestCreatedResponse(QUEST_ID.value())));
+          .thenReturn(EntityModel.of(new QuestCreatedResponse(QUEST_ID.value())));
 
       mockMvc
           .perform(
@@ -207,7 +208,7 @@ public class QuestControllerIT {
     void shouldReturnName() throws Exception {
       when(questService.getName(QUEST_ID)).thenReturn(QUEST_NAME);
       when(questResponseAssembler.toNameModel(eq(QUEST_ID.value()), eq(QUEST_NAME)))
-          .thenReturn(EntityModel.of(new QuestController.NameResponse(QUEST_NAME)));
+          .thenReturn(EntityModel.of(new NameResponse(QUEST_NAME)));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/name", QUEST_ID.value()))
@@ -225,7 +226,7 @@ public class QuestControllerIT {
     void shouldReturnDuration() throws Exception {
       when(questService.getDuration(QUEST_ID)).thenReturn(Duration.ofDays(3));
       when(questResponseAssembler.toDurationModel(eq(QUEST_ID.value()), eq(Duration.ofDays(3))))
-          .thenReturn(EntityModel.of(new QuestController.DurationResponse(3L)));
+          .thenReturn(EntityModel.of(new DurationResponse(3L)));
 
       mockMvc
           .perform(get("/api/v1/quests/{id}/duration", QUEST_ID.value()))
@@ -465,16 +466,16 @@ public class QuestControllerIT {
       when(questResponseAssembler.toProgressModel(eq("avatar-1"), anyList()))
           .thenReturn(
               EntityModel.of(
-                  new QuestController.AvatarQuestProgressResponse(
+                  new AvatarQuestProgressResponse(
                       "avatar-1",
                       List.of(
-                          new QuestController.QuestProgressResponse(
+                          new QuestProgressResponse(
                               QUEST_ID.value(),
                               QUEST_NAME,
                               "IN_PROGRESS",
                               50,
                               List.of(
-                                  new QuestController.HabitProgressResponse(
+                                  new HabitProgressResponse(
                                       HABIT_ID_1.value(), HABIT_TITLE, 2, 1, 1)))))));
 
       mockMvc

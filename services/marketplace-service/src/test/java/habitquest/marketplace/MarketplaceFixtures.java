@@ -11,8 +11,8 @@ import habitquest.marketplace.domain.Money;
 import habitquest.marketplace.domain.events.ItemBought;
 import habitquest.marketplace.domain.events.ItemSold;
 import habitquest.marketplace.domain.items.*;
-import habitquest.marketplace.infrastructure.dto.ItemResponse;
-import habitquest.marketplace.infrastructure.dto.MarketplaceResponse;
+import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
 import java.util.List;
 import java.util.Optional;
 

@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import habitquest.notification.infrastructure.consumers.guild.GuildMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,30 +24,22 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   }
 
   // --- GuildCreated ---
-
   @Test
   void whenGuildCreated_thenLeaderReceivesEmailAndIsMemberOfGuild() throws Exception {
-    publish(
-        "guild.created",
-        new GuildEventConsumer.GuildCreatedMessage(GUILD_1, LEADER_1, "I Draghi", Instant.now()));
+    publish("guild.created", new GuildCreatedMessage(GUILD_1, LEADER_1, "I Draghi", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
     assertThat(recipientOf(mails[0])).isEqualTo("leader@example.com");
     assertThat(subjectOf(mails[0])).isEqualTo("Guild created!");
     assertThat(bodyOf(mails[0])).contains("I Draghi");
-
-    // The leader should be added as a member
     assertThat(guildMemberRepository.findMembersByGuildId(GUILD_1)).contains(LEADER_1);
   }
 
   // --- GuildJoined ---
-
   @Test
   void whenGuildJoined_thenMemberReceivesEmailAndIsAddedToGuild() throws Exception {
-    publish(
-        "guild.joined",
-        new GuildEventConsumer.GuildJoinedMessage(GUILD_1, MEMBER_1, Instant.now()));
+    publish("guild.joined", new GuildJoinedMessage(GUILD_1, MEMBER_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -62,8 +55,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenGuildLeft_thenMemberReceivesEmailAndIsRemovedFromGuild() throws Exception {
     guildMemberRepository.addMember(GUILD_1, MEMBER_1);
 
-    publish(
-        "guild.left", new GuildEventConsumer.GuildLeftMessage(GUILD_1, MEMBER_1, Instant.now()));
+    publish("guild.left", new GuildLeftMessage(GUILD_1, MEMBER_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -77,9 +69,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenRemovedFromGuild_thenMemberReceivesEmailAndIsRemovedFromGuild() throws Exception {
     guildMemberRepository.addMember(GUILD_1, MEMBER_1);
 
-    publish(
-        "guild.removed",
-        new GuildEventConsumer.RemovedFromGuildMessage(GUILD_1, MEMBER_1, Instant.now()));
+    publish("guild.removed", new RemovedFromGuildMessage(GUILD_1, MEMBER_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -94,7 +84,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
     guildMemberRepository.addMember(GUILD_1, LEADER_1);
     guildMemberRepository.addMember(GUILD_1, MEMBER_1);
 
-    publish("guild.deleted", new GuildEventConsumer.GuildDeletedMessage(GUILD_1, Instant.now()));
+    publish("guild.deleted", new GuildDeletedMessage(GUILD_1, Instant.now()));
 
     // Two members → two emails
     MimeMessage[] mails = waitForEmails(2);
@@ -112,8 +102,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenRoleAssigned_thenMemberReceivesEmailWithRoleName() throws Exception {
     publish(
         "guild.role-assigned",
-        new GuildEventConsumer.RoleAssignedMessage(
-            GUILD_1, MEMBER_1, "VICE_LEADER", Instant.now()));
+        new RoleAssignedMessage(GUILD_1, MEMBER_1, "VICE_LEADER", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -126,8 +115,7 @@ class GuildEventConsumerTest extends BaseConsumerIntegrationTest {
   @Test
   void whenInviteSent_thenTargetAvatarReceivesEmail() throws Exception {
     publish(
-        "guild.invite-sent",
-        new GuildEventConsumer.InviteSentMessage(GUILD_1, MEMBER_1, "invite-xyz", Instant.now()));
+        "guild.invite-sent", new InviteSentMessage(GUILD_1, MEMBER_1, "invite-xyz", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 

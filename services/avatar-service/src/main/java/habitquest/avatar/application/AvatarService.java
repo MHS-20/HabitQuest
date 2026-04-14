@@ -60,7 +60,7 @@ public interface AvatarService {
 
   void unequipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException;
 
-  // --- Combat ---
+  // --- Battle ---
   boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
 
   void useHealthPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;

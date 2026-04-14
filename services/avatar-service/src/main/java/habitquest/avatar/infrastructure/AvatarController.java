@@ -6,6 +6,8 @@ import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.dto.*;
+import habitquest.avatar.infrastructure.dto.AvatarRequestsDto.*;
+import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -399,56 +401,4 @@ public class AvatarController {
     log.error(error, "Marketplace communication error", ex);
     return ResponseEntity.badRequest().body(error);
   }
-
-  // ─── Record ──────────────────────────────────────────────────────────────────
-  public record CreateAvatarRequest(String id, String name) {}
-
-  public record UpdateNameRequest(String name) {}
-
-  public record AmountRequest(Integer amount) {}
-
-  public record PotionRequest(String potionName) {}
-
-  public record AvatarCreatedResponse(String id) {}
-
-  public record NameResponse(String name) {}
-
-  public record ItemResponse(String type, String name, String description, Integer power) {}
-
-  public record ItemRequest(String type, String name, String description, Integer power) {}
-
-  public record ExperienceResponse(Integer amount) {}
-
-  public record EquippedItemsResponse(String id, List<ItemResponse> items) {
-    public EquippedItemsResponse {
-      items = List.copyOf(items);
-    }
-  }
-
-  public record InventoryResponse(List<ItemResponse> items) {
-    public InventoryResponse {
-      items = List.copyOf(items);
-    }
-  }
-
-  public record StatsResponse(Integer strength, Integer defense, Integer intelligence) {}
-
-  public record MoneyResponse(Integer amount) {}
-
-  public record ManaResponse(Integer amount, Integer max) {}
-
-  public record HealthResponse(Integer current, Integer max) {}
-
-  public record DamageResponse(boolean died) {}
-
-  public record GuildInviteRequest(
-      String inviteId, String guildId, String guildName, String expiresAt) {}
-
-  public record InviteResponse(
-      String inviteId, String guildId, String guildName, Instant expiresAt) {}
-
-  public record LevelResponse(
-      Integer levelNumber, Integer currentExperience, Integer experienceRequired) {}
-
-  public record ErrorResponse(String message) {}
 }
