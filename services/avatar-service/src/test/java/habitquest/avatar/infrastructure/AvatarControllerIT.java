@@ -694,7 +694,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldEquipItem() throws Exception {
-      doNothing().when(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
+      doNothing().when(avatarService).equipItem(eq(AVATAR_ID), any(Equipment.class));
 
       mockMvc
           .perform(
@@ -706,7 +706,7 @@ public class AvatarControllerIT {
                                       """))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).equipItem(eq(AVATAR_ID), any(Item.class));
+      verify(avatarService).equipItem(eq(AVATAR_ID), any(Equipment.class));
     }
 
     @Test
@@ -714,7 +714,7 @@ public class AvatarControllerIT {
     void shouldReturn400WhenItemNotInInventory() throws Exception {
       doThrow(new IllegalStateException("Item not in inventory"))
           .when(avatarService)
-          .equipItem(eq(AVATAR_ID), any(Item.class));
+          .equipItem(eq(AVATAR_ID), any(Equipment.class));
 
       mockMvc
           .perform(
@@ -738,7 +738,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldUnequipItem() throws Exception {
-      doNothing().when(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
+      doNothing().when(avatarService).unequipItem(eq(AVATAR_ID), any(Equipment.class));
 
       mockMvc
           .perform(
@@ -750,7 +750,7 @@ public class AvatarControllerIT {
                                       """))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).unequipItem(eq(AVATAR_ID), any(Item.class));
+      verify(avatarService).unequipItem(eq(AVATAR_ID), any(Equipment.class));
     }
   }
 

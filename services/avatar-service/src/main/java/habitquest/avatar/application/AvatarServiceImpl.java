@@ -149,14 +149,14 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void equipItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
+  public void equipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.equipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void unequipItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
+  public void unequipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.unequipItem(item);
     avatarRepository.save(avatar);
