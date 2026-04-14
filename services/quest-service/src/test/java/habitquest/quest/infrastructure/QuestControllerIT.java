@@ -8,17 +8,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import common.ddd.Id;
-import habitquest.quest.application.QuestLogger;
-import habitquest.quest.application.QuestNotFoundException;
-import habitquest.quest.application.QuestProgressView;
-import habitquest.quest.application.QuestService;
+import habitquest.quest.application.exceptions.QuestNotFoundException;
+import habitquest.quest.application.port.in.QuestService;
+import habitquest.quest.application.port.out.QuestLogger;
+import habitquest.quest.application.service.QuestProgressView;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.MoneyReward;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
-import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
 import habitquest.quest.infrastructure.dto.QuestResponseAssembler;
 import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
+import habitquest.quest.infrastructure.inbound.QuestController;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

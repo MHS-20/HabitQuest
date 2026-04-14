@@ -8,6 +8,7 @@ import common.ddd.Id;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;
 import habitquest.tracking.domain.events.HabitNotAttended;
+import habitquest.tracking.infrastructure.outbound.HabitNotifierImpl;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;

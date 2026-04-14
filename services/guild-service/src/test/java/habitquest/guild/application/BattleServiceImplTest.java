@@ -6,6 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
+import habitquest.guild.application.exceptions.BattleNotFoundException;
+import habitquest.guild.application.port.out.AvatarClientPort;
+import habitquest.guild.application.port.out.BattleRepository;
+import habitquest.guild.application.service.BattleServiceImpl;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.DamageResult;

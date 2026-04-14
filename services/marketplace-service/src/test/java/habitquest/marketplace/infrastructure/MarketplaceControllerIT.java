@@ -8,15 +8,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import habitquest.marketplace.MarketplaceFixtures;
-import habitquest.marketplace.application.*;
-import habitquest.marketplace.domain.ItemCatalog;
-import habitquest.marketplace.domain.ItemNotFoundException;
-import habitquest.marketplace.domain.Marketplace;
+import habitquest.marketplace.application.exceptions.AvatarCommunicationException;
+import habitquest.marketplace.application.exceptions.AvatarNotFoundException;
+import habitquest.marketplace.application.exceptions.InsufficientLevelException;
+import habitquest.marketplace.application.exceptions.MarketplaceNotFoundException;
+import habitquest.marketplace.application.port.in.MarketplaceService;
+import habitquest.marketplace.application.port.out.MarketplaceLogger;
+import habitquest.marketplace.domain.exceptions.ItemNotFoundException;
 import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.domain.items.ItemCatalog;
+import habitquest.marketplace.domain.marketplace.Marketplace;
 import habitquest.marketplace.infrastructure.dto.ItemMapper;
 import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponseAssembler;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
+import habitquest.marketplace.infrastructure.inbound.MarketplaceController;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

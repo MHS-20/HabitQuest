@@ -3,8 +3,8 @@ package habitquest.guild.infrastructure.dto;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import common.hexagonal.Adapter;
-import habitquest.guild.infrastructure.BattleController;
 import habitquest.guild.infrastructure.dto.BattleResponsesDto.*;
+import habitquest.guild.infrastructure.inbound.BattleController;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;

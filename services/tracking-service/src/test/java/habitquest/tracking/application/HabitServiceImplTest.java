@@ -5,6 +5,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import habitquest.tracking.application.exceptions.HabitNotFoundException;
+import habitquest.tracking.application.port.out.AvatarClientPort;
+import habitquest.tracking.application.port.out.HabitHistoryRepository;
+import habitquest.tracking.application.port.out.HabitRepository;
+import habitquest.tracking.application.port.out.QuestClientPort;
+import habitquest.tracking.application.service.HabitServiceImpl;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;

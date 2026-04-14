@@ -2,8 +2,8 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import habitquest.notification.infrastructure.consumers.avatar.AvatarMessages.*;
-import habitquest.notification.infrastructure.notification.NotificationService;
+import habitquest.notification.application.port.out.NotificationService;
+import habitquest.notification.infrastructure.inbound.consumers.avatar.AvatarMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
