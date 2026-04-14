@@ -3,14 +3,13 @@ package habitquest.quest.infrastructure.dto;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import habitquest.quest.application.QuestNotFoundException;
-import habitquest.quest.application.QuestProgressView;
+import habitquest.quest.application.exceptions.QuestNotFoundException;
+import habitquest.quest.application.service.QuestProgressView;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
-import habitquest.quest.infrastructure.QuestController;
-import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
 import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
+import habitquest.quest.infrastructure.inbound.QuestController;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;

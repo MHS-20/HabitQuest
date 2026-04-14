@@ -1,0 +1,9 @@
+package habitquest.marketplace.application.exceptions;
+
+public class InsufficientLevelException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
+
+  public InsufficientLevelException(String message) {
+    super(message);
+  }
+}

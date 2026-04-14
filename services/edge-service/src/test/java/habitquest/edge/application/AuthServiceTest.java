@@ -5,12 +5,16 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
+import habitquest.edge.application.port.out.UserNotifier;
+import habitquest.edge.application.port.out.UserRepository;
+import habitquest.edge.application.service.AuthServiceImpl;
+import habitquest.edge.domain.AuthResponse;
 import habitquest.edge.domain.User;
 import habitquest.edge.domain.UserExceptions.InvalidCredentialsException;
 import habitquest.edge.domain.UserExceptions.UserAlreadyExistsException;
 import habitquest.edge.domain.UserExceptions.UserNotFoundException;
 import habitquest.edge.domain.UserFactory;
-import habitquest.edge.infrastructure.JwtService;
+import habitquest.edge.infrastructure.security.JwtService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +36,7 @@ class AuthServiceTest {
   @Mock UserFactory userFactory;
   @Mock UserNotifier userNotifier;
 
-  @InjectMocks AuthService authService;
+  @InjectMocks AuthServiceImpl authService;
 
   private static final String EMAIL = "mario@example.com";
   private static final String RAW_PASSWORD = "password123";
@@ -56,7 +60,7 @@ class AuthServiceTest {
       when(userRepository.save(FAKE_USER)).thenReturn(FAKE_USER);
       when(jwtService.generateToken(FAKE_USER)).thenReturn(JWT_TOKEN);
 
-      AuthService.AuthResponse response = authService.register(NAME, EMAIL, RAW_PASSWORD);
+      AuthResponse response = authService.register(NAME, EMAIL, RAW_PASSWORD);
 
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
       assertThat(response.userId().value()).isEqualTo(USER_ID);
@@ -109,7 +113,7 @@ class AuthServiceTest {
       when(passwordEncoder.matches(RAW_PASSWORD, HASHED_PASSWORD)).thenReturn(true);
       when(jwtService.generateToken(existingUser)).thenReturn(JWT_TOKEN);
 
-      AuthService.AuthResponse response = authService.login(EMAIL, RAW_PASSWORD);
+      AuthResponse response = authService.login(EMAIL, RAW_PASSWORD);
 
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
       assertThat(response.userId().value()).isEqualTo(USER_ID);

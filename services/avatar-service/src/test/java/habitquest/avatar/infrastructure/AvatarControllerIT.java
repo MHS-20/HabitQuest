@@ -8,14 +8,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.avatar.application.AvatarLogger;
-import habitquest.avatar.application.AvatarNotFoundException;
-import habitquest.avatar.application.AvatarService;
+import habitquest.avatar.application.exceptions.AvatarNotFoundException;
+import habitquest.avatar.application.port.in.AvatarService;
+import habitquest.avatar.application.port.out.AvatarLogger;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.dto.AvatarResponseAssembler;
 import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
+import habitquest.avatar.infrastructure.inbound.AvatarController;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

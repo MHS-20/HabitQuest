@@ -4,8 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.edge.application.UserRepository;
+import habitquest.edge.application.port.out.UserRepository;
 import habitquest.edge.domain.User;
+import habitquest.edge.infrastructure.outbound.UserNotifierImpl;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;

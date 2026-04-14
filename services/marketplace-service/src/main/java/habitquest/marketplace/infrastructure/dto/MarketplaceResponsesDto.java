@@ -1,6 +1,6 @@
 package habitquest.marketplace.infrastructure.dto;
 
-import habitquest.marketplace.domain.Marketplace;
+import habitquest.marketplace.domain.marketplace.Marketplace;
 import java.util.List;
 
 public class MarketplaceResponsesDto {

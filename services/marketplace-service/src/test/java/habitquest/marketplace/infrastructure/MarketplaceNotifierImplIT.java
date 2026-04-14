@@ -4,7 +4,8 @@ import static habitquest.marketplace.MarketplaceFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import habitquest.marketplace.application.MarketplaceRepository;
+import habitquest.marketplace.application.port.out.MarketplaceRepository;
+import habitquest.marketplace.infrastructure.outbound.MarketplaceNotifierImpl;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;

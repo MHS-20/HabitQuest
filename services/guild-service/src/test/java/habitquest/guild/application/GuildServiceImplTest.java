@@ -6,6 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
+import habitquest.guild.application.exceptions.GuildNotFoundException;
+import habitquest.guild.application.port.in.BattleService;
+import habitquest.guild.application.port.out.AvatarClientPort;
+import habitquest.guild.application.port.out.GuildRepository;
+import habitquest.guild.application.service.GuildServiceImpl;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;

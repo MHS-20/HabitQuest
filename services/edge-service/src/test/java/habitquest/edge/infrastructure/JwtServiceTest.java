@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import common.ddd.Id;
 import habitquest.edge.domain.User;
+import habitquest.edge.infrastructure.security.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;

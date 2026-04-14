@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.avatar.application.AvatarRepository;
+import habitquest.avatar.application.port.out.AvatarRepository;
 import habitquest.avatar.domain.avatar.Experience;
 import habitquest.avatar.domain.avatar.Level;
 import habitquest.avatar.domain.events.Dead;
@@ -16,6 +16,7 @@ import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.Defense;
 import habitquest.avatar.domain.stats.Intelligence;
 import habitquest.avatar.domain.stats.Strength;
+import habitquest.avatar.infrastructure.outbound.AvatarNotifierImpl;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;

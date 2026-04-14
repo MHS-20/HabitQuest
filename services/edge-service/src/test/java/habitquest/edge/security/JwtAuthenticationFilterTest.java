@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import common.ddd.Id;
 import habitquest.edge.domain.User;
-import habitquest.edge.infrastructure.JwtService;
+import habitquest.edge.infrastructure.security.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

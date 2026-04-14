@@ -2,7 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import habitquest.notification.infrastructure.consumers.guild.BattleEventConsumer;
+import habitquest.notification.infrastructure.inbound.consumers.guild.BattleMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import java.util.stream.Stream;
@@ -29,9 +29,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenBattleStarted_thenAllGuildMembersReceiveEmail() throws Exception {
-    publish(
-        "guild.battle-started",
-        new BattleEventConsumer.BattleStartedMessage(BATTLE_1, GUILD_1, Instant.now()));
+    publish("guild.battle-started", new BattleStartedMessage(BATTLE_1, GUILD_1, Instant.now()));
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
     assertThat(mails)
@@ -43,9 +41,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenBattleWon_thenAllGuildMembersReceiveCongratulations() throws Exception {
-    publish(
-        "guild.battle-won",
-        new BattleEventConsumer.BattleWonMessage(BATTLE_1, GUILD_1, Instant.now()));
+    publish("guild.battle-won", new BattleWonMessage(BATTLE_1, GUILD_1, Instant.now()));
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
     assertThat(mails)
@@ -55,9 +51,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenBattleLost_thenAllGuildMembersReceiveEncouragement() throws Exception {
-    publish(
-        "guild.battle-lost",
-        new BattleEventConsumer.BattleLostMessage(BATTLE_1, GUILD_1, Instant.now()));
+    publish("guild.battle-lost", new BattleLostMessage(BATTLE_1, GUILD_1, Instant.now()));
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
     assertThat(mails)
@@ -69,8 +63,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
   @Test
   void whenBattleStarted_butGuildHasNoMembers_thenNoEmailIsSent() {
     publish(
-        "guild.battle-started",
-        new BattleEventConsumer.BattleStartedMessage("battle-2", "guild-vuota", Instant.now()));
+        "guild.battle-started", new BattleStartedMessage("battle-2", "guild-vuota", Instant.now()));
     assertThat(greenMail.getReceivedMessages()).isEmpty();
   }
 
@@ -78,9 +71,7 @@ class BattleEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenBattleWon_andOneMemberHasNoEmail_thenOnlyRegisteredMembersReceiveEmail()
       throws Exception {
     guildMemberRepository.addMember(GUILD_1, "avatar-4-senza-email");
-    publish(
-        "guild.battle-won",
-        new BattleEventConsumer.BattleWonMessage(BATTLE_1, GUILD_1, Instant.now()));
+    publish("guild.battle-won", new BattleWonMessage(BATTLE_1, GUILD_1, Instant.now()));
     MimeMessage[] mails = waitForEmails(3);
     assertThat(mails).hasSize(3);
   }
