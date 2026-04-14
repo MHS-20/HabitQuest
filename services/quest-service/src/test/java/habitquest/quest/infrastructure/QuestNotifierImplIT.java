@@ -9,6 +9,7 @@ import habitquest.quest.domain.events.QuestCreated;
 import habitquest.quest.domain.events.QuestJoined;
 import habitquest.quest.domain.events.QuestLeft;
 import habitquest.quest.domain.events.QuestNotCompleted;
+import habitquest.quest.infrastructure.outbound.QuestNotifierImpl;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;

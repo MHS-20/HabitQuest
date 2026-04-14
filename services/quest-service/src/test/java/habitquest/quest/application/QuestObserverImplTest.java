@@ -4,6 +4,9 @@ import static habitquest.quest.QuestFixtures.AVATAR_ID_1;
 import static habitquest.quest.QuestFixtures.fullQuest;
 import static org.mockito.Mockito.verify;
 
+import habitquest.quest.application.port.out.QuestLogger;
+import habitquest.quest.application.port.out.QuestNotifier;
+import habitquest.quest.application.service.QuestObserverImpl;
 import habitquest.quest.domain.events.QuestCompleted;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

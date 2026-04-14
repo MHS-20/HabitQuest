@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.lenient;
 
-import habitquest.edge.application.EdgeLogger;
+import habitquest.edge.application.port.out.EdgeLogger;
+import habitquest.edge.infrastructure.inbound.ResilienceFilter;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiter;

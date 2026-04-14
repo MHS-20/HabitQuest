@@ -2,6 +2,7 @@ package habitquest.marketplace.domain;
 
 import static org.assertj.core.api.Assertions.*;
 
+import habitquest.marketplace.domain.marketplace.Money;
 import org.junit.jupiter.api.Test;
 
 class MoneyTest {

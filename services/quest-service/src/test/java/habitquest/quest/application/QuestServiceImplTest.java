@@ -6,6 +6,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
+import habitquest.quest.application.exceptions.AvatarRewardException;
+import habitquest.quest.application.exceptions.QuestNotFoundException;
+import habitquest.quest.application.port.out.*;
+import habitquest.quest.application.service.QuestProgressView;
+import habitquest.quest.application.service.QuestServiceImpl;
 import habitquest.quest.domain.*;
 import habitquest.quest.domain.events.QuestCreated;
 import habitquest.quest.domain.events.QuestEvent;

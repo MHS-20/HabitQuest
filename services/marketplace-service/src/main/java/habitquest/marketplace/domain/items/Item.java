@@ -1,7 +1,7 @@
 package habitquest.marketplace.domain.items;
 
 import common.ddd.ValueObject;
-import habitquest.marketplace.domain.Money;
+import habitquest.marketplace.domain.marketplace.Money;
 
 public sealed interface Item extends ValueObject permits Equipment, Potion {
 

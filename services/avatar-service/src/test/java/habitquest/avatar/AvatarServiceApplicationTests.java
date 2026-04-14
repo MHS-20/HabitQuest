@@ -1,6 +1,6 @@
 package habitquest.avatar;
 
-import habitquest.avatar.application.AvatarRepository;
+import habitquest.avatar.application.port.out.AvatarRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;

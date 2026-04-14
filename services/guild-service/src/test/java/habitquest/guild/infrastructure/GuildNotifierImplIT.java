@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ddd.Id;
-import habitquest.guild.application.BattleRepository;
-import habitquest.guild.application.GuildRepository;
+import habitquest.guild.application.port.out.BattleRepository;
+import habitquest.guild.application.port.out.GuildRepository;
 import habitquest.guild.domain.events.guildEvents.*;
+import habitquest.guild.infrastructure.outbound.GuildNotifierImpl;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;

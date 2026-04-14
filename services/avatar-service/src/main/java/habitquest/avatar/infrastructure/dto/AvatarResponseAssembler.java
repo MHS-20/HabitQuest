@@ -2,13 +2,13 @@ package habitquest.avatar.infrastructure.dto;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import habitquest.avatar.application.AvatarNotFoundException;
-import habitquest.avatar.application.AvatarSearchRequest;
+import habitquest.avatar.application.exceptions.AvatarNotFoundException;
+import habitquest.avatar.application.service.AvatarSearchRequest;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
-import habitquest.avatar.infrastructure.AvatarController;
 import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
+import habitquest.avatar.infrastructure.inbound.AvatarController;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;

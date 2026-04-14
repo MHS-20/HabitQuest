@@ -1,6 +1,6 @@
 package habitquest.marketplace.domain.items;
 
-import habitquest.marketplace.domain.Money;
+import habitquest.marketplace.domain.marketplace.Money;
 
 public record Armor(BaseItem baseItem) implements Equipment {
   public Armor(String name, String description, Integer power, Money price, Level requiredLevel) {
