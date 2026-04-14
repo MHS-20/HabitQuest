@@ -6,9 +6,9 @@ import habitquest.guild.application.GuildLogger;
 import habitquest.guild.application.GuildNotFoundException;
 import habitquest.guild.application.GuildService;
 import habitquest.guild.domain.guild.*;
-import habitquest.guild.infrastructure.dto.GuildMemberResponse;
-import habitquest.guild.infrastructure.dto.GuildResponse;
+import habitquest.guild.infrastructure.dto.GuildRequestsDto.*;
 import habitquest.guild.infrastructure.dto.GuildResponseAssembler;
+import habitquest.guild.infrastructure.dto.GuildResponsesDto.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -203,24 +203,4 @@ public class GuildController {
     log.warn(ex, "Unauthorized guild operation");
     return ResponseEntity.status(403).build();
   }
-
-  public record CreateGuildRequest(String name, String creatorAvatarId, String creatorNickname) {}
-
-  public record RemoveMemberRequest(String requestorId) {}
-
-  public record SendInviteRequest(String requestorId, String targetAvatarId) {}
-
-  public record AcceptInviteRequest(String avatarId, String nickname) {}
-
-  public record PromoteMemberRequest(String roleName, String requestorId) {}
-
-  public record GuildCreatedResponse(String id) {}
-
-  public record RankResponse(Integer globalRank) {}
-
-  public record ErrorResponse(String message) {}
-
-  private record MembersCountResponse(String guildId, int count) {}
-
-  private record LeaderboardCountResponse(int count) {}
 }

@@ -157,3 +157,17 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: |
             habitquest-ui/composeApp/build/bin/iosSimulatorArm64/**
+
+  ui-final-status:
+    name: Final Pipeline Status
+    runs-on: ubuntu-22.04
+    needs:
+      - commit-lint
+      - static-scan
+      - build
+    if: always() && (
+      needs.commit-lint.result == 'failure' ||
+      needs.static-scan.result == 'failure' ||
+      needs.build.result == 'failure')
+    steps:
+      - run: exit 1

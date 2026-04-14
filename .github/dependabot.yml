@@ -9,7 +9,7 @@ updates:
       prefix: "chore"
 
   - package-ecosystem: npm
-    directory: "/services/habitquest-ui/kotlin-js-store"
+    directory: "/habitquest-ui/kotlin-js-store"
     schedule:
       interval: weekly
     target-branch: develop

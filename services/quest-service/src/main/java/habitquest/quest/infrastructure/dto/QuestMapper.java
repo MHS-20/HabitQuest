@@ -1,6 +1,8 @@
 package habitquest.quest.infrastructure.dto;
 
 import habitquest.quest.domain.Quest;
+import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
+import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
 
 public class QuestMapper {
   public static QuestResponse toResponse(Quest quest) {

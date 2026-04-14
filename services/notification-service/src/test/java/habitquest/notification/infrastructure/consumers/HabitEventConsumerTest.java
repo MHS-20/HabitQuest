@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import habitquest.notification.infrastructure.consumers.tracking.HabitMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +22,7 @@ class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenHabitDeleted_thenEmailSent() throws Exception {
-    publish(
-        "habit.deleted",
-        new HabitEventConsumer.HabitDeletedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
+    publish("habit.deleted", new HabitDeletedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -34,9 +33,7 @@ class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenHabitAttended_thenPositiveEmailSent() throws Exception {
-    publish(
-        "habit.attended",
-        new HabitEventConsumer.HabitAttendedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
+    publish("habit.attended", new HabitAttendedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -47,9 +44,7 @@ class HabitEventConsumerTest extends BaseConsumerIntegrationTest {
 
   @Test
   void whenHabitNotAttended_thenMotivationalEmailSent() throws Exception {
-    publish(
-        "habit.not-attended",
-        new HabitEventConsumer.HabitNotAttendedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
+    publish("habit.not-attended", new HabitNotAttendedMessage(HABIT_ABC, AVATAR_1, Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 

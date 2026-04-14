@@ -7,6 +7,8 @@ import habitquest.tracking.application.HabitNotFoundException;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.infrastructure.HabitController;
+import habitquest.tracking.infrastructure.dto.HabitRequestsDto.*;
+import habitquest.tracking.infrastructure.dto.HabitResponsesDto.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.hateoas.EntityModel;
@@ -16,10 +18,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class HabitResponseAssembler {
 
-  public EntityModel<HabitController.HabitCreatedResponse> toCreatedModel(Habit habit) {
+  public EntityModel<HabitCreatedResponse> toCreatedModel(Habit habit) {
     String id = habit.getId().value();
     return EntityModel.of(
-        new HabitController.HabitCreatedResponse(id),
+        new HabitCreatedResponse(id),
         selfLink(id),
         linkTo(methodOn(HabitController.class).getHabit(id)).withRel("habit"),
         linkTo(methodOn(HabitController.class).getTags(id)).withRel("tags"),
@@ -41,26 +43,24 @@ public class HabitResponseAssembler {
         linkTo(methodOn(HabitController.class).deleteHabit(id)).withRel("delete"));
   }
 
-  public EntityModel<HabitController.TitleResponse> toTitleModel(String id, String title) {
-    return EntityModel.of(new HabitController.TitleResponse(title), selfLink(id), habitLink(id));
+  public EntityModel<TitleResponse> toTitleModel(String id, String title) {
+    return EntityModel.of(new TitleResponse(title), selfLink(id), habitLink(id));
   }
 
-  public EntityModel<HabitController.DescriptionResponse> toDescriptionModel(
-      String id, String description) {
-    return EntityModel.of(
-        new HabitController.DescriptionResponse(description), selfLink(id), habitLink(id));
+  public EntityModel<DescriptionResponse> toDescriptionModel(String id, String description) {
+    return EntityModel.of(new DescriptionResponse(description), selfLink(id), habitLink(id));
   }
 
-  public EntityModel<HabitController.TagsResponse> toTagsModel(String id, List<Tag> tags) {
+  public EntityModel<TagsResponse> toTagsModel(String id, List<Tag> tags) {
     return EntityModel.of(
-        new HabitController.TagsResponse(tags.stream().map(Tag::name).toList()),
+        new TagsResponse(tags.stream().map(Tag::name).toList()),
         selfLink(id),
         habitLink(id),
         linkTo(methodOn(HabitController.class).updateTags(id, null)).withRel("update"));
   }
 
-  public EntityModel<HabitController.RecurrenceResponse> toRecurrenceModel(
-      String id, HabitController.RecurrenceResponse recurrence) {
+  public EntityModel<RecurrenceResponse> toRecurrenceModel(
+      String id, RecurrenceResponse recurrence) {
     return EntityModel.of(
         recurrence,
         selfLink(id),
@@ -68,19 +68,18 @@ public class HabitResponseAssembler {
         linkTo(methodOn(HabitController.class).updateRecurrence(id, null)).withRel("update"));
   }
 
-  public EntityModel<HabitController.LastAttendedDateResponse> toLastAttendedDateModel(
+  public EntityModel<LastAttendedDateResponse> toLastAttendedDateModel(
       String id, LocalDateTime date) {
     return EntityModel.of(
-        new HabitController.LastAttendedDateResponse(date),
+        new LastAttendedDateResponse(date),
         selfLink(id),
         habitLink(id),
         linkTo(methodOn(HabitController.class).attendHabit(id, null)).withRel("attend"));
   }
 
-  public EntityModel<HabitController.HistoryResponse> toHistoryModel(
+  public EntityModel<HistoryResponse> toHistoryModel(
       String id, List<HabitHistoryEventResponse> history) {
-    return EntityModel.of(
-        new HabitController.HistoryResponse(history), selfLink(id), habitLink(id));
+    return EntityModel.of(new HistoryResponse(history), selfLink(id), habitLink(id));
   }
 
   // ─── private helpers ────────────────────────────────────────────────────────

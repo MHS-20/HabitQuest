@@ -9,6 +9,8 @@ import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
 import habitquest.quest.infrastructure.QuestController;
+import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
+import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
@@ -19,10 +21,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestResponseAssembler {
 
-  public EntityModel<QuestController.QuestCreatedResponse> toCreatedModel(Quest quest) {
+  public EntityModel<QuestCreatedResponse> toCreatedModel(Quest quest) {
     String id = quest.getId().value();
     return EntityModel.of(
-        new QuestController.QuestCreatedResponse(id),
+        new QuestCreatedResponse(id),
         selfLink(id),
         linkTo(methodOn(QuestController.class).getQuest(id)).withRel("quest"),
         linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
@@ -49,33 +51,30 @@ public class QuestResponseAssembler {
         linkTo(methodOn(QuestController.class).deleteQuest(id)).withRel("delete"));
   }
 
-  public EntityModel<QuestController.NameResponse> toNameModel(String id, String name) {
-    return EntityModel.of(new QuestController.NameResponse(name), selfLink(id), questLink(id));
+  public EntityModel<NameResponse> toNameModel(String id, String name) {
+    return EntityModel.of(new NameResponse(name), selfLink(id), questLink(id));
   }
 
-  public EntityModel<QuestController.DurationResponse> toDurationModel(
-      String id, Duration duration) {
-    return EntityModel.of(
-        new QuestController.DurationResponse(duration.toDays()), selfLink(id), questLink(id));
+  public EntityModel<DurationResponse> toDurationModel(String id, Duration duration) {
+    return EntityModel.of(new DurationResponse(duration.toDays()), selfLink(id), questLink(id));
   }
 
   public EntityModel<Reward> toRewardModel(String id, Reward reward) {
     return EntityModel.of(reward, selfLink(id), questLink(id));
   }
 
-  public EntityModel<QuestController.HabitsResponse> toHabitsModel(String id, List<Habit> habits) {
+  public EntityModel<HabitsResponse> toHabitsModel(String id, List<Habit> habits) {
     List<HabitResponse> habitResponses = habits.stream().map(HabitMapper::toResponse).toList();
-    return EntityModel.of(
-        new QuestController.HabitsResponse(habitResponses), selfLink(id), questLink(id));
+    return EntityModel.of(new HabitsResponse(habitResponses), selfLink(id), questLink(id));
   }
 
-  public EntityModel<QuestController.AvatarQuestProgressResponse> toProgressModel(
+  public EntityModel<AvatarQuestProgressResponse> toProgressModel(
       String avatarId, List<QuestProgressView> progress) {
-    List<QuestController.QuestProgressResponse> items =
+    List<QuestProgressResponse> items =
         progress.stream()
             .map(
                 p ->
-                    new QuestController.QuestProgressResponse(
+                    new QuestProgressResponse(
                         p.questId(),
                         p.questName(),
                         p.status(),
@@ -83,7 +82,7 @@ public class QuestResponseAssembler {
                         p.habits().stream()
                             .map(
                                 h ->
-                                    new QuestController.HabitProgressResponse(
+                                    new HabitProgressResponse(
                                         h.habitId(),
                                         h.title(),
                                         h.requiredOccurrences(),
@@ -93,7 +92,7 @@ public class QuestResponseAssembler {
             .toList();
 
     return EntityModel.of(
-        new QuestController.AvatarQuestProgressResponse(avatarId, items),
+        new AvatarQuestProgressResponse(avatarId, items),
         linkTo(methodOn(QuestController.class).getActiveQuestProgress(avatarId)).withSelfRel());
   }
 

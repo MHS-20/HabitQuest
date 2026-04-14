@@ -15,6 +15,7 @@ import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.dto.AvatarResponseAssembler;
+import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,7 +51,7 @@ public class AvatarControllerIT {
     void shouldReturn201WithId() throws Exception {
       when(avatarService.createAvatar(AVATAR_ID, AVATAR_NAME)).thenReturn(AVATAR_ID);
       when(avatarResponseAssembler.toCreatedModel(AVATAR_1))
-          .thenReturn(EntityModel.of(new AvatarController.AvatarCreatedResponse(AVATAR_1)));
+          .thenReturn(EntityModel.of(new AvatarCreatedResponse(AVATAR_1)));
 
       mockMvc
           .perform(
@@ -66,7 +67,7 @@ public class AvatarControllerIT {
     void shouldDelegateNameToService() throws Exception {
       when(avatarService.createAvatar(any(Id.class), anyString())).thenReturn(AVATAR_ID);
       when(avatarResponseAssembler.toCreatedModel(AVATAR_1))
-          .thenReturn(EntityModel.of(new AvatarController.AvatarCreatedResponse(AVATAR_1)));
+          .thenReturn(EntityModel.of(new AvatarCreatedResponse(AVATAR_1)));
 
       mockMvc
           .perform(
@@ -269,7 +270,7 @@ public class AvatarControllerIT {
     void shouldReturnMoney() throws Exception {
       when(avatarService.getMoney(AVATAR_ID)).thenReturn(new Money(250));
       when(avatarResponseAssembler.toMoneyModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.MoneyResponse(250)));
+          .thenReturn(EntityModel.of(new MoneyResponse(250)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/money", AVATAR_1))
@@ -365,7 +366,7 @@ public class AvatarControllerIT {
       Level level = new Level(3, new Experience(50), new Experience(200));
       when(avatarService.getLevel(AVATAR_ID)).thenReturn(level);
       when(avatarResponseAssembler.toLevelModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.LevelResponse(3, 50, 200)));
+          .thenReturn(EntityModel.of(new LevelResponse(3, 50, 200)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/level", AVATAR_1))
@@ -388,7 +389,7 @@ public class AvatarControllerIT {
       AvatarHealth health = new AvatarHealth(new Health(75), new Health(100));
       when(avatarService.getHealth(AVATAR_ID)).thenReturn(health);
       when(avatarResponseAssembler.toHealthModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.HealthResponse(75, 100)));
+          .thenReturn(EntityModel.of(new HealthResponse(75, 100)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/health", AVATAR_1))
@@ -454,7 +455,7 @@ public class AvatarControllerIT {
       AvatarMana mana = new AvatarMana(new Mana(30), new Mana(50));
       when(avatarService.getMana(AVATAR_ID)).thenReturn(mana);
       when(avatarResponseAssembler.toManaModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.ManaResponse(30, 50)));
+          .thenReturn(EntityModel.of(new ManaResponse(30, 50)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/mana", AVATAR_1))
@@ -554,7 +555,7 @@ public class AvatarControllerIT {
     void shouldReturnExperience() throws Exception {
       when(avatarService.getExperience(AVATAR_ID)).thenReturn(new Experience(350));
       when(avatarResponseAssembler.toExperienceModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.ExperienceResponse(350)));
+          .thenReturn(EntityModel.of(new ExperienceResponse(350)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/experience", AVATAR_1))
@@ -648,7 +649,7 @@ public class AvatarControllerIT {
       inventory.addItem(SWORD);
       when(avatarService.getInventory(AVATAR_ID)).thenReturn(inventory.getItems());
       when(avatarResponseAssembler.toInventoryModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.InventoryResponse(List.of())));
+          .thenReturn(EntityModel.of(new InventoryResponse(List.of())));
 
       mockMvc.perform(get("/api/v1/avatars/{id}/inventory", AVATAR_1)).andExpect(status().isOk());
     }
@@ -665,8 +666,7 @@ public class AvatarControllerIT {
       EquippedItems equippedItems = new EquippedItems(EQUIPPED_ID);
       when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems);
       when(avatarResponseAssembler.toEquippedItemsModel(any(), eq(AVATAR_1)))
-          .thenReturn(
-              EntityModel.of(new AvatarController.EquippedItemsResponse(AVATAR_1, List.of())));
+          .thenReturn(EntityModel.of(new EquippedItemsResponse(AVATAR_1, List.of())));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_1))
@@ -859,7 +859,7 @@ public class AvatarControllerIT {
       AvatarStats stats = new AvatarStats(STATS_ID, 10, 8, 12);
       when(avatarService.getAvatarStats(AVATAR_ID)).thenReturn(stats);
       when(avatarResponseAssembler.toStatsModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new AvatarController.StatsResponse(10, 8, 12)));
+          .thenReturn(EntityModel.of(new StatsResponse(10, 8, 12)));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/stats", AVATAR_1))

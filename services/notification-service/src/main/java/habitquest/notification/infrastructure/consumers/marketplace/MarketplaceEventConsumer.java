@@ -1,9 +1,10 @@
-package habitquest.notification.infrastructure.consumers;
+package habitquest.notification.infrastructure.consumers.marketplace;
 
 import common.hexagonal.Adapter;
+import habitquest.notification.infrastructure.consumers.AvatarAwareEventConsumer;
+import habitquest.notification.infrastructure.consumers.marketplace.MarketplaceMessages.*;
 import habitquest.notification.infrastructure.notification.NotificationService;
 import habitquest.notification.infrastructure.repository.UserEmailRepository;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -48,10 +49,4 @@ public class MarketplaceEventConsumer extends AvatarAwareEventConsumer {
           "You sold \"" + message.itemName() + "\" on the marketplace successfully!");
     };
   }
-
-  public record ItemBoughtMessage(
-      String marketplaceId, String itemName, String avatarId, Instant occurredOn) {}
-
-  public record ItemSoldMessage(
-      String marketplaceId, String itemName, String avatarId, Instant occurredOn) {}
 }

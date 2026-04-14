@@ -8,6 +8,7 @@ import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
 import habitquest.avatar.infrastructure.AvatarController;
+import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -39,8 +40,8 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).deleteAvatar(id)).withRel("delete"));
   }
 
-  public EntityModel<AvatarController.AvatarCreatedResponse> toCreatedModel(String id) {
-    AvatarController.AvatarCreatedResponse body = new AvatarController.AvatarCreatedResponse(id);
+  public EntityModel<AvatarCreatedResponse> toCreatedModel(String id) {
+    AvatarCreatedResponse body = new AvatarCreatedResponse(id);
 
     return EntityModel.of(
         body,
@@ -72,12 +73,12 @@ public class AvatarResponseAssembler
 
   // ─── Sotto-risorse ───────────────────────────────────────────────────────────
 
-  public EntityModel<AvatarController.NameResponse> toNameModel(String name, String id) {
-    return EntityModel.of(new AvatarController.NameResponse(name), selfLink(id), avatarLink(id));
+  public EntityModel<NameResponse> toNameModel(String name, String id) {
+    return EntityModel.of(new NameResponse(name), selfLink(id), avatarLink(id));
   }
 
-  public EntityModel<AvatarController.MoneyResponse> toMoneyModel(Money money, String id) {
-    AvatarController.MoneyResponse dto = AvatarMapper.toResponse(money);
+  public EntityModel<MoneyResponse> toMoneyModel(Money money, String id) {
+    MoneyResponse dto = AvatarMapper.toResponse(money);
 
     return EntityModel.of(
         dto,
@@ -87,9 +88,8 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).spendMoney(id, null)).withRel("spend"));
   }
 
-  public EntityModel<AvatarController.InventoryResponse> toInventoryModel(
-      List<Item> inventory, String id) {
-    AvatarController.InventoryResponse dto = AvatarMapper.toResponse(inventory);
+  public EntityModel<InventoryResponse> toInventoryModel(List<Item> inventory, String id) {
+    InventoryResponse dto = AvatarMapper.toResponse(inventory);
 
     return EntityModel.of(
         dto,
@@ -100,9 +100,9 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).getEquippedItems(id)).withRel("equippedItems"));
   }
 
-  public EntityModel<AvatarController.EquippedItemsResponse> toEquippedItemsModel(
+  public EntityModel<EquippedItemsResponse> toEquippedItemsModel(
       EquippedItems equippedItems, String id) {
-    AvatarController.EquippedItemsResponse dto = AvatarMapper.toResponse(equippedItems);
+    EquippedItemsResponse dto = AvatarMapper.toResponse(equippedItems);
 
     return EntityModel.of(
         dto,
@@ -111,9 +111,8 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).getInventory(id)).withRel("inventory"));
   }
 
-  public EntityModel<AvatarController.ExperienceResponse> toExperienceModel(
-      Experience experience, String id) {
-    AvatarController.ExperienceResponse dto = AvatarMapper.toResponse(experience);
+  public EntityModel<ExperienceResponse> toExperienceModel(Experience experience, String id) {
+    ExperienceResponse dto = AvatarMapper.toResponse(experience);
 
     return EntityModel.of(
         dto,
@@ -123,14 +122,13 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).grantExperience(id, null)).withRel("grant"));
   }
 
-  public EntityModel<AvatarController.LevelResponse> toLevelModel(Level level, String id) {
-    AvatarController.LevelResponse dto = AvatarMapper.toResponse(level);
+  public EntityModel<LevelResponse> toLevelModel(Level level, String id) {
+    LevelResponse dto = AvatarMapper.toResponse(level);
     return EntityModel.of(dto, selfLink(id), avatarLink(id));
   }
 
-  public EntityModel<AvatarController.HealthResponse> toHealthModel(
-      AvatarHealth health, String id) {
-    AvatarController.HealthResponse dto = AvatarMapper.toResponse(health);
+  public EntityModel<HealthResponse> toHealthModel(AvatarHealth health, String id) {
+    HealthResponse dto = AvatarMapper.toResponse(health);
 
     return EntityModel.of(
         dto,
@@ -140,8 +138,8 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).applyDamage(id, null)).withRel("damage"));
   }
 
-  public EntityModel<AvatarController.ManaResponse> toManaModel(AvatarMana mana, String id) {
-    AvatarController.ManaResponse dto = AvatarMapper.toResponse(mana);
+  public EntityModel<ManaResponse> toManaModel(AvatarMana mana, String id) {
+    ManaResponse dto = AvatarMapper.toResponse(mana);
 
     return EntityModel.of(
         dto,
@@ -151,8 +149,8 @@ public class AvatarResponseAssembler
         linkTo(methodOn(AvatarController.class).spendMana(id, null)).withRel("spend"));
   }
 
-  public EntityModel<AvatarController.StatsResponse> toStatsModel(AvatarStats stats, String id) {
-    AvatarController.StatsResponse dto = AvatarMapper.toResponse(stats);
+  public EntityModel<StatsResponse> toStatsModel(AvatarStats stats, String id) {
+    StatsResponse dto = AvatarMapper.toResponse(stats);
 
     return EntityModel.of(
         dto,
@@ -164,14 +162,13 @@ public class AvatarResponseAssembler
             .withRel("increaseIntelligence"));
   }
 
-  public CollectionModel<EntityModel<AvatarController.InviteResponse>> toInvitesModel(
-      List<Invite> invites) {
-    List<EntityModel<AvatarController.InviteResponse>> models =
+  public CollectionModel<EntityModel<InviteResponse>> toInvitesModel(List<Invite> invites) {
+    List<EntityModel<InviteResponse>> models =
         invites.stream()
             .map(
                 invite ->
                     EntityModel.of(
-                        new AvatarController.InviteResponse(
+                        new InviteResponse(
                             invite.inviteId().value(),
                             invite.guildId().value(),
                             invite.guildName(),

@@ -2,6 +2,7 @@ package habitquest.notification.infrastructure.consumers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import habitquest.notification.infrastructure.consumers.marketplace.MarketplaceMessages.*;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,7 @@ class MarketplaceEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenItemBought_thenEmailSentWithItemName() throws Exception {
     publish(
         "marketplace.item-bought",
-        new MarketplaceEventConsumer.ItemBoughtMessage(
-            "mkt-1", "Sword of Destiny", "avatar-1", Instant.now()));
+        new ItemBoughtMessage("mkt-1", "Sword of Destiny", "avatar-1", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
@@ -33,8 +33,7 @@ class MarketplaceEventConsumerTest extends BaseConsumerIntegrationTest {
   void whenItemSold_thenEmailSentWithItemName() throws Exception {
     publish(
         "marketplace.item-sold",
-        new MarketplaceEventConsumer.ItemSoldMessage(
-            "mkt-1", "Ancient Shield", "avatar-1", Instant.now()));
+        new ItemSoldMessage("mkt-1", "Ancient Shield", "avatar-1", Instant.now()));
 
     MimeMessage[] mails = waitForEmails(1);
 
