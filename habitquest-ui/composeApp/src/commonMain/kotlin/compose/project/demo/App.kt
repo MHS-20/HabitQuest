@@ -11,7 +11,6 @@ import compose.project.demo.contexts.auth.presentation.screen.LoginScreen
 import compose.project.demo.contexts.auth.presentation.screen.RegisterScreen
 import kotlinx.coroutines.launch
 
-
 enum class AppPage(val label: String, val emoji: String) {
   Dashboard("Dashboard", "🏠"),
   Habits("Habits", "📝"),
