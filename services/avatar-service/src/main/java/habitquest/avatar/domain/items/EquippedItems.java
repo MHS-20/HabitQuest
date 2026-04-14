@@ -9,23 +9,23 @@ import java.util.Objects;
 
 public class EquippedItems implements Entity<Id<EquippedItems>> {
   private final Id<EquippedItems> id;
-  private List<Item> items;
+  private List<Equipment> items;
 
   public EquippedItems(Id<EquippedItems> id) {
     this.id = id;
     this.items = new ArrayList<>();
   }
 
-  public List<Item> getItems() {
+  public List<Equipment> getItems() {
     return Collections.unmodifiableList(items);
   }
 
-  public void equip(Item item) {
+  public void equip(Equipment item) {
     Objects.requireNonNull(item);
     items.add(item);
   }
 
-  public void unequip(Item item) {
+  public void unequip(Equipment item) {
     Objects.requireNonNull(item);
     if (!items.remove(item)) {
       throw new IllegalArgumentException("Item not found in inventory");

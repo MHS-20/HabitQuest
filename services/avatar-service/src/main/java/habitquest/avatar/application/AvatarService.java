@@ -3,6 +3,7 @@ package habitquest.avatar.application;
 import common.ddd.Id;
 import common.hexagonal.InBoundPort;
 import habitquest.avatar.domain.avatar.*;
+import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.stats.AvatarStats;
@@ -55,9 +56,9 @@ public interface AvatarService {
 
   void removeItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException;
 
-  void equipItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException;
+  void equipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException;
 
-  void unequipItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException;
+  void unequipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException;
 
   // --- Combat ---
   boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
