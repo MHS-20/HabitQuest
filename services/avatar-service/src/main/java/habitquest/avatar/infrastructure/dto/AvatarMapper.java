@@ -10,7 +10,8 @@ import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
-import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
+import habitquest.avatar.infrastructure.dto.AvatarCommands.*;
+import habitquest.avatar.infrastructure.dto.AvatarQueries.*;
 import java.util.List;
 
 public final class AvatarMapper {

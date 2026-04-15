@@ -3,12 +3,14 @@ package habitquest.avatar.infrastructure.dto;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import habitquest.avatar.application.exceptions.AvatarNotFoundException;
-import habitquest.avatar.application.service.AvatarSearchRequest;
+import habitquest.avatar.application.service.AvatarSearchQuery;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.stats.AvatarStats;
-import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
-import habitquest.avatar.infrastructure.inbound.AvatarController;
+import habitquest.avatar.infrastructure.dto.AvatarCommands.*;
+import habitquest.avatar.infrastructure.dto.AvatarQueries.*;
+import habitquest.avatar.infrastructure.inbound.AvatarCommandController;
+import habitquest.avatar.infrastructure.inbound.AvatarQueryController;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -30,14 +32,14 @@ public class AvatarResponseAssembler
     return EntityModel.of(
         dto,
         selfLink(id),
-        linkTo(methodOn(AvatarController.class).getInventory(id)).withRel("inventory"),
-        linkTo(methodOn(AvatarController.class).getEquippedItems(id)).withRel("equippedItems"),
-        linkTo(methodOn(AvatarController.class).getStats(id)).withRel("stats"),
-        linkTo(methodOn(AvatarController.class).getLevel(id)).withRel("level"),
-        linkTo(methodOn(AvatarController.class).getHealth(id)).withRel("health"),
-        linkTo(methodOn(AvatarController.class).getMana(id)).withRel("mana"),
-        linkTo(methodOn(AvatarController.class).getMoney(id)).withRel("money"),
-        linkTo(methodOn(AvatarController.class).deleteAvatar(id)).withRel("delete"));
+        linkTo(methodOn(AvatarQueryController.class).getInventory(id)).withRel("inventory"),
+        linkTo(methodOn(AvatarQueryController.class).getEquippedItems(id)).withRel("equippedItems"),
+        linkTo(methodOn(AvatarQueryController.class).getStats(id)).withRel("stats"),
+        linkTo(methodOn(AvatarQueryController.class).getLevel(id)).withRel("level"),
+        linkTo(methodOn(AvatarQueryController.class).getHealth(id)).withRel("health"),
+        linkTo(methodOn(AvatarQueryController.class).getMana(id)).withRel("mana"),
+        linkTo(methodOn(AvatarQueryController.class).getMoney(id)).withRel("money"),
+        linkTo(methodOn(AvatarCommandController.class).deleteAvatar(id)).withRel("delete"));
   }
 
   public EntityModel<AvatarCreatedResponse> toCreatedModel(String id) {
@@ -46,13 +48,13 @@ public class AvatarResponseAssembler
     return EntityModel.of(
         body,
         selfLink(id),
-        linkTo(methodOn(AvatarController.class).getAvatar(id)).withRel("avatar"),
-        linkTo(methodOn(AvatarController.class).getLevel(id)).withRel("level"),
-        linkTo(methodOn(AvatarController.class).getHealth(id)).withRel("health"));
+        linkTo(methodOn(AvatarQueryController.class).getAvatar(id)).withRel("avatar"),
+        linkTo(methodOn(AvatarQueryController.class).getLevel(id)).withRel("level"),
+        linkTo(methodOn(AvatarQueryController.class).getHealth(id)).withRel("health"));
   }
 
   public CollectionModel<EntityModel<AvatarResponse>> toCollectionModel(
-      List<Avatar> avatars, AvatarSearchRequest query) {
+      List<Avatar> avatars, AvatarSearchQuery query) {
 
     List<EntityModel<AvatarResponse>> models =
         avatars.stream()
@@ -63,12 +65,13 @@ public class AvatarResponseAssembler
                   return EntityModel.of(
                       dto,
                       selfLink(id),
-                      linkTo(methodOn(AvatarController.class).getAvatar(id)).withRel("avatar"));
+                      linkTo(methodOn(AvatarQueryController.class).getAvatar(id))
+                          .withRel("avatar"));
                 })
             .toList();
 
     return CollectionModel.of(
-        models, linkTo(methodOn(AvatarController.class).searchAvatars(query)).withSelfRel());
+        models, linkTo(methodOn(AvatarQueryController.class).searchAvatars(query)).withSelfRel());
   }
 
   // ─── Sotto-risorse ───────────────────────────────────────────────────────────
@@ -84,8 +87,8 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).earnMoney(id, null)).withRel("earn"),
-        linkTo(methodOn(AvatarController.class).spendMoney(id, null)).withRel("spend"));
+        linkTo(methodOn(AvatarCommandController.class).earnMoney(id, null)).withRel("earn"),
+        linkTo(methodOn(AvatarCommandController.class).spendMoney(id, null)).withRel("spend"));
   }
 
   public EntityModel<InventoryResponse> toInventoryModel(List<Item> inventory, String id) {
@@ -95,9 +98,10 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).addItem(id, null)).withRel("addItem"),
-        linkTo(methodOn(AvatarController.class).removeItem(id, null)).withRel("removeItem"),
-        linkTo(methodOn(AvatarController.class).getEquippedItems(id)).withRel("equippedItems"));
+        linkTo(methodOn(AvatarCommandController.class).addItem(id, null)).withRel("addItem"),
+        linkTo(methodOn(AvatarCommandController.class).removeItem(id, null)).withRel("removeItem"),
+        linkTo(methodOn(AvatarQueryController.class).getEquippedItems(id))
+            .withRel("equippedItems"));
   }
 
   public EntityModel<EquippedItemsResponse> toEquippedItemsModel(
@@ -108,7 +112,7 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).getInventory(id)).withRel("inventory"));
+        linkTo(methodOn(AvatarQueryController.class).getInventory(id)).withRel("inventory"));
   }
 
   public EntityModel<ExperienceResponse> toExperienceModel(Experience experience, String id) {
@@ -118,8 +122,8 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).getLevel(id)).withRel("level"),
-        linkTo(methodOn(AvatarController.class).grantExperience(id, null)).withRel("grant"));
+        linkTo(methodOn(AvatarQueryController.class).getLevel(id)).withRel("level"),
+        linkTo(methodOn(AvatarCommandController.class).grantExperience(id, null)).withRel("grant"));
   }
 
   public EntityModel<LevelResponse> toLevelModel(Level level, String id) {
@@ -134,9 +138,9 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).useHealthPotion(id, null))
+        linkTo(methodOn(AvatarCommandController.class).useHealthPotion(id, null))
             .withRel("useHealthPotion"),
-        linkTo(methodOn(AvatarController.class).applyDamage(id, null)).withRel("damage"));
+        linkTo(methodOn(AvatarCommandController.class).applyDamage(id, null)).withRel("damage"));
   }
 
   public EntityModel<ManaResponse> toManaModel(AvatarMana mana, String id) {
@@ -146,8 +150,9 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).useManaPotion(id, null)).withRel("useManaPotion"),
-        linkTo(methodOn(AvatarController.class).spendMana(id, null)).withRel("spend"));
+        linkTo(methodOn(AvatarCommandController.class).useManaPotion(id, null))
+            .withRel("useManaPotion"),
+        linkTo(methodOn(AvatarCommandController.class).spendMana(id, null)).withRel("spend"));
   }
 
   public EntityModel<StatsResponse> toStatsModel(AvatarStats stats, String id) {
@@ -157,9 +162,11 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).increaseStrength(id)).withRel("increaseStrength"),
-        linkTo(methodOn(AvatarController.class).increaseDefense(id)).withRel("increaseDefense"),
-        linkTo(methodOn(AvatarController.class).increaseIntelligence(id))
+        linkTo(methodOn(AvatarCommandController.class).increaseStrength(id))
+            .withRel("increaseStrength"),
+        linkTo(methodOn(AvatarCommandController.class).increaseDefense(id))
+            .withRel("increaseDefense"),
+        linkTo(methodOn(AvatarCommandController.class).increaseIntelligence(id))
             .withRel("increaseIntelligence"));
   }
 
@@ -183,13 +190,17 @@ public class AvatarResponseAssembler
 
   private Link selfLink(String id) {
     try {
-      return linkTo(methodOn(AvatarController.class).getAvatar(id)).withSelfRel();
+      return linkTo(methodOn(AvatarQueryController.class).getAvatar(id)).withSelfRel();
     } catch (AvatarNotFoundException e) {
       throw new RuntimeException(e);
     }
   }
 
   private Link avatarLink(String id) {
-    return linkTo(methodOn(AvatarController.class).getAvatar(id)).withRel("avatar");
+    try {
+      return linkTo(methodOn(AvatarQueryController.class).getAvatar(id)).withRel("avatar");
+    } catch (AvatarNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
