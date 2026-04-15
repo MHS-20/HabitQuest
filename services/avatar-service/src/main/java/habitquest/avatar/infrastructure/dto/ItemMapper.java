@@ -1,5 +1,6 @@
 package habitquest.avatar.infrastructure.dto;
 
+import habitquest.avatar.domain.avatar.Money;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.infrastructure.dto.AvatarRequestsDto.*;
 import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
@@ -8,6 +9,13 @@ import java.util.Locale;
 public final class ItemMapper {
 
   private ItemMapper() {}
+
+  public static Money toMoney(AmountRequest command) {
+    if (command.amount() < 0) {
+      throw new IllegalArgumentException("Money amount must be non-negative");
+    }
+    return new Money(command.amount());
+  }
 
   public static Item toDomain(ItemRequest command) {
     if (command.type() == null) {

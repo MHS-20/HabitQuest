@@ -95,8 +95,8 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     return Collections.unmodifiableList(inventory.getItems());
   }
 
-  public EquippedItems getEquippedItems() {
-    return equippedItems;
+  public List<Equipment> getEquippedItems() {
+    return Collections.unmodifiableList(equippedItems.getItems());
   }
 
   public Level getLevel() {
@@ -189,21 +189,21 @@ public class Avatar implements Aggregate<Id<Avatar>> {
   }
 
   // --- Money ---
-  public void earnMoney(Integer amount) {
-    if (amount <= 0) {
+  public void earnMoney(Money money) {
+    if (money.amount() <= 0) {
       throw new IllegalArgumentException("Amount must be positive");
     }
-    this.money = this.money.add(new Money(amount));
+    this.money = this.money.add(money);
   }
 
-  public void spendMoney(Integer amount) {
-    if (amount <= 0) {
+  public void spendMoney(Money money) {
+    if (money.amount() <= 0) {
       throw new IllegalArgumentException("Amount must be positive");
     }
-    if (!this.money.isEnough(new Money(amount))) {
+    if (!this.money.isEnough(money)) {
       throw new IllegalStateException("Not enough money");
     }
-    this.money = this.money.subtract(new Money(amount));
+    this.money = this.money.subtract(money);
   }
 
   // --- Inventory ---

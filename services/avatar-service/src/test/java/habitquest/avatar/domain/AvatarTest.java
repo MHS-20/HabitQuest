@@ -4,6 +4,7 @@ import static habitquest.avatar.AvatarFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 
 import habitquest.avatar.domain.avatar.Avatar;
+import habitquest.avatar.domain.avatar.Money;
 import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.domain.spells.Spell;
@@ -77,34 +78,37 @@ class AvatarTest {
     @Test
     @DisplayName("earnMoney adds the amount")
     void earnMoney() {
-      avatar.earnMoney(50);
+      avatar.earnMoney(new Money(50));
       assertThat(avatar.getMoney().amount()).isEqualTo(50);
     }
 
     @Test
     @DisplayName("earnMoney throws on non-positive amount")
     void earnMoneyNonPositive() {
-      assertThatThrownBy(() -> avatar.earnMoney(0)).isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(() -> avatar.earnMoney(new Money(0)))
+          .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("spendMoney subtracts the amount when funds are sufficient")
     void spendMoney() {
-      avatar.earnMoney(100);
-      avatar.spendMoney(40);
+      avatar.earnMoney(new Money(100));
+      avatar.spendMoney(new Money(40));
       assertThat(avatar.getMoney().amount()).isEqualTo(60);
     }
 
     @Test
     @DisplayName("spendMoney throws when funds are insufficient")
     void spendMoneyInsufficient() {
-      assertThatThrownBy(() -> avatar.spendMoney(1)).isInstanceOf(IllegalStateException.class);
+      assertThatThrownBy(() -> avatar.spendMoney(new Money(1)))
+          .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     @DisplayName("spendMoney throws on non-positive amount")
     void spendMoneyNonPositive() {
-      assertThatThrownBy(() -> avatar.spendMoney(0)).isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(() -> avatar.spendMoney(new Money(0)))
+          .isInstanceOf(IllegalArgumentException.class);
     }
   }
 
@@ -144,7 +148,7 @@ class AvatarTest {
       @Test
       @DisplayName("current health resets to max after lethal damage")
       void healthResets() {
-        avatar.earnMoney(200); // ensure money can be subtracted
+        avatar.earnMoney(new Money(200)); // ensure money can be subtracted
         avatar.takeDamage(9999);
         assertThat(avatar.getHealth().current().value())
             .isEqualTo(avatar.getHealth().max().value());
@@ -153,7 +157,7 @@ class AvatarTest {
       @Test
       @DisplayName("mana resets to max after lethal damage")
       void manaResets() {
-        avatar.earnMoney(200);
+        avatar.earnMoney(new Money(200));
         avatar.spendMana(20);
         avatar.takeDamage(9999);
         assertThat(avatar.getMana().amount().value()).isEqualTo(avatar.getMana().max().value());
@@ -162,7 +166,7 @@ class AvatarTest {
       @Test
       @DisplayName("experience resets to zero after lethal damage")
       void experienceResets() {
-        avatar.earnMoney(200);
+        avatar.earnMoney(new Money(200));
         avatar.gainExperience(50);
         avatar.takeDamage(9999);
         assertThat(avatar.getLevel().currentExperience().amount()).isZero();
@@ -171,9 +175,8 @@ class AvatarTest {
       @Test
       @DisplayName("100 coins are deducted on death")
       void moneyDeducted() {
-        avatar.earnMoney(200);
+        avatar.earnMoney(new Money(200));
         avatar.takeDamage(9999);
-        // 200 earned initially − 100 penalty
         assertThat(avatar.getMoney().amount()).isEqualTo(100);
       }
     }
@@ -295,7 +298,7 @@ class AvatarTest {
     void equipItem() {
       avatar.addItemToInventory(sword);
       avatar.equipItem(sword);
-      assertThat(avatar.getEquippedItems().getItems()).contains(sword);
+      assertThat(avatar.getEquippedItems()).contains(sword);
       assertThat(avatar.getInventory()).doesNotContain(sword);
     }
 
@@ -312,7 +315,7 @@ class AvatarTest {
       avatar.equipItem(sword);
       avatar.unequipItem(sword);
       assertThat(avatar.getInventory()).contains(sword);
-      assertThat(avatar.getEquippedItems().getItems()).doesNotContain(sword);
+      assertThat(avatar.getEquippedItems()).doesNotContain(sword);
     }
   }
 
