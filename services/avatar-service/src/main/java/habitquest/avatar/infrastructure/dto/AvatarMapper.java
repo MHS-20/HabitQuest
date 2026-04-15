@@ -6,7 +6,7 @@ import habitquest.avatar.domain.avatar.AvatarMana;
 import habitquest.avatar.domain.avatar.Experience;
 import habitquest.avatar.domain.avatar.Level;
 import habitquest.avatar.domain.avatar.Money;
-import habitquest.avatar.domain.items.EquippedItems;
+import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
@@ -26,8 +26,8 @@ public final class AvatarMapper {
         toResponse(avatar.getHealth()),
         toResponse(avatar.getMana()),
         toResponse(avatar.getAvatarStats()),
-        toResponse(avatar.getInventory()),
-        toResponse(avatar.getEquippedItems()),
+        toInventoryResponse(avatar.getInventory()),
+        toEquipmentResponse(avatar.getEquippedItems()),
         avatar.getSpells().stream().map(Spell::getName).toList());
   }
 
@@ -59,14 +59,13 @@ public final class AvatarMapper {
         stats.getStrength().value(), stats.getDefense().value(), stats.getIntelligence().value());
   }
 
-  public static InventoryResponse toResponse(List<Item> inventory) {
+  public static InventoryResponse toInventoryResponse(List<Item> inventory) {
     List<ItemResponse> items = inventory.stream().map(ItemMapper::toResponse).toList();
     return new InventoryResponse(items);
   }
 
-  public static EquippedItemsResponse toResponse(EquippedItems equippedItems) {
-    List<ItemResponse> items =
-        equippedItems.getItems().stream().map(ItemMapper::toResponse).toList();
-    return new EquippedItemsResponse(equippedItems.getId().value(), items);
+  public static EquippedItemsResponse toEquipmentResponse(List<Equipment> equippedItems) {
+    List<ItemResponse> items = equippedItems.stream().map(ItemMapper::toResponse).toList();
+    return new EquippedItemsResponse(items);
   }
 }

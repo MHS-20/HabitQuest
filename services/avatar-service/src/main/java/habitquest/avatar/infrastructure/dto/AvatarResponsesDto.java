@@ -12,7 +12,7 @@ public class AvatarResponsesDto {
 
   public record ExperienceResponse(Integer amount) {}
 
-  public record EquippedItemsResponse(String id, List<ItemResponse> items) {
+  public record EquippedItemsResponse(List<ItemResponse> items) {
     public EquippedItemsResponse {
       items = List.copyOf(items);
     }

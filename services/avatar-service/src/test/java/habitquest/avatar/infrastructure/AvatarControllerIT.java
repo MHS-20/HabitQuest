@@ -289,7 +289,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates to service")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarService).earnMoney(AVATAR_ID, 100);
+      doNothing().when(avatarService).earnMoney(AVATAR_ID, new Money(100));
 
       mockMvc
           .perform(
@@ -298,7 +298,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 100}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).earnMoney(AVATAR_ID, 100);
+      verify(avatarService).earnMoney(AVATAR_ID, new Money(100));
     }
 
     @Test
@@ -306,7 +306,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnNonPositiveAmount() throws Exception {
       doThrow(new IllegalArgumentException("Amount must be positive"))
           .when(avatarService)
-          .earnMoney(AVATAR_ID, 0);
+          .earnMoney(AVATAR_ID, new Money(0));
 
       mockMvc
           .perform(
@@ -326,7 +326,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 on success")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarService).spendMoney(AVATAR_ID, 50);
+      doNothing().when(avatarService).spendMoney(AVATAR_ID, new Money(50));
 
       mockMvc
           .perform(
@@ -335,7 +335,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 50}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).spendMoney(AVATAR_ID, 50);
+      verify(avatarService).spendMoney(AVATAR_ID, new Money(50));
     }
 
     @Test
@@ -343,7 +343,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnInsufficientFunds() throws Exception {
       doThrow(new IllegalStateException("Not enough money"))
           .when(avatarService)
-          .spendMoney(AVATAR_ID, 9999);
+          .spendMoney(AVATAR_ID, new Money(9999));
 
       mockMvc
           .perform(
@@ -422,25 +422,25 @@ public class AvatarControllerIT {
     }
   }
 
-  // ── POST /api/v1/avatars/{id}/health/heal ────────────────────────────────────
+  // ── POST /api/v1/avatars/{id}/health/potion ────────────────────────────────────
 
   @Nested
-  @DisplayName("POST /api/v1/avatars/{id}/health/heal")
-  class HealAvatar {
+  @DisplayName("POST /api/v1/avatars/{id}/health/potion")
+  class UseHealthPotion {
 
     @Test
-    @DisplayName("returns 204 and delegates heal amount")
-    void shouldHealAvatar() throws Exception {
-      doNothing().when(avatarService).healAvatar(AVATAR_ID, 20);
+    @DisplayName("returns 204 and delegates potion name")
+    void shouldUseHealthPotion() throws Exception {
+      doNothing().when(avatarService).useHealthPotion(AVATAR_ID, "Greater Health Potion");
 
       mockMvc
           .perform(
-              post("/api/v1/avatars/{id}/health/heal", AVATAR_1)
+              post("/api/v1/avatars/{id}/health/potion", AVATAR_1)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"amount\": 20}"))
+                  .content("{\"potionName\": \"Greater Health Potion\"}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).healAvatar(AVATAR_ID, 20);
+      verify(avatarService).useHealthPotion(AVATAR_ID, "Greater Health Potion");
     }
   }
 
@@ -501,25 +501,24 @@ public class AvatarControllerIT {
     }
   }
 
-  // ── POST /api/v1/avatars/{id}/mana/restore ───────────────────────────────────
-
+  // ── POST /api/v1/avatars/{id}/mana/potion ───────────────────────────────────
   @Nested
-  @DisplayName("POST /api/v1/avatars/{id}/mana/restore")
-  class RestoreMana {
+  @DisplayName("POST /api/v1/avatars/{id}/mana/potion")
+  class UseManaPotion {
 
     @Test
-    @DisplayName("returns 204 and delegates restore amount")
-    void shouldRestoreMana() throws Exception {
-      doNothing().when(avatarService).restoreMana(AVATAR_ID, 15);
+    @DisplayName("returns 204 and delegates potion name")
+    void shouldUseManaPotion() throws Exception {
+      doNothing().when(avatarService).useManaPotion(AVATAR_ID, "Greater Mana Potion");
 
       mockMvc
           .perform(
-              post("/api/v1/avatars/{id}/mana/restore", AVATAR_1)
+              post("/api/v1/avatars/{id}/mana/potion", AVATAR_1)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"amount\": 15}"))
+                  .content("{\"potionName\": \"Greater Mana Potion\"}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarService).restoreMana(AVATAR_ID, 15);
+      verify(avatarService).useManaPotion(AVATAR_ID, "Greater Mana Potion");
     }
   }
 
@@ -665,9 +664,9 @@ public class AvatarControllerIT {
     @DisplayName("returns 200 with equipped items list")
     void shouldReturnEquippedItems() throws Exception {
       EquippedItems equippedItems = new EquippedItems(EQUIPPED_ID);
-      when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems);
+      when(avatarService.getEquippedItems(AVATAR_ID)).thenReturn(equippedItems.getItems());
       when(avatarResponseAssembler.toEquippedItemsModel(any(), eq(AVATAR_1)))
-          .thenReturn(EntityModel.of(new EquippedItemsResponse(AVATAR_1, List.of())));
+          .thenReturn(EntityModel.of(new EquippedItemsResponse(List.of())));
 
       mockMvc
           .perform(get("/api/v1/avatars/{id}/equipped-items", AVATAR_1))

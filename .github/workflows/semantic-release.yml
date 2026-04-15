@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
 
       - name: Install semantic-release
         run: |
@@ -48,7 +48,8 @@ jobs:
             @semantic-release/github \
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
-            semantic-release-monorepo
+            semantic-release-monorepo \ 
+            conventional-changelog-conventionalcommits
 
       - name: Run Semantic Release
         id: semantic
@@ -59,9 +60,9 @@ jobs:
           cd services/$SERVICE
           npx semantic-release 2>&1 | tee release_output.log
           if grep -q "Created tag" release_output.log; then
-            # VERSION=$(grep -oP "${SERVICE_SHORT}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
+            VERSION=$(grep -oP "${SERVICE_SHORT}-v\K[0-9]+\.[0-9]+\.[0-9]+" release_output.log | head -1)
             # VERSION=$(sed -n "s/.*${SERVICE_SHORT}-v\([0-9.]*\).*/\1/p" release_output.log | head -1)
-            VERSION=$(node -p "require('./package.json').version")
+            # VERSION=$(node -p "require('./package.json').version")
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "Detected Version: $VERSION"
           else
