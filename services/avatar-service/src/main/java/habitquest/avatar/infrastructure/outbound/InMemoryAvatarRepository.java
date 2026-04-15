@@ -3,7 +3,7 @@ package habitquest.avatar.infrastructure.outbound;
 import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.avatar.application.port.out.AvatarRepository;
-import habitquest.avatar.application.service.AvatarSearchRequest;
+import habitquest.avatar.application.service.AvatarSearchQuery;
 import habitquest.avatar.domain.avatar.Avatar;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +32,7 @@ public class InMemoryAvatarRepository implements AvatarRepository {
   }
 
   @Override
-  public List<Avatar> search(AvatarSearchRequest criteria) {
+  public List<Avatar> search(AvatarSearchQuery criteria) {
     if (criteria == null) {
       return new ArrayList<>(store.values());
     }
