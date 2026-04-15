@@ -14,6 +14,8 @@ import habitquest.avatar.application.service.AvatarServiceImpl;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
+import habitquest.avatar.domain.items.HealthPotion;
+import habitquest.avatar.domain.items.ManaPotion;
 import habitquest.avatar.domain.spells.Spell;
 import java.util.List;
 import java.util.Optional;
@@ -145,9 +147,7 @@ class AvatarServiceImplTest {
     void earnMoney() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.earnMoney(AVATAR_ID, 50);
-
+      service.earnMoney(AVATAR_ID, new Money(50));
       assertThat(avatar.getMoney().amount()).isEqualTo(50);
       verify(avatarRepository).save(avatar);
     }
@@ -156,11 +156,9 @@ class AvatarServiceImplTest {
     @DisplayName("spendMoney decreases money and saves")
     void spendMoney() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
-      avatar.earnMoney(100);
+      avatar.earnMoney(new Money(100));
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.spendMoney(AVATAR_ID, 40);
-
+      service.spendMoney(AVATAR_ID, new Money(40));
       assertThat(avatar.getMoney().amount()).isEqualTo(60);
       verify(avatarRepository).save(avatar);
     }
@@ -189,7 +187,7 @@ class AvatarServiceImplTest {
     @DisplayName("fires Dead event when avatar dies from damage")
     void damageLethal() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
-      avatar.earnMoney(200);
+      avatar.earnMoney(new Money(200));
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
       service.applyDamage(AVATAR_ID, 9999);
@@ -197,59 +195,49 @@ class AvatarServiceImplTest {
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(Dead.class);
-      // .value() restituisce la stringa: confrontiamo con AVATAR_1, non AVATAR_ID (che è Id<>)
       assertThat(((Dead) captor.getValue()).avatarId().value()).isEqualTo(AVATAR_1);
     }
   }
 
-  // ─── healAvatar ──────────────────────────────────────────────────────────────
-
+  // ─── use Potion ──────────────────────────────────────────────────────────────
   @Nested
-  @DisplayName("healAvatar")
-  class HealAvatar {
+  @DisplayName("useHealthPotion")
+  class UseHealthPotion {
 
     @Test
-    @DisplayName("increases health and saves")
-    void heals() throws AvatarNotFoundException {
+    @DisplayName("heals avatar with potion power and saves")
+    void usesHealthPotion() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       avatar.takeDamage(40);
+      HealthPotion potion = new HealthPotion("Minor Health Potion", "Restores 20 HP", 20);
+      avatar.addItemToInventory(potion);
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.healAvatar(AVATAR_ID, 20);
+      service.useHealthPotion(AVATAR_ID, "Minor Health Potion");
 
       assertThat(avatar.getHealth().current().value()).isEqualTo(80);
+      assertThat(avatar.getInventory()).doesNotContain(potion);
       verify(avatarRepository).save(avatar);
     }
   }
 
-  // ─── Mana ────────────────────────────────────────────────────────────────────
-
   @Nested
-  @DisplayName("mana operations")
-  class ManaOperations {
+  @DisplayName("useManaPotion")
+  class UseManaPotion {
 
     @Test
-    @DisplayName("spendMana reduces mana and saves")
-    void spendMana() throws AvatarNotFoundException {
-      Avatar avatar = mutableAvatar();
-      when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.spendMana(AVATAR_ID, 10);
-
-      assertThat(avatar.getMana().amount().value()).isEqualTo(40);
-      verify(avatarRepository).save(avatar);
-    }
-
-    @Test
-    @DisplayName("restoreMana increases mana and saves")
-    void restoreMana() throws AvatarNotFoundException {
+    @DisplayName("restores mana with potion power and saves")
+    void usesManaPotion() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       avatar.spendMana(20);
+      ManaPotion potion = new ManaPotion("Minor Mana Potion", "Restores 10 MP", 10);
+      avatar.addItemToInventory(potion);
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.restoreMana(AVATAR_ID, 10);
+      service.useManaPotion(AVATAR_ID, "Minor Mana Potion");
 
       assertThat(avatar.getMana().amount().value()).isEqualTo(40);
+      assertThat(avatar.getInventory()).doesNotContain(potion);
       verify(avatarRepository).save(avatar);
     }
   }
@@ -432,7 +420,7 @@ class AvatarServiceImplTest {
 
       service.equipItem(AVATAR_ID, SWORD);
 
-      assertThat(avatar.getEquippedItems().getItems()).contains(SWORD);
+      assertThat(avatar.getEquippedItems()).contains(SWORD);
       assertThat(avatar.getInventory()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
     }
@@ -448,7 +436,7 @@ class AvatarServiceImplTest {
       service.unequipItem(AVATAR_ID, SWORD);
 
       assertThat(avatar.getInventory()).contains(SWORD);
-      assertThat(avatar.getEquippedItems().getItems()).doesNotContain(SWORD);
+      assertThat(avatar.getEquippedItems()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
     }
   }

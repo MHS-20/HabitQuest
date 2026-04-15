@@ -199,11 +199,11 @@ public class HabitControllerIT {
     @Test
     @DisplayName("applies tags when provided during creation")
     void shouldApplyTagsWhenProvided() throws Exception {
-      when(habitService.createDailyHabit(any(), anyString(), anyString(), any()))
+      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitService.updateTags(eq(HABIT_ID), anyList())).thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
-          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+          .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(
@@ -231,10 +231,10 @@ public class HabitControllerIT {
     @Test
     @DisplayName("does not apply tags when request has no tags")
     void shouldNotApplyTagsWhenMissing() throws Exception {
-      when(habitService.createDailyHabit(any(), anyString(), anyString(), any()))
+      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
-          .thenReturn(EntityModel.of(new HabitController.HabitCreatedResponse(HABIT_ID.value())));
+          .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
       mockMvc
           .perform(

@@ -88,7 +88,7 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public EquippedItems getEquippedItems(Id<Avatar> avatarId) throws AvatarNotFoundException {
+  public List<Equipment> getEquippedItems(Id<Avatar> avatarId) throws AvatarNotFoundException {
     return getAvatarById(avatarId).getEquippedItems();
   }
 
@@ -125,14 +125,14 @@ public class AvatarServiceImpl implements AvatarService {
   }
 
   @Override
-  public void spendMoney(Id<Avatar> avatarId, Integer money) throws AvatarNotFoundException {
+  public void spendMoney(Id<Avatar> avatarId, Money money) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.spendMoney(money);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void earnMoney(Id<Avatar> avatarId, Integer money) throws AvatarNotFoundException {
+  public void earnMoney(Id<Avatar> avatarId, Money money) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.earnMoney(money);
     avatarRepository.save(avatar);
@@ -191,6 +191,7 @@ public class AvatarServiceImpl implements AvatarService {
                 () -> new IllegalArgumentException("No potion found with name: " + potionName));
     avatar.heal(potion.power());
     avatar.removeItemFromInventory(potion);
+    avatarRepository.save(avatar);
   }
 
   @Override
@@ -206,12 +207,6 @@ public class AvatarServiceImpl implements AvatarService {
                 () -> new IllegalArgumentException("No potion found with name: " + potionName));
     avatar.restoreMana(potion.power());
     avatar.removeItemFromInventory(potion);
-  }
-
-  @Override
-  public void healAvatar(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
-    Avatar avatar = getAvatarById(avatarId);
-    avatar.heal(amount);
     avatarRepository.save(avatar);
   }
 
@@ -219,13 +214,6 @@ public class AvatarServiceImpl implements AvatarService {
   public void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
     Avatar avatar = getAvatarById(avatarId);
     avatar.spendMana(amount);
-    avatarRepository.save(avatar);
-  }
-
-  @Override
-  public void restoreMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
-    Avatar avatar = getAvatarById(avatarId);
-    avatar.restoreMana(amount);
     avatarRepository.save(avatar);
   }
 

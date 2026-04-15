@@ -109,7 +109,7 @@ public final class AvatarFixtures {
         new ManaResponse(DEFAULT_MANA, DEFAULT_MANA),
         new StatsResponse(DEFAULT_STRENGTH, DEFAULT_DEFENSE, DEFAULT_INTELLIGENCE),
         new InventoryResponse(List.of()),
-        new EquippedItemsResponse(AVATAR_1, List.of()),
+        new EquippedItemsResponse(List.of()),
         new ArrayList<>(List.of(Spell.FIREBALL.getName())));
   }
 
