@@ -6,7 +6,6 @@ import habitquest.avatar.application.exceptions.AvatarNotFoundException;
 import habitquest.avatar.application.service.AvatarSearchRequest;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.Equipment;
-import habitquest.avatar.domain.items.EquippedItems;
 import habitquest.avatar.domain.items.Item;
 import habitquest.avatar.domain.stats.AvatarStats;
 import java.util.List;
@@ -36,7 +35,7 @@ public interface AvatarService {
 
   List<Item> getInventory(Id<Avatar> avatarId) throws AvatarNotFoundException;
 
-  EquippedItems getEquippedItems(Id<Avatar> avatarId) throws AvatarNotFoundException;
+  List<Equipment> getEquippedItems(Id<Avatar> avatarId) throws AvatarNotFoundException;
 
   Experience getExperience(Id<Avatar> avatarId) throws AvatarNotFoundException;
 
@@ -49,9 +48,9 @@ public interface AvatarService {
   AvatarStats getAvatarStats(Id<Avatar> avatarId) throws AvatarNotFoundException;
 
   // --- Money ---
-  void earnMoney(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
+  void earnMoney(Id<Avatar> avatarId, Money amount) throws AvatarNotFoundException;
 
-  void spendMoney(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
+  void spendMoney(Id<Avatar> avatarId, Money amount) throws AvatarNotFoundException;
 
   // --- Inventory ---
   void addToInventory(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException;
@@ -65,15 +64,11 @@ public interface AvatarService {
   // --- Battle ---
   boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
 
+  void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
+
   void useHealthPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;
 
   void useManaPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;
-
-  void healAvatar(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
-
-  void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
-
-  void restoreMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
 
   // --- Progression ---
   void grantExperience(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;

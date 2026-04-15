@@ -89,7 +89,7 @@ public class AvatarResponseAssembler
   }
 
   public EntityModel<InventoryResponse> toInventoryModel(List<Item> inventory, String id) {
-    InventoryResponse dto = AvatarMapper.toResponse(inventory);
+    InventoryResponse dto = AvatarMapper.toInventoryResponse(inventory);
 
     return EntityModel.of(
         dto,
@@ -101,8 +101,8 @@ public class AvatarResponseAssembler
   }
 
   public EntityModel<EquippedItemsResponse> toEquippedItemsModel(
-      EquippedItems equippedItems, String id) {
-    EquippedItemsResponse dto = AvatarMapper.toResponse(equippedItems);
+      List<Equipment> equippedItems, String id) {
+    EquippedItemsResponse dto = AvatarMapper.toEquipmentResponse(equippedItems);
 
     return EntityModel.of(
         dto,
@@ -134,7 +134,8 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).healAvatar(id, null)).withRel("heal"),
+        linkTo(methodOn(AvatarController.class).useHealthPotion(id, null))
+            .withRel("useHealthPotion"),
         linkTo(methodOn(AvatarController.class).applyDamage(id, null)).withRel("damage"));
   }
 
@@ -145,7 +146,7 @@ public class AvatarResponseAssembler
         dto,
         selfLink(id),
         avatarLink(id),
-        linkTo(methodOn(AvatarController.class).restoreMana(id, null)).withRel("restore"),
+        linkTo(methodOn(AvatarController.class).useManaPotion(id, null)).withRel("useManaPotion"),
         linkTo(methodOn(AvatarController.class).spendMana(id, null)).withRel("spend"));
   }
 

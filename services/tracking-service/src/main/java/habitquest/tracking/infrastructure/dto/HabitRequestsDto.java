@@ -12,6 +12,7 @@ public class HabitRequestsDto {
       String recurrenceType,
       DayOfWeek dayOfWeek,
       Integer dayOfMonth,
+      List<String> tags,
       String associatedQuestId,
       String sourceHabitId) {}
 

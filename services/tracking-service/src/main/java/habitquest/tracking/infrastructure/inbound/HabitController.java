@@ -17,6 +17,7 @@ import habitquest.tracking.infrastructure.exceptions.QuestCommunicationException
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,23 @@ public class HabitController {
             recurrence,
             request.associatedQuestId(),
             request.sourceHabitId());
+
+    List<Tag> tags =
+        request.tags() == null
+            ? List.of()
+            : request.tags().stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(tag -> !tag.isBlank())
+                .map(Tag::new)
+                .toList();
+    if (!tags.isEmpty()) {
+      try {
+        created = habitService.updateTags(created.getId(), tags);
+      } catch (HabitNotFoundException ex) {
+        throw new IllegalStateException("Created habit not found while applying tags", ex);
+      }
+    }
 
     log.info(created, "Habit created");
     return ResponseEntity.created(URI.create("/api/v1/habits/" + created.getId().value()))
