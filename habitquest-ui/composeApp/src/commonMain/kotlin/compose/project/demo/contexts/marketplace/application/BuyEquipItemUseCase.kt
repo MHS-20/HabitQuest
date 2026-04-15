@@ -7,28 +7,25 @@ import compose.project.demo.contexts.marketplace.domain.contract.MarketplaceGate
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
 
 class BuyEquipItemUseCase(
-  private val marketplaceGateway: MarketplaceGateway,
-  private val avatarGateway: AvatarGateway,
+    private val marketplaceGateway: MarketplaceGateway,
+    private val avatarGateway: AvatarGateway,
 ) {
-  suspend fun buy(
-    token: String,
-    marketplaceId: String,
-    itemName: String,
-    currentLevel: Int,
-  ): MarketplaceBuyResult {
-    return marketplaceGateway.buyItem(token, marketplaceId, itemName, currentLevel)
-  }
+    suspend fun buy(
+        token: String,
+        marketplaceId: String,
+        itemName: String,
+        currentLevel: Int,
+    ): MarketplaceBuyResult = marketplaceGateway.buyItem(token, marketplaceId, itemName, currentLevel)
 
-  suspend fun toggleEquip(
-    token: String,
-    avatarId: String,
-    item: AvatarInventoryItem,
-    isEquipped: Boolean,
-  ): AvatarInventoryActionResult {
-    return if (isEquipped) {
-      avatarGateway.unequipItem(token, avatarId, item)
-    } else {
-      avatarGateway.equipItem(token, avatarId, item)
-    }
-  }
+    suspend fun toggleEquip(
+        token: String,
+        avatarId: String,
+        item: AvatarInventoryItem,
+        isEquipped: Boolean,
+    ): AvatarInventoryActionResult =
+        if (isEquipped) {
+            avatarGateway.unequipItem(token, avatarId, item)
+        } else {
+            avatarGateway.equipItem(token, avatarId, item)
+        }
 }

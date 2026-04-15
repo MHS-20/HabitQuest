@@ -15,7 +15,7 @@ import habitquest.avatar.domain.items.Inventory;
 import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
-import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
+import habitquest.avatar.infrastructure.dto.AvatarQueries.*;
 import java.util.ArrayList;
 import java.util.List;
 

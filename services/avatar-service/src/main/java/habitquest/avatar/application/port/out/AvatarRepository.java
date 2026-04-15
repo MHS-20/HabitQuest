@@ -3,7 +3,7 @@ package habitquest.avatar.application.port.out;
 import common.ddd.Id;
 import common.ddd.Repository;
 import common.hexagonal.OutBoundPort;
-import habitquest.avatar.application.service.AvatarSearchRequest;
+import habitquest.avatar.application.service.AvatarSearchQuery;
 import habitquest.avatar.domain.avatar.Avatar;
 import java.util.List;
 import java.util.Optional;
@@ -16,5 +16,5 @@ public interface AvatarRepository extends Repository {
 
   void deleteById(Id<Avatar> id);
 
-  List<Avatar> search(AvatarSearchRequest criteria);
+  List<Avatar> search(AvatarSearchQuery criteria);
 }
