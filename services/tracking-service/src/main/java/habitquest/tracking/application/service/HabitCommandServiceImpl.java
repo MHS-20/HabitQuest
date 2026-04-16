@@ -3,33 +3,20 @@ package habitquest.tracking.application.service;
 import common.ddd.Id;
 import common.hexagonal.Adapter;
 import habitquest.tracking.application.exceptions.HabitNotFoundException;
-import habitquest.tracking.application.port.in.HabitService;
-import habitquest.tracking.application.port.out.AvatarClientPort;
-import habitquest.tracking.application.port.out.HabitHistoryRepository;
-import habitquest.tracking.application.port.out.HabitRepository;
-import habitquest.tracking.application.port.out.QuestClientPort;
-import habitquest.tracking.domain.Avatar;
-import habitquest.tracking.domain.Habit;
-import habitquest.tracking.domain.Tag;
-import habitquest.tracking.domain.events.HabitAttended;
-import habitquest.tracking.domain.events.HabitCreated;
-import habitquest.tracking.domain.events.HabitDeleted;
-import habitquest.tracking.domain.events.HabitEvent;
-import habitquest.tracking.domain.events.HabitHistoryEvent;
-import habitquest.tracking.domain.events.HabitNotAttended;
-import habitquest.tracking.domain.events.HabitObserver;
-import habitquest.tracking.domain.events.HabitUpdated;
+import habitquest.tracking.application.port.in.HabitCommandService;
+import habitquest.tracking.application.port.out.*;
+import habitquest.tracking.domain.*;
+import habitquest.tracking.domain.events.*;
 import habitquest.tracking.domain.factory.HabitFactory;
 import habitquest.tracking.domain.reminder.Recurrence;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 
 @Adapter
 @Service
-public class HabitServiceImpl implements HabitService {
+public class HabitCommandServiceImpl implements HabitCommandService {
 
   private static final int ATTEND_HABIT_XP_REWARD = 10;
   private static final int NOT_ATTENDED_DAMAGE = 10;
@@ -41,7 +28,7 @@ public class HabitServiceImpl implements HabitService {
   private final AvatarClientPort avatarClient;
   private final QuestClientPort questClient;
 
-  public HabitServiceImpl(
+  public HabitCommandServiceImpl(
       HabitRepository habitRepository,
       HabitHistoryRepository historyRepository,
       HabitFactory habitFactory,
@@ -75,86 +62,8 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
-  public Habit getHabitById(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
-  }
-
-  @Override
-  public List<Habit> getHabitsByAvatarId(Id<Avatar> avatarId) {
-    return habitRepository.findByAvatarId(avatarId);
-  }
-
-  @Override
-  public void deleteHabitById(Id<Habit> habitId) throws HabitNotFoundException {
-    Habit habit = getHabitById(habitId);
-    habitRepository.deleteById(habitId);
-    HabitDeleted event = new HabitDeleted(habitId, habit.getAvatarId());
-    appendHistory(event, "habit deleted");
-    habitObserver.notifyHabitEvent(event);
-  }
-
-  @Override
-  public String getTitle(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()))
-        .getTitle();
-  }
-
-  @Override
-  public String getDescription(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()))
-        .getDescription();
-  }
-
-  @Override
-  public List<Tag> getTags(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()))
-        .getTags();
-  }
-
-  @Override
-  public Recurrence getRecurrence(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()))
-        .getRecurrence();
-  }
-
-  @Override
-  public LocalDateTime getLastAttendedDate(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()))
-        .getLastAttendedDate();
-  }
-
-  @Override
-  public List<HabitHistoryEvent> getHistory(Id<Habit> habitId) {
-    getHabitById(habitId);
-    return historyRepository.findByHabitId(habitId);
-  }
-
-  @Override
-  public List<HabitHistoryEvent> getHistoryByAvatarId(Id<Avatar> avatarId) {
-    return habitRepository.findByAvatarId(avatarId).stream()
-        .flatMap(habit -> historyRepository.findByHabitId(habit.getId()).stream())
-        .sorted(Comparator.comparing(HabitHistoryEvent::occurredAt).reversed())
-        .toList();
-  }
-
-  @Override
   public Habit updateTitle(Id<Habit> habitId, String title) throws HabitNotFoundException {
-    Habit habit =
-        habitRepository
-            .findById(habitId)
-            .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
+    Habit habit = findOrThrow(habitId);
     habit.setTitle(title);
     habitRepository.save(habit);
     appendHistory(new HabitUpdated(habit, habit.getAvatarId()), "title=" + title);
@@ -164,10 +73,7 @@ public class HabitServiceImpl implements HabitService {
   @Override
   public Habit updateDescription(Id<Habit> habitId, String description)
       throws HabitNotFoundException {
-    Habit habit =
-        habitRepository
-            .findById(habitId)
-            .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
+    Habit habit = findOrThrow(habitId);
     habit.setDescription(description);
     habitRepository.save(habit);
     appendHistory(new HabitUpdated(habit, habit.getAvatarId()), "description updated");
@@ -176,10 +82,7 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit updateTags(Id<Habit> habitId, List<Tag> tags) throws HabitNotFoundException {
-    Habit habit =
-        habitRepository
-            .findById(habitId)
-            .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
+    Habit habit = findOrThrow(habitId);
     habit.setTags(tags);
     habitRepository.save(habit);
     appendHistory(
@@ -190,10 +93,7 @@ public class HabitServiceImpl implements HabitService {
   @Override
   public Habit updateRecurrence(Id<Habit> habitId, Recurrence recurrence)
       throws HabitNotFoundException {
-    Habit habit =
-        habitRepository
-            .findById(habitId)
-            .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
+    Habit habit = findOrThrow(habitId);
     habit.setRecurrence(recurrence);
     habitRepository.save(habit);
     appendHistory(
@@ -204,10 +104,7 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   public Habit attendHabit(Id<Habit> habitId, LocalDateTime date) throws HabitNotFoundException {
-    Habit habit =
-        habitRepository
-            .findById(habitId)
-            .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
+    Habit habit = findOrThrow(habitId);
     habit.attendHabit(date);
     habitRepository.save(habit);
     avatarClient.grantExperience(habit.getAvatarId(), ATTEND_HABIT_XP_REWARD);
@@ -227,10 +124,18 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
+  public void deleteHabitById(Id<Habit> habitId) throws HabitNotFoundException {
+    Habit habit = findOrThrow(habitId);
+    habitRepository.deleteById(habitId);
+    HabitDeleted event = new HabitDeleted(habitId, habit.getAvatarId());
+    appendHistory(event, "habit deleted");
+    habitObserver.notifyHabitEvent(event);
+  }
+
+  @Override
   public void detectOverdueHabits() {
     LocalDateTime now = LocalDateTime.now();
-    List<Habit> habits = habitRepository.findAll();
-    for (Habit habit : habits) {
+    for (Habit habit : habitRepository.findAll()) {
       LocalDateTime lastAttendedDate = habit.getLastAttendedDate();
       if (lastAttendedDate == null) {
         HabitNotAttended event = new HabitNotAttended(habit, habit.getAvatarId());
@@ -252,6 +157,12 @@ public class HabitServiceImpl implements HabitService {
         habitObserver.notifyHabitEvent(event);
       }
     }
+  }
+
+  private Habit findOrThrow(Id<Habit> habitId) throws HabitNotFoundException {
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
   }
 
   private void appendHistory(HabitEvent event, String details) {
