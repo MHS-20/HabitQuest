@@ -7,10 +7,12 @@ import static org.mockito.Mockito.*;
 
 import common.ddd.Id;
 import habitquest.guild.application.exceptions.GuildNotFoundException;
-import habitquest.guild.application.port.in.BattleService;
+import habitquest.guild.application.port.in.BattleCommandService;
+import habitquest.guild.application.port.in.BattleQueryService;
 import habitquest.guild.application.port.out.AvatarClientPort;
 import habitquest.guild.application.port.out.GuildRepository;
-import habitquest.guild.application.service.GuildServiceImpl;
+import habitquest.guild.application.service.GuildCommandServiceImpl;
+import habitquest.guild.application.service.GuildQueryServiceImpl;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.events.guildEvents.*;
 import habitquest.guild.domain.factory.GuildFactory;
@@ -38,11 +40,13 @@ class GuildServiceImplTest {
   @Mock private GuildFactory guildFactory;
   @Mock private GuildRepository guildRepository;
   @Mock private GuildObserver guildObserver;
-  @Mock private BattleService battleService;
+  @Mock private BattleCommandService battleCommandService;
+  @Mock private BattleQueryService battleQueryService;
   @Mock private InviteFactory inviteFactory;
   @Mock private AvatarClientPort avatarPort;
 
-  @InjectMocks private GuildServiceImpl guildService;
+  @InjectMocks private GuildCommandServiceImpl guildCommandService;
+  @InjectMocks private GuildQueryServiceImpl guildQueryService;
 
   private Guild guild;
 
@@ -62,7 +66,7 @@ class GuildServiceImplTest {
     void shouldCreateAndSave() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      guildService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK);
+      guildCommandService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK);
 
       verify(guildRepository).save(guild);
     }
@@ -72,7 +76,7 @@ class GuildServiceImplTest {
     void shouldReturnGuildId() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      Id<Guild> result = guildService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK);
+      Id<Guild> result = guildCommandService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK);
 
       assertThat(result).isEqualTo(GUILD_ID);
     }
@@ -82,7 +86,7 @@ class GuildServiceImplTest {
     void shouldPublishGuildCreatedEvent() {
       when(guildFactory.create(any(), any(), any())).thenReturn(guild);
 
-      guildService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK);
+      guildCommandService.createGuild(GUILD_NAME, LEADER_ID, LEADER_NICK);
 
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver).notifyGuildEvent(captor.capture());
@@ -102,7 +106,7 @@ class GuildServiceImplTest {
     void shouldReturnGuildWhenFound() throws GuildNotFoundException {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
-      Guild result = guildService.getGuild(GUILD_ID);
+      Guild result = guildQueryService.getGuild(GUILD_ID);
 
       assertThat(result).isSameAs(guild);
     }
@@ -112,7 +116,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> guildService.getGuild(GUILD_ID))
+      assertThatThrownBy(() -> guildQueryService.getGuild(GUILD_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -128,7 +132,7 @@ class GuildServiceImplTest {
     void shouldDeleteAndPublishEvent() throws GuildNotFoundException {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
-      guildService.deleteGuild(GUILD_ID);
+      guildCommandService.deleteGuild(GUILD_ID);
 
       verify(guildRepository).deleteById(GUILD_ID);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
@@ -141,7 +145,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> guildService.deleteGuild(GUILD_ID))
+      assertThatThrownBy(() -> guildCommandService.deleteGuild(GUILD_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -157,7 +161,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> guildService.getMembers(GUILD_ID))
+      assertThatThrownBy(() -> guildQueryService.getMembers(GUILD_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -176,7 +180,7 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(inviteFactory.create(GUILD_ID, MEMBER_ID)).thenReturn(invite);
 
-      guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
+      guildCommandService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID);
 
       verify(guildRepository).save(guild);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
@@ -194,7 +198,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotLeader() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
-      assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, MEMBER_ID, LEADER_ID))
+      assertThatThrownBy(() -> guildCommandService.sendInvite(GUILD_ID, MEMBER_ID, LEADER_ID))
           .isInstanceOf(UnauthorizedGuildOperationException.class);
 
       verify(guildRepository, never()).save(any());
@@ -208,7 +212,7 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
       when(inviteFactory.create(GUILD_ID, MEMBER_ID)).thenReturn(invite());
 
-      assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
+      assertThatThrownBy(() -> guildCommandService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
           .isInstanceOf(IllegalStateException.class);
 
       verify(guildRepository, never()).save(any());
@@ -219,7 +223,7 @@ class GuildServiceImplTest {
     @DisplayName(THROWS_WHEN_NOT_FOUND)
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
-      assertThatThrownBy(() -> guildService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
+      assertThatThrownBy(() -> guildCommandService.sendInvite(GUILD_ID, LEADER_ID, MEMBER_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -239,9 +243,9 @@ class GuildServiceImplTest {
     @DisplayName("should add member, save and publish GuildJoined event")
     void shouldAddMemberAndPublishEvent() throws GuildNotFoundException {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
+      when(battleQueryService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 
-      guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
+      guildCommandService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
 
       verify(guildRepository).save(guild);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
@@ -257,11 +261,11 @@ class GuildServiceImplTest {
       Battle ongoingBattle = mock(Battle.class);
       when(ongoingBattle.getId()).thenReturn(BATTLE_ID);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
+      when(battleQueryService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
 
-      guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
+      guildCommandService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK);
 
-      verify(battleService).increaseNumOfTurn(BATTLE_ID, MEMBER_ID);
+      verify(battleCommandService).increaseNumOfTurn(BATTLE_ID, MEMBER_ID);
     }
 
     @Test
@@ -271,7 +275,7 @@ class GuildServiceImplTest {
 
       assertThatThrownBy(
               () ->
-                  guildService.acceptInvite(
+                  guildCommandService.acceptInvite(
                       GUILD_ID, INVITE_ID, new Id<>("wrong-avatar"), MEMBER_NICK))
           .isInstanceOf(IllegalArgumentException.class);
 
@@ -285,7 +289,9 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
       assertThatThrownBy(
-              () -> guildService.acceptInvite(GUILD_ID, UNKNOWN_INVITE_ID, MEMBER_ID, MEMBER_NICK))
+              () ->
+                  guildCommandService.acceptInvite(
+                      GUILD_ID, UNKNOWN_INVITE_ID, MEMBER_ID, MEMBER_NICK))
           .isInstanceOf(IllegalArgumentException.class);
 
       verify(guildRepository, never()).save(any());
@@ -297,7 +303,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
       assertThatThrownBy(
-              () -> guildService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK))
+              () -> guildCommandService.acceptInvite(GUILD_ID, INVITE_ID, MEMBER_ID, MEMBER_NICK))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -312,9 +318,9 @@ class GuildServiceImplTest {
     void shouldRemoveMemberAndPublishEvent() throws GuildNotFoundException {
       addMember(guild);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
+      when(battleQueryService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 
-      guildService.leaveGuild(GUILD_ID, MEMBER_ID);
+      guildCommandService.leaveGuild(GUILD_ID, MEMBER_ID);
 
       verify(guildRepository).save(guild);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
@@ -329,12 +335,12 @@ class GuildServiceImplTest {
       Battle ongoingBattle = mock(Battle.class);
       when(ongoingBattle.getId()).thenReturn(BATTLE_ID);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
+      when(battleQueryService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.of(ongoingBattle));
 
-      guildService.leaveGuild(GUILD_ID, LEADER_ID);
+      guildCommandService.leaveGuild(GUILD_ID, LEADER_ID);
 
       verify(guildRepository).deleteById(GUILD_ID);
-      verify(battleService).deleteBattle(BATTLE_ID);
+      verify(battleCommandService).deleteBattle(BATTLE_ID);
 
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
       verify(guildObserver, times(2)).notifyGuildEvent(captor.capture());
@@ -349,7 +355,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> guildService.leaveGuild(GUILD_ID, LEADER_ID))
+      assertThatThrownBy(() -> guildCommandService.leaveGuild(GUILD_ID, LEADER_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -366,9 +372,9 @@ class GuildServiceImplTest {
     void shouldRemoveMemberAndPublishEvent() throws GuildNotFoundException {
       addMember(guild);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
-      when(battleService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
+      when(battleQueryService.getBattleByGuild(GUILD_ID)).thenReturn(Optional.empty());
 
-      guildService.removeMember(GUILD_ID, LEADER_ID, MEMBER_ID);
+      guildCommandService.removeMember(GUILD_ID, LEADER_ID, MEMBER_ID);
 
       verify(guildRepository).save(guild);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
@@ -383,7 +389,7 @@ class GuildServiceImplTest {
       addMember(guild);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
-      assertThatThrownBy(() -> guildService.removeMember(GUILD_ID, MEMBER_ID, LEADER_ID))
+      assertThatThrownBy(() -> guildCommandService.removeMember(GUILD_ID, MEMBER_ID, LEADER_ID))
           .isInstanceOf(UnauthorizedGuildOperationException.class);
 
       verify(guildRepository, never()).save(any());
@@ -395,7 +401,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> guildService.removeMember(GUILD_ID, LEADER_ID, MEMBER_ID))
+      assertThatThrownBy(() -> guildCommandService.removeMember(GUILD_ID, LEADER_ID, MEMBER_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -413,7 +419,7 @@ class GuildServiceImplTest {
       addMember(guild);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
-      guildService.promoteMember(GUILD_ID, LEADER_ID, MEMBER_ID, OFFICER_ROLE);
+      guildCommandService.promoteMember(GUILD_ID, LEADER_ID, MEMBER_ID, OFFICER_ROLE);
 
       verify(guildRepository).save(guild);
       ArgumentCaptor<GuildEvent> captor = ArgumentCaptor.forClass(GuildEvent.class);
@@ -430,7 +436,7 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
       assertThatThrownBy(
-              () -> guildService.promoteMember(GUILD_ID, MEMBER_ID, LEADER_ID, OFFICER_ROLE))
+              () -> guildCommandService.promoteMember(GUILD_ID, MEMBER_ID, LEADER_ID, OFFICER_ROLE))
           .isInstanceOf(UnauthorizedGuildOperationException.class);
 
       verify(guildRepository, never()).save(any());
@@ -443,7 +449,7 @@ class GuildServiceImplTest {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(
-              () -> guildService.promoteMember(GUILD_ID, LEADER_ID, MEMBER_ID, OFFICER_ROLE))
+              () -> guildCommandService.promoteMember(GUILD_ID, LEADER_ID, MEMBER_ID, OFFICER_ROLE))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -460,7 +466,7 @@ class GuildServiceImplTest {
       guild.updateGlobalRank(7);
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.of(guild));
 
-      assertThat(guildService.getGlobalRank(GUILD_ID)).isEqualTo(7);
+      assertThat(guildQueryService.getGlobalRank(GUILD_ID)).isEqualTo(7);
     }
 
     @Test
@@ -468,7 +474,7 @@ class GuildServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(guildRepository.findById(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> guildService.getGlobalRank(GUILD_ID))
+      assertThatThrownBy(() -> guildQueryService.getGlobalRank(GUILD_ID))
           .isInstanceOf(GuildNotFoundException.class);
     }
   }
@@ -483,7 +489,7 @@ class GuildServiceImplTest {
     void shouldReturnLeaderboard() {
       when(guildRepository.findAllSortedByRank()).thenReturn(List.of(guild));
 
-      assertThat(guildService.getGuildLeaderboard()).containsExactly(guild);
+      assertThat(guildQueryService.getGuildLeaderboard()).containsExactly(guild);
     }
   }
 }
