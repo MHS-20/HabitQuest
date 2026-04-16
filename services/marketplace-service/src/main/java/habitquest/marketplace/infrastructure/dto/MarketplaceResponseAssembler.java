@@ -5,8 +5,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import habitquest.marketplace.domain.items.Item;
 import habitquest.marketplace.domain.items.ItemFilter;
 import habitquest.marketplace.domain.marketplace.Marketplace;
-import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
-import habitquest.marketplace.infrastructure.inbound.MarketplaceController;
+import habitquest.marketplace.infrastructure.dto.MarketplaceQueries.*;
+import habitquest.marketplace.infrastructure.inbound.MarketplaceCommandController;
+import habitquest.marketplace.infrastructure.inbound.MarketplaceQueryController;
 import java.util.List;
 import org.springframework.hateoas.*;
 import org.springframework.stereotype.Component;
@@ -24,10 +25,10 @@ public class MarketplaceResponseAssembler {
         dto,
         selfMarketplaceLink(marketplaceId),
         linkTo(
-                methodOn(MarketplaceController.class)
+                methodOn(MarketplaceQueryController.class)
                     .getAvailableItems(marketplaceId, ItemFilter.ALL))
             .withRel("items"),
-        linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
+        linkTo(methodOn(MarketplaceQueryController.class).getSoldItems(marketplaceId))
             .withRel("sold-items"));
   }
 
@@ -38,14 +39,16 @@ public class MarketplaceResponseAssembler {
 
     return EntityModel.of(
         dto,
-        linkTo(methodOn(MarketplaceController.class).getAvailableItem(marketplaceId, item.name()))
+        linkTo(
+                methodOn(MarketplaceQueryController.class)
+                    .getAvailableItem(marketplaceId, item.name()))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
         linkTo(
-                methodOn(MarketplaceController.class)
+                methodOn(MarketplaceQueryController.class)
                     .getAvailableItems(marketplaceId, ItemFilter.ALL))
             .withRel("items"),
-        linkTo(methodOn(MarketplaceController.class).buyItem(marketplaceId, item.name(), 0))
+        linkTo(methodOn(MarketplaceCommandController.class).buyItem(marketplaceId, item.name(), 0))
             .withRel("buy"));
   }
 
@@ -57,7 +60,7 @@ public class MarketplaceResponseAssembler {
 
     return CollectionModel.of(
         itemModels,
-        linkTo(methodOn(MarketplaceController.class).getAvailableItems(marketplaceId, type))
+        linkTo(methodOn(MarketplaceQueryController.class).getAvailableItems(marketplaceId, type))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId));
   }
@@ -69,12 +72,12 @@ public class MarketplaceResponseAssembler {
 
     return EntityModel.of(
         dto,
-        linkTo(methodOn(MarketplaceController.class).getSoldItem(marketplaceId, item.name()))
+        linkTo(methodOn(MarketplaceQueryController.class).getSoldItem(marketplaceId, item.name()))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
-        linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId))
+        linkTo(methodOn(MarketplaceQueryController.class).getSoldItems(marketplaceId))
             .withRel("sold-items"),
-        linkTo(methodOn(MarketplaceController.class).sellItem(marketplaceId, item.name()))
+        linkTo(methodOn(MarketplaceCommandController.class).sellItem(marketplaceId, item.name()))
             .withRel("sell"));
   }
 
@@ -86,13 +89,14 @@ public class MarketplaceResponseAssembler {
 
     return CollectionModel.of(
         itemModels,
-        linkTo(methodOn(MarketplaceController.class).getSoldItems(marketplaceId)).withSelfRel(),
+        linkTo(methodOn(MarketplaceQueryController.class).getSoldItems(marketplaceId))
+            .withSelfRel(),
         selfMarketplaceLink(marketplaceId));
   }
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
   private Link selfMarketplaceLink(String marketplaceId) {
-    return linkTo(methodOn(MarketplaceController.class).getMarketplace(marketplaceId))
+    return linkTo(methodOn(MarketplaceQueryController.class).getMarketplace(marketplaceId))
         .withSelfRel();
   }
 }

@@ -4,7 +4,8 @@ import common.ddd.Id;
 import habitquest.marketplace.application.exceptions.AvatarCommunicationException;
 import habitquest.marketplace.application.exceptions.InsufficientLevelException;
 import habitquest.marketplace.application.exceptions.MarketplaceNotFoundException;
-import habitquest.marketplace.application.port.in.MarketplaceService;
+import habitquest.marketplace.application.port.in.MarketplaceCommandService;
+import habitquest.marketplace.application.port.in.MarketplaceQueryService;
 import habitquest.marketplace.application.port.out.AvatarClientPort;
 import habitquest.marketplace.application.port.out.MarketplaceRepository;
 import habitquest.marketplace.domain.events.ItemBought;
@@ -12,52 +13,33 @@ import habitquest.marketplace.domain.events.ItemSold;
 import habitquest.marketplace.domain.events.MarketplaceObserver;
 import habitquest.marketplace.domain.exceptions.ItemNotFoundException;
 import habitquest.marketplace.domain.factory.MarketplaceFactory;
-import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.domain.items.Item;
+import habitquest.marketplace.domain.items.Level;
 import habitquest.marketplace.domain.marketplace.Avatar;
 import habitquest.marketplace.domain.marketplace.Marketplace;
 import habitquest.marketplace.domain.marketplace.Money;
-import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MarketplaceServiceImpl implements MarketplaceService {
+public class MarketplaceCommandServiceImpl implements MarketplaceCommandService {
+
   private final MarketplaceRepository marketplaceRepository;
   private final MarketplaceObserver marketplaceObserver;
   private final MarketplaceFactory marketplaceFactory;
   private final AvatarClientPort avatarPort;
+  private final MarketplaceQueryService queryService;
 
-  public MarketplaceServiceImpl(
+  public MarketplaceCommandServiceImpl(
       MarketplaceRepository marketplaceRepository,
       MarketplaceObserver marketplaceObserver,
       MarketplaceFactory marketplaceFactory,
-      AvatarClientPort avatarPort) {
+      AvatarClientPort avatarPort,
+      MarketplaceQueryService queryService) {
     this.marketplaceRepository = marketplaceRepository;
     this.marketplaceObserver = marketplaceObserver;
     this.marketplaceFactory = marketplaceFactory;
     this.avatarPort = avatarPort;
-  }
-
-  // -------------------------------------------------
-  // Queries
-  // -------------------------------------------------
-  @Override
-  public Marketplace getMarketplace(Id<Marketplace> marketplaceId)
-      throws MarketplaceNotFoundException {
-    return marketplaceRepository
-        .findById(marketplaceId)
-        .orElseThrow(() -> new MarketplaceNotFoundException(marketplaceId.value()));
-  }
-
-  @Override
-  public Id<Marketplace> getMarketplaceIdByAvatarId(Id<Avatar> avatarId)
-      throws MarketplaceNotFoundException {
-    return marketplaceRepository
-        .findByAvatarId(avatarId)
-        .map(Marketplace::getId)
-        .orElseThrow(
-            () ->
-                new MarketplaceNotFoundException(
-                    "No marketplace found for avatar ID: " + avatarId.value()));
+    this.queryService = queryService;
   }
 
   @Override
@@ -68,50 +50,8 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   }
 
   @Override
-  public Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getAvatarId();
-  }
-
-  @Override
-  public List<Item> getAllAvailableItems(Id<Marketplace> marketplaceId)
-      throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getAllAvailableItems();
-  }
-
-  @Override
-  public List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemFilter type)
-      throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getAvailableItemsByType(type);
-  }
-
-  @Override
-  public Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
-      throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId)
-        .getAvailableItem(itemName)
-        .orElseThrow(() -> new ItemNotFoundException(itemName));
-  }
-
-  @Override
-  public List<Item> getSoldItems(Id<Marketplace> marketplaceId)
-      throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId).getSoldItems();
-  }
-
-  @Override
-  public Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
-      throws MarketplaceNotFoundException {
-    return getMarketplace(marketplaceId)
-        .getSoldItem(itemName)
-        .orElseThrow(() -> new ItemNotFoundException(itemName));
-  }
-
-  // -------------------------------------------------
-  // Commands
-  // -------------------------------------------------
-  @Override
   public void buyItem(Id<Marketplace> marketplaceId, String itemName, Level currentLevel) {
-    Marketplace marketplace = getMarketplace(marketplaceId);
+    Marketplace marketplace = queryService.getMarketplace(marketplaceId);
     String avatarId = marketplace.getAvatarId().value();
     Item item =
         marketplace
@@ -136,12 +76,8 @@ public class MarketplaceServiceImpl implements MarketplaceService {
           new ItemBought(marketplaceId, itemName, marketplace.getAvatarId()));
     } catch (AvatarCommunicationException | IllegalStateException | ItemNotFoundException ex) {
       try {
-        if (inventoryAdded) {
-          avatarPort.removeItemFromInventory(avatarId, item);
-        }
-        if (moneySpent) {
-          avatarPort.earnMoney(avatarId, price);
-        }
+        if (inventoryAdded) avatarPort.removeItemFromInventory(avatarId, item);
+        if (moneySpent) avatarPort.earnMoney(avatarId, price);
       } catch (AvatarCommunicationException | ItemNotFoundException compensationEx) {
         throw new AvatarCommunicationException(
             "Partial failure and compensation failed during buy saga", compensationEx);
@@ -154,9 +90,8 @@ public class MarketplaceServiceImpl implements MarketplaceService {
   @Override
   public void sellItem(Id<Marketplace> marketplaceId, String itemName)
       throws MarketplaceNotFoundException {
-    Marketplace marketplace = getMarketplace(marketplaceId);
+    Marketplace marketplace = queryService.getMarketplace(marketplaceId);
     String avatarId = marketplace.getAvatarId().value();
-
     Item item =
         marketplace.getSoldItem(itemName).orElseThrow(() -> new ItemNotFoundException(itemName));
     Money price = item.price();
@@ -166,23 +101,16 @@ public class MarketplaceServiceImpl implements MarketplaceService {
     try {
       avatarPort.removeItemFromInventory(avatarId, item);
       removedFromInventory = true;
-
       avatarPort.earnMoney(avatarId, price);
       earnedMoney = true;
-
       marketplace.sellItem(itemName);
       marketplaceRepository.save(marketplace);
       marketplaceObserver.notifyMarketplaceEvent(
           new ItemSold(marketplaceId, itemName, marketplace.getAvatarId()));
-
     } catch (AvatarCommunicationException | ItemNotFoundException | IllegalArgumentException ex) {
       try {
-        if (earnedMoney) {
-          avatarPort.spendMoney(avatarId, price);
-        }
-        if (removedFromInventory) {
-          avatarPort.addItemToInventory(avatarId, item);
-        }
+        if (earnedMoney) avatarPort.spendMoney(avatarId, price);
+        if (removedFromInventory) avatarPort.addItemToInventory(avatarId, item);
       } catch (AvatarCommunicationException | ItemNotFoundException compensationEx) {
         throw new AvatarCommunicationException(
             "Partial failure and compensation failed during sell saga", compensationEx);
@@ -190,16 +118,5 @@ public class MarketplaceServiceImpl implements MarketplaceService {
       throw new AvatarCommunicationException(
           "Avatar operation failed during sell saga, compensation performed", ex);
     }
-  }
-
-  @Override
-  public boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
-      throws MarketplaceNotFoundException {
-    Marketplace marketplace = getMarketplace(marketplaceId);
-    Item item =
-        marketplace
-            .getAvailableItem(itemName)
-            .orElseThrow(() -> new ItemNotFoundException(itemName));
-    return item.requiredLevel().levelNumber() <= level.levelNumber();
   }
 }

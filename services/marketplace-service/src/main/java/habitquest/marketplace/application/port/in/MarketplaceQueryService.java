@@ -1,22 +1,22 @@
 package habitquest.marketplace.application.port.in;
 
 import common.ddd.Id;
-import common.hexagonal.InBoundPort;
 import habitquest.marketplace.application.exceptions.MarketplaceNotFoundException;
-import habitquest.marketplace.domain.exceptions.ItemNotFoundException;
-import habitquest.marketplace.domain.items.*;
+import habitquest.marketplace.domain.items.Item;
+import habitquest.marketplace.domain.items.ItemFilter;
+import habitquest.marketplace.domain.items.Level;
 import habitquest.marketplace.domain.marketplace.Avatar;
 import habitquest.marketplace.domain.marketplace.Marketplace;
 import java.util.List;
 
-@InBoundPort
-public interface MarketplaceService {
+public interface MarketplaceQueryService {
+
   Marketplace getMarketplace(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
   Id<Marketplace> getMarketplaceIdByAvatarId(Id<Avatar> avatarId)
       throws MarketplaceNotFoundException;
 
-  Id<Marketplace> createMarketplaceForAvatar(Id<Avatar> avatarId);
+  Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
   List<Item> getAllAvailableItems(Id<Marketplace> marketplaceId)
       throws MarketplaceNotFoundException;
@@ -25,20 +25,12 @@ public interface MarketplaceService {
       throws MarketplaceNotFoundException;
 
   Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException;
+      throws MarketplaceNotFoundException;
 
   List<Item> getSoldItems(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
   Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException;
-
-  Id<Avatar> getAvatarId(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
-
-  void buyItem(Id<Marketplace> marketplaceId, String itemName, Level currentLevel)
-      throws MarketplaceNotFoundException, ItemNotFoundException;
-
-  void sellItem(Id<Marketplace> marketplaceId, String itemName)
-      throws MarketplaceNotFoundException, ItemNotFoundException;
+      throws MarketplaceNotFoundException;
 
   boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
       throws MarketplaceNotFoundException;
