@@ -76,8 +76,12 @@ public class MarketplaceCommandServiceImpl implements MarketplaceCommandService 
           new ItemBought(marketplaceId, itemName, marketplace.getAvatarId()));
     } catch (AvatarCommunicationException | IllegalStateException | ItemNotFoundException ex) {
       try {
-        if (inventoryAdded) avatarPort.removeItemFromInventory(avatarId, item);
-        if (moneySpent) avatarPort.earnMoney(avatarId, price);
+        if (inventoryAdded) {
+          avatarPort.removeItemFromInventory(avatarId, item);
+        }
+        if (moneySpent) {
+          avatarPort.earnMoney(avatarId, price);
+        }
       } catch (AvatarCommunicationException | ItemNotFoundException compensationEx) {
         throw new AvatarCommunicationException(
             "Partial failure and compensation failed during buy saga", compensationEx);
@@ -109,8 +113,12 @@ public class MarketplaceCommandServiceImpl implements MarketplaceCommandService 
           new ItemSold(marketplaceId, itemName, marketplace.getAvatarId()));
     } catch (AvatarCommunicationException | ItemNotFoundException | IllegalArgumentException ex) {
       try {
-        if (earnedMoney) avatarPort.spendMoney(avatarId, price);
-        if (removedFromInventory) avatarPort.addItemToInventory(avatarId, item);
+        if (earnedMoney) {
+          avatarPort.spendMoney(avatarId, price);
+        }
+        if (removedFromInventory) {
+          avatarPort.addItemToInventory(avatarId, item);
+        }
       } catch (AvatarCommunicationException | ItemNotFoundException compensationEx) {
         throw new AvatarCommunicationException(
             "Partial failure and compensation failed during sell saga", compensationEx);

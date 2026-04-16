@@ -1,32 +1,38 @@
 package habitquest.quest.infrastructure.dto;
 
+import common.cqrs.QueryResponse;
 import java.time.LocalDate;
 import java.util.List;
 
-public class QuestResponsesDto {
+public class QuestQueries {
 
-  public record RecurrenceResponse(String type, Integer dayOfMonth, String dayOfWeek) {}
+  public record RecurrenceResponse(String type, Integer dayOfMonth, String dayOfWeek)
+      implements QueryResponse {}
 
   public record QuestResponse(
-      String id, String name, Integer durationDays, Integer reward, List<String> habitIds) {
+      String id, String name, Integer durationDays, Integer reward, List<String> habitIds)
+      implements QueryResponse {
     public QuestResponse {
       habitIds = List.copyOf(habitIds);
     }
   }
 
-  public record QuestCreatedResponse(String id) {}
+  public record QuestCreatedResponse(String id) implements QueryResponse {}
 
-  public record NameResponse(String name) {}
+  public record NameResponse(String name) implements QueryResponse {}
 
-  public record DurationResponse(Long durationDays) {}
+  public record DurationResponse(Long durationDays) implements QueryResponse {}
 
-  public record HabitsResponse(List<HabitResponse> habits) {
+  public record ErrorResponse(String message) implements QueryResponse {}
+
+  public record HabitsResponse(List<HabitResponse> habits) implements QueryResponse {
     public HabitsResponse {
       habits = habits != null ? List.copyOf(habits) : List.of();
     }
   }
 
-  public record AvatarQuestProgressResponse(String avatarId, List<QuestProgressResponse> quests) {
+  public record AvatarQuestProgressResponse(String avatarId, List<QuestProgressResponse> quests)
+      implements QueryResponse {
     public AvatarQuestProgressResponse {
       quests = quests != null ? List.copyOf(quests) : List.of();
     }
@@ -37,7 +43,8 @@ public class QuestResponsesDto {
       String questName,
       String status,
       Integer completionPercentage,
-      List<HabitProgressResponse> habits) {
+      List<HabitProgressResponse> habits)
+      implements QueryResponse {
     public QuestProgressResponse {
       habits = habits != null ? List.copyOf(habits) : List.of();
     }
@@ -48,9 +55,8 @@ public class QuestResponsesDto {
       String title,
       Integer requiredOccurrences,
       Integer attendedOccurrences,
-      Integer remainingOccurrences) {}
-
-  public record ErrorResponse(String message) {}
+      Integer remainingOccurrences)
+      implements QueryResponse {}
 
   public record HabitResponse(
       String id,
@@ -59,7 +65,8 @@ public class QuestResponsesDto {
       List<String> tags,
       RecurrenceResponse recurrence,
       LocalDate nextRecurrenceDate,
-      LocalDate lastAttendedDate) {
+      LocalDate lastAttendedDate)
+      implements QueryResponse {
 
     public HabitResponse {
       tags = List.copyOf(tags);
