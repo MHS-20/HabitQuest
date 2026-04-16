@@ -7,12 +7,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import common.ddd.Id;
-import habitquest.tracking.application.port.in.HabitService;
+import habitquest.tracking.application.port.in.HabitCommandService;
 import habitquest.tracking.application.port.out.AvatarClientPort;
 import habitquest.tracking.application.port.out.HabitHistoryRepository;
 import habitquest.tracking.application.port.out.HabitRepository;
 import habitquest.tracking.application.port.out.QuestClientPort;
-import habitquest.tracking.application.service.HabitServiceImpl;
+import habitquest.tracking.application.service.HabitCommandServiceImpl;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.events.HabitEvent;
 import habitquest.tracking.domain.events.HabitNotAttended;
@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("HabitCheckerJob")
 class HabitCheckerJobTest {
 
-  @Mock private HabitService habitService;
+  @Mock private HabitCommandService habitService;
   @Mock private HabitRepository habitRepository;
   @Mock private HabitHistoryRepository historyRepository;
   @Mock private HabitFactory habitFactory;
@@ -72,8 +72,8 @@ class HabitCheckerJobTest {
     when(habitRepository.findAll()).thenReturn(List.of(neverAttendedHabit));
     when(historyRepository.findByHabitId(new Id<>("habit-1"))).thenReturn(List.of());
 
-    HabitService realService =
-        new HabitServiceImpl(
+    HabitCommandService realService =
+        new HabitCommandServiceImpl(
             habitRepository,
             historyRepository,
             habitFactory,

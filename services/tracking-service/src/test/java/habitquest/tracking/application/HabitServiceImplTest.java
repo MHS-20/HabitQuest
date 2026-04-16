@@ -10,7 +10,8 @@ import habitquest.tracking.application.port.out.AvatarClientPort;
 import habitquest.tracking.application.port.out.HabitHistoryRepository;
 import habitquest.tracking.application.port.out.HabitRepository;
 import habitquest.tracking.application.port.out.QuestClientPort;
-import habitquest.tracking.application.service.HabitServiceImpl;
+import habitquest.tracking.application.service.HabitCommandServiceImpl;
+import habitquest.tracking.application.service.HabitQueryServiceImpl;
 import habitquest.tracking.domain.Tag;
 import habitquest.tracking.domain.events.HabitAttended;
 import habitquest.tracking.domain.events.HabitDeleted;
@@ -41,7 +42,8 @@ class HabitServiceImplTest {
   @Mock private HabitObserver habitObserver;
   @Mock private AvatarClientPort avatarClient;
   @Mock private QuestClientPort questClient;
-  @InjectMocks private HabitServiceImpl service;
+  @InjectMocks private HabitCommandServiceImpl commandService;
+  @InjectMocks private HabitQueryServiceImpl queryService;
 
   @Nested
   @DisplayName("creation methods")
@@ -56,7 +58,7 @@ class HabitServiceImplTest {
       when(habitRepository.save(habit)).thenReturn(habit);
 
       var created =
-          service.createHabit(AVATAR_ID, TITLE, DESCRIPTION, DAILY_RECURRENCE, null, null);
+          commandService.createHabit(AVATAR_ID, TITLE, DESCRIPTION, DAILY_RECURRENCE, null, null);
 
       assertThat(created).isSameAs(habit);
       verify(habitFactory).createHabit(AVATAR_ID, TITLE, DESCRIPTION, DAILY_RECURRENCE, null, null);
@@ -74,7 +76,7 @@ class HabitServiceImplTest {
       when(habitRepository.save(habit)).thenReturn(habit);
 
       var created =
-          service.createHabit(AVATAR_ID, TITLE, DESCRIPTION, WEEKLY_RECURRENCE, null, null);
+          commandService.createHabit(AVATAR_ID, TITLE, DESCRIPTION, WEEKLY_RECURRENCE, null, null);
 
       assertThat(created).isSameAs(habit);
       verify(habitFactory)
@@ -94,7 +96,7 @@ class HabitServiceImplTest {
       var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      assertThat(service.getHabitById(HABIT_ID)).isSameAs(habit);
+      assertThat(queryService.getHabitById(HABIT_ID)).isSameAs(habit);
     }
 
     @Test
@@ -102,7 +104,7 @@ class HabitServiceImplTest {
     void notFound() {
       when(habitRepository.findById(UNKNOWN_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.getHabitById(UNKNOWN_ID))
+      assertThatThrownBy(() -> queryService.getHabitById(UNKNOWN_ID))
           .isInstanceOf(HabitNotFoundException.class)
           .hasMessage(UNKNOWN_ID.value());
     }
@@ -117,7 +119,7 @@ class HabitServiceImplTest {
     void deletesAndEmitsEvent() {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      service.deleteHabitById(HABIT_ID);
+      commandService.deleteHabitById(HABIT_ID);
 
       verify(habitRepository).deleteById(HABIT_ID);
       verify(historyRepository).append(any(HabitHistoryEvent.class));
@@ -138,7 +140,7 @@ class HabitServiceImplTest {
     void getTitle() {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getTitle(HABIT_ID)).isEqualTo(TITLE);
+      assertThat(queryService.getTitle(HABIT_ID)).isEqualTo(TITLE);
     }
 
     @Test
@@ -146,7 +148,7 @@ class HabitServiceImplTest {
     void getDescription() {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getDescription(HABIT_ID)).isEqualTo(DESCRIPTION);
+      assertThat(queryService.getDescription(HABIT_ID)).isEqualTo(DESCRIPTION);
     }
 
     @Test
@@ -154,7 +156,7 @@ class HabitServiceImplTest {
     void getTags() {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getTags(HABIT_ID))
+      assertThat(queryService.getTags(HABIT_ID))
           .containsExactly(new Tag(TAG_HEALTH), new Tag(TAG_WELLNESS));
     }
 
@@ -163,7 +165,7 @@ class HabitServiceImplTest {
     void getRecurrence() {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getRecurrence(HABIT_ID)).isEqualTo(DAILY_RECURRENCE);
+      assertThat(queryService.getRecurrence(HABIT_ID)).isEqualTo(DAILY_RECURRENCE);
     }
 
     @Test
@@ -171,7 +173,7 @@ class HabitServiceImplTest {
     void getLastAttendedDate() {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(hydrateHabit()));
 
-      assertThat(service.getLastAttendedDate(HABIT_ID)).isEqualTo(ATTENDED_AT);
+      assertThat(queryService.getLastAttendedDate(HABIT_ID)).isEqualTo(ATTENDED_AT);
     }
 
     @Test
@@ -179,7 +181,7 @@ class HabitServiceImplTest {
     void queryNotFound() {
       when(habitRepository.findById(UNKNOWN_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.getTitle(UNKNOWN_ID))
+      assertThatThrownBy(() -> queryService.getTitle(UNKNOWN_ID))
           .isInstanceOf(HabitNotFoundException.class)
           .hasMessage(UNKNOWN_ID.value().toString());
     }
@@ -195,7 +197,7 @@ class HabitServiceImplTest {
       var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      var updated = service.updateTitle(HABIT_ID, "Read");
+      var updated = commandService.updateTitle(HABIT_ID, "Read");
 
       assertThat(updated.getTitle()).isEqualTo("Read");
       verify(habitRepository).save(habit);
@@ -212,7 +214,7 @@ class HabitServiceImplTest {
       var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      var updated = service.updateDescription(HABIT_ID, "Read 20 pages");
+      var updated = commandService.updateDescription(HABIT_ID, "Read 20 pages");
 
       assertThat(updated.getDescription()).isEqualTo("Read 20 pages");
       verify(habitRepository).save(habit);
@@ -230,7 +232,7 @@ class HabitServiceImplTest {
       var tags = List.of(new Tag(TAG_MINDSET));
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      var updated = service.updateTags(HABIT_ID, tags);
+      var updated = commandService.updateTags(HABIT_ID, tags);
 
       assertThat(updated.getTags()).containsExactly(new Tag(TAG_MINDSET));
       verify(habitRepository).save(habit);
@@ -247,7 +249,7 @@ class HabitServiceImplTest {
       var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      var updated = service.updateRecurrence(HABIT_ID, WEEKLY_RECURRENCE);
+      var updated = commandService.updateRecurrence(HABIT_ID, WEEKLY_RECURRENCE);
 
       assertThat(updated.getRecurrence()).isEqualTo(WEEKLY_RECURRENCE);
       verify(habitRepository).save(habit);
@@ -264,7 +266,7 @@ class HabitServiceImplTest {
       var habit = hydrateHabit();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      var attended = service.attendHabit(HABIT_ID, NEXT_ATTENDED_AT);
+      var attended = commandService.attendHabit(HABIT_ID, NEXT_ATTENDED_AT);
 
       assertThat(attended.getLastAttendedDate()).isEqualTo(NEXT_ATTENDED_AT);
       verify(habitRepository).save(habit);
@@ -285,7 +287,7 @@ class HabitServiceImplTest {
       var habit = hydrateHabitWithQuest();
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
 
-      service.attendHabit(HABIT_ID, NEXT_ATTENDED_AT);
+      commandService.attendHabit(HABIT_ID, NEXT_ATTENDED_AT);
 
       verify(questClient)
           .recordHabitAttendance(QUEST_1, AVATAR_ID, HABIT_ID, NEXT_ATTENDED_AT.toLocalDate());
@@ -296,7 +298,7 @@ class HabitServiceImplTest {
     void notFound() {
       when(habitRepository.findById(UNKNOWN_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.attendHabit(UNKNOWN_ID, LocalDateTime.now()))
+      assertThatThrownBy(() -> commandService.attendHabit(UNKNOWN_ID, LocalDateTime.now()))
           .isInstanceOf(HabitNotFoundException.class)
           .hasMessage(UNKNOWN_ID.value().toString());
     }
@@ -313,7 +315,7 @@ class HabitServiceImplTest {
       when(habitRepository.findAll()).thenReturn(List.of(neverAttended));
       when(historyRepository.findByHabitId(neverAttended.getId())).thenReturn(List.of());
 
-      service.detectOverdueHabits();
+      commandService.detectOverdueHabits();
 
       ArgumentCaptor<HabitEvent> captor = ArgumentCaptor.forClass(HabitEvent.class);
       verify(habitObserver).notifyHabitEvent(captor.capture());
@@ -330,7 +332,7 @@ class HabitServiceImplTest {
       when(habitRepository.findAll()).thenReturn(List.of(overdue));
       when(historyRepository.findByHabitId(OVERDUE_HABIT_ID)).thenReturn(List.of());
 
-      service.detectOverdueHabits();
+      commandService.detectOverdueHabits();
 
       ArgumentCaptor<HabitEvent> captor = ArgumentCaptor.forClass(HabitEvent.class);
       verify(habitObserver).notifyHabitEvent(captor.capture());
@@ -346,7 +348,7 @@ class HabitServiceImplTest {
       var upToDate = upToDateMonthlyHabit();
       when(habitRepository.findAll()).thenReturn(List.of(upToDate));
 
-      service.detectOverdueHabits();
+      commandService.detectOverdueHabits();
 
       verify(habitObserver, never()).notifyHabitEvent(any(HabitNotAttended.class));
       verify(avatarClient, never()).applyDamage(any(), anyInt());
@@ -368,7 +370,7 @@ class HabitServiceImplTest {
                       LocalDateTime.now().minusMinutes(1),
                       expectedMarker)));
 
-      service.detectOverdueHabits();
+      commandService.detectOverdueHabits();
 
       verify(historyRepository, never())
           .append(argThat(e -> e.event() instanceof HabitNotAttended));
@@ -391,7 +393,7 @@ class HabitServiceImplTest {
       when(habitRepository.findById(HABIT_ID)).thenReturn(Optional.of(habit));
       when(historyRepository.findByHabitId(HABIT_ID)).thenReturn(history);
 
-      assertThat(service.getHistory(HABIT_ID)).isEqualTo(history);
+      assertThat(queryService.getHistory(HABIT_ID)).isEqualTo(history);
     }
 
     @Test
@@ -411,7 +413,8 @@ class HabitServiceImplTest {
       when(historyRepository.findByHabitId(habit1.getId())).thenReturn(List.of(olderEvent));
       when(historyRepository.findByHabitId(habit2.getId())).thenReturn(List.of(newerEvent));
 
-      assertThat(service.getHistoryByAvatarId(AVATAR_ID)).containsExactly(newerEvent, olderEvent);
+      assertThat(queryService.getHistoryByAvatarId(AVATAR_ID))
+          .containsExactly(newerEvent, olderEvent);
     }
   }
 }

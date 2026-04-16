@@ -7,8 +7,7 @@ import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.Recurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
-import habitquest.tracking.infrastructure.dto.HabitRequestsDto.*;
-import habitquest.tracking.infrastructure.dto.HabitResponsesDto.*;
+import habitquest.tracking.infrastructure.dto.HabitQueries.*;
 import java.time.DayOfWeek;
 import java.util.Locale;
 
