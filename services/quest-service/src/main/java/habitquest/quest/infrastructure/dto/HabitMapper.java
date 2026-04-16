@@ -7,8 +7,8 @@ import habitquest.quest.domain.reminder.DailyRecurrence;
 import habitquest.quest.domain.reminder.MonthlyRecurrence;
 import habitquest.quest.domain.reminder.Recurrence;
 import habitquest.quest.domain.reminder.WeeklyRecurrence;
-import habitquest.quest.infrastructure.dto.QuestRequestsDto.*;
-import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
+import habitquest.quest.infrastructure.dto.QuestCommands.*;
+import habitquest.quest.infrastructure.dto.QuestQueries.*;
 import java.time.DayOfWeek;
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class HabitMapper {
     };
   }
 
-  public static Habit toDomain(String habitId, AddHabitRequest request) {
+  public static Habit toDomain(String habitId, AddHabitCommand request) {
     return new Habit(
         new Id<>(habitId),
         request.title(),
@@ -55,7 +55,7 @@ public class HabitMapper {
     return tags.stream().map(Tag::new).toList();
   }
 
-  private static Recurrence toRecurrence(RecurrenceRequest request) {
+  private static Recurrence toRecurrence(RecurrenceCommand request) {
     if (request == null) {
       return null;
     }

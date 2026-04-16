@@ -32,5 +32,4 @@ public class ControllerExceptionHandler {
   public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
     return ResponseEntity.notFound().build();
   }
-
 }
