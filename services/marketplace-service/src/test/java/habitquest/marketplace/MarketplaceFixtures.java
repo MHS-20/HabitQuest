@@ -11,7 +11,7 @@ import habitquest.marketplace.domain.marketplace.Avatar;
 import habitquest.marketplace.domain.marketplace.Marketplace;
 import habitquest.marketplace.domain.marketplace.MarketplaceImpl;
 import habitquest.marketplace.domain.marketplace.Money;
-import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceQueries.*;
 import java.util.List;
 import java.util.Optional;
 
