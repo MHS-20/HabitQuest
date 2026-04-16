@@ -7,7 +7,7 @@ import habitquest.marketplace.application.port.out.MarketplaceLogger;
 import habitquest.marketplace.domain.items.Item;
 import habitquest.marketplace.domain.marketplace.Money;
 import habitquest.marketplace.infrastructure.dto.ItemMapper;
-import habitquest.marketplace.infrastructure.dto.MarketplaceRequestsDto.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceCommands.*;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Component;
@@ -70,7 +70,7 @@ public class AvatarClient implements AvatarClientPort {
   @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "addItemToInventoryFallback")
   @Retry(name = AVATAR_CLIENT)
   public void addItemToInventory(String avatarId, Item item) {
-    ItemRequest request = ItemMapper.from(item);
+    ItemCommand request = ItemMapper.from(item);
     log.info(request, "Adding item to inventory of avatar " + avatarId);
     try {
       restClient
@@ -89,7 +89,7 @@ public class AvatarClient implements AvatarClientPort {
   @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "removeItemFromInventoryFallback")
   @Retry(name = AVATAR_CLIENT)
   public void removeItemFromInventory(String avatarId, Item item) {
-    ItemRequest request = ItemMapper.from(item);
+    ItemCommand request = ItemMapper.from(item);
     log.info(request, "Removing item from inventory of avatar " + avatarId);
     try {
       restClient
