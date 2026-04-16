@@ -1,21 +1,20 @@
 package habitquest.guild.infrastructure.dto;
 
+import common.cqrs.QueryResponse;
 import habitquest.guild.domain.guild.Guild;
 import habitquest.guild.domain.guild.GuildMember;
 import java.util.List;
 
-public class GuildResponsesDto {
-  public record GuildCreatedResponse(String id) {}
+public class GuildQueries {
+  // Query responses
+  public record RankResponse(Integer globalRank) implements QueryResponse {}
 
-  public record RankResponse(Integer globalRank) {}
+  public record MembersCountResponse(String guildId, int count) implements QueryResponse {}
 
-  public record ErrorResponse(String message) {}
+  public record LeaderboardCountResponse(int count) implements QueryResponse {}
 
-  public record MembersCountResponse(String guildId, int count) {}
-
-  public record LeaderboardCountResponse(int count) {}
-
-  public record GuildMemberResponse(String avatarId, String nickname, String role) {
+  public record GuildMemberResponse(String avatarId, String nickname, String role)
+      implements QueryResponse {
     public static GuildMemberResponse from(GuildMember member) {
       return new GuildMemberResponse(
           member.getId().value(), member.getNickname(), member.getRole().name());
@@ -23,8 +22,8 @@ public class GuildResponsesDto {
   }
 
   public record GuildResponse(
-      String id, String name, Integer globalRank, List<GuildMemberResponse> members) {
-
+      String id, String name, Integer globalRank, List<GuildMemberResponse> members)
+      implements QueryResponse {
     public GuildResponse {
       members = List.copyOf(members);
     }

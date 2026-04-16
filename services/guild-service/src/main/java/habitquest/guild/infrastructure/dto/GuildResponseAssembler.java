@@ -3,8 +3,10 @@ package habitquest.guild.infrastructure.dto;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import common.hexagonal.Adapter;
-import habitquest.guild.infrastructure.dto.GuildResponsesDto.*;
-import habitquest.guild.infrastructure.inbound.GuildController;
+import habitquest.guild.infrastructure.dto.GuildCommands.*;
+import habitquest.guild.infrastructure.dto.GuildQueries.*;
+import habitquest.guild.infrastructure.inbound.GuildCommandController;
+import habitquest.guild.infrastructure.inbound.GuildQueryController;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -21,15 +23,15 @@ public class GuildResponseAssembler {
     return EntityModel.of(
         body,
         selfLink(id),
-        linkTo(methodOn(GuildController.class).getMembers(id)).withRel("members"),
-        linkTo(methodOn(GuildController.class).getGlobalRank(id)).withRel("rank"),
-        linkTo(methodOn(GuildController.class).getLeaderboard()).withRel("leaderboard"),
-        linkTo(methodOn(GuildController.class).deleteGuild(id)).withRel("delete"));
+        linkTo(methodOn(GuildQueryController.class).getMembers(id)).withRel("members"),
+        linkTo(methodOn(GuildQueryController.class).getGlobalRank(id)).withRel("rank"),
+        linkTo(methodOn(GuildQueryController.class).getLeaderboard()).withRel("leaderboard"),
+        linkTo(methodOn(GuildCommandController.class).deleteGuild(id)).withRel("delete"));
   }
 
   public CollectionModel<GuildResponse> toLeaderboardModel(List<GuildResponse> guilds) {
     return CollectionModel.of(
-        guilds, linkTo(methodOn(GuildController.class).getLeaderboard()).withSelfRel());
+        guilds, linkTo(methodOn(GuildQueryController.class).getLeaderboard()).withSelfRel());
   }
 
   // ── GuildCreatedResponse ──────────────────────────────────────────────────────
@@ -38,9 +40,9 @@ public class GuildResponseAssembler {
     return EntityModel.of(
         body,
         selfLink(id),
-        linkTo(methodOn(GuildController.class).getGuild(id)).withRel("guild"),
-        linkTo(methodOn(GuildController.class).getMembers(id)).withRel("members"),
-        linkTo(methodOn(GuildController.class).getGlobalRank(id)).withRel("rank"));
+        linkTo(methodOn(GuildQueryController.class).getGuild(id)).withRel("guild"),
+        linkTo(methodOn(GuildQueryController.class).getMembers(id)).withRel("members"),
+        linkTo(methodOn(GuildQueryController.class).getGlobalRank(id)).withRel("rank"));
   }
 
   // ── GuildMemberResponse ───────────────────────────────────────────────────────
@@ -48,7 +50,7 @@ public class GuildResponseAssembler {
       List<GuildMemberResponse> members, String guildId) {
     return CollectionModel.of(
         members,
-        linkTo(methodOn(GuildController.class).getMembers(guildId)).withSelfRel(),
+        linkTo(methodOn(GuildQueryController.class).getMembers(guildId)).withSelfRel(),
         selfLink(guildId));
   }
 
@@ -56,9 +58,9 @@ public class GuildResponseAssembler {
   public EntityModel<RankResponse> toRankModel(RankResponse body, String guildId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(GuildController.class).getGlobalRank(guildId)).withSelfRel(),
+        linkTo(methodOn(GuildQueryController.class).getGlobalRank(guildId)).withSelfRel(),
         selfLink(guildId),
-        linkTo(methodOn(GuildController.class).getLeaderboard()).withRel("leaderboard"));
+        linkTo(methodOn(GuildQueryController.class).getLeaderboard()).withRel("leaderboard"));
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────────

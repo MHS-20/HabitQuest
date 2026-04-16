@@ -3,8 +3,10 @@ package habitquest.guild.infrastructure.dto;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import common.hexagonal.Adapter;
-import habitquest.guild.infrastructure.dto.BattleResponsesDto.*;
-import habitquest.guild.infrastructure.inbound.BattleController;
+import habitquest.guild.infrastructure.dto.BattleCommands.*;
+import habitquest.guild.infrastructure.dto.BattleQueries.*;
+import habitquest.guild.infrastructure.inbound.BattleCommandController;
+import habitquest.guild.infrastructure.inbound.BattleQueryController;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -23,22 +25,22 @@ public class BattleResponseAssembler {
     return EntityModel.of(
         body,
         selfLink(id),
-        linkTo(methodOn(BattleController.class).getBoss(id)).withRel("boss"),
-        linkTo(methodOn(BattleController.class).getBossHealth(id)).withRel("bossHealth"),
-        linkTo(methodOn(BattleController.class).getBattleStatus(id)).withRel("status"),
-        linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel(CURRENT_TURN),
-        linkTo(methodOn(BattleController.class).getNumOfTurns(id)).withRel("numOfTurns"),
-        linkTo(methodOn(BattleController.class).dealDamage(id, null)).withRel("dealDamage"));
+        linkTo(methodOn(BattleQueryController.class).getBoss(id)).withRel("boss"),
+        linkTo(methodOn(BattleQueryController.class).getBossHealth(id)).withRel("bossHealth"),
+        linkTo(methodOn(BattleQueryController.class).getBattleStatus(id)).withRel("status"),
+        linkTo(methodOn(BattleQueryController.class).getCurrentTurn(id)).withRel(CURRENT_TURN),
+        linkTo(methodOn(BattleQueryController.class).getNumOfTurns(id)).withRel("numOfTurns"),
+        linkTo(methodOn(BattleCommandController.class).dealDamage(id, null)).withRel("dealDamage"));
   }
 
   public EntityModel<BattleResponse> toModelForGuild(BattleResponse body, String guildId) {
     String id = body.id();
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).getBattleByGuild(guildId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getBattleByGuild(guildId)).withSelfRel(),
         selfLink(id),
-        linkTo(methodOn(BattleController.class).getBattleStatus(id)).withRel("status"),
-        linkTo(methodOn(BattleController.class).dealDamage(id, null)).withRel("dealDamage"));
+        linkTo(methodOn(BattleQueryController.class).getBattleStatus(id)).withRel("status"),
+        linkTo(methodOn(BattleCommandController.class).dealDamage(id, null)).withRel("dealDamage"));
   }
 
   // ── BattleCreatedResponse ─────────────────────────────────────────────────────
@@ -48,10 +50,10 @@ public class BattleResponseAssembler {
     return EntityModel.of(
         body,
         selfLink(id),
-        linkTo(methodOn(BattleController.class).getBattle(id)).withRel("battle"),
-        linkTo(methodOn(BattleController.class).getBoss(id)).withRel("boss"),
-        linkTo(methodOn(BattleController.class).getBattleStatus(id)).withRel("status"),
-        linkTo(methodOn(BattleController.class).getCurrentTurn(id)).withRel(CURRENT_TURN));
+        linkTo(methodOn(BattleQueryController.class).getBattle(id)).withRel("battle"),
+        linkTo(methodOn(BattleQueryController.class).getBoss(id)).withRel("boss"),
+        linkTo(methodOn(BattleQueryController.class).getBattleStatus(id)).withRel("status"),
+        linkTo(methodOn(BattleQueryController.class).getCurrentTurn(id)).withRel(CURRENT_TURN));
   }
 
   // ── BossResponse ──────────────────────────────────────────────────────────────
@@ -59,14 +61,15 @@ public class BattleResponseAssembler {
   public EntityModel<BossResponse> toBossModel(BossResponse body, String battleId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).getBoss(battleId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getBoss(battleId)).withSelfRel(),
         selfLink(battleId),
-        linkTo(methodOn(BattleController.class).getBossHealth(battleId)).withRel("bossHealth"));
+        linkTo(methodOn(BattleQueryController.class).getBossHealth(battleId))
+            .withRel("bossHealth"));
   }
 
   public CollectionModel<BossResponse> toAllBossesModel(List<BossResponse> bosses) {
     return CollectionModel.of(
-        bosses, linkTo(methodOn(BattleController.class).getAllBosses()).withSelfRel());
+        bosses, linkTo(methodOn(BattleQueryController.class).getAllBosses()).withSelfRel());
   }
 
   // ── BossHealthResponse ────────────────────────────────────────────────────────
@@ -75,9 +78,10 @@ public class BattleResponseAssembler {
       BossHealthResponse body, String battleId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).getBossHealth(battleId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getBossHealth(battleId)).withSelfRel(),
         selfLink(battleId),
-        linkTo(methodOn(BattleController.class).dealDamage(battleId, null)).withRel("dealDamage"));
+        linkTo(methodOn(BattleCommandController.class).dealDamage(battleId, null))
+            .withRel("dealDamage"));
   }
 
   // ── TurnResponse ──────────────────────────────────────────────────────────────
@@ -85,17 +89,19 @@ public class BattleResponseAssembler {
   public EntityModel<TurnResponse> toCurrentTurnModel(TurnResponse body, String battleId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).getCurrentTurn(battleId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getCurrentTurn(battleId)).withSelfRel(),
         selfLink(battleId),
-        linkTo(methodOn(BattleController.class).getNumOfTurns(battleId)).withRel("numOfTurns"));
+        linkTo(methodOn(BattleQueryController.class).getNumOfTurns(battleId))
+            .withRel("numOfTurns"));
   }
 
   public EntityModel<TurnResponse> toTotalTurnsModel(TurnResponse body, String battleId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).getNumOfTurns(battleId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getNumOfTurns(battleId)).withSelfRel(),
         selfLink(battleId),
-        linkTo(methodOn(BattleController.class).getCurrentTurn(battleId)).withRel(CURRENT_TURN));
+        linkTo(methodOn(BattleQueryController.class).getCurrentTurn(battleId))
+            .withRel(CURRENT_TURN));
   }
 
   // ── InProgressResponse ────────────────────────────────────────────────────────
@@ -104,8 +110,8 @@ public class BattleResponseAssembler {
       InProgressResponse body, String guildId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).hasBattleInProgress(guildId)).withSelfRel(),
-        linkTo(methodOn(BattleController.class).getBattleByGuild(guildId)).withRel("battle"));
+        linkTo(methodOn(BattleQueryController.class).hasBattleInProgress(guildId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getBattleByGuild(guildId)).withRel("battle"));
   }
 
   // ── BattleStatusResponse ──────────────────────────────────────────────────────
@@ -114,10 +120,11 @@ public class BattleResponseAssembler {
       BattleStatusResponse body, String battleId) {
     return EntityModel.of(
         body,
-        linkTo(methodOn(BattleController.class).getBattleStatus(battleId)).withSelfRel(),
+        linkTo(methodOn(BattleQueryController.class).getBattleStatus(battleId)).withSelfRel(),
         selfLink(battleId),
-        linkTo(methodOn(BattleController.class).getBossHealth(battleId)).withRel("bossHealth"),
-        linkTo(methodOn(BattleController.class).getCurrentTurn(battleId)).withRel(CURRENT_TURN));
+        linkTo(methodOn(BattleQueryController.class).getBossHealth(battleId)).withRel("bossHealth"),
+        linkTo(methodOn(BattleQueryController.class).getCurrentTurn(battleId))
+            .withRel(CURRENT_TURN));
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────────
