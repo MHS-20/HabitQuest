@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import compose.project.demo.AvatarUiState
+import compose.project.demo.contexts.habits.domain.model.HabitCalendarEntry
 import compose.project.demo.contexts.habits.domain.model.AttendHabitResult
 import compose.project.demo.contexts.habits.domain.model.CreateHabitRecurrenceType
 import compose.project.demo.contexts.habits.domain.model.DeleteHabitResult
@@ -42,9 +43,15 @@ import compose.project.demo.contexts.habits.domain.model.HabitListResult
 import compose.project.demo.contexts.habits.domain.model.UpdateHabitResult
 import compose.project.demo.contexts.habits.infrastructure.repository.HabitsApiRepository
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 
 @Composable
-fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () -> Unit = {}) {
+fun HabitsScreen(
+  token: String,
+  avatarState: AvatarUiState,
+  onHabitAttended: () -> Unit = {},
+  habitCalendarLauncher: (HabitCalendarEntry) -> Unit,
+) {
   val habitRepository = remember { HabitsApiRepository() }
   val scope = rememberCoroutineScope()
   var uiState by remember { mutableStateOf<HabitsUiState>(HabitsUiState.Loading) }
@@ -64,6 +71,18 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
   fun recurrenceTypeFrom(habit: HabitListItem): CreateHabitRecurrenceType =
     runCatching { CreateHabitRecurrenceType.valueOf(habit.recurrenceType.trim().uppercase()) }
       .getOrElse { CreateHabitRecurrenceType.DAILY }
+
+  fun HabitListItem.toCalendarEntryOrNull(): HabitCalendarEntry? =
+    nextRecurrenceDate?.let { dateText ->
+      runCatching {
+          HabitCalendarEntry(
+            title = title,
+            description = description,
+            startDateTime = LocalDateTime.parse(dateText),
+          )
+        }
+        .getOrNull()
+    }
 
   suspend fun loadHabits(showLoading: Boolean) {
     val avatar = (avatarState as? AvatarUiState.Ready)?.avatar
@@ -137,6 +156,7 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
         } else {
           LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(filteredHabits, key = { it.id }) { habit ->
+              val calendarEntry = habit.toCalendarEntryOrNull()
               HabitRow(
                 habit = habit,
                 isAttending = attendingHabitId == habit.id,
@@ -169,6 +189,13 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
                   editDayOfMonth = (habit.recurrenceDayOfMonth ?: 1).toString()
                 },
                 onDelete = { pendingDeleteHabit = habit },
+                onAddToCalendar =
+                  calendarEntry?.let { entry ->
+                    {
+                      habitCalendarLauncher(entry)
+                      actionMessage = "Calendar event added: ${habit.title}"
+                    }
+                  },
               )
             }
           }
@@ -205,7 +232,9 @@ fun HabitsScreen(token: String, avatarState: AvatarUiState, onHabitAttended: () 
             Text("Delete")
           }
         },
-        dismissButton = { TextButton(onClick = { pendingDeleteHabit = null }) { Text("Cancel") } },
+        dismissButton = {
+          TextButton(onClick = { pendingDeleteHabit = null }) { Text("Cancel") }
+        },
       )
     }
 
@@ -356,6 +385,7 @@ private fun HabitRow(
   onAttend: () -> Unit,
   onEdit: () -> Unit,
   onDelete: () -> Unit,
+  onAddToCalendar: (() -> Unit)?,
 ) {
   val tagsText = habit.tags.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "No tags"
   val lastAttendedText = habit.lastAttendedDate ?: "Not available"
@@ -442,6 +472,16 @@ private fun HabitRow(
           Text("Deleting...")
         } else {
           Text("Delete")
+        }
+      }
+      if (onAddToCalendar != null) {
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+          onClick = onAddToCalendar,
+          enabled = !isAttending && !isDeleting && !isUpdating,
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Text("Add to calendar")
         }
       }
     }

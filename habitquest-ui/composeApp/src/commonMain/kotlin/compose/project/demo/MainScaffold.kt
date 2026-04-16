@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import compose.project.demo.contexts.avatar.domain.model.AvatarData
 import compose.project.demo.contexts.avatar.domain.model.AvatarResult
 import compose.project.demo.contexts.avatar.infrastructure.repository.AvatarRepository
+import compose.project.demo.contexts.habits.domain.model.HabitCalendarEntry
 import compose.project.demo.contexts.avatar.presentation.screen.CharacterScreen
 import compose.project.demo.contexts.dashboard.presentation.screen.DashboardScreen
 import compose.project.demo.contexts.guild.presentation.screen.GuildScreen
@@ -33,7 +34,12 @@ import compose.project.demo.contexts.quest.presentation.screen.QuestScreen
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
+fun MainScaffold(
+  onLogout: () -> Unit,
+  token: String,
+  userId: String,
+  habitCalendarLauncher: (HabitCalendarEntry) -> Unit,
+) {
   var selectedPage by remember { mutableStateOf(AppPage.Dashboard) }
   val avatarRepository = remember { AvatarRepository() }
   var avatarState by remember { mutableStateOf<AvatarUiState>(AvatarUiState.Loading) }
@@ -116,6 +122,7 @@ fun MainScaffold(onLogout: () -> Unit, token: String, userId: String) {
               requestAvatarRefresh()
               requestQuestProgressRefresh()
             },
+            habitCalendarLauncher = habitCalendarLauncher,
           )
         AppPage.Quest ->
           QuestScreen(

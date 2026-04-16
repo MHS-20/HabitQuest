@@ -4,5 +4,9 @@
     <dict>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
+        <key>NSCalendarsUsageDescription</key>
+        <string>HabitQuest needs calendar access to add habits to your calendar.</string>
+        <key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+        <string>HabitQuest needs calendar access to add habits to your calendar.</string>
     </dict>
 </plist>

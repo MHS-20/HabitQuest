@@ -7,6 +7,8 @@ import compose.project.demo.contexts.auth.application.LoginUseCase
 import compose.project.demo.contexts.auth.application.RegisterUseCase
 import compose.project.demo.contexts.auth.domain.model.AuthResult
 import compose.project.demo.contexts.auth.infrastructure.repository.AuthRepository
+import compose.project.demo.contexts.habits.domain.model.HabitCalendarEntry
+import compose.project.demo.contexts.habits.infrastructure.calendar.defaultHabitCalendarLauncher
 import compose.project.demo.contexts.auth.presentation.screen.LoginScreen
 import compose.project.demo.contexts.auth.presentation.screen.RegisterScreen
 import kotlinx.coroutines.launch
@@ -28,7 +30,7 @@ private enum class AuthRoute {
 
 @Composable
 @Preview
-fun App() {
+fun App(habitCalendarLauncher: (HabitCalendarEntry) -> Unit = defaultHabitCalendarLauncher()) {
   MaterialTheme {
     val authRepository = remember { AuthRepository() }
     val loginUseCase = remember { LoginUseCase(authRepository) }
@@ -108,6 +110,7 @@ fun App() {
           },
           token = authToken.orEmpty(),
           userId = authUserId.orEmpty(),
+          habitCalendarLauncher = habitCalendarLauncher,
         )
     }
   }
