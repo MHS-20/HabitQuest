@@ -1,23 +1,20 @@
 package habitquest.guild.infrastructure.dto;
 
+import common.cqrs.QueryResponse;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.boss.BossEnemy;
 
-public class BattleResponsesDto {
-  public record BattleCreatedResponse(String id) {}
+public class BattleQueries {
+  // Query responses
+  public record BossHealthResponse(int remainingHealth) implements QueryResponse {}
 
-  public record BossHealthResponse(int remainingHealth) {}
+  public record TurnResponse(Integer turn) implements QueryResponse {}
 
-  public record TurnResponse(Integer turn) {}
+  public record InProgressResponse(boolean inProgress) implements QueryResponse {}
 
-  public record InProgressResponse(boolean inProgress) {}
-
-  public record BattleStatusResponse(BattleOutcome status, boolean isOver, boolean isWon) {}
-
-  public record ErrorResponse(String message) {}
-
-  public record BattleOutcomeLog(String battleId, String outcome, int primary, int secondary) {}
+  public record BattleStatusResponse(BattleOutcome status, boolean isOver, boolean isWon)
+      implements QueryResponse {}
 
   public record BattleResponse(
       String id,
@@ -26,7 +23,8 @@ public class BattleResponsesDto {
       int currentTurn,
       int numOfTurns,
       BossResponse boss,
-      int bossRemainingHealth) {
+      int bossRemainingHealth)
+      implements QueryResponse {
 
     public static BattleResponse from(Battle battle) {
       return new BattleResponse(
@@ -47,7 +45,8 @@ public class BattleResponsesDto {
       int defense,
       int experienceReward,
       int moneyReward,
-      int penalty) {
+      int penalty)
+      implements QueryResponse {
 
     public static BossResponse from(BossEnemy boss) {
       return new BossResponse(
