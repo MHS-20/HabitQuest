@@ -8,8 +8,9 @@ import habitquest.quest.application.service.QuestProgressView;
 import habitquest.quest.domain.Habit;
 import habitquest.quest.domain.Quest;
 import habitquest.quest.domain.Reward;
-import habitquest.quest.infrastructure.dto.QuestResponsesDto.*;
-import habitquest.quest.infrastructure.inbound.QuestController;
+import habitquest.quest.infrastructure.dto.QuestQueries.*;
+import habitquest.quest.infrastructure.inbound.QuestCommandController;
+import habitquest.quest.infrastructure.inbound.QuestQueryController;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.hateoas.CollectionModel;
@@ -25,17 +26,17 @@ public class QuestResponseAssembler {
     return EntityModel.of(
         new QuestCreatedResponse(id),
         selfLink(id),
-        linkTo(methodOn(QuestController.class).getQuest(id)).withRel("quest"),
-        linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
-        linkTo(methodOn(QuestController.class).getReward(id)).withRel("reward"),
-        linkTo(methodOn(QuestController.class).getHabits(id)).withRel("habits"));
+        linkTo(methodOn(QuestQueryController.class).getQuest(id)).withRel("quest"),
+        linkTo(methodOn(QuestQueryController.class).getDuration(id)).withRel("duration"),
+        linkTo(methodOn(QuestQueryController.class).getReward(id)).withRel("reward"),
+        linkTo(methodOn(QuestQueryController.class).getHabits(id)).withRel("habits"));
   }
 
   public CollectionModel<EntityModel<QuestResponse>> toCollectionModel(List<Quest> quests) {
     List<EntityModel<QuestResponse>> questModels =
         quests.stream().map(this::toSummaryModel).toList();
     return CollectionModel.of(
-        questModels, linkTo(methodOn(QuestController.class).getAllQuests()).withSelfRel());
+        questModels, linkTo(methodOn(QuestQueryController.class).getAllQuests()).withSelfRel());
   }
 
   public EntityModel<QuestResponse> toModel(Quest quest) {
@@ -43,11 +44,11 @@ public class QuestResponseAssembler {
     return EntityModel.of(
         QuestMapper.toResponse(quest),
         selfLink(id),
-        linkTo(methodOn(QuestController.class).getName(id)).withRel("name"),
-        linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
-        linkTo(methodOn(QuestController.class).getReward(id)).withRel("reward"),
-        linkTo(methodOn(QuestController.class).getHabits(id)).withRel("habits"),
-        linkTo(methodOn(QuestController.class).deleteQuest(id)).withRel("delete"));
+        linkTo(methodOn(QuestQueryController.class).getName(id)).withRel("name"),
+        linkTo(methodOn(QuestQueryController.class).getDuration(id)).withRel("duration"),
+        linkTo(methodOn(QuestQueryController.class).getReward(id)).withRel("reward"),
+        linkTo(methodOn(QuestQueryController.class).getHabits(id)).withRel("habits"),
+        linkTo(methodOn(QuestCommandController.class).deleteQuest(id)).withRel("delete"));
   }
 
   public EntityModel<NameResponse> toNameModel(String id, String name) {
@@ -92,7 +93,8 @@ public class QuestResponseAssembler {
 
     return EntityModel.of(
         new AvatarQuestProgressResponse(avatarId, items),
-        linkTo(methodOn(QuestController.class).getActiveQuestProgress(avatarId)).withSelfRel());
+        linkTo(methodOn(QuestQueryController.class).getActiveQuestProgress(avatarId))
+            .withSelfRel());
   }
 
   // ─── private helpers ────────────────────────────────────────────────────────
@@ -102,15 +104,15 @@ public class QuestResponseAssembler {
     return EntityModel.of(
         QuestMapper.toResponse(quest),
         selfLink(id),
-        linkTo(methodOn(QuestController.class).getName(id)).withRel("name"),
-        linkTo(methodOn(QuestController.class).getDuration(id)).withRel("duration"),
-        linkTo(methodOn(QuestController.class).getReward(id)).withRel("reward"),
-        linkTo(methodOn(QuestController.class).getHabits(id)).withRel("habits"));
+        linkTo(methodOn(QuestQueryController.class).getName(id)).withRel("name"),
+        linkTo(methodOn(QuestQueryController.class).getDuration(id)).withRel("duration"),
+        linkTo(methodOn(QuestQueryController.class).getReward(id)).withRel("reward"),
+        linkTo(methodOn(QuestQueryController.class).getHabits(id)).withRel("habits"));
   }
 
   private Link selfLink(String id) {
     try {
-      return linkTo(methodOn(QuestController.class).getQuest(id)).withSelfRel();
+      return linkTo(methodOn(QuestQueryController.class).getQuest(id)).withSelfRel();
     } catch (QuestNotFoundException e) {
       throw new RuntimeException(e);
     }
@@ -118,7 +120,7 @@ public class QuestResponseAssembler {
 
   private Link questLink(String id) {
     try {
-      return linkTo(methodOn(QuestController.class).getQuest(id)).withRel("quest");
+      return linkTo(methodOn(QuestQueryController.class).getQuest(id)).withRel("quest");
     } catch (QuestNotFoundException e) {
       throw new RuntimeException(e);
     }
