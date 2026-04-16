@@ -159,15 +159,20 @@ jobs:
             habitquest-ui/composeApp/build/bin/iosSimulatorArm64/**
 
   ui-final-status:
-    name: Final Pipeline Status
+    name: UI Final Pipeline Status
     runs-on: ubuntu-22.04
     needs:
       - commit-lint
       - static-scan
       - build
-    if: always() && (
-      needs.commit-lint.result == 'failure' ||
-      needs.static-scan.result == 'failure' ||
-      needs.build.result == 'failure')
+    if: always()
     steps:
-      - run: exit 1
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.commit-lint.result }}" == "failure" ||
+                "${{ needs.static-scan.result }}" == "failure" ||
+                "${{ needs.build.result }}" == "failure" ]]; then
+            echo "One or more jobs failed"
+            exit 1
+          fi
+          echo "All jobs passed"

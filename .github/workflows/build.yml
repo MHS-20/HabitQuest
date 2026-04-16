@@ -93,23 +93,10 @@ jobs:
           name: ${{ matrix.service }}-jar
           path: services/${{ matrix.service }}/build/libs/*.jar
 
-  build-aggregate:
-    name: Build Aggregate Status
-    runs-on: ubuntu-22.04
-    needs: [ detect-changes, build ]
-    if: always()
-    steps:
-      - name: Fail if build failed
-        run: |
-          if [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "One or more builds failed"
-            exit 1
-          fi
-
   package-scan-publish:
     name: Package, Scan & Publish
     needs:
-      - build-aggregate
+      - build
       - detect-changes
     if: ${{ success() && needs.detect-changes.outputs.services != '[]' }}
     runs-on: ubuntu-22.04
@@ -199,34 +186,23 @@ jobs:
               "image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}"
             }
 
-  package-aggregate:
-    name: Package Aggregate Status
-    runs-on: ubuntu-22.04
-    needs:
-      - detect-changes
-      - package-scan-publish
-    if: always()
-    steps:
-      - name: Evaluate package results
-        run: |
-          if [[ "${{ needs.package-scan-publish.result }}" == "failure" ]]; then
-            echo "One or more package jobs failed"
-            exit 1
-          fi
-
   final-status:
     name: Final Pipeline Status
     runs-on: ubuntu-22.04
     needs:
       - commit-lint
       - k8s-validate
-      - build-aggregate
-      - package-aggregate
-    if: always() && (
-      needs.commit-lint.result == 'failure' ||
-      needs.k8s-validate.result == 'failure' ||
-      needs.build-aggregate.result == 'failure' ||
-      needs.package-aggregate.result == 'failure'
-      )
+      - build
+      - package-scan-publish
+    if: always()
     steps:
-      - run: exit 1
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.commit-lint.result }}" == "failure" ||
+                "${{ needs.k8s-validate.result }}" == "failure" ||
+                "${{ needs.build.result }}" == "failure" ||
+                "${{ needs.package-scan-publish.result }}" == "failure" ]]; then
+            echo "One or more jobs failed"
+            exit 1
+          fi
+          echo "All jobs passed"
