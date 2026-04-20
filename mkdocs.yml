@@ -21,6 +21,7 @@ nav:
   - Architecture & Implementation:
     - Interactions: implementation/interactions/interactions.md
     - Hexagonal Architecture: implementation/hexagonal-architecture.md
+    - Architecture Decision Records: ddd/adr/adr-index.md
     - Microservices Patterns: implementation/microservices-patterns.md
     - CQRS: implementation/cqrs.md
     - SAGA: implementation/saga.md
