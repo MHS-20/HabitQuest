@@ -15,27 +15,26 @@ import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun rememberHabitCalendarLauncher(): (HabitCalendarEntry) -> Unit {
-  val context = LocalContext.current
-  val scope = rememberCoroutineScope()
-  val manager = remember(context) { CalendarEventManager().apply { setup(context) } }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val manager = remember(context) { CalendarEventManager().apply { setup(context) } }
 
-  return remember(scope, manager) {
-    { entry ->
-      val zone = TimeZone.currentSystemDefault()
-      val startInstant = entry.startDateTime.toInstant(zone)
-      val endDateTime = (startInstant + entry.durationMinutes.minutes).toLocalDateTime(zone)
+    return remember(scope, manager) {
+        { entry ->
+            val zone = TimeZone.currentSystemDefault()
+            val startInstant = entry.startDateTime.toInstant(zone)
+            val endDateTime = (startInstant + entry.durationMinutes.minutes).toLocalDateTime(zone)
 
-      scope.launch {
-        manager.createEvent(
-          Event(
-            title = entry.title,
-            startDate = entry.startDateTime,
-            endDate = endDateTime,
-            notes = entry.description,
-          )
-        )
-      }
+            scope.launch {
+                manager.createEvent(
+                    Event(
+                        title = entry.title,
+                        startDate = entry.startDateTime,
+                        endDate = endDateTime,
+                        notes = entry.description,
+                    ),
+                )
+            }
+        }
     }
-  }
 }
-
