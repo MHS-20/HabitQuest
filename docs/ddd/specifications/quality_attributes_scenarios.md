@@ -1,126 +1,98 @@
-# Quality Attribute Scenarios for Habit RPG Microservices
+# Quality Attribute Scenarios
 
-## Edge Service – Availability
+## Edge Service — Availability (Login)
 
-**Scenario:**  
-
-- **Stimulus:** A login request arrives.  
-- **Source:** Authenticated mobile or web client.  
-- **Environment:** Normal operation, regular load.  
-- **Artifact:** Edge Service API.  
-- **Response:** Edge service must authenticate user and return a JWT.  
-- **Response Measure:** ≤ 300 ms for 95% of authentication requests.
+- **Stimulus:** A login request arrives at the system.
+- **Source:** Mobile or web client.
+- **Environment:** Normal operation, regular load.
+- **Artifact:** Edge Service — authentication endpoint.
+- **Response:** The system verifies the user's credentials, generates a session token, and returns it to the client.
+- **Response Measure:** ≤ 300 ms for 95% of requests.
 
 ---
 
-## Tracking Service – Performance
+## Edge Service — Correctness (Registration)
 
-**Scenario:**  
+- **Stimulus:** A registration request arrives at the system.
+- **Source:** New user from a mobile or web client.
+- **Environment:** Normal operation.
+- **Artifact:** Edge Service — registration endpoint.
+- **Response:** The system creates the user account and the associated avatar profile as an atomic operation. If either creation fails, the entire operation is rolled back and an explicit error is returned.
+- **Response Measure:** No partial registration is observable by the client: either both resources are created, or neither is.
 
-- **Stimulus:** A user requests the list of active habits.  
-- **Source:** Authenticated web or mobile user.  
-- **Environment:** Under typical usage load.  
-- **Artifact:** Tracking Service.  
-- **Response:** Tracking service returns all active habits with correct metadata.  
+---
+
+## Tracking Service — Performance
+
+- **Stimulus:** A user requests the list of habits associated with their avatar.
+- **Source:** Authenticated user from a web or mobile client.
+- **Environment:** Typical usage load.
+- **Artifact:** Tracking Service — habit query endpoint.
+- **Response:** The system returns all habits belonging to the avatar, along with their full metadata.
 - **Response Measure:** ≤ 500 ms for 95% of requests.
 
 ---
 
-## Notification Service – Reliability
+## Avatar Service — Consistency (Experience Grant)
 
-**Scenario:**  
-
-- **Stimulus:** A scheduled reminder is due to be sent.  
-- **Source:** Internal scheduler.  
-- **Environment:** During normal system load.  
-- **Artifact:** Notification Service.  
-- **Response:** Notification Service issues the notification.  
-- **Response Measure:** ≥ 99% of reminders delivered within 5 seconds after scheduled time.
+- **Stimulus:** A user completes a habit.
+- **Source:** Tracking Service.
+- **Environment:** Normal operation, synchronous processing.
+- **Artifact:** Avatar Service — experience update endpoint.
+- **Response:** The system updates the avatar's experience points, checks for level-up conditions, and unlocks new abilities if applicable. State is persisted before any downstream notification is triggered.
+- **Response Measure:** State persisted within 500 ms of the request.
 
 ---
 
-## Avatar Service – Consistency
+## Marketplace Service — Transactional Integrity
 
-**Scenario:**  
-
-- **Stimulus:** HabitCompleted event arrives via event bus.  
-- **Source:** Habit Service.  
-- **Environment:** Normal event processing conditions.  
-- **Artifact:** Avatar Service.  
-- **Response:** Avatar increments user XP and updates level if threshold hit.  
-- **Response Measure:** XP updated within 1 second of event receipt.
+- **Stimulus:** A user purchases an item in the marketplace.
+- **Source:** Authenticated client.
+- **Environment:** Normal operating conditions.
+- **Artifact:** Marketplace Service — item purchase endpoint.
+- **Response:** The system deducts the required currency from the avatar, adds the item to the inventory, and updates the marketplace. If any step fails, all previously completed operations are compensated and an explicit error is returned.
+- **Response Measure:** No partial update is observable by the client: the purchase either succeeds completely or is fully rolled back.
 
 ---
 
-## Avatar Service – Correctness
+## Avatar Service — Inventory Update
 
-**Scenario:**  
-
-- **Stimulus:** ItemPurchased event is received.  
-- **Source:** Shop Service via event bus.  
-- **Environment:** Normal asynchronous processing.  
-- **Artifact:** Inventory Service.  
-- **Response:** Inventory adds the purchased item to user inventory.  
-- **Response Measure:** Inventory update reflected in queries within 1 second.
+- **Stimulus:** A purchase in the Marketplace is confirmed.
+- **Source:** Marketplace Service.
+- **Environment:** Synchronous processing within a purchase flow.
+- **Artifact:** Avatar Service — inventory management endpoint.
+- **Response:** The system adds the purchased item to the avatar's inventory and persists the updated state.
+- **Response Measure:** The updated inventory is reflected in subsequent queries within 500 ms of the request.
 
 ---
 
-## Marketplace Service – Transactional Integrity
+## Guild Service — Scalability (Invite Acceptance)
 
-**Scenario:**  
-
-- **Stimulus:** User submits an item purchase.  
-- **Source:** Authenticated client.  
-- **Environment:** Normal operating conditions.  
-- **Artifact:** Marketplace Service.  
-- **Response:** Marketplace service debits currency and issues ItemPurchased event.  
-- **Response Measure:** Entire operation must complete successfully or fail atomically; no partial updates.
+- **Stimulus:** 50 users concurrently submit an invite acceptance request to the same guild.
+- **Source:** Multiple authenticated users.
+- **Environment:** High but expected load.
+- **Artifact:** Guild Service — invite acceptance endpoint.
+- **Response:** The system handles concurrent requests while preserving guild state consistency (no duplicate members, no lost updates).
+- **Response Measure:** ≥ 95% of requests completed successfully within 1 second.
 
 ---
 
-## Guild Service – Scalability
+## Battle Service — Reliability (Combat Action)
 
-**Scenario:**  
-
-- **Stimulus:** 50 users concurrently request to join a guild.  
-- **Source:** Multiple authenticated users.  
-- **Environment:** Elevated but expected load.  
-- **Artifact:** Guild Service API.  
-- **Response:** Guild service processes all join requests without failures.  
-- **Response Measure:** ≥ 95% of requests handled within 1 second.
----
-
-## Guild Service – Reliability
-
-**Scenario:**  
-
-- **Stimulus:** Guild combat action (attack or spell) arrives.  
-- **Source:** Member of an active guild.  
-- **Environment:** Combat session in progress.  
-- **Artifact:** Combat Service.  
-- **Response:** Combat service calculates damage and updates boss and player state.  
-- **Response Measure:** Response delivered in ≤ 300 ms.
+- **Stimulus:** A guild member performs an attack against the boss.
+- **Source:** Member of a guild with an active battle.
+- **Environment:** Active combat session.
+- **Artifact:** Battle Service — damage processing endpoint.
+- **Response:** The system verifies that it is the player's turn, computes the action outcome (ongoing, victory, or defeat), and updates the state of all involved avatars accordingly, distributing rewards or applying penalties.
+- **Response Measure:** Response to the combat action delivered within ≤ 300 ms.
 
 ---
 
-## Guild Service – Real-time
+## Quest Service — Responsiveness
 
-**Scenario:**  
-
-- **Stimulus:** Guild member sends a chat message.  
-- **Source:** Client via WebSocket.  
-- **Environment:** Chat session active.  
-- **Artifact:** Messaging Service.  
-- **Response:** Message is broadcast to all members in the guild chat.  
-- **Response Measure:** Delivery latency ≤ 200 ms.
-
-## Quest Service – Responsiveness
-
-**Scenario:**  
-
-- **Stimulus:** User requests quest details.  
-- **Source:** Authenticated client.  
-- **Environment:** Normal load.  
-- **Artifact:** Quest Service API.  
-- **Response:** Quest service returns the quest data including associated habits and progress status.  
-- **Response Measure:** ≤ 600 ms for 95% of requests.
+- **Stimulus:** A user requests quest details or their current progress.
+- **Source:** Authenticated client.
+- **Environment:** Normal load.
+- **Artifact:** Quest Service — quest detail and progress endpoints.
+- **Response:** The system returns the requested quest data. For progress queries, it refreshes the status of active quests, applies any expiry penalties, and computes the completion percentage for each associated habit.
+- **Response Measure:** ≤ 600 ms for quest detail requests; ≤ 800 ms for progress requests (due to state refresh and interactions with the Avatar Service).
