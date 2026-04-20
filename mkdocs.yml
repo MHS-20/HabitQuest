@@ -7,6 +7,8 @@ nav:
     - Event Storming: ddd/eventStorming/event_storming.md
     - Use Cases: ddd/useCases/use_cases.md
     - User Stories: ddd/specifications/user_stories.md
+    - Components & Connectors: ddd/conponentsAndConnectors/components-and-connectors.png
+    - Context Map: ddd/contextMap/context-map.md
     - Quality Attributes: ddd/specifications/quality_attributes.md
     - Quality Attribute Scenarios: ddd/specifications/quality_attributes_scenarios.md
   - Domain Overview:
@@ -20,6 +22,7 @@ nav:
     - Interactions: implementation/interactions/interactions.md
     - Hexagonal Architecture: implementation/hexagonal-architecture.md
     - Microservices Patterns: implementation/microservices-patterns.md
+    - CQRS: implementation/cqrs.md
     - SAGA: implementation/saga.md
     - HATEOAS: implementation/hateoas.md
     - Event Sourcing: implementation/event-sourcing.md
