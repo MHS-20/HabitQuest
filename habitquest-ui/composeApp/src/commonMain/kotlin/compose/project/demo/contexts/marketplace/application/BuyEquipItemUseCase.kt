@@ -16,7 +16,7 @@ class BuyEquipItemUseCase(
         marketplaceId: String,
         item: MarketplaceItem,
         currentLevel: Int,
-      ): MarketplaceBuyResult = marketplaceGateway.buyItem(token, marketplaceId, item, currentLevel)
+    ): MarketplaceBuyResult = marketplaceGateway.buyItem(token, marketplaceId, item, currentLevel)
 
     suspend fun toggleEquip(
         token: String,
