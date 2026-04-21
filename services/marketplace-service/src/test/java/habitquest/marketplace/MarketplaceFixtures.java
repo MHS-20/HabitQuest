@@ -126,11 +126,11 @@ public final class MarketplaceFixtures {
   }
 
   public static ItemResponse swordResponse() {
-    return new ItemResponse("WEAPON", SWORD_NAME, "A sturdy iron sword", 30, 50);
+    return new ItemResponse("WEAPON", SWORD_NAME, "A sturdy iron sword", 30, 50, 1);
   }
 
   public static ItemResponse shieldResponse() {
-    return new ItemResponse("ARMOR", SHIELD_NAME, "A sturdy iron shield", 20, 40);
+    return new ItemResponse("ARMOR", SHIELD_NAME, "A sturdy iron shield", 20, 40, 1);
   }
 
   public static MarketplaceResponse marketplaceResponse() {

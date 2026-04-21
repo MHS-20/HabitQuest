@@ -8,7 +8,12 @@ public class MarketplaceQueries {
   public record ErrorResponse(String message) implements QueryResponse {}
 
   public record ItemResponse(
-      String type, String name, String description, Integer power, Integer price)
+      String type,
+      String name,
+      String description,
+      Integer power,
+      Integer price,
+      Integer requiredLevel)
       implements QueryResponse {}
 
   public record MarketplaceResponse(String id, List<ItemResponse> items) implements QueryResponse {

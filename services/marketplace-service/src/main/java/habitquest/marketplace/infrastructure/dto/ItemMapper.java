@@ -10,39 +10,25 @@ public final class ItemMapper {
   private ItemMapper() {}
 
   public static Item toItem(ItemCommand command) {
-    return switch (command.type()) {
+      final BaseItem baseItem = new BaseItem(
+              command.itemName(),
+              command.description(),
+              command.power(),
+              new Money(command.price()),
+              new Level(command.requiredLevel()));
+      return switch (command.type()) {
       case "WEAPON" ->
           new Weapon(
-              new BaseItem(
-                  command.itemName(),
-                  command.description(),
-                  command.power(),
-                  new Money(command.price()),
-                  new Level(command.requiredLevel())));
+                  baseItem);
       case "ARMOR" ->
           new Armor(
-              new BaseItem(
-                  command.itemName(),
-                  command.description(),
-                  command.power(),
-                  new Money(command.price()),
-                  new Level(command.requiredLevel())));
+                  baseItem);
       case "HEALTH_POTION" ->
           new HealthPotion(
-              new BaseItem(
-                  command.itemName(),
-                  command.description(),
-                  command.power(),
-                  new Money(command.price()),
-                  new Level(command.requiredLevel())));
+                  baseItem);
       case "MANA_POTION" ->
           new ManaPotion(
-              new BaseItem(
-                  command.itemName(),
-                  command.description(),
-                  command.power(),
-                  new Money(command.price()),
-                  new Level(command.requiredLevel())));
+                  baseItem);
       default -> throw new IllegalArgumentException("Unknown item type: " + command.type());
     };
   }
@@ -56,7 +42,12 @@ public final class ItemMapper {
           case ManaPotion m -> "MANA_POTION";
         };
     return new ItemResponse(
-        type, item.name(), item.description(), item.power(), item.price().amount());
+        type,
+        item.name(),
+        item.description(),
+        item.power(),
+        item.price().amount(),
+        item.requiredLevel().levelNumber());
   }
 
   public static ItemCommand from(Item item) {
