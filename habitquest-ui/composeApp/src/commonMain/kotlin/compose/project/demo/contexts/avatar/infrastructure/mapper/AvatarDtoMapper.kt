@@ -129,4 +129,3 @@ private fun JsonObject.inventoryItemsOrNull(key: String): List<AvatarInventoryIt
     val element = this[key] ?: return null
     return parseInventoryFromPayload(element)
 }
-

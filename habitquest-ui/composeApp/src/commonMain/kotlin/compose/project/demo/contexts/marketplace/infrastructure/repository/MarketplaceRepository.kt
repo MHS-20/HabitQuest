@@ -1,15 +1,15 @@
 package compose.project.demo.contexts.marketplace.infrastructure.repository
 
+import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.marketplace.domain.contract.MarketplaceGateway
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItemsResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceLoadResult
-import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceSellResult
 import compose.project.demo.contexts.marketplace.infrastructure.mapper.parseItemsFromMarketplacePayload
 import compose.project.demo.createHttpEngine
 import compose.project.demo.edgeServiceBaseUrl
-import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -187,7 +187,7 @@ class MarketplaceRepository : MarketplaceGateway {
                             put("power", JsonPrimitive(item.power ?: 0))
                             put("price", JsonPrimitive(item.price))
                             put("requiredLevel", JsonPrimitive(item.requiredLevel))
-                        }
+                        },
                     )
                 }
             }.getOrElse {
@@ -277,8 +277,8 @@ class MarketplaceRepository : MarketplaceGateway {
         token: String,
         marketplaceId: String,
         item: AvatarInventoryItem,
-    ): HttpResponse {
-        return client.post(
+    ): HttpResponse =
+        client.post(
             "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/sold-items/sell",
         ) {
             header(HttpHeaders.Authorization, "Bearer $token")
@@ -291,10 +291,9 @@ class MarketplaceRepository : MarketplaceGateway {
                     put("power", JsonPrimitive(item.power ?: 0))
                     put("price", JsonPrimitive(item.price))
                     put("requiredLevel", JsonPrimitive(1))
-                }
+                },
             )
         }
-    }
 
     private suspend fun extractErrorMessage(response: HttpResponse): String? {
         val body = runCatching { response.body<JsonObject>() }.getOrNull() ?: return null
