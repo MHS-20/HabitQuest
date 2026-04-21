@@ -37,8 +37,4 @@ public class ItemCatalog {
   public List<Item> getAllItems() {
     return items.values().stream().toList();
   }
-
-  public boolean contains(String name) {
-    return items.containsKey(name);
-  }
 }
