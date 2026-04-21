@@ -39,6 +39,7 @@ import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryResult
 import compose.project.demo.contexts.avatar.infrastructure.repository.AvatarRepository
 import compose.project.demo.contexts.marketplace.application.BuyEquipItemUseCase
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceLoadResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceSellResult
 import compose.project.demo.contexts.marketplace.infrastructure.repository.MarketplaceRepository
@@ -64,6 +65,7 @@ fun CharacterScreen(
     var equippedItems by remember { mutableStateOf<List<AvatarInventoryItem>>(emptyList()) }
     var equippedItemNames by remember { mutableStateOf<Set<String>>(emptySet()) }
     var marketplaceId by remember { mutableStateOf<String?>(null) }
+    var marketplaceItemsByName by remember { mutableStateOf<Map<String, MarketplaceItem>>(emptyMap()) }
     var sellingItemName by remember { mutableStateOf<String?>(null) }
     var inventoryActionItemName by remember { mutableStateOf<String?>(null) }
     var sellActionMessage by remember { mutableStateOf<String?>(null) }
@@ -93,6 +95,25 @@ fun CharacterScreen(
         }
     }
 
+    suspend fun refreshMarketplaceMetadata(
+        avatarId: String,
+        reportError: Boolean,
+    ): String? =
+        when (val result = marketplaceRepository.ensureMarketplace(token, avatarId)) {
+            is MarketplaceLoadResult.Success -> {
+                marketplaceId = result.marketplaceId
+                marketplaceItemsByName = result.items.associateBy { it.name }
+                result.marketplaceId
+            }
+
+            is MarketplaceLoadResult.Error -> {
+                if (reportError) {
+                    inventoryError = result.message
+                }
+                null
+            }
+        }
+
     suspend fun reloadInventoryState(avatar: AvatarData) {
         inventoryError = null
         inventoryLoading = true
@@ -112,23 +133,15 @@ fun CharacterScreen(
             loadEquippedItems(avatar.id)
         }
 
+        refreshMarketplaceMetadata(avatar.id, reportError = false)
+
         inventoryLoading = false
     }
 
     suspend fun ensureMarketplaceId(avatarId: String): String? {
         val current = marketplaceId
         if (current != null) return current
-        return when (val result = marketplaceRepository.ensureMarketplace(token, avatarId)) {
-            is MarketplaceLoadResult.Success -> {
-                marketplaceId = result.marketplaceId
-                result.marketplaceId
-            }
-
-            is MarketplaceLoadResult.Error -> {
-                inventoryError = result.message
-                null
-            }
-        }
+        return refreshMarketplaceMetadata(avatarId, reportError = true)
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -153,8 +166,22 @@ fun CharacterScreen(
             is AvatarUiState.Ready -> {
                 LaunchedEffect(state.avatar.id, token) {
                     marketplaceId = null
+                    marketplaceItemsByName = emptyMap()
                     reloadInventoryState(state.avatar)
                 }
+
+                val enrichedInventoryItems =
+                    inventoryItems.map { item ->
+                        val marketplaceItem = marketplaceItemsByName[item.name]
+                        if (marketplaceItem == null) {
+                            item
+                        } else {
+                            item.copy(
+                                price = marketplaceItem.price,
+                                requiredLevel = marketplaceItem.requiredLevel,
+                            )
+                        }
+                    }
 
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
@@ -204,12 +231,12 @@ fun CharacterScreen(
                             Text(text = inventoryError.orEmpty(), color = MaterialTheme.colorScheme.error)
                         }
 
-                        inventoryItems.isEmpty() -> {
+                        enrichedInventoryItems.isEmpty() -> {
                             Text("Inventory is empty")
                         }
 
                         else -> {
-                            inventoryItems.forEach { item ->
+                            enrichedInventoryItems.forEach { item ->
                                 val isEquippable =
                                     item.type.equals("WEAPON", true) || item.type.equals("ARMOR", true)
                                 val isPotion =
@@ -252,6 +279,7 @@ fun CharacterScreen(
                                         Text("Power: ${item.power ?: "-"}", style = MaterialTheme.typography.bodySmall)
                                         Text("Quantity: ${item.quantity}", style = MaterialTheme.typography.bodySmall)
                                         Text("Price: ${item.price}", style = MaterialTheme.typography.bodySmall)
+                                        Text("Required level: ${item.requiredLevel}", style = MaterialTheme.typography.bodySmall)
                                         Spacer(Modifier.height(10.dp))
                                         if (isEquippable) {
                                             Button(
@@ -345,13 +373,20 @@ fun CharacterScreen(
                                                         sellingItemName = null
                                                         return@launch
                                                     }
+                                                    val sellItem =
+                                                        marketplaceItemsByName[item.name]?.let { marketplaceItem ->
+                                                            item.copy(
+                                                                price = marketplaceItem.price,
+                                                                requiredLevel = marketplaceItem.requiredLevel,
+                                                            )
+                                                        } ?: item
                                                     when (
                                                         val result =
-                                                            marketplaceRepository.sellItem(token, marketplace, item)
+                                                            marketplaceRepository.sellItem(token, marketplace, sellItem)
                                                     ) {
                                                         MarketplaceSellResult.Success -> {
                                                             sellActionMessage = "Sale completed: ${item.name}"
-                                                            onMoneyDelta(item.price)
+                                                            onMoneyDelta(sellItem.price)
                                                             onAvatarRefresh()
                                                             reloadInventoryState(state.avatar)
                                                         }

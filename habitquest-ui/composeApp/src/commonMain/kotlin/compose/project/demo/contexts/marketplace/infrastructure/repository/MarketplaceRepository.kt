@@ -290,7 +290,7 @@ class MarketplaceRepository : MarketplaceGateway {
                     put("description", JsonPrimitive(item.description))
                     put("power", JsonPrimitive(item.power ?: 0))
                     put("price", JsonPrimitive(item.price))
-                    put("requiredLevel", JsonPrimitive(1))
+                    put("requiredLevel", JsonPrimitive(item.requiredLevel))
                 },
             )
         }

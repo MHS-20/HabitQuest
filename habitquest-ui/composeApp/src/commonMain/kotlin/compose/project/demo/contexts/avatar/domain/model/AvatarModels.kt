@@ -77,4 +77,5 @@ data class AvatarInventoryItem(
     val power: Int?,
     val price: Int,
     val quantity: Int,
+    val requiredLevel: Int = 1,
 )

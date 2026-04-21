@@ -117,6 +117,11 @@ private fun asInventoryItem(element: JsonElement): AvatarInventoryItem? {
             source["quantity"]?.jsonPrimitive?.intOrNull
                 ?: source["amount"]?.jsonPrimitive?.intOrNull
                 ?: 1,
+        requiredLevel =
+            source["requiredLevel"]?.jsonPrimitive?.intOrNull
+                ?: source["levelRequired"]?.jsonPrimitive?.intOrNull
+                ?: source["minLevel"]?.jsonPrimitive?.intOrNull
+                ?: 1,
     )
 }
 
