@@ -177,7 +177,7 @@ class AvatarRepository : AvatarGateway {
             token = token,
             avatarId = avatarId,
             path = potionPath,
-            potionName = item.name,
+            item = item,
             errorPrefix = "Use potion",
         )
     }
@@ -312,7 +312,7 @@ class AvatarRepository : AvatarGateway {
         token: String,
         avatarId: String,
         path: String,
-        potionName: String,
+        item: AvatarInventoryItem,
         errorPrefix: String,
     ): AvatarInventoryActionResult {
         if (avatarId.isBlank()) {
@@ -324,7 +324,7 @@ class AvatarRepository : AvatarGateway {
                 client.post("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/$path") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
-                    setBody(buildPotionActionPayload(potionName))
+                    setBody(buildPotionActionPayload(item))
                 }
             }.getOrElse {
                 return AvatarInventoryActionResult.Error("Unable to contact avatar-service")

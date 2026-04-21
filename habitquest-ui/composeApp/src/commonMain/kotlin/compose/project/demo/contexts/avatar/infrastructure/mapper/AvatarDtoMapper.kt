@@ -89,12 +89,11 @@ internal fun buildInventoryActionPayload(item: AvatarInventoryItem): JsonObject 
         put("power", JsonPrimitive(item.power ?: 0))
     }
 
-internal fun buildPotionActionPayload(potionName: String): JsonObject =
+internal fun buildPotionActionPayload(item: AvatarInventoryItem): JsonObject =
     buildJsonObject {
-        put("potionName", JsonPrimitive(potionName))
-        // Keep compatibility with APIs that renamed the input field.
-        put("name", JsonPrimitive(potionName))
-        put("itemName", JsonPrimitive(potionName))
+        put("name", JsonPrimitive(item.name))
+        put("description", JsonPrimitive(item.description))
+        put("power", JsonPrimitive(item.power ?: 0))
     }
 
 private fun asInventoryItem(element: JsonElement): AvatarInventoryItem? {
