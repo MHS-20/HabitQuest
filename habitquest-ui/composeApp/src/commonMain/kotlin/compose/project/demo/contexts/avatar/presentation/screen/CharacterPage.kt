@@ -37,6 +37,7 @@ import compose.project.demo.contexts.avatar.domain.model.AvatarEquippedItemsResu
 import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryActionResult
 import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryResult
+import compose.project.demo.contexts.avatar.domain.model.AvatarResult
 import compose.project.demo.contexts.avatar.infrastructure.repository.AvatarRepository
 import compose.project.demo.contexts.marketplace.application.BuyEquipItemUseCase
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
@@ -142,6 +143,17 @@ fun CharacterScreen(
         val current = marketplaceId
         if (current != null) return current
         return refreshMarketplaceMetadata(avatarId, reportError = true)
+    }
+
+    suspend fun refreshPageAfterAction(
+        avatarId: String,
+        fallbackAvatar: AvatarData,
+    ) {
+        onAvatarRefresh()
+        when (val avatarResult = avatarRepository.fetchAvatar(avatarId, token)) {
+            is AvatarResult.Success -> reloadInventoryState(avatarResult.avatar)
+            is AvatarResult.Error -> reloadInventoryState(fallbackAvatar)
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -302,8 +314,7 @@ fun CharacterScreen(
                                                                     } else {
                                                                         "Equip completed: ${item.name}"
                                                                     }
-                                                                onAvatarRefresh()
-                                                                reloadInventoryState(state.avatar)
+                                                                refreshPageAfterAction(state.avatar.id, state.avatar)
                                                             }
 
                                                             is AvatarInventoryActionResult.Error -> {
@@ -338,8 +349,7 @@ fun CharacterScreen(
                                                         ) {
                                                             AvatarInventoryActionResult.Success -> {
                                                                 inventoryActionMessage = "Use potion completed: ${item.name}"
-                                                                onAvatarRefresh()
-                                                                reloadInventoryState(state.avatar)
+                                                                refreshPageAfterAction(state.avatar.id, state.avatar)
                                                             }
 
                                                             is AvatarInventoryActionResult.Error -> {
@@ -387,8 +397,7 @@ fun CharacterScreen(
                                                         MarketplaceSellResult.Success -> {
                                                             sellActionMessage = "Sale completed: ${item.name}"
                                                             onMoneyDelta(sellItem.price)
-                                                            onAvatarRefresh()
-                                                            reloadInventoryState(state.avatar)
+                                                            refreshPageAfterAction(state.avatar.id, state.avatar)
                                                         }
 
                                                         is MarketplaceSellResult.Error -> {
@@ -470,8 +479,7 @@ fun CharacterScreen(
                                                 ) {
                                                     AvatarInventoryActionResult.Success -> {
                                                         inventoryActionMessage = "Unequip completed: ${item.name}"
-                                                        onAvatarRefresh()
-                                                        reloadInventoryState(state.avatar)
+                                                        refreshPageAfterAction(state.avatar.id, state.avatar)
                                                     }
 
                                                     is AvatarInventoryActionResult.Error -> {
