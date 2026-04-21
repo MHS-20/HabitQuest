@@ -9,7 +9,7 @@ Feature: User registration and authentication
   Scenario: Successful login
     Given a registered user
     When the user provides correct credentials
-    Then the system returns a valid JWT token
+    Then the system returns a valid authentication token
 
   Scenario: Login with invalid credentials
     Given a registered user
