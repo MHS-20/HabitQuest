@@ -66,6 +66,8 @@ data class AvatarData(
     val strength: Int,
     val defense: Int,
     val intelligence: Int,
+    val inventoryItems: List<AvatarInventoryItem>? = null,
+    val equippedItems: List<AvatarInventoryItem>? = null,
 )
 
 data class AvatarInventoryItem(

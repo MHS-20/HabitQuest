@@ -6,6 +6,7 @@ data class MarketplaceItem(
     val type: String,
     val power: Int?,
     val price: Int,
+    val requiredLevel: Int,
 )
 
 sealed interface MarketplaceLoadResult {
