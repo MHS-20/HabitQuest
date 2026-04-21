@@ -20,3 +20,9 @@ style:
     ignoreAnnotated: ['Composable', 'Preview']
   ReturnCount:
     active: false
+
+project:
+  exclude:
+    - "**/build/**"
+    - "**/resources/**"
+    - "**/generated/**"
