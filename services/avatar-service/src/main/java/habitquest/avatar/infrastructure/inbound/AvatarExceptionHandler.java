@@ -1,6 +1,7 @@
 package habitquest.avatar.infrastructure.inbound;
 
 import habitquest.avatar.application.exceptions.AvatarNotFoundException;
+import habitquest.avatar.application.exceptions.ItemNotFoundException;
 import habitquest.avatar.application.exceptions.MarketplaceCommunicationException;
 import habitquest.avatar.application.port.out.AvatarLogger;
 import habitquest.avatar.infrastructure.dto.AvatarCommands.*;
@@ -35,6 +36,13 @@ public class AvatarExceptionHandler {
   public ResponseEntity<ErrorResponse> handleMarketplaceError(RuntimeException ex) {
     ErrorResponse error = new ErrorResponse(ex.getMessage());
     log.error(error, "Marketplace communication error", ex);
+    return ResponseEntity.badRequest().body(error);
+  }
+
+  @ExceptionHandler(ItemNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleItemNotFoundError(RuntimeException ex) {
+    ErrorResponse error = new ErrorResponse(ex.getMessage());
+    log.error(error, "Item not found in inventory", ex);
     return ResponseEntity.badRequest().body(error);
   }
 }

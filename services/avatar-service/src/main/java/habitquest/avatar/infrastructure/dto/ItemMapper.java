@@ -1,5 +1,6 @@
 package habitquest.avatar.infrastructure.dto;
 
+import habitquest.avatar.domain.avatar.Damage;
 import habitquest.avatar.domain.avatar.Money;
 import habitquest.avatar.domain.items.*;
 import habitquest.avatar.infrastructure.dto.AvatarCommands.*;
@@ -15,6 +16,23 @@ public final class ItemMapper {
       throw new IllegalArgumentException("Money amount must be non-negative");
     }
     return new Money(command.amount());
+  }
+
+  public static Damage toDamage(ApplyDamageCommand command) {
+    if (command.amount() < 0) {
+      throw new IllegalArgumentException("Damage value must be non-negative");
+    }
+    return new Damage(command.amount());
+  }
+
+  public static HealthPotion toHealthPotion(UsePotionCommand command) {
+    int power = command.power() != null ? command.power() : 0;
+    return new HealthPotion(command.name(), command.description(), power);
+  }
+
+  public static ManaPotion toManaPotion(UsePotionCommand command) {
+    int power = command.power() != null ? command.power() : 0;
+    return new ManaPotion(command.name(), command.description(), power);
   }
 
   public static Item toDomain(ItemCommand command) {

@@ -8,6 +8,8 @@ import habitquest.marketplace.domain.exceptions.ItemNotFoundException;
 import habitquest.marketplace.domain.items.*;
 import habitquest.marketplace.domain.marketplace.Avatar;
 import habitquest.marketplace.domain.marketplace.Marketplace;
+import habitquest.marketplace.infrastructure.dto.ItemMapper;
+import habitquest.marketplace.infrastructure.dto.MarketplaceCommands.*;
 import habitquest.marketplace.infrastructure.dto.MarketplaceQueries.*;
 import habitquest.marketplace.infrastructure.dto.MarketplaceResponseAssembler;
 import java.util.List;
@@ -46,74 +48,61 @@ public class MarketplaceQueryController {
   @GetMapping("/{marketplaceId}")
   public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplace(
       @PathVariable String marketplaceId) {
-
     Marketplace marketplace = queryService.getMarketplace(idOfMarketplace(marketplaceId));
-
     log.info(marketplace, "Fetched marketplace");
-
     return ResponseEntity.ok(assembler.toModel(marketplace));
   }
 
   @GetMapping("/by-avatar/{avatarId}")
   public ResponseEntity<EntityModel<MarketplaceResponse>> getMarketplaceByAvatarId(
       @PathVariable String avatarId) {
-
     Id<Marketplace> marketplaceId = queryService.getMarketplaceIdByAvatarId(idOfAvatar(avatarId));
-
     return getMarketplace(marketplaceId.value());
   }
 
   // ─── Available Items ────────────────────────────────────────────────────────
-
   @GetMapping("/{marketplaceId}/items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getAvailableItems(
       @PathVariable String marketplaceId, @RequestParam(defaultValue = "ALL") ItemFilter type)
       throws MarketplaceNotFoundException {
-
     List<Item> items =
         type == ItemFilter.ALL
             ? queryService.getAllAvailableItems(idOfMarketplace(marketplaceId))
             : queryService.getAvailableItemsByType(idOfMarketplace(marketplaceId), type);
-
     log.info(items, "Fetched available items");
-
     return ResponseEntity.ok(assembler.toAvailableItemsCollection(marketplaceId, items, type));
   }
 
   @GetMapping("/{marketplaceId}/items/{itemName}")
   public ResponseEntity<EntityModel<ItemResponse>> getAvailableItem(
-      @PathVariable String marketplaceId, @PathVariable String itemName)
+      @PathVariable String marketplaceId,
+      @PathVariable String itemName,
+      @RequestBody ItemCommand request)
       throws MarketplaceNotFoundException, ItemNotFoundException {
-
-    Item item = queryService.getAvailableItem(idOfMarketplace(marketplaceId), itemName);
-
+    Item item =
+        queryService.getAvailableItem(idOfMarketplace(marketplaceId), ItemMapper.toItem(request));
     log.info(item, "Fetched available item");
-
     return ResponseEntity.ok(assembler.toAvailableItemModel(marketplaceId, item));
   }
 
   // ─── Sold Items ─────────────────────────────────────────────────────────────
-
   @GetMapping("/{marketplaceId}/sold-items")
   public ResponseEntity<CollectionModel<EntityModel<ItemResponse>>> getSoldItems(
       @PathVariable String marketplaceId) throws MarketplaceNotFoundException {
-
     List<Item> items = queryService.getSoldItems(idOfMarketplace(marketplaceId));
-
     log.info(items, "Fetched sold items");
-
     return ResponseEntity.ok(assembler.toSoldItemsCollection(marketplaceId, items));
   }
 
   @GetMapping("/{marketplaceId}/sold-items/{itemName}")
   public ResponseEntity<EntityModel<ItemResponse>> getSoldItem(
-      @PathVariable String marketplaceId, @PathVariable String itemName)
+      @PathVariable String marketplaceId,
+      @PathVariable String itemName,
+      @RequestBody ItemCommand request)
       throws MarketplaceNotFoundException, ItemNotFoundException {
-
-    Item item = queryService.getSoldItem(idOfMarketplace(marketplaceId), itemName);
-
+    Item item =
+        queryService.getSoldItem(idOfMarketplace(marketplaceId), ItemMapper.toItem(request));
     log.info(item, "Fetched sold item");
-
     return ResponseEntity.ok(assembler.toSoldItemModel(marketplaceId, item));
   }
 }

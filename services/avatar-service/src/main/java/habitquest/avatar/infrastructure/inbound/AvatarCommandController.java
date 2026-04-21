@@ -4,9 +4,7 @@ import common.ddd.Id;
 import habitquest.avatar.application.exceptions.AvatarNotFoundException;
 import habitquest.avatar.application.port.in.AvatarCommandService;
 import habitquest.avatar.application.port.out.AvatarLogger;
-import habitquest.avatar.domain.avatar.Avatar;
-import habitquest.avatar.domain.avatar.Guild;
-import habitquest.avatar.domain.avatar.Invite;
+import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.infrastructure.dto.AvatarCommands.*;
 import habitquest.avatar.infrastructure.dto.AvatarResponseAssembler;
 import habitquest.avatar.infrastructure.dto.ItemMapper;
@@ -142,7 +140,7 @@ public class AvatarCommandController {
   public ResponseEntity<DamageResponse> applyDamage(
       @PathVariable String id, @RequestBody ApplyDamageCommand request)
       throws AvatarNotFoundException {
-    boolean died = commandService.applyDamage(idOf(id), request.amount());
+    boolean died = commandService.applyDamage(idOf(id), ItemMapper.toDamage(request));
     DamageResponse response = new DamageResponse(died);
     log.info(response, "Damage applied to avatar id: " + id);
     return ResponseEntity.ok(response);
@@ -152,7 +150,7 @@ public class AvatarCommandController {
   public ResponseEntity<Void> useHealthPotion(
       @PathVariable String id, @RequestBody UsePotionCommand request)
       throws AvatarNotFoundException {
-    commandService.useHealthPotion(idOf(id), request.potionName());
+    commandService.useHealthPotion(idOf(id), ItemMapper.toHealthPotion(request));
     log.info(request, "Health potion used for avatar id: " + id);
     return ResponseEntity.noContent().build();
   }
@@ -161,7 +159,7 @@ public class AvatarCommandController {
   public ResponseEntity<Void> useManaPotion(
       @PathVariable String id, @RequestBody UsePotionCommand request)
       throws AvatarNotFoundException {
-    commandService.useManaPotion(idOf(id), request.potionName());
+    commandService.useManaPotion(idOf(id), ItemMapper.toManaPotion(request));
     log.info(request, "Mana potion used for avatar id: " + id);
     return ResponseEntity.noContent().build();
   }
@@ -170,7 +168,7 @@ public class AvatarCommandController {
   public ResponseEntity<Void> spendMana(
       @PathVariable String id, @RequestBody SpendManaCommand request)
       throws AvatarNotFoundException {
-    commandService.spendMana(idOf(id), request.amount());
+    commandService.spendMana(idOf(id), new Mana(request.amount()));
     log.info(request, "Avatar spent mana for id: " + id);
     return ResponseEntity.noContent().build();
   }
@@ -180,7 +178,7 @@ public class AvatarCommandController {
   public ResponseEntity<Void> grantExperience(
       @PathVariable String id, @RequestBody GrantExperienceCommand request)
       throws AvatarNotFoundException {
-    commandService.grantExperience(idOf(id), request.amount());
+    commandService.grantExperience(idOf(id), new Experience(request.amount()));
     log.info(request, "Experience granted to avatar id: " + id);
     return ResponseEntity.noContent().build();
   }

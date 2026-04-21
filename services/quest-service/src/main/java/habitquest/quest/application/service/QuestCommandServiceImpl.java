@@ -43,6 +43,10 @@ public class QuestCommandServiceImpl implements QuestCommandService {
     this.log = log;
   }
 
+  private Quest getQuest(Id<Quest> questId) throws QuestNotFoundException {
+    return questRepository.findById(questId);
+  }
+
   @Override
   public Quest createQuest(String name, Duration duration) {
     Quest quest = questFactory.createQuest(name, duration);
@@ -53,7 +57,7 @@ public class QuestCommandServiceImpl implements QuestCommandService {
 
   @Override
   public Quest updateQuest(Id<Quest> id, Quest quest) throws QuestNotFoundException {
-    questRepository.findById(id);
+    getQuest(id);
     return questRepository.save(quest);
   }
 
@@ -64,35 +68,35 @@ public class QuestCommandServiceImpl implements QuestCommandService {
 
   @Override
   public Quest updateName(Id<Quest> questId, String name) throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
     quest.setName(name);
     return questRepository.save(quest);
   }
 
   @Override
   public Quest updateDuration(Id<Quest> questId, Duration duration) throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
     quest.setDuration(duration);
     return questRepository.save(quest);
   }
 
   @Override
   public Quest updateReward(Id<Quest> questId, MoneyReward reward) throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
     quest.setReward(reward);
     return questRepository.save(quest);
   }
 
   @Override
   public Quest addHabit(Id<Quest> questId, Habit habit) throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
     quest.addHabit(habit);
     return questRepository.save(quest);
   }
 
   @Override
   public Quest removeHabit(Id<Quest> questId, Id<Habit> habit) throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
     quest.removeHabit(habit);
     return questRepository.save(quest);
   }
@@ -101,7 +105,7 @@ public class QuestCommandServiceImpl implements QuestCommandService {
   public ActiveQuests recordHabitAttendance(
       Id<Quest> questId, Id<Avatar> avatarId, Id<Habit> habitId, LocalDate attendedOn)
       throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
 
     ActiveQuests activeQuest =
         activeQuestsRepository
@@ -132,7 +136,7 @@ public class QuestCommandServiceImpl implements QuestCommandService {
   @Override
   public ActiveQuests joinQuest(Id<Quest> questId, Id<Avatar> avatarId, LocalDate joinedOn)
       throws QuestNotFoundException {
-    Quest quest = questRepository.findById(questId);
+    Quest quest = getQuest(questId);
     Optional<ActiveQuests> existing =
         activeQuestsRepository.findByQuestIdAndAvatarId(questId, avatarId);
     if (existing.isPresent()) {

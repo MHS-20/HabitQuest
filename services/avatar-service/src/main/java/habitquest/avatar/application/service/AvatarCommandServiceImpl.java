@@ -2,13 +2,11 @@ package habitquest.avatar.application.service;
 
 import common.ddd.Id;
 import habitquest.avatar.application.exceptions.AvatarNotFoundException;
+import habitquest.avatar.application.exceptions.ItemNotFoundException;
 import habitquest.avatar.application.port.in.AvatarCommandService;
 import habitquest.avatar.application.port.out.AvatarRepository;
 import habitquest.avatar.application.port.out.MarketplaceClientPort;
-import habitquest.avatar.domain.avatar.Avatar;
-import habitquest.avatar.domain.avatar.Invite;
-import habitquest.avatar.domain.avatar.Level;
-import habitquest.avatar.domain.avatar.Money;
+import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
 import habitquest.avatar.domain.items.Equipment;
@@ -37,6 +35,10 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
     this.marketplacePort = marketplacePort;
   }
 
+  private Avatar getAvatarById(Id<Avatar> id) throws AvatarNotFoundException {
+    return avatarRepository.findById(id).orElseThrow(() -> new AvatarNotFoundException(id.value()));
+  }
+
   @Override
   public Id<Avatar> createAvatar(Id<Avatar> id, String name) {
     Avatar avatar = this.avatarFactory.create(id, name);
@@ -47,10 +49,7 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
 
   @Override
   public void addPendingInvite(Id<Avatar> avatarId, Invite invite) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.addPendingGuildInvite(invite);
     avatarRepository.save(avatar);
   }
@@ -58,10 +57,7 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
   @Override
   public void acceptInvite(Id<Avatar> avatarId, Id<Invite> inviteId)
       throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.acceptGuildInvite(inviteId);
     avatarRepository.save(avatar);
   }
@@ -74,80 +70,56 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
 
   @Override
   public void updateName(Id<Avatar> avatarId, String name) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.rename(name);
     avatarRepository.save(avatar);
   }
 
   @Override
   public void spendMoney(Id<Avatar> avatarId, Money money) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.spendMoney(money);
     avatarRepository.save(avatar);
   }
 
   @Override
   public void earnMoney(Id<Avatar> avatarId, Money money) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.earnMoney(money);
     avatarRepository.save(avatar);
   }
 
   @Override
   public void addToInventory(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.addItemToInventory(item);
     avatarRepository.save(avatar);
   }
 
   @Override
   public void removeItem(Id<Avatar> avatarId, Item item) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.removeItemFromInventory(item);
     avatarRepository.save(avatar);
   }
 
   @Override
   public void equipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.equipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
   public void unequipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.unequipItem(item);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+  public boolean applyDamage(Id<Avatar> avatarId, Damage amount) throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
     boolean died = avatar.takeDamage(amount);
     if (died) {
       avatarObserver.notifyAvatarEvent(new Dead(avatarId));
@@ -157,62 +129,41 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
   }
 
   @Override
-  public void useHealthPotion(Id<Avatar> avatarId, String potionName)
+  public void useHealthPotion(Id<Avatar> avatarId, HealthPotion potion)
       throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
-    HealthPotion potion =
-        avatar.getInventory().stream()
-            .filter(item -> item instanceof HealthPotion)
-            .map(item -> (HealthPotion) item)
-            .filter(p -> p.name().equals(potionName))
-            .findFirst()
-            .orElseThrow(
-                () -> new IllegalArgumentException("No potion found with name: " + potionName));
-    avatar.heal(potion.power());
+    Avatar avatar = getAvatarById(avatarId);
+    if (!avatar.getInventory().contains(potion)) {
+      throw new ItemNotFoundException(potion.name());
+    }
+    avatar.heal(new Health(potion.power()));
     avatar.removeItemFromInventory(potion);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void useManaPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
-    ManaPotion potion =
-        avatar.getInventory().stream()
-            .filter(item -> item instanceof ManaPotion)
-            .map(item -> (ManaPotion) item)
-            .filter(p -> p.name().equals(potionName))
-            .findFirst()
-            .orElseThrow(
-                () -> new IllegalArgumentException("No potion found with name: " + potionName));
-    avatar.restoreMana(potion.power());
+  public void useManaPotion(Id<Avatar> avatarId, ManaPotion potion) throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
+    if (!avatar.getInventory().contains(potion)) {
+      throw new ItemNotFoundException(potion.name());
+    }
+    avatar.restoreMana(new Mana(potion.power()));
     avatar.removeItemFromInventory(potion);
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
-    avatar.spendMana(amount);
+  public void spendMana(Id<Avatar> avatarId, Mana amount) throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
+    avatar.spendMana(new Mana(amount.value()));
     avatarRepository.save(avatar);
   }
 
   @Override
-  public void grantExperience(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+  public void grantExperience(Id<Avatar> avatarId, Experience amount)
+      throws AvatarNotFoundException {
+    Avatar avatar = getAvatarById(avatarId);
     Level levelBefore = avatar.getLevel();
-    avatar.gainExperience(amount);
+    avatar.gainExperience(amount.amount());
     Level levelAfter = avatar.getLevel();
     avatarRepository.save(avatar);
     if (levelAfter.levelNumber() > levelBefore.levelNumber()) {
@@ -230,10 +181,7 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
 
   @Override
   public void increaseStrength(Id<Avatar> avatarId) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.incrementStrength();
     avatarRepository.save(avatar);
     avatarObserver.notifyAvatarEvent(
@@ -242,10 +190,7 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
 
   @Override
   public void increaseDefense(Id<Avatar> avatarId) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.incrementDefense();
     avatarRepository.save(avatar);
     avatarObserver.notifyAvatarEvent(
@@ -254,10 +199,7 @@ public class AvatarCommandServiceImpl implements AvatarCommandService {
 
   @Override
   public void increaseIntelligence(Id<Avatar> avatarId) throws AvatarNotFoundException {
-    Avatar avatar =
-        avatarRepository
-            .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
+    Avatar avatar = getAvatarById(avatarId);
     avatar.incrementIntelligence();
     avatarRepository.save(avatar);
     avatarObserver.notifyAvatarEvent(
