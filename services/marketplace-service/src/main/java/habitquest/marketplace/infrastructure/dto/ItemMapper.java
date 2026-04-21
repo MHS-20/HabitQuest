@@ -27,7 +27,6 @@ public final class ItemMapper {
     };
   }
 
-  // --- Metodo estratto per eliminare la duplicazione ---
   private static String determineType(Item item) {
     return switch (item) {
       case Weapon w -> "WEAPON";
