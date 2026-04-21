@@ -496,7 +496,7 @@ fun GuildScreen(
                         pendingInvitesError = "Avatar not available"
                         return@PendingInvitesDialog
                     }
-                    val avatarNickname = avatar?.name?.takeIf { it.isNotBlank() }
+                    val avatarNickname = avatar.name.takeIf { it.isNotBlank() }
                     if (avatarNickname == null) {
                         pendingInvitesError = "Avatar nickname not available"
                         return@PendingInvitesDialog
@@ -625,7 +625,7 @@ fun GuildScreen(
                         battleAttackError = "It's not your turn"
                         return@BattleInfoDialog
                     }
-                    val damage = (avatar?.strength ?: 10).coerceAtLeast(1)
+                    val damage = (avatar.strength ?: 10).coerceAtLeast(1)
                     scope.launch {
                         battleAttackLoading = true
                         battleAttackError = null
