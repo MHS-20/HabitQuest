@@ -12,5 +12,8 @@ public class MarketplaceCommands {
       Integer requiredLevel)
       implements Command {}
 
+  public record AvatarItemCommand(String type, String name, String description, Integer power)
+      implements Command {}
+
   public record CreateMarketplaceCommand(String avatarId) implements Command {}
 }

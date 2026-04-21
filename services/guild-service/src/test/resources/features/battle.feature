@@ -20,5 +20,5 @@ Feature: Guild boss fight
   Scenario: Defeat the boss
     Given a boss with zero HP
     When the system verifies the state
-    Then it publishes a BossDefeated event
+    Then it publishes a BattleWon event
     And distributes rewards to guild members
