@@ -103,7 +103,6 @@ public class MarketplaceControllerIT {
   }
 
   // ── GET /api/v1/marketplaces/by-avatar/{avatarId} ─────────────────────────────
-
   @Nested
   @DisplayName("GET /api/v1/marketplaces/by-avatar/{avatarId}")
   class GetMarketplaceByAvatarId {
@@ -123,7 +122,6 @@ public class MarketplaceControllerIT {
   }
 
   // ── POST /api/v1/marketplaces ─────────────────────────────────────────────────
-
   @Nested
   @DisplayName("POST /api/v1/marketplaces")
   class CreateMarketplace {
@@ -179,7 +177,6 @@ public class MarketplaceControllerIT {
   }
 
   // ── GET /api/v1/marketplaces/{marketplaceId}/items ───────────────────────────
-
   @Nested
   @DisplayName("GET /api/v1/marketplaces/{marketplaceId}/items")
   class GetAvailableItems {
@@ -304,8 +301,7 @@ public class MarketplaceControllerIT {
     }
   }
 
-  // ── GET /api/v1/marketplaces/{marketplaceId}/items/{itemName} ────────────────
-
+  // ── GET /api/v1/marketplaces/{marketplaceId}/items/ ────────────────
   @Nested
   @DisplayName("GET /api/v1/marketplaces/{marketplaceId}/items/{itemName}")
   class GetAvailableItem {
@@ -314,52 +310,66 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with the requested item")
     void shouldReturn200WhenItemFound() throws Exception {
       Item item = sword();
-      when(queryService.getAvailableItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(item);
+      when(queryService.getAvailableItem(eq(MARKETPLACE_ID), any(Item.class))).thenReturn(item);
       when(assembler.toAvailableItemModel(MARKETPLACE_ID.value(), item))
           .thenReturn(stubItemModel(item));
 
       mockMvc
           .perform(
               get(
-                  "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
-                  MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
+                      MARKETPLACE_ID.value(),
+                      SWORD_NAME)
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("returns 404 when item does not exist or is already bought")
     void shouldReturn404WhenItemNotFound() throws Exception {
-      when(queryService.getAvailableItem(MARKETPLACE_ID, UNKNOWN_ITEM))
+      when(queryService.getAvailableItem(eq(MARKETPLACE_ID), any(Item.class)))
           .thenThrow(new ItemNotFoundException(UNKNOWN_ITEM));
 
       mockMvc
           .perform(
               get(
-                  "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
-                  MARKETPLACE_ID.value(),
-                  UNKNOWN_ITEM))
+                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
+                      MARKETPLACE_ID.value(),
+                      UNKNOWN_ITEM)
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Ghost Item","description":"???","power":0,"price":0,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(queryService.getAvailableItem(UNKNOWN_MARKETPLACE_ID, SWORD_NAME))
+      when(queryService.getAvailableItem(eq(UNKNOWN_MARKETPLACE_ID), any(Item.class)))
           .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
 
       mockMvc
           .perform(
               get(
-                  "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
-                  UNKNOWN_MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}",
+                      UNKNOWN_MARKETPLACE_ID.value(),
+                      SWORD_NAME)
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
   }
 
   // ── GET /api/v1/marketplaces/{marketplaceId}/sold-items ──────────────────────
-
   @Nested
   @DisplayName("GET /api/v1/marketplaces/{marketplaceId}/sold-items")
   class GetSoldItems {
@@ -404,8 +414,6 @@ public class MarketplaceControllerIT {
     }
   }
 
-  // ── GET /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName} ────────────
-
   @Nested
   @DisplayName("GET /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}")
   class GetSoldItem {
@@ -414,53 +422,66 @@ public class MarketplaceControllerIT {
     @DisplayName("returns 200 with the requested sold item")
     void shouldReturn200WhenItemFound() throws Exception {
       Item item = sword();
-      when(queryService.getSoldItem(MARKETPLACE_ID, SWORD_NAME)).thenReturn(item);
+      when(queryService.getSoldItem(eq(MARKETPLACE_ID), any(Item.class))).thenReturn(item);
       when(assembler.toSoldItemModel(MARKETPLACE_ID.value(), item)).thenReturn(stubItemModel(item));
 
       mockMvc
           .perform(
               get(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
-                  MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+                      "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
+                      MARKETPLACE_ID.value(),
+                      SWORD_NAME)
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("returns 404 when item has not been bought yet")
     void shouldReturn404WhenItemNotFound() throws Exception {
-      when(queryService.getSoldItem(MARKETPLACE_ID, UNKNOWN_ITEM))
+      when(queryService.getSoldItem(eq(MARKETPLACE_ID), any(Item.class)))
           .thenThrow(new ItemNotFoundException(UNKNOWN_ITEM));
 
       mockMvc
           .perform(
               get(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
-                  MARKETPLACE_ID.value(),
-                  UNKNOWN_ITEM))
+                      "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
+                      MARKETPLACE_ID.value(),
+                      UNKNOWN_ITEM)
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Ghost Item","description":"???","power":0,"price":0,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("returns 404 when marketplace does not exist")
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
-      when(queryService.getSoldItem(UNKNOWN_MARKETPLACE_ID, SWORD_NAME))
+      when(queryService.getSoldItem(eq(UNKNOWN_MARKETPLACE_ID), any(Item.class)))
           .thenThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()));
 
       mockMvc
           .perform(
               get(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
-                  UNKNOWN_MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+                      "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}",
+                      UNKNOWN_MARKETPLACE_ID.value(),
+                      SWORD_NAME)
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
   }
 
-  // ── POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy ────────────
-
   @Nested
-  @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy")
+  @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/items/buy")
   class BuyItem {
 
     @Test
@@ -468,15 +489,17 @@ public class MarketplaceControllerIT {
     void shouldReturn204OnSuccess() throws Exception {
       doNothing()
           .when(commandService)
-          .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
+          .buyItem(eq(MARKETPLACE_ID), any(Item.class), any(Level.class));
 
       mockMvc
           .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      MARKETPLACE_ID.value(),
-                      SWORD_NAME)
-                  .param("currentLevel", "1"))
+              post("/api/v1/marketplaces/{marketplaceId}/items/buy", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .param("currentLevel", "1")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isNoContent());
     }
 
@@ -485,15 +508,17 @@ public class MarketplaceControllerIT {
     void shouldReturn403WhenLevelInsufficient() throws Exception {
       doThrow(new InsufficientLevelException(SWORD_NAME))
           .when(commandService)
-          .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
+          .buyItem(eq(MARKETPLACE_ID), any(Item.class), any(Level.class));
 
       mockMvc
           .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      MARKETPLACE_ID.value(),
-                      SWORD_NAME)
-                  .param("currentLevel", "1"))
+              post("/api/v1/marketplaces/{marketplaceId}/items/buy", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .param("currentLevel", "1")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isForbidden());
     }
 
@@ -502,15 +527,17 @@ public class MarketplaceControllerIT {
     void shouldReturn404WhenItemNotFound() throws Exception {
       doThrow(new ItemNotFoundException(UNKNOWN_ITEM))
           .when(commandService)
-          .buyItem(eq(MARKETPLACE_ID), eq(UNKNOWN_ITEM), any(Level.class));
+          .buyItem(eq(MARKETPLACE_ID), any(Item.class), any(Level.class));
 
       mockMvc
           .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      MARKETPLACE_ID.value(),
-                      UNKNOWN_ITEM)
-                  .param("currentLevel", "1"))
+              post("/api/v1/marketplaces/{marketplaceId}/items/buy", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .param("currentLevel", "1")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Ghost Item","description":"???","power":0,"price":0,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
 
@@ -519,15 +546,17 @@ public class MarketplaceControllerIT {
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
       doThrow(new AvatarCommunicationException("fail", new RestClientException("err")))
           .when(commandService)
-          .buyItem(eq(MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
+          .buyItem(eq(MARKETPLACE_ID), any(Item.class), any(Level.class));
 
       mockMvc
           .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      MARKETPLACE_ID.value(),
-                      SWORD_NAME)
-                  .param("currentLevel", "1"))
+              post("/api/v1/marketplaces/{marketplaceId}/items/buy", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .param("currentLevel", "1")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isBadGateway());
     }
 
@@ -536,39 +565,41 @@ public class MarketplaceControllerIT {
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
       doThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()))
           .when(commandService)
-          .buyItem(eq(UNKNOWN_MARKETPLACE_ID), eq(SWORD_NAME), any(Level.class));
+          .buyItem(eq(UNKNOWN_MARKETPLACE_ID), any(Item.class), any(Level.class));
 
       mockMvc
           .perform(
-              post(
-                      "/api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy",
-                      UNKNOWN_MARKETPLACE_ID.value(),
-                      SWORD_NAME)
-                  .param("currentLevel", "1"))
+              post("/api/v1/marketplaces/{marketplaceId}/items/buy", UNKNOWN_MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .param("currentLevel", "1")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
   }
 
-  // ── POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell ──────
-
   @Nested
-  @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell")
+  @DisplayName("POST /api/v1/marketplaces/{marketplaceId}/sold-items/sell")
   class SellItem {
 
     @Test
     @DisplayName("returns 204 on successful sale")
     void shouldReturn204OnSuccess() throws Exception {
-      doNothing().when(commandService).sellItem(MARKETPLACE_ID, SWORD_NAME);
+      doNothing().when(commandService).sellItem(eq(MARKETPLACE_ID), any(Item.class));
 
       mockMvc
           .perform(
-              post(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell",
-                  MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+              post("/api/v1/marketplaces/{marketplaceId}/sold-items/sell", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isNoContent());
 
-      verify(commandService).sellItem(MARKETPLACE_ID, SWORD_NAME);
+      verify(commandService).sellItem(eq(MARKETPLACE_ID), any(Item.class));
     }
 
     @Test
@@ -576,14 +607,16 @@ public class MarketplaceControllerIT {
     void shouldReturn404WhenItemNotFound() throws Exception {
       doThrow(new ItemNotFoundException(UNKNOWN_ITEM))
           .when(commandService)
-          .sellItem(MARKETPLACE_ID, UNKNOWN_ITEM);
+          .sellItem(eq(MARKETPLACE_ID), any(Item.class));
 
       mockMvc
           .perform(
-              post(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell",
-                  MARKETPLACE_ID.value(),
-                  UNKNOWN_ITEM))
+              post("/api/v1/marketplaces/{marketplaceId}/sold-items/sell", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Ghost Item","description":"???","power":0,"price":0,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
 
@@ -592,14 +625,16 @@ public class MarketplaceControllerIT {
     void shouldReturn502WhenAvatarServiceFails() throws Exception {
       doThrow(new AvatarCommunicationException("fail", new RestClientException("err")))
           .when(commandService)
-          .sellItem(MARKETPLACE_ID, SWORD_NAME);
+          .sellItem(eq(MARKETPLACE_ID), any(Item.class));
 
       mockMvc
           .perform(
-              post(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell",
-                  MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+              post("/api/v1/marketplaces/{marketplaceId}/sold-items/sell", MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isBadGateway());
     }
 
@@ -608,14 +643,18 @@ public class MarketplaceControllerIT {
     void shouldReturn404WhenMarketplaceNotFound() throws Exception {
       doThrow(new MarketplaceNotFoundException(UNKNOWN_MARKETPLACE_ID.value()))
           .when(commandService)
-          .sellItem(UNKNOWN_MARKETPLACE_ID, SWORD_NAME);
+          .sellItem(eq(UNKNOWN_MARKETPLACE_ID), any(Item.class));
 
       mockMvc
           .perform(
               post(
-                  "/api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell",
-                  UNKNOWN_MARKETPLACE_ID.value(),
-                  SWORD_NAME))
+                      "/api/v1/marketplaces/{marketplaceId}/sold-items/sell",
+                      UNKNOWN_MARKETPLACE_ID.value())
+                  .contentType("application/json")
+                  .content(
+                      """
+                    {"type":"WEAPON","itemName":"Iron Sword","description":"A sturdy iron sword","power":30,"price":50,"requiredLevel":1}
+                    """))
           .andExpect(status().isNotFound());
     }
   }

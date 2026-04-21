@@ -50,16 +50,16 @@ public class MarketplaceCommandServiceImpl implements MarketplaceCommandService 
   }
 
   @Override
-  public void buyItem(Id<Marketplace> marketplaceId, String itemName, Level currentLevel) {
+  public void buyItem(Id<Marketplace> marketplaceId, Item item, Level currentLevel) {
     Marketplace marketplace = queryService.getMarketplace(marketplaceId);
     String avatarId = marketplace.getAvatarId().value();
-    Item item =
-        marketplace
-            .getAvailableItem(itemName)
-            .orElseThrow(() -> new ItemNotFoundException(itemName));
+
+    if (!marketplace.hasItem(item)) {
+      throw new ItemNotFoundException(item.name());
+    }
 
     if (item.requiredLevel().levelNumber() > currentLevel.levelNumber()) {
-      throw new InsufficientLevelException(itemName);
+      throw new InsufficientLevelException(item.name());
     }
 
     Money price = item.price();
@@ -70,10 +70,10 @@ public class MarketplaceCommandServiceImpl implements MarketplaceCommandService 
       moneySpent = true;
       avatarPort.addItemToInventory(avatarId, item);
       inventoryAdded = true;
-      marketplace.buyItem(itemName);
+      marketplace.buyItem(item);
       marketplaceRepository.save(marketplace);
       marketplaceObserver.notifyMarketplaceEvent(
-          new ItemBought(marketplaceId, itemName, marketplace.getAvatarId()));
+          new ItemBought(marketplaceId, item.name(), marketplace.getAvatarId()));
     } catch (AvatarCommunicationException | IllegalStateException | ItemNotFoundException ex) {
       try {
         if (inventoryAdded) {
@@ -92,14 +92,16 @@ public class MarketplaceCommandServiceImpl implements MarketplaceCommandService 
   }
 
   @Override
-  public void sellItem(Id<Marketplace> marketplaceId, String itemName)
+  public void sellItem(Id<Marketplace> marketplaceId, Item item)
       throws MarketplaceNotFoundException {
     Marketplace marketplace = queryService.getMarketplace(marketplaceId);
     String avatarId = marketplace.getAvatarId().value();
-    Item item =
-        marketplace.getSoldItem(itemName).orElseThrow(() -> new ItemNotFoundException(itemName));
-    Money price = item.price();
 
+    if (!marketplace.hasItem(item)) {
+      throw new ItemNotFoundException(item.name());
+    }
+
+    Money price = item.price();
     boolean removedFromInventory = false;
     boolean earnedMoney = false;
     try {
@@ -107,10 +109,10 @@ public class MarketplaceCommandServiceImpl implements MarketplaceCommandService 
       removedFromInventory = true;
       avatarPort.earnMoney(avatarId, price);
       earnedMoney = true;
-      marketplace.sellItem(itemName);
+      marketplace.sellItem(item);
       marketplaceRepository.save(marketplace);
       marketplaceObserver.notifyMarketplaceEvent(
-          new ItemSold(marketplaceId, itemName, marketplace.getAvatarId()));
+          new ItemSold(marketplaceId, item.name(), marketplace.getAvatarId()));
     } catch (AvatarCommunicationException | ItemNotFoundException | IllegalArgumentException ex) {
       try {
         if (earnedMoney) {

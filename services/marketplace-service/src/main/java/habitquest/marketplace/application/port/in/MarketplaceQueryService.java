@@ -24,14 +24,13 @@ public interface MarketplaceQueryService {
   List<Item> getAvailableItemsByType(Id<Marketplace> marketplaceId, ItemFilter type)
       throws MarketplaceNotFoundException;
 
-  Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
+  Item getAvailableItem(Id<Marketplace> marketplaceId, Item item)
       throws MarketplaceNotFoundException;
 
   List<Item> getSoldItems(Id<Marketplace> marketplaceId) throws MarketplaceNotFoundException;
 
-  Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
-      throws MarketplaceNotFoundException;
+  Item getSoldItem(Id<Marketplace> marketplaceId, Item item) throws MarketplaceNotFoundException;
 
-  boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
+  boolean canBuyItem(Id<Marketplace> marketplaceId, Item item, Level level)
       throws MarketplaceNotFoundException;
 }

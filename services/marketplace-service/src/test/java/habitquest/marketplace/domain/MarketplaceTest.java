@@ -7,20 +7,21 @@ import static org.mockito.Mockito.*;
 import common.ddd.Id;
 import habitquest.marketplace.domain.exceptions.ItemNotFoundException;
 import habitquest.marketplace.domain.items.*;
-import habitquest.marketplace.domain.marketplace.MarketplaceImpl;
+import habitquest.marketplace.domain.marketplace.Marketplace;
+import habitquest.marketplace.domain.marketplace.Money;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class MarketplaceImplTest {
+class MarketplaceTest {
 
-  private MarketplaceImpl marketplace;
+  private Marketplace marketplace;
 
   @BeforeEach
   void setUp() {
     ItemCatalog catalog = mockCatalog();
-    marketplace = new MarketplaceImpl(MARKETPLACE_ID, AVATAR_ID, catalog);
+    marketplace = new Marketplace(MARKETPLACE_ID, AVATAR_ID, catalog);
   }
 
   // ── Identity ─────────────────────────────────────────────────────────────────
@@ -41,8 +42,7 @@ class MarketplaceImplTest {
   void emptyMarketplaceShouldHaveNoAvailableItems() {
     ItemCatalog emptyCatalog = mock(ItemCatalog.class);
     when(emptyCatalog.getAllItems()).thenReturn(List.of());
-    MarketplaceImpl empty =
-        new MarketplaceImpl(new Id<>("empty"), new Id<>(AVATAR_1), emptyCatalog);
+    Marketplace empty = new Marketplace(new Id<>("empty"), new Id<>(AVATAR_1), emptyCatalog);
     assertThat(empty.getAllAvailableItems()).isEmpty();
   }
 
@@ -92,7 +92,7 @@ class MarketplaceImplTest {
 
     @Test
     void shouldExcludeBoughtItemsFromAvailableItems() {
-      marketplace.buyItem(SWORD_NAME);
+      marketplace.buyItem(sword());
       assertThat(marketplace.getAllAvailableItems())
           .containsExactlyInAnyOrder(shield(), hpPotion(), mpPotion())
           .doesNotContain(sword());
@@ -100,7 +100,7 @@ class MarketplaceImplTest {
 
     @Test
     void shouldExcludeBoughtItemsFromAvailableItemsByType() {
-      marketplace.buyItem(SWORD_NAME);
+      marketplace.buyItem(sword());
       assertThat(marketplace.getAvailableItemsByType(ItemFilter.WEAPON)).isEmpty();
     }
   }
@@ -111,19 +111,20 @@ class MarketplaceImplTest {
   class GetAvailableItem {
 
     @Test
-    void shouldFindExistingAvailableItemByName() {
-      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isPresent().contains(sword());
+    void shouldFindExistingAvailableItem() {
+      assertThat(marketplace.getAvailableItem(sword())).isPresent().contains(sword());
     }
 
     @Test
-    void shouldReturnEmptyForUnknownItemName() {
-      assertThat(marketplace.getAvailableItem(UNKNOWN_ITEM_NAME)).isEmpty();
+    void shouldReturnEmptyForUnknownItem() {
+      Weapon unknown = new Weapon(UNKNOWN_ITEM_NAME, "???", 0, new Money(0), LEVEL_1);
+      assertThat(marketplace.getAvailableItem(unknown)).isEmpty();
     }
 
     @Test
     void shouldReturnEmptyForAlreadyBoughtItem() {
-      marketplace.buyItem(SWORD_NAME);
-      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isEmpty();
+      marketplace.buyItem(sword());
+      assertThat(marketplace.getAvailableItem(sword())).isEmpty();
     }
   }
 
@@ -134,27 +135,27 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnEmptyForItemNotYetBought() {
-      assertThat(marketplace.getSoldItem(SWORD_NAME)).isEmpty();
+      assertThat(marketplace.getSoldItem(sword())).isEmpty();
     }
 
     @Test
     void shouldFindSoldItemAfterBuy() {
-      marketplace.buyItem(SWORD_NAME);
-      assertThat(marketplace.getSoldItem(SWORD_NAME)).isPresent().contains(sword());
+      marketplace.buyItem(sword());
+      assertThat(marketplace.getSoldItem(sword())).isPresent().contains(sword());
     }
 
     @Test
     void shouldReturnAllSoldItems() {
-      marketplace.buyItem(SWORD_NAME);
-      marketplace.buyItem(SHIELD_NAME);
+      marketplace.buyItem(sword());
+      marketplace.buyItem(shield());
       assertThat(marketplace.getSoldItems()).containsExactlyInAnyOrder(sword(), shield());
     }
 
     @Test
     void shouldRemoveItemFromSoldItemsAfterSell() {
-      marketplace.buyItem(SWORD_NAME);
-      marketplace.sellItem(SWORD_NAME);
-      assertThat(marketplace.getSoldItem(SWORD_NAME)).isEmpty();
+      marketplace.buyItem(sword());
+      marketplace.sellItem(sword());
+      assertThat(marketplace.getSoldItem(sword())).isEmpty();
       assertThat(marketplace.getSoldItems()).doesNotContain(sword());
     }
   }
@@ -166,33 +167,34 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnItemPriceOnBuy() {
-      assertThat(marketplace.buyItem(SWORD_NAME)).isEqualTo(SWORD_PRICE);
+      assertThat(marketplace.buyItem(sword())).isEqualTo(SWORD_PRICE);
     }
 
     @Test
     void shouldReturnCorrectPriceForEachItemType() {
-      assertThat(marketplace.buyItem(SHIELD_NAME)).isEqualTo(SHIELD_PRICE);
-      assertThat(marketplace.buyItem(HP_POTION_NAME)).isEqualTo(HP_PRICE);
-      assertThat(marketplace.buyItem(MP_POTION_NAME)).isEqualTo(MP_PRICE);
+      assertThat(marketplace.buyItem(shield())).isEqualTo(SHIELD_PRICE);
+      assertThat(marketplace.buyItem(hpPotion())).isEqualTo(HP_PRICE);
+      assertThat(marketplace.buyItem(mpPotion())).isEqualTo(MP_PRICE);
     }
 
     @Test
     void shouldMoveItemFromAvailableToSoldAfterBuy() {
-      marketplace.buyItem(SWORD_NAME);
-      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isEmpty();
-      assertThat(marketplace.getSoldItem(SWORD_NAME)).isPresent().contains(sword());
+      marketplace.buyItem(sword());
+      assertThat(marketplace.getAvailableItem(sword())).isEmpty();
+      assertThat(marketplace.getSoldItem(sword())).isPresent().contains(sword());
     }
 
     @Test
     void shouldThrowWhenBuyingNonExistentItem() {
-      assertThatThrownBy(() -> marketplace.buyItem(UNKNOWN_ITEM_NAME))
+      Weapon unknown = new Weapon(UNKNOWN_ITEM_NAME, "???", 0, new Money(0), LEVEL_1);
+      assertThatThrownBy(() -> marketplace.buyItem(unknown))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
     @Test
     void shouldThrowWhenBuyingAlreadyBoughtItem() {
-      marketplace.buyItem(SWORD_NAME);
-      assertThatThrownBy(() -> marketplace.buyItem(SWORD_NAME))
+      marketplace.buyItem(sword());
+      assertThatThrownBy(() -> marketplace.buyItem(sword()))
           .isInstanceOf(IllegalStateException.class)
           .hasMessageContaining(SWORD_NAME);
     }
@@ -205,37 +207,38 @@ class MarketplaceImplTest {
 
     @Test
     void shouldReturnItemPriceOnSell() {
-      marketplace.buyItem(SWORD_NAME);
-      assertThat(marketplace.sellItem(SWORD_NAME)).isEqualTo(SWORD_PRICE);
+      marketplace.buyItem(sword());
+      assertThat(marketplace.sellItem(sword())).isEqualTo(SWORD_PRICE);
     }
 
     @Test
     void shouldReturnCorrectPriceForEachItemType() {
-      marketplace.buyItem(SHIELD_NAME);
-      marketplace.buyItem(HP_POTION_NAME);
-      marketplace.buyItem(MP_POTION_NAME);
-      assertThat(marketplace.sellItem(SHIELD_NAME)).isEqualTo(SHIELD_PRICE);
-      assertThat(marketplace.sellItem(HP_POTION_NAME)).isEqualTo(HP_PRICE);
-      assertThat(marketplace.sellItem(MP_POTION_NAME)).isEqualTo(MP_PRICE);
+      marketplace.buyItem(shield());
+      marketplace.buyItem(hpPotion());
+      marketplace.buyItem(mpPotion());
+      assertThat(marketplace.sellItem(shield())).isEqualTo(SHIELD_PRICE);
+      assertThat(marketplace.sellItem(hpPotion())).isEqualTo(HP_PRICE);
+      assertThat(marketplace.sellItem(mpPotion())).isEqualTo(MP_PRICE);
     }
 
     @Test
     void shouldMoveItemFromSoldToAvailableAfterSell() {
-      marketplace.buyItem(SWORD_NAME);
-      marketplace.sellItem(SWORD_NAME);
-      assertThat(marketplace.getSoldItem(SWORD_NAME)).isEmpty();
-      assertThat(marketplace.getAvailableItem(SWORD_NAME)).isPresent().contains(sword());
+      marketplace.buyItem(sword());
+      marketplace.sellItem(sword());
+      assertThat(marketplace.getSoldItem(sword())).isEmpty();
+      assertThat(marketplace.getAvailableItem(sword())).isPresent().contains(sword());
     }
 
     @Test
     void shouldThrowWhenSellingNonExistentItem() {
-      assertThatThrownBy(() -> marketplace.sellItem(UNKNOWN_ITEM_NAME))
+      Weapon unknown = new Weapon(UNKNOWN_ITEM_NAME, "???", 0, new Money(0), LEVEL_1);
+      assertThatThrownBy(() -> marketplace.sellItem(unknown))
           .isInstanceOf(ItemNotFoundException.class);
     }
 
     @Test
     void shouldThrowWhenSellingItemNotYetBought() {
-      assertThatThrownBy(() -> marketplace.sellItem(SWORD_NAME))
+      assertThatThrownBy(() -> marketplace.sellItem(sword()))
           .isInstanceOf(IllegalArgumentException.class)
           .hasMessageContaining(SWORD_NAME);
     }

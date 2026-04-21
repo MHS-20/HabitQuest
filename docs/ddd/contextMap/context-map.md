@@ -1,5 +1,6 @@
+# Context Map
 **Avatar** is the central bounded context and acts as an upstream for most of the system.  
-It exposes a stable REST API that all other contexts consume → **Open Host Service (OHS)**.
+It exposes a stable REST API that all other contexts consume, so it's considered an **Open Host Service (OHS)**.
 
 The mapped relationships are:
 
@@ -30,6 +31,4 @@ The mapped relationships are:
   `QuestCommandServiceImpl` calls `earnMoney` on completion, while `QuestQueryServiceImpl` calls `applyDamage` when a quest expires.
 
 
-<p align="center">
-<img src="context-map.png" alt="Logo" width="300"/>
-</p>
+![Context Map](./context-map.png)

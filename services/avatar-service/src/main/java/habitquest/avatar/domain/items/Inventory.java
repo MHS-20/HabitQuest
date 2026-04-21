@@ -16,6 +16,11 @@ public class Inventory implements Entity<Id<Inventory>> {
     this.items = new ArrayList<>();
   }
 
+  public Inventory(Id<Inventory> id, List<Item> items) {
+    this.id = id;
+    this.items = new ArrayList<>(items);
+  }
+
   public List<Item> getItems() {
     return Collections.unmodifiableList(items);
   }
