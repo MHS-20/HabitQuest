@@ -1,11 +1,11 @@
 package compose.project.demo.contexts.marketplace.domain.contract
 
+import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItemsResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceLoadResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceSellResult
-import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
-import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 
 interface MarketplaceGateway {
     suspend fun ensureMarketplace(

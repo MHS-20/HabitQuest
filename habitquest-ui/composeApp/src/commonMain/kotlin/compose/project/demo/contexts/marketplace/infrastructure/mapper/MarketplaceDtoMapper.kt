@@ -22,7 +22,6 @@ internal fun parseItemsFromMarketplacePayload(payload: JsonObject): List<Marketp
         .orEmpty()
 }
 
-
 private fun asMarketplaceItem(element: JsonElement): MarketplaceItem? {
     val raw = element as? JsonObject ?: return null
     val source = raw["content"]?.jsonObject ?: raw
