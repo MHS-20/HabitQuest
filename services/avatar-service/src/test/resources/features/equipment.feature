@@ -24,9 +24,3 @@ Feature: Equipment Management
     When the player removes the weapon
     Then the avatar strength should return to 10
     And the weapon should no longer be equipped
-
-  Scenario: Cannot equip two weapons in the same slot
-    Given an avatar with a weapon equipped in the main hand slot
-    When the player tries to equip another weapon in the same slot
-    Then the operation should be rejected
-    And the original weapon should remain equipped

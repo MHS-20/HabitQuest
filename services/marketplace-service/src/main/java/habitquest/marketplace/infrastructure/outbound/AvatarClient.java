@@ -70,7 +70,7 @@ public class AvatarClient implements AvatarClientPort {
   @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "addItemToInventoryFallback")
   @Retry(name = AVATAR_CLIENT)
   public void addItemToInventory(String avatarId, Item item) {
-    ItemCommand request = ItemMapper.from(item);
+    AvatarItemCommand request = ItemMapper.toAvatarItem(item);
     log.info(request, "Adding item to inventory of avatar " + avatarId);
     try {
       restClient
@@ -89,7 +89,7 @@ public class AvatarClient implements AvatarClientPort {
   @CircuitBreaker(name = AVATAR_CLIENT, fallbackMethod = "removeItemFromInventoryFallback")
   @Retry(name = AVATAR_CLIENT)
   public void removeItemFromInventory(String avatarId, Item item) {
-    ItemCommand request = ItemMapper.from(item);
+    AvatarItemCommand request = ItemMapper.toAvatarItem(item);
     log.info(request, "Removing item from inventory of avatar " + avatarId);
     try {
       restClient
@@ -106,7 +106,6 @@ public class AvatarClient implements AvatarClientPort {
   }
 
   // ─── Fallback methods ────────────────────────────────────────────────────────
-
   private void spendMoneyFallback(String avatarId, Money price, Exception ex) {
     log.error(
         new AmountRequest(price.amount()),
