@@ -43,6 +43,12 @@ public class GuildCommandServiceImpl implements GuildCommandService {
     this.avatarPort = avatarClientPort;
   }
 
+  private Guild getGuild(Id<Guild> guildId) throws GuildNotFoundException {
+    return guildRepository
+        .findById(guildId)
+        .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+  }
+
   @Override
   public Id<Guild> createGuild(
       String name, Id<GuildMember> creatorAvatarId, String creatorNickname) {
@@ -54,10 +60,10 @@ public class GuildCommandServiceImpl implements GuildCommandService {
 
   @Override
   public void deleteGuild(Id<Guild> guildId) throws GuildNotFoundException {
-    Guild guild =
-        guildRepository
-            .findById(guildId)
-            .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+    Guild guild = getGuild(guildId);
+    battleQueryService
+        .getBattleByGuild(guildId)
+        .ifPresent(battle -> battleCommandService.deleteBattle(battle.getId()));
     guildRepository.deleteById(guildId);
     guildObserver.notifyGuildEvent(new GuildDeleted(guild.getId()));
   }
@@ -66,10 +72,7 @@ public class GuildCommandServiceImpl implements GuildCommandService {
   public Invite sendInvite(
       Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> targetAvatarId)
       throws GuildNotFoundException {
-    Guild guild =
-        guildRepository
-            .findById(guildId)
-            .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+    Guild guild = getGuild(guildId);
     Invite invite = inviteFactory.create(guildId, targetAvatarId);
     guild.sendInvite(requestorId, invite);
     guildRepository.save(guild);
@@ -90,10 +93,7 @@ public class GuildCommandServiceImpl implements GuildCommandService {
       Id<GuildMember> avatarId,
       String nickname)
       throws GuildNotFoundException {
-    Guild guild =
-        guildRepository
-            .findById(guildId)
-            .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+    Guild guild = getGuild(guildId);
     guild.acceptInvite(inviteId, avatarId, nickname);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new GuildJoined(guildId, avatarId));
@@ -105,10 +105,7 @@ public class GuildCommandServiceImpl implements GuildCommandService {
   @Override
   public void leaveGuild(Id<Guild> guildId, Id<GuildMember> memberId)
       throws GuildNotFoundException {
-    Guild guild =
-        guildRepository
-            .findById(guildId)
-            .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+    Guild guild = getGuild(guildId);
     guild.leaveGuild(memberId);
     guildObserver.notifyGuildEvent(new GuildLeft(guild.getId(), memberId));
 
@@ -131,10 +128,7 @@ public class GuildCommandServiceImpl implements GuildCommandService {
   @Override
   public void removeMember(Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> memberId)
       throws GuildNotFoundException {
-    Guild guild =
-        guildRepository
-            .findById(guildId)
-            .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+    Guild guild = getGuild(guildId);
     guild.removeMember(requestorId, memberId);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new RemovedFromGuild(guild.getId(), memberId));
@@ -147,10 +141,7 @@ public class GuildCommandServiceImpl implements GuildCommandService {
   public void promoteMember(
       Id<Guild> guildId, Id<GuildMember> requestorId, Id<GuildMember> memberId, GuildRole newRole)
       throws GuildNotFoundException {
-    Guild guild =
-        guildRepository
-            .findById(guildId)
-            .orElseThrow(() -> new GuildNotFoundException(guildId.value()));
+    Guild guild = getGuild(guildId);
     guild.promoteMember(requestorId, memberId, newRole);
     guildRepository.save(guild);
     guildObserver.notifyGuildEvent(new RoleAssigned(guild.getId(), memberId, newRole));

@@ -7,7 +7,9 @@ import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.avatar.Avatar;
 import habitquest.avatar.domain.avatar.Invite;
 import habitquest.avatar.domain.items.Equipment;
+import habitquest.avatar.domain.items.HealthPotion;
 import habitquest.avatar.domain.items.Item;
+import habitquest.avatar.domain.items.ManaPotion;
 
 @InBoundPort
 public interface AvatarCommandService {
@@ -34,15 +36,15 @@ public interface AvatarCommandService {
 
   void unequipItem(Id<Avatar> avatarId, Equipment item) throws AvatarNotFoundException;
 
-  boolean applyDamage(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
+  boolean applyDamage(Id<Avatar> avatarId, Damage amount) throws AvatarNotFoundException;
 
-  void useHealthPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;
+  void useHealthPotion(Id<Avatar> avatarId, HealthPotion potion) throws AvatarNotFoundException;
 
-  void useManaPotion(Id<Avatar> avatarId, String potionName) throws AvatarNotFoundException;
+  void useManaPotion(Id<Avatar> avatarId, ManaPotion potion) throws AvatarNotFoundException;
 
-  void spendMana(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
+  void spendMana(Id<Avatar> avatarId, Mana amount) throws AvatarNotFoundException;
 
-  void grantExperience(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException;
+  void grantExperience(Id<Avatar> avatarId, Experience amount) throws AvatarNotFoundException;
 
   void increaseStrength(Id<Avatar> avatarId) throws AvatarNotFoundException;
 

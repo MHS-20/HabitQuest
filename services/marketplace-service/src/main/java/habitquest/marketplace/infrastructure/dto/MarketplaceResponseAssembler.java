@@ -41,14 +41,16 @@ public class MarketplaceResponseAssembler {
         dto,
         linkTo(
                 methodOn(MarketplaceQueryController.class)
-                    .getAvailableItem(marketplaceId, item.name()))
+                    .getAvailableItem(marketplaceId, item.name(), null))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
         linkTo(
                 methodOn(MarketplaceQueryController.class)
                     .getAvailableItems(marketplaceId, ItemFilter.ALL))
             .withRel("items"),
-        linkTo(methodOn(MarketplaceCommandController.class).buyItem(marketplaceId, item.name(), 0))
+        linkTo(
+                methodOn(MarketplaceCommandController.class)
+                    .buyItem(marketplaceId, item.requiredLevel().levelNumber(), null))
             .withRel("buy"));
   }
 
@@ -72,12 +74,14 @@ public class MarketplaceResponseAssembler {
 
     return EntityModel.of(
         dto,
-        linkTo(methodOn(MarketplaceQueryController.class).getSoldItem(marketplaceId, item.name()))
+        linkTo(
+                methodOn(MarketplaceQueryController.class)
+                    .getSoldItem(marketplaceId, item.name(), null))
             .withSelfRel(),
         selfMarketplaceLink(marketplaceId),
         linkTo(methodOn(MarketplaceQueryController.class).getSoldItems(marketplaceId))
             .withRel("sold-items"),
-        linkTo(methodOn(MarketplaceCommandController.class).sellItem(marketplaceId, item.name()))
+        linkTo(methodOn(MarketplaceCommandController.class).sellItem(marketplaceId, null))
             .withRel("sell"));
   }
 

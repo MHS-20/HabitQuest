@@ -60,11 +60,11 @@ public class MarketplaceQueryServiceImpl implements MarketplaceQueryService {
   }
 
   @Override
-  public Item getAvailableItem(Id<Marketplace> marketplaceId, String itemName)
+  public Item getAvailableItem(Id<Marketplace> marketplaceId, Item item)
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId)
-        .getAvailableItem(itemName)
-        .orElseThrow(() -> new ItemNotFoundException(itemName));
+        .getAvailableItem(item)
+        .orElseThrow(() -> new ItemNotFoundException(item.name()));
   }
 
   @Override
@@ -74,20 +74,19 @@ public class MarketplaceQueryServiceImpl implements MarketplaceQueryService {
   }
 
   @Override
-  public Item getSoldItem(Id<Marketplace> marketplaceId, String itemName)
+  public Item getSoldItem(Id<Marketplace> marketplaceId, Item item)
       throws MarketplaceNotFoundException {
     return getMarketplace(marketplaceId)
-        .getSoldItem(itemName)
-        .orElseThrow(() -> new ItemNotFoundException(itemName));
+        .getSoldItem(item)
+        .orElseThrow(() -> new ItemNotFoundException(item.name()));
   }
 
   @Override
-  public boolean canBuyItem(Id<Marketplace> marketplaceId, String itemName, Level level)
+  public boolean canBuyItem(Id<Marketplace> marketplaceId, Item item, Level level)
       throws MarketplaceNotFoundException {
-    Item item =
-        getMarketplace(marketplaceId)
-            .getAvailableItem(itemName)
-            .orElseThrow(() -> new ItemNotFoundException(itemName));
+    if (!getMarketplace(marketplaceId).hasItem(item)) {
+      throw new ItemNotFoundException(item.name());
+    }
     return item.requiredLevel().levelNumber() <= level.levelNumber();
   }
 }

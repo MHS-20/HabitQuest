@@ -5,7 +5,6 @@ import common.ddd.Id;
 import habitquest.marketplace.domain.items.ItemCatalog;
 import habitquest.marketplace.domain.marketplace.Avatar;
 import habitquest.marketplace.domain.marketplace.Marketplace;
-import habitquest.marketplace.domain.marketplace.MarketplaceImpl;
 
 public class MarketplaceFactory implements Factory {
   private final IdGenerator idGenerator;
@@ -15,6 +14,6 @@ public class MarketplaceFactory implements Factory {
   }
 
   public Marketplace create(Id<Avatar> avatarId) {
-    return new MarketplaceImpl(new Id<>(idGenerator.nextId()), avatarId, new ItemCatalog());
+    return new Marketplace(new Id<>(idGenerator.nextId()), avatarId, new ItemCatalog());
   }
 }

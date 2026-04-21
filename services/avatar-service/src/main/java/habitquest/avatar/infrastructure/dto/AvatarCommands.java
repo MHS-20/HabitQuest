@@ -17,7 +17,8 @@ public class AvatarCommands {
 
   public record ApplyDamageCommand(int amount) {}
 
-  public record UsePotionCommand(String potionName) implements Command {}
+  public record UsePotionCommand(String name, String description, Integer power)
+      implements Command {}
 
   public record GuildInviteCommand(
       String inviteId, String guildId, String guildName, String expiresAt) implements Command {}

@@ -413,7 +413,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates damage amount")
     void shouldApplyDamage() throws Exception {
-      when(avatarCommandService.applyDamage(AVATAR_ID, 30)).thenReturn(false);
+      when(avatarCommandService.applyDamage(AVATAR_ID, new Damage(30))).thenReturn(false);
 
       mockMvc
           .perform(
@@ -422,7 +422,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 30}"))
           .andExpect(status().is2xxSuccessful());
 
-      verify(avatarCommandService).applyDamage(AVATAR_ID, 30);
+      verify(avatarCommandService).applyDamage(AVATAR_ID, new Damage(30));
     }
   }
 
@@ -433,18 +433,21 @@ public class AvatarControllerIT {
   class UseHealthPotion {
 
     @Test
-    @DisplayName("returns 204 and delegates potion name")
+    @DisplayName("returns 204 and delegates potion")
     void shouldUseHealthPotion() throws Exception {
-      doNothing().when(avatarCommandService).useHealthPotion(AVATAR_ID, "Greater Health Potion");
+      doNothing().when(avatarCommandService).useHealthPotion(AVATAR_ID, HEALTH_POTION);
 
       mockMvc
           .perform(
               post("/api/v1/avatars/{id}/health/potion", AVATAR_1)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"potionName\": \"Greater Health Potion\"}"))
+                  .content(
+                      """
+                  {"name": "Small Health Potion", "description": "Restores 20 health", "power": 20}
+                  """))
           .andExpect(status().isNoContent());
 
-      verify(avatarCommandService).useHealthPotion(AVATAR_ID, "Greater Health Potion");
+      verify(avatarCommandService).useHealthPotion(AVATAR_ID, HEALTH_POTION);
     }
   }
 
@@ -479,7 +482,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 on success")
     void shouldReturn204() throws Exception {
-      doNothing().when(avatarCommandService).spendMana(AVATAR_ID, 10);
+      doNothing().when(avatarCommandService).spendMana(AVATAR_ID, new Mana(10));
 
       mockMvc
           .perform(
@@ -494,7 +497,7 @@ public class AvatarControllerIT {
     void shouldReturn400OnInsufficientMana() throws Exception {
       doThrow(new IllegalArgumentException("Cannot subtract more mana than available"))
           .when(avatarCommandService)
-          .spendMana(AVATAR_ID, 999);
+          .spendMana(AVATAR_ID, new Mana(999));
 
       mockMvc
           .perform(
@@ -513,16 +516,19 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates potion name")
     void shouldUseManaPotion() throws Exception {
-      doNothing().when(avatarCommandService).useManaPotion(AVATAR_ID, "Greater Mana Potion");
+      doNothing().when(avatarCommandService).useManaPotion(AVATAR_ID, MANA_POTION);
 
       mockMvc
           .perform(
               post("/api/v1/avatars/{id}/mana/potion", AVATAR_1)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content("{\"potionName\": \"Greater Mana Potion\"}"))
+                  .content(
+                      """
+                  {"name": "Small Mana Potion", "description": "Restores 10 mana", "power": 10}
+                  """))
           .andExpect(status().isNoContent());
 
-      verify(avatarCommandService).useManaPotion(AVATAR_ID, "Greater Mana Potion");
+      verify(avatarCommandService).useManaPotion(AVATAR_ID, MANA_POTION);
     }
   }
 
@@ -535,7 +541,7 @@ public class AvatarControllerIT {
     @Test
     @DisplayName("returns 204 and delegates XP amount")
     void shouldGrantExperience() throws Exception {
-      doNothing().when(avatarCommandService).grantExperience(AVATAR_ID, 500);
+      doNothing().when(avatarCommandService).grantExperience(AVATAR_ID, new Experience(500));
 
       mockMvc
           .perform(
@@ -544,7 +550,7 @@ public class AvatarControllerIT {
                   .content("{\"amount\": 500}"))
           .andExpect(status().isNoContent());
 
-      verify(avatarCommandService).grantExperience(AVATAR_ID, 500);
+      verify(avatarCommandService).grantExperience(AVATAR_ID, new Experience(500));
     }
   }
 

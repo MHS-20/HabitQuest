@@ -16,14 +16,14 @@ public class Avatar implements Aggregate<Id<Avatar>> {
   private final Id<Avatar> id;
   private String name;
   private Money money;
-  private Inventory inventory;
-  private EquippedItems equippedItems;
+  private final Inventory inventory;
+  private final EquippedItems equippedItems;
   private Level level;
   private AvatarHealth health;
   private AvatarMana mana;
-  private AvatarStats avatarStats;
-  private List<Spell> spells;
-  private List<Invite> pendingInvites;
+  private final AvatarStats avatarStats;
+  private final List<Spell> spells;
+  private final List<Invite> pendingInvites;
   private Id<Guild> guildId;
 
   public Avatar(
@@ -158,8 +158,8 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     }
   }
 
-  public boolean takeDamage(Integer amount) {
-    this.health = this.health.damage(new Health(amount));
+  public boolean takeDamage(Damage damage) {
+    this.health = this.health.damage(new Health(damage.value()));
     boolean died = this.health.isDead();
     if (died) {
       this.mana = this.mana.resetMana();
@@ -170,16 +170,16 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     return died;
   }
 
-  public void heal(Integer amount) {
-    this.health = this.health.heal(new Health(amount));
+  public void heal(Health amount) {
+    this.health = this.health.heal(amount);
   }
 
-  public void spendMana(Integer amount) {
-    this.mana = this.mana.subtract(new Mana(amount));
+  public void spendMana(Mana amount) {
+    this.mana = this.mana.subtract(amount);
   }
 
-  public void restoreMana(Integer amount) {
-    this.mana = this.mana.add(new Mana(amount));
+  public void restoreMana(Mana amount) {
+    this.mana = this.mana.add(amount);
   }
 
   private void onLevelUp() {
@@ -240,7 +240,7 @@ public class Avatar implements Aggregate<Id<Avatar>> {
     if (!this.spells.contains(spell)) {
       throw new IllegalStateException("Spell not known: " + spell.name());
     }
-    spendMana(spell.getRequiredMana().value());
+    spendMana(spell.getRequiredMana());
   }
 
   // --- Stats ---

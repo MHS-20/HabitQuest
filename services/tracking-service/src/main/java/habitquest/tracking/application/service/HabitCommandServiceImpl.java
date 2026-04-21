@@ -43,6 +43,12 @@ public class HabitCommandServiceImpl implements HabitCommandService {
     this.questClient = questClient;
   }
 
+  private Habit findOrThrow(Id<Habit> habitId) throws HabitNotFoundException {
+    return habitRepository
+        .findById(habitId)
+        .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
+  }
+
   @Override
   public Habit createHabit(
       Id<Avatar> avatarId,
@@ -157,12 +163,6 @@ public class HabitCommandServiceImpl implements HabitCommandService {
         habitObserver.notifyHabitEvent(event);
       }
     }
-  }
-
-  private Habit findOrThrow(Id<Habit> habitId) throws HabitNotFoundException {
-    return habitRepository
-        .findById(habitId)
-        .orElseThrow(() -> new HabitNotFoundException(habitId.value()));
   }
 
   private void appendHistory(HabitEvent event, String details) {

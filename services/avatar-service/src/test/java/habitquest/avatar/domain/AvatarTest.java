@@ -3,8 +3,7 @@ package habitquest.avatar.domain;
 import static habitquest.avatar.AvatarFixtures.*;
 import static org.assertj.core.api.Assertions.*;
 
-import habitquest.avatar.domain.avatar.Avatar;
-import habitquest.avatar.domain.avatar.Money;
+import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.items.Equipment;
 import habitquest.avatar.domain.items.Weapon;
 import habitquest.avatar.domain.spells.Spell;
@@ -122,22 +121,22 @@ class AvatarTest {
     @DisplayName("takeDamage reduces current health")
     void takeDamage() {
       int hpBefore = avatar.getHealth().current().value();
-      avatar.takeDamage(20);
+      avatar.takeDamage(new Damage(20));
       assertThat(avatar.getHealth().current().value()).isEqualTo(hpBefore - 20);
     }
 
     @Test
     @DisplayName("heal increases current health")
     void heal() {
-      avatar.takeDamage(50);
-      avatar.heal(30);
+      avatar.takeDamage(new Damage(50));
+      avatar.heal(new Health(30));
       assertThat(avatar.getHealth().current().value()).isEqualTo(80);
     }
 
     @Test
     @DisplayName("heal cannot exceed max health")
     void healCannotExceedMax() {
-      avatar.heal(999);
+      avatar.heal(new Health(999));
       assertThat(avatar.getHealth().current().value()).isEqualTo(avatar.getHealth().max().value());
     }
 
@@ -149,7 +148,7 @@ class AvatarTest {
       @DisplayName("current health resets to max after lethal damage")
       void healthResets() {
         avatar.earnMoney(new Money(200)); // ensure money can be subtracted
-        avatar.takeDamage(9999);
+        avatar.takeDamage(FATAL_DAMAGE);
         assertThat(avatar.getHealth().current().value())
             .isEqualTo(avatar.getHealth().max().value());
       }
@@ -158,8 +157,8 @@ class AvatarTest {
       @DisplayName("mana resets to max after lethal damage")
       void manaResets() {
         avatar.earnMoney(new Money(200));
-        avatar.spendMana(20);
-        avatar.takeDamage(9999);
+        avatar.spendMana(new Mana(20));
+        avatar.takeDamage(FATAL_DAMAGE);
         assertThat(avatar.getMana().amount().value()).isEqualTo(avatar.getMana().max().value());
       }
 
@@ -168,7 +167,7 @@ class AvatarTest {
       void experienceResets() {
         avatar.earnMoney(new Money(200));
         avatar.gainExperience(50);
-        avatar.takeDamage(9999);
+        avatar.takeDamage(FATAL_DAMAGE);
         assertThat(avatar.getLevel().currentExperience().amount()).isZero();
       }
 
@@ -176,7 +175,7 @@ class AvatarTest {
       @DisplayName("100 coins are deducted on death")
       void moneyDeducted() {
         avatar.earnMoney(new Money(200));
-        avatar.takeDamage(9999);
+        avatar.takeDamage(FATAL_DAMAGE);
         assertThat(avatar.getMoney().amount()).isEqualTo(100);
       }
     }
@@ -192,21 +191,22 @@ class AvatarTest {
     @DisplayName("spendMana reduces current mana")
     void spendMana() {
       int manaBefore = avatar.getMana().amount().value();
-      avatar.spendMana(10);
+      avatar.spendMana(new Mana(10));
       assertThat(avatar.getMana().amount().value()).isEqualTo(manaBefore - 10);
     }
 
     @Test
     @DisplayName("spendMana throws when mana is insufficient")
     void spendManaInsufficient() {
-      assertThatThrownBy(() -> avatar.spendMana(9999)).isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(() -> avatar.spendMana(new Mana(9999)))
+          .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("restoreMana increases current mana up to max")
     void restoreMana() {
-      avatar.spendMana(20);
-      avatar.restoreMana(10);
+      avatar.spendMana(new Mana(20));
+      avatar.restoreMana(new Mana(10));
       assertThat(avatar.getMana().amount().value()).isEqualTo(40);
     }
   }
