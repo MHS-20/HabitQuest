@@ -4,10 +4,12 @@ import compose.project.demo.contexts.marketplace.domain.contract.MarketplaceGate
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItemsResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceLoadResult
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceSellResult
 import compose.project.demo.contexts.marketplace.infrastructure.mapper.parseItemsFromMarketplacePayload
 import compose.project.demo.createHttpEngine
 import compose.project.demo.edgeServiceBaseUrl
+import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -20,7 +22,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.encodeURLPath
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -166,17 +168,27 @@ class MarketplaceRepository : MarketplaceGateway {
     override suspend fun buyItem(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: MarketplaceItem,
         currentLevel: Int,
     ): MarketplaceBuyResult {
-        val encodedItemName = itemName.encodeURLPath()
         val response =
             runCatching {
                 client.post(
-                    "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/items/$encodedItemName/buy",
+                    "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/items/buy",
                 ) {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     parameter("currentLevel", currentLevel)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        buildJsonObject {
+                            put("type", JsonPrimitive(item.type))
+                            put("itemName", JsonPrimitive(item.name))
+                            put("description", JsonPrimitive(item.description))
+                            put("power", JsonPrimitive(item.power ?: 0))
+                            put("price", JsonPrimitive(item.price))
+                            put("requiredLevel", JsonPrimitive(item.requiredLevel))
+                        }
+                    )
                 }
             }.getOrElse {
                 return MarketplaceBuyResult.Error("Unable to contact marketplace-service")
@@ -192,6 +204,11 @@ class MarketplaceRepository : MarketplaceGateway {
             HttpStatusCode.Forbidden -> {
                 val message = extractErrorMessage(response)
                 MarketplaceBuyResult.Error(message ?: "Level too low to buy this item")
+            }
+
+            HttpStatusCode.BadRequest -> {
+                val message = extractErrorMessage(response)
+                MarketplaceBuyResult.Error(message ?: "Purchase failed - insufficient funds or business rule violation")
             }
 
             HttpStatusCode.NotFound -> {
@@ -215,18 +232,11 @@ class MarketplaceRepository : MarketplaceGateway {
     override suspend fun sellItem(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: AvatarInventoryItem,
     ): MarketplaceSellResult {
-        val encodedItemName = itemName.encodeURLPath()
         val response =
             runCatching {
-                val primary = postSell(token, marketplaceId, encodedItemName, useSoldItemsPath = true)
-                if (primary.status == HttpStatusCode.NotFound) {
-                    // Fallback for API variants that expose /items/{itemName}/sell.
-                    postSell(token, marketplaceId, encodedItemName, useSoldItemsPath = false)
-                } else {
-                    primary
-                }
+                postSell(token, marketplaceId, item)
             }.getOrElse {
                 return MarketplaceSellResult.Error("Unable to contact marketplace-service")
             }
@@ -266,14 +276,23 @@ class MarketplaceRepository : MarketplaceGateway {
     private suspend fun postSell(
         token: String,
         marketplaceId: String,
-        encodedItemName: String,
-        useSoldItemsPath: Boolean,
+        item: AvatarInventoryItem,
     ): HttpResponse {
-        val pathSegment = if (useSoldItemsPath) "sold-items" else "items"
         return client.post(
-            "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/$pathSegment/$encodedItemName/sell",
+            "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/sold-items/sell",
         ) {
             header(HttpHeaders.Authorization, "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(
+                buildJsonObject {
+                    put("type", JsonPrimitive(item.type))
+                    put("itemName", JsonPrimitive(item.name))
+                    put("description", JsonPrimitive(item.description))
+                    put("power", JsonPrimitive(item.power ?: 0))
+                    put("price", JsonPrimitive(item.price))
+                    put("requiredLevel", JsonPrimitive(1))
+                }
+            )
         }
     }
 
