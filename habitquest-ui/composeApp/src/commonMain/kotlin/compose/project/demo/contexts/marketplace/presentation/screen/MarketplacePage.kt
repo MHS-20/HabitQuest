@@ -168,7 +168,7 @@ fun MarketplaceScreen(
                                                 buyEquipItemUseCase.buy(
                                                     token = token,
                                                     marketplaceId = state.marketplaceId,
-                                                    itemName = item.name,
+                                                    item = item,
                                                     currentLevel = avatarLevel,
                                                 )
                                         ) {

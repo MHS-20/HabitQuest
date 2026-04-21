@@ -22,6 +22,7 @@ internal fun parseItemsFromMarketplacePayload(payload: JsonObject): List<Marketp
         .orEmpty()
 }
 
+
 private fun asMarketplaceItem(element: JsonElement): MarketplaceItem? {
     val raw = element as? JsonObject ?: return null
     val source = raw["content"]?.jsonObject ?: raw
@@ -32,5 +33,6 @@ private fun asMarketplaceItem(element: JsonElement): MarketplaceItem? {
         type = source["type"]?.jsonPrimitive?.contentOrNull ?: "UNKNOWN",
         power = source["power"]?.jsonPrimitive?.intOrNull,
         price = source["price"]?.jsonPrimitive?.intOrNull ?: 0,
+        requiredLevel = (source["requiredLevel"]?.jsonPrimitive?.intOrNull ?: 1).coerceAtLeast(1),
     )
 }
