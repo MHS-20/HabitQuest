@@ -5,9 +5,8 @@ import compose.project.demo.contexts.habits.infrastructure.calendar.IOSCalendarP
 import compose.project.demo.contexts.habits.infrastructure.calendar.rememberHabitCalendarLauncher
 
 fun MainViewController() =
-  ComposeUIViewController {
-	App(habitCalendarLauncher = rememberHabitCalendarLauncher())
-  }
-	.also { viewController ->
-	  IOSCalendarPlatform.initializeCalendarEventManager(viewController)
-	}
+    ComposeUIViewController {
+        App(habitCalendarLauncher = rememberHabitCalendarLauncher())
+    }.also { viewController ->
+        IOSCalendarPlatform.initializeCalendarEventManager(viewController)
+    }
