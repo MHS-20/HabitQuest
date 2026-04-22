@@ -8,6 +8,8 @@ import compose.project.demo.contexts.auth.application.RegisterUseCase
 import compose.project.demo.contexts.auth.domain.model.AuthResult
 import compose.project.demo.contexts.auth.infrastructure.repository.AuthRepository
 import compose.project.demo.contexts.auth.presentation.screen.LoginScreen
+import compose.project.demo.contexts.habits.infrastructure.calendar.HabitCalendarLauncher
+import compose.project.demo.contexts.habits.infrastructure.calendar.defaultHabitCalendarLauncher
 import compose.project.demo.contexts.auth.presentation.screen.RegisterScreen
 import kotlinx.coroutines.launch
 
@@ -31,7 +33,7 @@ private enum class AuthRoute {
 
 @Composable
 @Preview
-fun App() {
+fun App(habitCalendarLauncher: HabitCalendarLauncher = defaultHabitCalendarLauncher()) {
     MaterialTheme {
         val authRepository = remember { AuthRepository() }
         val loginUseCase = remember { LoginUseCase(authRepository) }
@@ -45,7 +47,7 @@ fun App() {
         var authUserId by remember { mutableStateOf<String?>(null) }
 
         when (authRoute) {
-            AuthRoute.Login -> {
+            AuthRoute.Login ->
                 LoginScreen(
                     isLoading = authLoading,
                     errorMessage = authError,
@@ -65,6 +67,13 @@ fun App() {
                                 }
                             }
                             authLoading = false
+
+
+
+
+
+
+
                         }
                     },
                     onNavigateRegister = {
@@ -72,9 +81,8 @@ fun App() {
                         authRoute = AuthRoute.Register
                     },
                 )
-            }
 
-            AuthRoute.Register -> {
+            AuthRoute.Register ->
                 RegisterScreen(
                     isLoading = authLoading,
                     errorMessage = authError,
@@ -94,6 +102,13 @@ fun App() {
                                 }
                             }
                             authLoading = false
+
+
+
+
+
+
+
                         }
                     },
                     onNavigateLogin = {
@@ -101,9 +116,8 @@ fun App() {
                         authRoute = AuthRoute.Login
                     },
                 )
-            }
 
-            AuthRoute.Main -> {
+            AuthRoute.Main ->
                 MainScaffold(
                     onLogout = {
                         authToken = null
@@ -113,8 +127,9 @@ fun App() {
                     },
                     token = authToken.orEmpty(),
                     userId = authUserId.orEmpty(),
+                    habitCalendarLauncher = habitCalendarLauncher,
                 )
-            }
+
         }
     }
 }
