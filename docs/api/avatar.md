@@ -24,7 +24,7 @@ Creates a new avatar.
 }
 ```
 
-**Response `200 OK`:**
+**Response `201 Created`:**
 
 ```json
 {
@@ -73,7 +73,7 @@ Permanently deletes the avatar.
 
 ### Search Avatars
 
-**`GET /api/v1/avatars/search`**
+**`POST /api/v1/avatars/search`**
 
 Searches for avatars by name and/or level range.
 
@@ -88,6 +88,47 @@ Searches for avatars by name and/or level range.
 ```
 
 **Response `200 OK`:** Collection of avatar objects.
+
+---
+
+## Invites
+
+### Get Pending Invites
+
+**`GET /api/v1/avatars/{id}/invites`**
+
+Returns the pending guild invites for the avatar.
+
+**Response `200 OK`:** Collection of invite objects.
+
+### Receive Guild Invite
+
+**`POST /api/v1/avatars/{id}/invites`**
+
+Stores a guild invite for the avatar.
+
+**Request body:**
+
+```json
+{
+  "inviteId": "string",
+  "guildId": "string",
+  "guildName": "Guild Name",
+  "expiresAt": "2026-04-22T12:00:00Z"
+}
+```
+
+If `expiresAt` is missing or blank, the service defaults the invite to expire 24 hours from receipt.
+
+**Response `204 No Content`**
+
+### Accept Guild Invite
+
+**`POST /api/v1/avatars/{id}/invites/{inviteId}/accept`**
+
+Accepts a pending guild invite.
+
+**Response `204 No Content`**
 
 ---
 
@@ -190,6 +231,23 @@ Searches for avatars by name and/or level range.
 
 **Response `204 No Content`**
 
+### Get Equipped Items
+
+**`GET /api/v1/avatars/{id}/equipped-items`**
+
+Returns the currently equipped items for the avatar.
+
+**Response `200 OK`:**
+
+```json
+{
+  "id": "string",
+  "items": [
+    { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
+  ]
+}
+```
+
 ### Equip Item
 
 **`POST /api/v1/avatars/{id}/inventory/items/equip`**
@@ -214,20 +272,29 @@ Searches for avatars by name and/or level range.
 
 **Response `204 No Content`**
 
-### Get Equipped Items
+### Equip Item
 
-**`GET /api/v1/avatars/{id}/equipped-items`**
+**`POST /api/v1/avatars/{id}/inventory/items/equip`**
+
+**Request body:**
 
 ```json
-{
-  "id": "string",
-  "items": [
-    { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
-  ]
-}
+{ "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
 ```
 
----
+**Response `204 No Content`**
+
+### Unequip Item
+
+**`POST /api/v1/avatars/{id}/inventory/items/unequip`**
+
+**Request body:**
+
+```json
+{ "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
+```
+
+**Response `204 No Content`**
 
 ## Experience & Level
 
