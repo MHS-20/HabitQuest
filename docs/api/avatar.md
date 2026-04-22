@@ -29,7 +29,9 @@ Creates a new avatar.
 ```json
 {
   "id": "string",
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/avatars/string" }
+  }
 }
 ```
 
@@ -52,10 +54,12 @@ Returns full avatar details.
   "health": { "current": 100, "max": 100 },
   "mana": { "amount": 50, "max": 50 },
   "stats": { "strength": 10, "defense": 10, "intelligence": 10 },
-  "inventory": { "id": "string", "items": [] },
-  "equippedItems": { "id": "string", "items": [] },
+  "inventory": { "items": [] },
+  "equippedItems": { "items": [] },
   "spells": [],
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/avatars/string" }
+  }
 }
 ```
 
@@ -87,7 +91,7 @@ Searches for avatars by name and/or level range.
 }
 ```
 
-**Response `200 OK`:** Collection of avatar objects.
+**Response `200 OK`:** HATEOAS collection of avatar resources.
 
 ---
 
@@ -99,7 +103,7 @@ Searches for avatars by name and/or level range.
 
 Returns the pending guild invites for the avatar.
 
-**Response `200 OK`:** Collection of invite objects.
+**Response `200 OK`:** HATEOAS collection of invite resources.
 
 ### Receive Guild Invite
 
@@ -200,7 +204,6 @@ Accepts a pending guild invite.
 
 ```json
 {
-  "id": "string",
   "items": [
     { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
   ]
@@ -217,6 +220,8 @@ Accepts a pending guild invite.
 { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
 ```
 
+`type` must be one of `WEAPON`, `ARMOR`, `HEALTH_POTION`, or `MANA_POTION`. `power` is optional and defaults to `0` when omitted.
+
 **Response `204 No Content`**
 
 ### Remove Item from Inventory
@@ -228,6 +233,8 @@ Accepts a pending guild invite.
 ```json
 { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
 ```
+
+`type` must be one of `WEAPON`, `ARMOR`, `HEALTH_POTION`, or `MANA_POTION`. `power` is optional and defaults to `0` when omitted.
 
 **Response `204 No Content`**
 
@@ -241,7 +248,6 @@ Returns the currently equipped items for the avatar.
 
 ```json
 {
-  "id": "string",
   "items": [
     { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
   ]
@@ -258,29 +264,7 @@ Returns the currently equipped items for the avatar.
 { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
 ```
 
-**Response `204 No Content`**
-
-### Unequip Item
-
-**`POST /api/v1/avatars/{id}/inventory/items/unequip`**
-
-**Request body:**
-
-```json
-{ "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
-```
-
-**Response `204 No Content`**
-
-### Equip Item
-
-**`POST /api/v1/avatars/{id}/inventory/items/equip`**
-
-**Request body:**
-
-```json
-{ "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
-```
+`type` must be `WEAPON` or `ARMOR` for equip and unequip operations. `power` is optional and defaults to `0` when omitted.
 
 **Response `204 No Content`**
 
@@ -294,7 +278,10 @@ Returns the currently equipped items for the avatar.
 { "type": "WEAPON", "name": "Iron Sword", "description": "...", "power": 10 }
 ```
 
+`type` must be `WEAPON` or `ARMOR` for equip and unequip operations. `power` is optional and defaults to `0` when omitted.
+
 **Response `204 No Content`**
+
 
 ## Experience & Level
 
@@ -354,15 +341,19 @@ Returns the currently equipped items for the avatar.
 { "died": false }
 ```
 
-### Heal
+### Use Health Potion
 
-**`POST /api/v1/avatars/{id}/health/heal`**
+**`POST /api/v1/avatars/{id}/health/potion`**
+
+Uses a health potion from the avatar inventory to restore health.
 
 **Request body:**
 
 ```json
-{ "amount": 20 }
+{ "name": "Health Potion", "description": "Restores health", "power": 20 }
 ```
+
+`power` is optional and defaults to `0` when omitted.
 
 **Response `204 No Content`**
 
@@ -390,15 +381,19 @@ Returns the currently equipped items for the avatar.
 
 **Response `204 No Content`**
 
-### Restore Mana
+### Use Mana Potion
 
-**`POST /api/v1/avatars/{id}/mana/restore`**
+**`POST /api/v1/avatars/{id}/mana/potion`**
+
+Uses a mana potion from the avatar inventory to restore mana.
 
 **Request body:**
 
 ```json
-{ "amount": 10 }
+{ "name": "Mana Potion", "description": "Restores mana", "power": 10 }
 ```
+
+`power` is optional and defaults to `0` when omitted.
 
 **Response `204 No Content`**
 

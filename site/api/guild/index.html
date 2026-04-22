@@ -162,6 +162,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#get-guilds-active-battle">Get Guild's Active Battle</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-all-boss-types">Get All Boss Types</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#check-battle-in-progress">Check Battle In Progress</a>
     </li>
         </ul>
@@ -244,10 +246,12 @@
   &quot;creatorNickname&quot;: &quot;string&quot;
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong></p>
+<p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/guilds/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -262,7 +266,9 @@
   &quot;members&quot;: [
     { &quot;avatarId&quot;: &quot;string&quot;, &quot;nickname&quot;: &quot;string&quot;, &quot;role&quot;: &quot;LEADER&quot; }
   ],
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/guilds/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -275,7 +281,7 @@
 <h3 id="get-members">Get Members</h3>
 <p><strong><code>GET /api/v1/guilds/{id}/members</code></strong></p>
 <p>Returns all guild members.</p>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of member objects.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of member objects.</p>
 <pre><code class="language-json">[
   { &quot;avatarId&quot;: &quot;string&quot;, &quot;nickname&quot;: &quot;string&quot;, &quot;role&quot;: &quot;MEMBER&quot; }
 ]
@@ -348,10 +354,12 @@
   &quot;requesterId&quot;: &quot;string&quot;
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong></p>
+<p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/battles/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -375,7 +383,9 @@
     &quot;penalty&quot;: 100
   },
   &quot;bossRemainingHealth&quot;: 750,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/battles/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -394,6 +404,23 @@
 <p><strong><code>GET /api/v1/battles/guild/{guildId}</code></strong></p>
 <p>Returns the active battle for the specified guild.</p>
 <p><strong>Response <code>200 OK</code>:</strong> Battle object (same schema as Get Battle).</p>
+<hr />
+<h3 id="get-all-boss-types">Get All Boss Types</h3>
+<p><strong><code>GET /api/v1/battles/boss</code></strong></p>
+<p>Returns the catalog of available boss types.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of boss objects.</p>
+<pre><code class="language-json">[
+  {
+    &quot;name&quot;: &quot;Dragon&quot;,
+    &quot;health&quot;: 1000,
+    &quot;strength&quot;: 50,
+    &quot;defense&quot;: 20,
+    &quot;experienceReward&quot;: 500,
+    &quot;moneyReward&quot;: 200,
+    &quot;penalty&quot;: 100
+  }
+]
+</code></pre>
 <hr />
 <h3 id="check-battle-in-progress">Check Battle In Progress</h3>
 <p><strong><code>GET /api/v1/battles/guild/{guildId}/in-progress</code></strong></p>

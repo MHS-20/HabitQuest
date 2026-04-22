@@ -5,6 +5,8 @@
 
 The Marketplace Service provides each avatar with a personal shop. Avatars can browse available items filtered by type, purchase them using in-game currency, and sell owned items back. Buy and sell operations use a saga pattern to maintain consistency between the avatar's inventory and wallet.
 
+Responses are exposed as HATEOAS resources. The top-level marketplace response is an `EntityModel`, and item listings are returned as `CollectionModel<EntityModel<ItemResponse>>`.
+
 ---
 
 ## Endpoints
@@ -41,6 +43,8 @@ Provisions a new marketplace for an avatar.
 
 Returns marketplace details and its available items.
 
+`GET /api/v1/marketplaces/by-avatar/{avatarId}` returns the same canonical marketplace resource for the avatar.
+
 **Response `200 OK`:**
 
 ```json
@@ -52,7 +56,8 @@ Returns marketplace details and its available items.
       "name": "Iron Sword",
       "description": "A sturdy iron sword.",
       "power": 15,
-      "price": 100
+      "price": 100,
+      "requiredLevel": 5
     }
   ],
   "_links": { ... }
@@ -77,7 +82,8 @@ Returns the marketplace owned by the avatar.
       "name": "Iron Sword",
       "description": "A sturdy iron sword.",
       "power": 15,
-      "price": 100
+      "price": 100,
+      "requiredLevel": 5
     }
   ],
   "_links": { ... }
@@ -100,7 +106,7 @@ Returns items available for purchase, optionally filtered by type.
 |-----------|------|---------|-------------|
 | `type` | `ItemType` | `ALL` | Filter by item type (e.g. `WEAPON`, `ARMOR`, `CONSUMABLE`) |
 
-**Response `200 OK`:** Collection of item objects.
+**Response `200 OK`:** HATEOAS collection of available items.
 
 ```json
 [
@@ -109,7 +115,8 @@ Returns items available for purchase, optionally filtered by type.
     "name": "Leather Armor",
     "description": "Basic leather armor.",
     "power": 5,
-    "price": 50
+    "price": 50,
+    "requiredLevel": 1
   }
 ]
 ```
@@ -122,7 +129,7 @@ Returns items available for purchase, optionally filtered by type.
 
 Returns a single available item by name.
 
-> The current implementation expects an `ItemCommand` request body even for this lookup endpoint, because the controller resolves the item through the same mapper used for commerce commands.
+> The current implementation expects an `ItemCommand` request body even for this lookup endpoint, because the controller resolves the item through the same mapper used for commerce commands. The `itemName` path variable is present, but the body drives the lookup today.
 
 **Request body:**
 
@@ -137,7 +144,7 @@ Returns a single available item by name.
 }
 ```
 
-**Response `200 OK`:**
+**Response `200 OK`:** HATEOAS item resource.
 
 ```json
 {
@@ -145,7 +152,8 @@ Returns a single available item by name.
   "name": "Iron Sword",
   "description": "A sturdy iron sword.",
   "power": 15,
-  "price": 100
+  "price": 100,
+  "requiredLevel": 5
 }
 ```
 
@@ -159,7 +167,7 @@ Returns a single available item by name.
 
 Returns items previously sold by the avatar (their inventory items listed for resale).
 
-**Response `200 OK`:** Collection of item objects.
+**Response `200 OK`:** HATEOAS collection of sold items.
 
 ---
 
@@ -169,7 +177,7 @@ Returns items previously sold by the avatar (their inventory items listed for re
 
 Returns a single sold item by name.
 
-> As with available items, the current controller expects an `ItemCommand` body for this lookup.
+> As with available items, the current controller expects an `ItemCommand` body for this lookup. The path variable is present, but the request body is what the controller converts into the item lookup value.
 
 **Request body:**
 
@@ -184,7 +192,7 @@ Returns a single sold item by name.
 }
 ```
 
-**Response `200 OK`:** Item object.
+**Response `200 OK`:** HATEOAS item resource.
 
 ---
 
@@ -217,6 +225,12 @@ Purchases an item from the marketplace. Deducts the price from the avatar's wall
 
 **Response `204 No Content`**
 
+Errors for this endpoint map to:
+
+- `403 Forbidden` when the avatar level is below the item requirement
+- `404 Not Found` when the marketplace or item cannot be found
+- `502 Bad Gateway` when the avatar service cannot be reached
+
 ---
 
 ### Sell Item
@@ -240,12 +254,18 @@ Sells an item from the avatar's inventory. Removes the item from inventory and c
 
 **Response `204 No Content`**
 
+Errors for this endpoint map to:
+
+- `404 Not Found` when the marketplace or item cannot be found
+- `502 Bad Gateway` when the avatar service cannot be reached
+
 ---
 
 ## Error Responses
 
 | Status | Condition |
 |--------|-----------|
-| `400 Bad Request` | Insufficient funds, item not found in inventory, or other business rule violation |
+| `403 Forbidden` | Avatar level is below the item requirement (`InsufficientLevelException`) |
 | `404 Not Found` | Marketplace or item not found |
 | `502 Bad Gateway` | Avatar Service communication failure during saga execution |
+| `400 Bad Request` | Malformed request body or invalid query parameter values |

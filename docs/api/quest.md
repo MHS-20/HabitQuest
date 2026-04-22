@@ -19,7 +19,8 @@ Creates a new quest.
 
 ```json
 {
-  "name": "string"
+  "name": "string",
+  "durationDays": 30
 }
 ```
 
@@ -28,8 +29,35 @@ Creates a new quest.
 ```json
 {
   "id": "string",
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/quests/string" }
+  }
 }
+```
+
+---
+
+### Get All Quests
+
+**`GET /api/v1/quests`**
+
+Returns the list of quests in the system.
+
+**Response `200 OK`:** HATEOAS collection of quest objects.
+
+```json
+[
+  {
+    "id": "string",
+    "name": "string",
+    "durationDays": 30,
+    "reward": 100,
+    "habitIds": ["habit-id-1", "habit-id-2"],
+    "_links": {
+      "self": { "href": "/api/v1/quests/string" }
+    }
+  }
+]
 ```
 
 ---
@@ -46,10 +74,12 @@ Returns full quest details.
 {
   "id": "string",
   "name": "string",
-  "duration": "P30D",
-  "reward": { "experience": 500, "money": 100 },
+  "durationDays": 30,
+  "reward": 100,
   "habitIds": ["habit-id-1", "habit-id-2"],
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/quests/string" }
+  }
 }
 ```
 
@@ -93,10 +123,10 @@ Permanently deletes the quest.
 
 **`GET /api/v1/quests/{id}/duration`**
 
-Returns the quest duration as an ISO 8601 duration string.
+Returns the quest duration in days.
 
 ```json
-{ "duration": "P30D" }
+{ "durationDays": 30 }
 ```
 
 ### Update Duration
@@ -106,7 +136,7 @@ Returns the quest duration as an ISO 8601 duration string.
 **Request body:**
 
 ```json
-{ "duration": "P14D" }
+{ "durationDays": 14 }
 ```
 
 **Response `204 No Content`**
@@ -118,7 +148,7 @@ Returns the quest duration as an ISO 8601 duration string.
 **`GET /api/v1/quests/{id}/reward`**
 
 ```json
-{ "experience": 500, "money": 100 }
+{ "value": 100 }
 ```
 
 ### Update Reward
@@ -130,6 +160,8 @@ Returns the quest duration as an ISO 8601 duration string.
 ```json
 { "experience": 750, "money": 200 }
 ```
+
+> The current command payload still accepts `experience`, but the controller maps the update to the quest's money reward value.
 
 **Response `204 No Content`**
 
@@ -151,7 +183,9 @@ Returns the habits associated with this quest.
       "title": "Morning Run",
       "description": "Run 5km",
       "tags": ["fitness"],
-      "recurrence": { "type": "DAILY", "dayOfMonth": null, "dayOfWeek": null }
+      "recurrence": { "type": "DAILY", "dayOfMonth": null, "dayOfWeek": null },
+      "nextRecurrenceDate": "2026-04-03",
+      "lastAttendedDate": "2026-04-02"
     }
   ]
 }
@@ -187,7 +221,30 @@ Adds a habit (identified by `habitId`) to this quest, along with its metadata. T
 
 Returns the active quest progress for an avatar.
 
-**Response `200 OK`:** Collection of quest progress entries.
+**Response `200 OK`:** HATEOAS resource containing the avatar progress summary.
+
+```json
+{
+  "avatarId": "string",
+  "quests": [
+    {
+      "questId": "string",
+      "questName": "Morning Routine",
+      "status": "IN_PROGRESS",
+      "completionPercentage": 50,
+      "habits": [
+        {
+          "habitId": "string",
+          "title": "Morning Run",
+          "requiredOccurrences": 2,
+          "attendedOccurrences": 1,
+          "remainingOccurrences": 1
+        }
+      ]
+    }
+  ]
+}
+```
 
 ### Remove Habit from Quest
 
