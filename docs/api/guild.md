@@ -25,12 +25,14 @@ Creates a new guild. The creator is automatically assigned the **Leader** role.
 }
 ```
 
-**Response `200 OK`:**
+**Response `201 Created`:**
 
 ```json
 {
   "id": "string",
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/guilds/string" }
+  }
 }
 ```
 
@@ -52,7 +54,9 @@ Returns full guild details including all members.
   "members": [
     { "avatarId": "string", "nickname": "string", "role": "LEADER" }
   ],
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/guilds/string" }
+  }
 }
 ```
 
@@ -76,7 +80,7 @@ Permanently deletes the guild. Only the guild leader can perform this action.
 
 Returns all guild members.
 
-**Response `200 OK`:** Collection of member objects.
+**Response `200 OK`:** HATEOAS collection of member objects.
 
 ```json
 [
@@ -207,12 +211,14 @@ Creates a new boss battle for a guild. Only the guild leader can initiate a batt
 }
 ```
 
-**Response `200 OK`:**
+**Response `201 Created`:**
 
 ```json
 {
   "id": "string",
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/battles/string" }
+  }
 }
 ```
 
@@ -243,7 +249,9 @@ Returns full battle details.
     "penalty": 100
   },
   "bossRemainingHealth": 750,
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/battles/string" }
+  }
 }
 ```
 
@@ -275,6 +283,30 @@ Cancels and deletes the battle. Only the guild leader can perform this action.
 Returns the active battle for the specified guild.
 
 **Response `200 OK`:** Battle object (same schema as Get Battle).
+
+---
+
+### Get All Boss Types
+
+**`GET /api/v1/battles/boss`**
+
+Returns the catalog of available boss types.
+
+**Response `200 OK`:** HATEOAS collection of boss objects.
+
+```json
+[
+  {
+    "name": "Dragon",
+    "health": 1000,
+    "strength": 50,
+    "defense": 20,
+    "experienceReward": 500,
+    "moneyReward": 200,
+    "penalty": 100
+  }
+]
+```
 
 ---
 
