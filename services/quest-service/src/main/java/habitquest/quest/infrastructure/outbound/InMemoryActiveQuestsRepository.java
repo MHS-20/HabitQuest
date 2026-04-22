@@ -6,17 +6,17 @@ import habitquest.quest.application.port.out.ActiveQuestsRepository;
 import habitquest.quest.domain.ActiveQuests;
 import habitquest.quest.domain.Avatar;
 import habitquest.quest.domain.Quest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 
 @Adapter
 @Repository
 public class InMemoryActiveQuestsRepository implements ActiveQuestsRepository {
 
-  private final Map<Id<ActiveQuests>, ActiveQuests> store = new HashMap<>();
+  private final Map<Id<ActiveQuests>, ActiveQuests> store = new ConcurrentHashMap<>();
 
   @Override
   public ActiveQuests save(ActiveQuests activeQuests) {
