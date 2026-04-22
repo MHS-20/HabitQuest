@@ -99,15 +99,15 @@ jobs:
           docker tag $IMAGE:latest $IMAGE:$VERSION
           docker push $IMAGE:$VERSION
 
-#      - name: Trigger Update Manifest workflow
-#        if: github.ref == 'refs/heads/main'
-#        uses: peter-evans/repository-dispatch@v3
-#        with:
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          event-type: update_manifest
-#          client-payload: |
-#            {
-#              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE }}/${{ env.SERVICE }}",
-#              "app_name": "${{ env.SERVICE }}",
-#              "app_version": "${{ steps.semantic.outputs.version }}"
-#            }
+      - name: Trigger Update Manifest workflow
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: update_manifest
+          client-payload: |
+            {
+              "app_image": "${{ env.REGISTRY }}/${{ env.IMAGE }}/${{ env.SERVICE }}",
+              "app_name": "${{ env.SERVICE }}",
+              "app_version": "${{ steps.semantic.outputs.version }}"
+            }

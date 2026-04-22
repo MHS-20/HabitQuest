@@ -6,17 +6,17 @@ import habitquest.tracking.application.exceptions.HabitNotFoundException;
 import habitquest.tracking.application.port.out.HabitRepository;
 import habitquest.tracking.domain.Avatar;
 import habitquest.tracking.domain.Habit;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 
 @Adapter
 @Repository
 public class InMemoryHabitRepository implements HabitRepository {
 
-  private final Map<Id<Habit>, Habit> store = new HashMap<>();
+  private final Map<Id<Habit>, Habit> store = new ConcurrentHashMap<>();
 
   @Override
   public Habit save(Habit habit) {
