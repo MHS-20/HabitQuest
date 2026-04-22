@@ -46,6 +46,7 @@ kotlin {
             implementation(uiLibs.compose.uiToolingPreview)
             implementation(uiLibs.androidx.activity.compose)
             implementation(uiLibs.ktor.client.okhttp)
+            implementation(uiLibs.kalendar.kit)
         }
         commonMain.dependencies {
             implementation(uiLibs.compose.runtime)
@@ -68,7 +69,10 @@ kotlin {
             implementation(uiLibs.kotlinx.coroutinesSwing)
             implementation(uiLibs.ktor.client.okhttp)
         }
-        iosMain.dependencies { implementation(uiLibs.ktor.client.darwin) }
+        iosMain.dependencies {
+            implementation(uiLibs.ktor.client.darwin)
+            implementation(uiLibs.kalendar.kit)
+        }
         jsMain.dependencies { implementation(uiLibs.ktor.client.js) }
         wasmJsMain.dependencies { implementation(uiLibs.ktor.client.js) }
     }
