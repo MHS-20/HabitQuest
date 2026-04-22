@@ -27,12 +27,6 @@ Feature: Equipment Management
     When the player removes the weapon
     Then the avatar strength should return to 10
     And the weapon should no longer be equipped
-
-  Scenario: Cannot equip two weapons in the same slot
-    Given an avatar with a weapon equipped in the main hand slot
-    When the player tries to equip another weapon in the same slot
-    Then the operation should be rejected
-    And the original weapon should remain equipped
 ```
 
 ## Invetory Feature
@@ -77,14 +71,6 @@ Feature: Use Consumable Items from Inventory
     Then the operation should be rejected
     And the avatar health should remain unchanged
 
-  Scenario: Cannot use potion if avatar is already at maximum health
-    Given an avatar with current health 100
-    And maximum health 100
-    And the avatar has 1 health potion in inventory
-    When the player tries to use the health potion
-    Then the operation should be rejected
-    And the potion quantity should remain unchanged
-
   Scenario: Using potion removes item if quantity reaches zero
     Given an avatar with 1 mana potion in inventory
     And current mana 10
@@ -119,13 +105,6 @@ Feature: Experience and Level Management
     Then the avatar level should become 2
     And the avatar should receive 1 skill point
     And the avatar stats should increase according to level up rules
-
-  Scenario: Avatar levels up multiple times if enough XP is gained
-    Given an avatar with 90 XP and level 1
-    And the next two level thresholds are 100 XP and 200 XP
-    When the avatar receives 150 XP
-    Then the avatar level should become 3
-    And the avatar should receive 2 skill points
 ```
 
 ## Skillpoint Feature
@@ -179,7 +158,7 @@ Feature: User registration and authentication
   Scenario: Successful login
     Given a registered user
     When the user provides correct credentials
-    Then the system returns a valid JWT token
+    Then the system returns a valid authentication token
 
   Scenario: Login with invalid credentials
     Given a registered user
@@ -188,7 +167,7 @@ Feature: User registration and authentication
 
 ```
 
-## Combat Feature
+## Battle Feature
 
 ```gherkin
 Feature: Guild boss fight
@@ -213,7 +192,7 @@ Feature: Guild boss fight
   Scenario: Defeat the boss
     Given a boss with zero HP
     When the system verifies the state
-    Then it publishes a BossDefeated event
+    Then it publishes a BattleWon event
     And distributes rewards to guild members
 
 ```
@@ -229,10 +208,16 @@ Feature: Guild management
     Then the system registers the guild
     And assigns the Leader role to the creator
 
-  Scenario: Request to join a guild
+  Scenario: Invite to join a guild
     Given an existing guild
-    When a user submits a join request
+    When the leader send a join request to an avatar
     Then the system records the request
+
+  Scenario: Accept a guild invitation
+    Given a pending guild invitation
+    When the avatar accepts the invitation
+    Then the system adds the avatar to the guild
+    And assigns the Member role to the avatar
 
   Scenario: Promote a guild member
     Given a guild leader
@@ -246,28 +231,41 @@ Feature: Guild management
 ```gherkin
 Feature: Marketplace management
 
-  Scenario: View item catalog
-    Given an authenticated user
-    When the user requests the marketplace catalog
-    Then the system returns the list of available items
+  Scenario: View all available items in the catalog
+    Given an authenticated user with a marketplace
+    When the user requests the list of available items
+    Then the system returns all items not yet purchased
 
-  Scenario: Purchase item with sufficient currency
-    Given a user with enough in-game currency
+  Scenario: View available items filtered by type
+    Given an authenticated user with a marketplace
+    When the user requests items filtered by type
+    Then the system returns only items of that type that are still available
+
+  Scenario: Purchase item with sufficient currency and required level
+    Given a user with enough in-game currency and the required level
     When the user purchases an item
-    Then the system deducts the currency
-    And publishes an ItemPurchased event
+    Then the system deducts the currency from the avatar
+    And adds the item to the avatar's inventory
+    And marks the item as sold in the marketplace
+    And publishes an ItemBought event
 
   Scenario: Purchase item with insufficient currency
     Given a user with insufficient currency
     When the user attempts to purchase an item
     Then the system rejects the purchase
+    And rolls back any partial changes
 
-  Scenario: Sell an item successfully
-    Given an authenticated user
-    And the user has an item in their inventory
-    When the user selects the item and chooses to sell it
-    Then the system removes the item from the inventory
-    And the system credits the user with the corresponding in-game currency
+  Scenario: Purchase item with insufficient level
+    Given a user whose level is below the item's required level
+    When the user attempts to purchase an item
+    Then the system rejects the purchase with an insufficient level error
+
+  Scenario: Sell a previously purchased item
+    Given a user who has previously purchased an item in the marketplace
+    When the user sells the item back
+    Then the system removes the item from the avatar's inventory
+    And credits the avatar with the item's price
+    And marks the item as available again in the marketplace
     And publishes an ItemSold event
 
 ```
@@ -277,21 +275,54 @@ Feature: Marketplace management
 ```gherkin
 Feature: Quest management
 
-  Scenario: Create a public quest
+  Scenario: Create a quest
     Given an authenticated user
-    When the user creates a quest with duration and associated habits
-    Then the system publishes the quest
+    When the user creates a quest with a name and a duration in days
+    Then the system persists the quest with a default money reward of 100
+    And publishes a QuestCreated event
+
+  Scenario: Delete a quest
+    Given an existing quest
+    When the user deletes the quest
+    Then the system removes the quest permanently
+    And returns a success response
+
+  Scenario: Add a habit to a quest
+    Given an existing quest
+    When the user adds a habit with a recurrence rule to the quest
+    Then the system appends the habit to the quest's habit list
+    And returns a success response
 
   Scenario: Join a quest
-    Given an active quest
-    When a user joins the quest
-    Then the system adds the quest habits to the user's habit plan
+    Given an existing quest with at least one habit
+    When an avatar joins the quest
+    Then the system creates an ActiveQuests record in IN_PROGRESS status
+    And adds the quest habits to the avatar's habit tracking plan
+    And publishes a QuestJoined event
 
-  Scenario: Complete a quest
-    Given a quest whose objectives are fulfilled
-    When the quest duration ends
-    Then the system distributes the rewards
+  Scenario: Join a quest that the avatar has already joined
+    Given an avatar who has already joined a quest
+    When the avatar joins the same quest again
+    Then the system returns the existing ActiveQuests record without creating a duplicate
+
+  Scenario: Record habit attendance that completes the quest
+    Given an avatar participating in a quest
+    And the avatar has attended all required habit occurrences except one
+    When the avatar records the final habit attendance
+    Then the system marks the ActiveQuests as COMPLETED
+    And grants the money reward to the avatar via the avatar service
     And publishes a QuestCompleted event
+
+  Scenario: Record habit attendance without completing the quest
+    Given an avatar participating in a quest with multiple required habit occurrences
+    When the avatar records a habit attendance that does not yet fulfill all requirements
+    Then the system increments the attended occurrences
+    And the ActiveQuests status remains IN_PROGRESS
+
+  Scenario: Record habit attendance after the quest window has elapsed
+    Given an avatar whose active quest window has ended without completion
+    When the system refreshes the quest status
+    Then the ActiveQuests status transitions to EXPIRED
 
 ```
 
@@ -304,13 +335,6 @@ Feature: Character progression system
     Given a HabitCompleted event is received
     When the system calculates experience based on difficulty
     Then the character's XP increases
-
-  Scenario: Level up when XP threshold is reached
-    Given a character with sufficient XP
-    When the XP exceeds the current level threshold
-    Then the system increases the character's level
-    And increases the base statistics
-    And publishes a LevelUp event
 
   Scenario: Apply penalty after missed habit
     Given a HabitMissed event is received
@@ -327,21 +351,58 @@ Feature: Habit management
 
   Scenario: Create a new habit
     Given an authenticated user
-    When the user creates a habit with title, recurrence, and difficulty
+    When the user creates a habit with title, description, and recurrence
     Then the habit is stored
-    And it becomes active in the user's habit plan
+    And a HabitCreated event is appended to the habit history
 
-  Scenario: Complete a habit
-    Given an active habit in the user's plan
-    When the user marks the habit as completed
-    Then the system records the completion
-    And publishes a HabitCompleted event
+  Scenario: Create a habit linked to a quest
+    Given an authenticated user
+    When the user creates a habit with an associated quest ID
+    Then the habit is stored with the quest reference
+    And attendance will be reported to the quest service when completed
+
+  Scenario: Attend a habit
+    Given an active habit belonging to a user
+    When the user marks the habit as attended on a given date
+    Then the system records the attendance date
+    And grants experience to the avatar
+    And publishes a HabitAttended event
+
+  Scenario: Attend a quest-linked habit
+    Given an active habit associated with a quest
+    When the user marks the habit as attended
+    Then the system records the attendance to the quest service
 
   Scenario: Missed habit detection
-    Given an active habit whose time window has expired
-    When the system performs the scheduled check
-    Then it records the habit as missed
-    And publishes a HabitMissed event
+    Given an active habit whose next recurrence has passed without attendance
+    When the scheduled job runs
+    Then the system records the habit as not attended
+    And applies damage to the avatar
+    And publishes a HabitNotAttended event
+
+  Scenario: Missed habit deduplication
+    Given a habit that was already recorded as not attended in the last check
+    When the scheduled job runs again without any new attendance
+    Then the system does not apply damage again
+    And does not publish a duplicate HabitNotAttended event
+
+  Scenario: Update habit title
+    Given an existing habit
+    When the user updates the habit title
+    Then the system stores the new title
+    And appends a HabitUpdated event to the history
+
+  Scenario: Update habit recurrence
+    Given an existing habit
+    When the user updates the habit recurrence
+    Then the system stores the new recurrence schedule
+    And appends a HabitUpdated event to the history
+
+  Scenario: Delete a habit
+    Given an existing habit
+    When the user deletes the habit
+    Then the habit is removed from the repository
+    And a HabitDeleted event is published
 
 ```
 

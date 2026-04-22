@@ -1,5 +1,8 @@
-# HabitQuest – Gamified Habit Tracker
+[![Build and Package](https://github.com/MHS-20/HabitQuest/actions/workflows/build.yml/badge.svg)](https://github.com/MHS-20/HabitQuest/actions/workflows/build.yml)
+[![Build and Package Multiplatform UI](https://github.com/MHS-20/HabitQuest/actions/workflows/build_ui.yml/badge.svg)](https://github.com/MHS-20/HabitQuest/actions/workflows/build_ui.yml)
+[![Semantic Release](https://github.com/MHS-20/HabitQuest/actions/workflows/semantic-release.yml/badge.svg)](https://github.com/MHS-20/HabitQuest/actions/workflows/semantic-release.yml)
 
+# HabitQuest – Gamified Habit Tracker
 ## Project Overview
 HabitQuest is a gamified habit tracker with RPG mechanics. Users can create habits, earn XP, level up, join guilds, do quests, and fight bosses.
 
