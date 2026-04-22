@@ -6,8 +6,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import habitquest.tracking.application.exceptions.HabitNotFoundException;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
-import habitquest.tracking.infrastructure.dto.HabitResponsesDto.*;
-import habitquest.tracking.infrastructure.inbound.HabitController;
+import habitquest.tracking.infrastructure.dto.HabitQueries.*;
+import habitquest.tracking.infrastructure.inbound.HabitCommandController;
+import habitquest.tracking.infrastructure.inbound.HabitQueryController;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.hateoas.EntityModel;
@@ -22,10 +23,10 @@ public class HabitResponseAssembler {
     return EntityModel.of(
         new HabitCreatedResponse(id),
         selfLink(id),
-        linkTo(methodOn(HabitController.class).getHabit(id)).withRel("habit"),
-        linkTo(methodOn(HabitController.class).getTags(id)).withRel("tags"),
-        linkTo(methodOn(HabitController.class).getRecurrence(id)).withRel("recurrence"),
-        linkTo(methodOn(HabitController.class).getHistory(id)).withRel("history"));
+        linkTo(methodOn(HabitQueryController.class).getHabit(id)).withRel("habit"),
+        linkTo(methodOn(HabitQueryController.class).getTags(id)).withRel("tags"),
+        linkTo(methodOn(HabitQueryController.class).getRecurrence(id)).withRel("recurrence"),
+        linkTo(methodOn(HabitQueryController.class).getHistory(id)).withRel("history"));
   }
 
   public EntityModel<HabitResponse> toModel(Habit habit) {
@@ -33,13 +34,14 @@ public class HabitResponseAssembler {
     return EntityModel.of(
         HabitMapper.toResponse(habit),
         selfLink(id),
-        linkTo(methodOn(HabitController.class).getTitle(id)).withRel("title"),
-        linkTo(methodOn(HabitController.class).getDescription(id)).withRel("description"),
-        linkTo(methodOn(HabitController.class).getTags(id)).withRel("tags"),
-        linkTo(methodOn(HabitController.class).getRecurrence(id)).withRel("recurrence"),
-        linkTo(methodOn(HabitController.class).getLastAttendedDate(id)).withRel("lastAttendedDate"),
-        linkTo(methodOn(HabitController.class).getHistory(id)).withRel("history"),
-        linkTo(methodOn(HabitController.class).deleteHabit(id)).withRel("delete"));
+        linkTo(methodOn(HabitQueryController.class).getTitle(id)).withRel("title"),
+        linkTo(methodOn(HabitQueryController.class).getDescription(id)).withRel("description"),
+        linkTo(methodOn(HabitQueryController.class).getTags(id)).withRel("tags"),
+        linkTo(methodOn(HabitQueryController.class).getRecurrence(id)).withRel("recurrence"),
+        linkTo(methodOn(HabitQueryController.class).getLastAttendedDate(id))
+            .withRel("lastAttendedDate"),
+        linkTo(methodOn(HabitQueryController.class).getHistory(id)).withRel("history"),
+        linkTo(methodOn(HabitCommandController.class).deleteHabit(id)).withRel("delete"));
   }
 
   public EntityModel<TitleResponse> toTitleModel(String id, String title) {
@@ -55,7 +57,7 @@ public class HabitResponseAssembler {
         new TagsResponse(tags.stream().map(Tag::name).toList()),
         selfLink(id),
         habitLink(id),
-        linkTo(methodOn(HabitController.class).updateTags(id, null)).withRel("update"));
+        linkTo(methodOn(HabitCommandController.class).updateTags(id, null)).withRel("update"));
   }
 
   public EntityModel<RecurrenceResponse> toRecurrenceModel(
@@ -64,7 +66,8 @@ public class HabitResponseAssembler {
         recurrence,
         selfLink(id),
         habitLink(id),
-        linkTo(methodOn(HabitController.class).updateRecurrence(id, null)).withRel("update"));
+        linkTo(methodOn(HabitCommandController.class).updateRecurrence(id, null))
+            .withRel("update"));
   }
 
   public EntityModel<LastAttendedDateResponse> toLastAttendedDateModel(
@@ -73,7 +76,7 @@ public class HabitResponseAssembler {
         new LastAttendedDateResponse(date),
         selfLink(id),
         habitLink(id),
-        linkTo(methodOn(HabitController.class).attendHabit(id, null)).withRel("attend"));
+        linkTo(methodOn(HabitCommandController.class).attendHabit(id, null)).withRel("attend"));
   }
 
   public EntityModel<HistoryResponse> toHistoryModel(
@@ -85,7 +88,7 @@ public class HabitResponseAssembler {
 
   private Link selfLink(String id) {
     try {
-      return linkTo(methodOn(HabitController.class).getHabit(id)).withSelfRel();
+      return linkTo(methodOn(HabitQueryController.class).getHabit(id)).withSelfRel();
     } catch (HabitNotFoundException e) {
       throw new RuntimeException(e);
     }
@@ -93,7 +96,7 @@ public class HabitResponseAssembler {
 
   private Link habitLink(String id) {
     try {
-      return linkTo(methodOn(HabitController.class).getHabit(id)).withRel("habit");
+      return linkTo(methodOn(HabitQueryController.class).getHabit(id)).withRel("habit");
     } catch (HabitNotFoundException e) {
       throw new RuntimeException(e);
     }

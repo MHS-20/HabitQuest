@@ -9,22 +9,21 @@ import common.ddd.Id;
 import habitquest.avatar.application.exceptions.AvatarNotFoundException;
 import habitquest.avatar.application.port.out.AvatarRepository;
 import habitquest.avatar.application.port.out.MarketplaceClientPort;
-import habitquest.avatar.application.service.AvatarSearchRequest;
-import habitquest.avatar.application.service.AvatarServiceImpl;
+import habitquest.avatar.application.service.AvatarCommandServiceImpl;
+import habitquest.avatar.application.service.AvatarQueryServiceImpl;
+import habitquest.avatar.application.service.AvatarSearchQuery;
 import habitquest.avatar.domain.avatar.*;
 import habitquest.avatar.domain.events.*;
 import habitquest.avatar.domain.factory.AvatarFactory;
-import habitquest.avatar.domain.items.HealthPotion;
-import habitquest.avatar.domain.items.ManaPotion;
 import habitquest.avatar.domain.spells.Spell;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,13 +37,8 @@ class AvatarServiceImplTest {
   @Mock private AvatarObserver avatarObserver;
   @Mock private MarketplaceClientPort marketplacePort;
 
-  private AvatarServiceImpl service;
-
-  @BeforeEach
-  void setUp() {
-    service =
-        new AvatarServiceImpl(avatarFactory, avatarRepository, avatarObserver, marketplacePort);
-  }
+  @InjectMocks private AvatarCommandServiceImpl commandService;
+  @InjectMocks private AvatarQueryServiceImpl queryService;
 
   // ─── createAvatar ────────────────────────────────────────────────────────────
 
@@ -59,7 +53,7 @@ class AvatarServiceImplTest {
       when(avatarFactory.create(AVATAR_ID, AVATAR_NAME)).thenReturn(avatar);
       when(avatarRepository.save(avatar)).thenReturn(avatar);
 
-      Id<Avatar> id = service.createAvatar(AVATAR_ID, AVATAR_NAME);
+      Id<Avatar> id = commandService.createAvatar(AVATAR_ID, AVATAR_NAME);
 
       assertThat(id.value()).isEqualTo(AVATAR_1);
       verify(avatarRepository).save(avatar);
@@ -78,7 +72,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getAvatarById(AVATAR_ID)).isSameAs(avatar);
+      assertThat(queryService.getAvatarById(AVATAR_ID)).isSameAs(avatar);
     }
 
     @Test
@@ -86,7 +80,7 @@ class AvatarServiceImplTest {
     void notFound() {
       when(avatarRepository.findById(UNKNOWN_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.getAvatarById(UNKNOWN_ID))
+      assertThatThrownBy(() -> queryService.getAvatarById(UNKNOWN_ID))
           .isInstanceOf(AvatarNotFoundException.class);
     }
   }
@@ -102,7 +96,7 @@ class AvatarServiceImplTest {
     void deletes() throws AvatarNotFoundException {
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(mutableAvatar()));
 
-      service.deleteAvatar(AVATAR_ID);
+      commandService.deleteAvatar(AVATAR_ID);
 
       verify(avatarRepository).deleteById(AVATAR_ID);
     }
@@ -112,7 +106,7 @@ class AvatarServiceImplTest {
     void throwsWhenNotFound() {
       when(avatarRepository.findById(new Id<>(BAD_ID))).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> service.deleteAvatar(new Id<>(BAD_ID)))
+      assertThatThrownBy(() -> commandService.deleteAvatar(new Id<>(BAD_ID)))
           .isInstanceOf(AvatarNotFoundException.class);
     }
   }
@@ -129,7 +123,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.updateName(AVATAR_ID, "Mage");
+      commandService.updateName(AVATAR_ID, "Mage");
 
       assertThat(avatar.getName()).isEqualTo("Mage");
       verify(avatarRepository).save(avatar);
@@ -147,7 +141,7 @@ class AvatarServiceImplTest {
     void earnMoney() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      service.earnMoney(AVATAR_ID, new Money(50));
+      commandService.earnMoney(AVATAR_ID, new Money(50));
       assertThat(avatar.getMoney().amount()).isEqualTo(50);
       verify(avatarRepository).save(avatar);
     }
@@ -158,7 +152,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       avatar.earnMoney(new Money(100));
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-      service.spendMoney(AVATAR_ID, new Money(40));
+      commandService.spendMoney(AVATAR_ID, new Money(40));
       assertThat(avatar.getMoney().amount()).isEqualTo(60);
       verify(avatarRepository).save(avatar);
     }
@@ -176,7 +170,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.applyDamage(AVATAR_ID, 10);
+      commandService.applyDamage(AVATAR_ID, new Damage(10));
 
       assertThat(avatar.getHealth().current().value()).isEqualTo(90);
       verify(avatarObserver, never()).notifyAvatarEvent(any(Dead.class));
@@ -190,7 +184,7 @@ class AvatarServiceImplTest {
       avatar.earnMoney(new Money(200));
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.applyDamage(AVATAR_ID, 9999);
+      commandService.applyDamage(AVATAR_ID, new Damage(9999));
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
@@ -208,15 +202,11 @@ class AvatarServiceImplTest {
     @DisplayName("heals avatar with potion power and saves")
     void usesHealthPotion() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
-      avatar.takeDamage(40);
-      HealthPotion potion = new HealthPotion("Minor Health Potion", "Restores 20 HP", 20);
-      avatar.addItemToInventory(potion);
+      avatar.takeDamage(new Damage(40));
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.useHealthPotion(AVATAR_ID, "Minor Health Potion");
-
+      commandService.useHealthPotion(AVATAR_ID, HEALTH_POTION);
       assertThat(avatar.getHealth().current().value()).isEqualTo(80);
-      assertThat(avatar.getInventory()).doesNotContain(potion);
+      assertThat(avatar.getInventory()).doesNotContain(HEALTH_POTION);
       verify(avatarRepository).save(avatar);
     }
   }
@@ -229,15 +219,11 @@ class AvatarServiceImplTest {
     @DisplayName("restores mana with potion power and saves")
     void usesManaPotion() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
-      avatar.spendMana(20);
-      ManaPotion potion = new ManaPotion("Minor Mana Potion", "Restores 10 MP", 10);
-      avatar.addItemToInventory(potion);
+      avatar.spendMana(new Mana(20));
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.useManaPotion(AVATAR_ID, "Minor Mana Potion");
-
+      commandService.useManaPotion(AVATAR_ID, MANA_POTION);
       assertThat(avatar.getMana().amount().value()).isEqualTo(40);
-      assertThat(avatar.getInventory()).doesNotContain(potion);
+      assertThat(avatar.getInventory()).doesNotContain(MANA_POTION);
       verify(avatarRepository).save(avatar);
     }
   }
@@ -254,7 +240,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.grantExperience(AVATAR_ID, 50);
+      commandService.grantExperience(AVATAR_ID, new Experience(50));
 
       verify(avatarObserver, never()).notifyAvatarEvent(any(LevelUpped.class));
       verify(avatarRepository).save(avatar);
@@ -265,9 +251,7 @@ class AvatarServiceImplTest {
     void levelUp() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      // DEFAULT_XP_TO_NEXT (100) è esattamente la soglia per passare al livello 2
-      service.grantExperience(AVATAR_ID, DEFAULT_XP_TO_NEXT);
+      commandService.grantExperience(AVATAR_ID, XP_TO_NEXT);
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
@@ -280,9 +264,7 @@ class AvatarServiceImplTest {
     void noSpellOnLevelWithoutSpell() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.grantExperience(AVATAR_ID, DEFAULT_XP_TO_NEXT);
-
+      commandService.grantExperience(AVATAR_ID, XP_TO_NEXT);
       verify(avatarObserver, never()).notifyAvatarEvent(any(NewSpellLearned.class));
     }
 
@@ -292,7 +274,7 @@ class AvatarServiceImplTest {
       Avatar avatar = avatarAtLevel4();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      service.grantExperience(AVATAR_ID, DEFAULT_XP_TO_NEXT);
+      commandService.grantExperience(AVATAR_ID, XP_TO_NEXT);
       assertThat(avatar.getSpells()).contains(Spell.FIREBALL);
 
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
@@ -312,9 +294,7 @@ class AvatarServiceImplTest {
     void avatarSavedTwiceWhenSpellLearned() throws AvatarNotFoundException {
       Avatar avatar = avatarAtLevel4();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.grantExperience(AVATAR_ID, DEFAULT_XP_TO_NEXT);
-
+      commandService.grantExperience(AVATAR_ID, XP_TO_NEXT);
       verify(avatarRepository, times(2)).save(avatar);
     }
   }
@@ -330,9 +310,7 @@ class AvatarServiceImplTest {
     void firesEvent() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.increaseStrength(AVATAR_ID);
-
+      commandService.increaseStrength(AVATAR_ID);
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(SkillPointAssigned.class);
@@ -349,9 +327,7 @@ class AvatarServiceImplTest {
     void firesEvent() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.increaseDefense(AVATAR_ID);
-
+      commandService.increaseDefense(AVATAR_ID);
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(SkillPointAssigned.class);
@@ -368,9 +344,7 @@ class AvatarServiceImplTest {
     void firesEvent() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.increaseIntelligence(AVATAR_ID);
-
+      commandService.increaseIntelligence(AVATAR_ID);
       ArgumentCaptor<AvatarEvent> captor = ArgumentCaptor.forClass(AvatarEvent.class);
       verify(avatarObserver).notifyAvatarEvent(captor.capture());
       assertThat(captor.getValue()).isInstanceOf(SkillPointAssigned.class);
@@ -384,16 +358,12 @@ class AvatarServiceImplTest {
   @DisplayName("inventory operations")
   class InventoryOperations {
 
-    // SWORD e SHIELD vengono da AvatarFixtures.* — non serve ridichiarare item locali
-
     @Test
     @DisplayName("addToInventory adds item and saves")
     void addToInventory() throws AvatarNotFoundException {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.addToInventory(AVATAR_ID, SWORD);
-
+      commandService.addToInventory(AVATAR_ID, SWORD);
       assertThat(avatar.getInventory()).contains(SWORD);
       verify(avatarRepository).save(avatar);
     }
@@ -404,9 +374,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       avatar.addItemToInventory(SWORD);
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.removeItem(AVATAR_ID, SWORD);
-
+      commandService.removeItem(AVATAR_ID, SWORD);
       assertThat(avatar.getInventory()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
     }
@@ -417,9 +385,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       avatar.addItemToInventory(SWORD);
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.equipItem(AVATAR_ID, SWORD);
-
+      commandService.equipItem(AVATAR_ID, SWORD);
       assertThat(avatar.getEquippedItems()).contains(SWORD);
       assertThat(avatar.getInventory()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
@@ -432,9 +398,7 @@ class AvatarServiceImplTest {
       avatar.addItemToInventory(SWORD);
       avatar.equipItem(SWORD);
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
-
-      service.unequipItem(AVATAR_ID, SWORD);
-
+      commandService.unequipItem(AVATAR_ID, SWORD);
       assertThat(avatar.getInventory()).contains(SWORD);
       assertThat(avatar.getEquippedItems()).doesNotContain(SWORD);
       verify(avatarRepository).save(avatar);
@@ -453,7 +417,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getName(AVATAR_ID)).isEqualTo(AVATAR_NAME);
+      assertThat(queryService.getName(AVATAR_ID)).isEqualTo(AVATAR_NAME);
     }
 
     @Test
@@ -462,7 +426,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getMoney(AVATAR_ID).amount()).isZero();
+      assertThat(queryService.getMoney(AVATAR_ID).amount()).isZero();
     }
 
     @Test
@@ -471,7 +435,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getLevel(AVATAR_ID).levelNumber()).isEqualTo(1);
+      assertThat(queryService.getLevel(AVATAR_ID).levelNumber()).isEqualTo(1);
     }
 
     @Test
@@ -480,7 +444,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getHealth(AVATAR_ID).current().value()).isEqualTo(DEFAULT_HEALTH);
+      assertThat(queryService.getHealth(AVATAR_ID).current().value()).isEqualTo(DEFAULT_HEALTH);
     }
 
     @Test
@@ -489,7 +453,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getMana(AVATAR_ID).amount().value()).isEqualTo(DEFAULT_MANA);
+      assertThat(queryService.getMana(AVATAR_ID).amount().value()).isEqualTo(DEFAULT_MANA);
     }
 
     @Test
@@ -499,7 +463,7 @@ class AvatarServiceImplTest {
       avatar.gainExperience(30);
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getExperience(AVATAR_ID).amount()).isEqualTo(30);
+      assertThat(queryService.getExperience(AVATAR_ID).amount()).isEqualTo(30);
     }
 
     @Test
@@ -508,7 +472,7 @@ class AvatarServiceImplTest {
       Avatar avatar = mutableAvatar();
       when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
 
-      assertThat(service.getAvatarStats(AVATAR_ID)).isSameAs(avatar.getAvatarStats());
+      assertThat(queryService.getAvatarStats(AVATAR_ID)).isSameAs(avatar.getAvatarStats());
     }
   }
 
@@ -518,10 +482,10 @@ class AvatarServiceImplTest {
   @DisplayName("searchAvatars delegates to repository with the given criteria")
   void searchAvatars() {
     Avatar avatar = mutableAvatar();
-    AvatarSearchRequest criteria = new AvatarSearchRequest(AVATAR_NAME, 1, 10);
+    AvatarSearchQuery criteria = new AvatarSearchQuery(AVATAR_NAME, 1, 10);
     when(avatarRepository.search(criteria)).thenReturn(List.of(avatar));
 
-    assertThat(service.searchAvatars(criteria)).containsExactly(avatar);
+    assertThat(queryService.searchAvatars(criteria)).containsExactly(avatar);
     verify(avatarRepository).search(criteria);
   }
 }

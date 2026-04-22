@@ -1,7 +1,9 @@
 package compose.project.demo.contexts.marketplace.infrastructure.repository
 
+import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.marketplace.domain.contract.MarketplaceGateway
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItemsResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceLoadResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceSellResult
@@ -16,10 +18,11 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.encodeURLPath
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -68,6 +71,10 @@ class MarketplaceRepository : MarketplaceGateway {
                 MarketplaceLoadResult.Error("Session expired, please log in again")
             }
 
+            HttpStatusCode.BadGateway -> {
+                MarketplaceLoadResult.Error("Marketplace service is temporarily unavailable")
+            }
+
             else -> {
                 MarketplaceLoadResult.Error("Marketplace error (${response.status.value})")
             }
@@ -110,6 +117,10 @@ class MarketplaceRepository : MarketplaceGateway {
                 MarketplaceLoadResult.Error("Avatar not found")
             }
 
+            HttpStatusCode.BadGateway -> {
+                MarketplaceLoadResult.Error("Marketplace service is temporarily unavailable")
+            }
+
             else -> {
                 MarketplaceLoadResult.Error("Marketplace error (${response.status.value})")
             }
@@ -144,6 +155,10 @@ class MarketplaceRepository : MarketplaceGateway {
                 MarketplaceItemsResult.Error("Marketplace not found")
             }
 
+            HttpStatusCode.BadGateway -> {
+                MarketplaceItemsResult.Error("Marketplace service is temporarily unavailable")
+            }
+
             else -> {
                 MarketplaceItemsResult.Error("Marketplace read error (${response.status.value})")
             }
@@ -153,17 +168,27 @@ class MarketplaceRepository : MarketplaceGateway {
     override suspend fun buyItem(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: MarketplaceItem,
         currentLevel: Int,
     ): MarketplaceBuyResult {
-        val encodedItemName = itemName.encodeURLPath()
         val response =
             runCatching {
                 client.post(
-                    "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/items/$encodedItemName/buy",
+                    "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/items/buy",
                 ) {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     parameter("currentLevel", currentLevel)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        buildJsonObject {
+                            put("type", JsonPrimitive(item.type))
+                            put("itemName", JsonPrimitive(item.name))
+                            put("description", JsonPrimitive(item.description))
+                            put("power", JsonPrimitive(item.power ?: 0))
+                            put("price", JsonPrimitive(item.price))
+                            put("requiredLevel", JsonPrimitive(item.requiredLevel))
+                        },
+                    )
                 }
             }.getOrElse {
                 return MarketplaceBuyResult.Error("Unable to contact marketplace-service")
@@ -177,11 +202,21 @@ class MarketplaceRepository : MarketplaceGateway {
             }
 
             HttpStatusCode.Forbidden -> {
-                MarketplaceBuyResult.Error("Level too low to buy this item")
+                val message = extractErrorMessage(response)
+                MarketplaceBuyResult.Error(message ?: "Level too low to buy this item")
+            }
+
+            HttpStatusCode.BadRequest -> {
+                val message = extractErrorMessage(response)
+                MarketplaceBuyResult.Error(message ?: "Purchase failed - insufficient funds or business rule violation")
             }
 
             HttpStatusCode.NotFound -> {
                 MarketplaceBuyResult.Error("Item not available")
+            }
+
+            HttpStatusCode.BadGateway -> {
+                MarketplaceBuyResult.Error("Marketplace service is temporarily unavailable")
             }
 
             HttpStatusCode.Unauthorized -> {
@@ -197,16 +232,11 @@ class MarketplaceRepository : MarketplaceGateway {
     override suspend fun sellItem(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: AvatarInventoryItem,
     ): MarketplaceSellResult {
-        val encodedItemName = itemName.encodeURLPath()
         val response =
             runCatching {
-                client.post(
-                    "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/sold-items/$encodedItemName/sell",
-                ) {
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
+                postSell(token, marketplaceId, item)
             }.getOrElse {
                 return MarketplaceSellResult.Error("Unable to contact marketplace-service")
             }
@@ -222,6 +252,17 @@ class MarketplaceRepository : MarketplaceGateway {
                 MarketplaceSellResult.Error("Item not available")
             }
 
+            HttpStatusCode.BadRequest,
+            HttpStatusCode.Forbidden,
+            -> {
+                val message = extractErrorMessage(response)
+                MarketplaceSellResult.Error(message ?: "Sale failed")
+            }
+
+            HttpStatusCode.BadGateway -> {
+                MarketplaceSellResult.Error("Marketplace service is temporarily unavailable")
+            }
+
             HttpStatusCode.Unauthorized -> {
                 MarketplaceSellResult.Error("Session expired, please log in again")
             }
@@ -230,5 +271,33 @@ class MarketplaceRepository : MarketplaceGateway {
                 MarketplaceSellResult.Error("Sale failed (${response.status.value})")
             }
         }
+    }
+
+    private suspend fun postSell(
+        token: String,
+        marketplaceId: String,
+        item: AvatarInventoryItem,
+    ): HttpResponse =
+        client.post(
+            "${edgeServiceBaseUrl()}/api/v1/marketplaces/$marketplaceId/sold-items/sell",
+        ) {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(
+                buildJsonObject {
+                    put("type", JsonPrimitive(item.type))
+                    put("itemName", JsonPrimitive(item.name))
+                    put("description", JsonPrimitive(item.description))
+                    put("power", JsonPrimitive(item.power ?: 0))
+                    put("price", JsonPrimitive(item.price))
+                    put("requiredLevel", JsonPrimitive(item.requiredLevel))
+                },
+            )
+        }
+    }
+
+    private suspend fun extractErrorMessage(response: HttpResponse): String? {
+        val body = runCatching { response.body<JsonObject>() }.getOrNull() ?: return null
+        return body["message"]?.jsonPrimitive?.contentOrNull
     }
 }

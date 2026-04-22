@@ -1,21 +1,11 @@
 package habitquest.avatar;
 
 import common.ddd.Id;
-import habitquest.avatar.domain.avatar.Avatar;
-import habitquest.avatar.domain.avatar.AvatarHealth;
-import habitquest.avatar.domain.avatar.AvatarMana;
-import habitquest.avatar.domain.avatar.Experience;
-import habitquest.avatar.domain.avatar.Health;
-import habitquest.avatar.domain.avatar.Level;
-import habitquest.avatar.domain.avatar.Mana;
-import habitquest.avatar.domain.avatar.Money;
-import habitquest.avatar.domain.items.Armor;
-import habitquest.avatar.domain.items.EquippedItems;
-import habitquest.avatar.domain.items.Inventory;
-import habitquest.avatar.domain.items.Weapon;
+import habitquest.avatar.domain.avatar.*;
+import habitquest.avatar.domain.items.*;
 import habitquest.avatar.domain.spells.Spell;
 import habitquest.avatar.domain.stats.AvatarStats;
-import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
+import habitquest.avatar.infrastructure.dto.AvatarQueries.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +24,10 @@ public final class AvatarFixtures {
   public static final int DEFAULT_DEFENSE = 10;
   public static final int DEFAULT_INTELLIGENCE = 10;
   public static final int DEFAULT_XP_TO_NEXT = 100;
+  public static final int DEFAULT_FATAL_DAMAGE = 9999;
+
+  public static final Damage FATAL_DAMAGE = new Damage(DEFAULT_FATAL_DAMAGE);
+  public static final Experience XP_TO_NEXT = new Experience(DEFAULT_XP_TO_NEXT);
 
   public static final String FIELD_OCCURRED_ON = "occurredOn";
   public static final String FIELD_NEW_LEVEL = "newLevel";
@@ -51,6 +45,10 @@ public final class AvatarFixtures {
 
   public static final Weapon SWORD = new Weapon("Iron Sword", "A basic sword", 15);
   public static final Armor SHIELD = new Armor("Iron Shield", "A basic shield", 5);
+  public static final HealthPotion HEALTH_POTION =
+      new HealthPotion("Small Health Potion", "Restores 20 health", 20);
+  public static final ManaPotion MANA_POTION =
+      new ManaPotion("Small Mana Potion", "Restores 10 mana", 10);
 
   // Avatar factories
   public static Avatar mutableAvatar() {
@@ -58,7 +56,7 @@ public final class AvatarFixtures {
         new Id<>(AVATAR_1),
         AVATAR_NAME,
         new Money(0),
-        new Inventory(new Id<>(INVENTORY_1)),
+        new Inventory(new Id<>(INVENTORY_1), List.of(HEALTH_POTION, MANA_POTION)),
         new EquippedItems(new Id<>(EQUIP_1)),
         new Level(1, new Experience(0), new Experience(DEFAULT_XP_TO_NEXT)),
         new AvatarHealth(new Health(DEFAULT_HEALTH), new Health(DEFAULT_HEALTH)),
@@ -72,7 +70,7 @@ public final class AvatarFixtures {
         new Id<>(AVATAR_1),
         AVATAR_NAME,
         new Money(0),
-        new Inventory(new Id<>(INVENTORY_1)),
+        new Inventory(new Id<>(INVENTORY_1), List.of(HEALTH_POTION, MANA_POTION)),
         new EquippedItems(new Id<>(EQUIP_1)),
         new Level(1, new Experience(0), new Experience(DEFAULT_XP_TO_NEXT)),
         new AvatarHealth(new Health(DEFAULT_HEALTH), new Health(DEFAULT_HEALTH)),
@@ -86,7 +84,7 @@ public final class AvatarFixtures {
         new Id<>(AVATAR_1),
         AVATAR_NAME,
         new Money(0),
-        new Inventory(new Id<>(INVENTORY_1)),
+        new Inventory(new Id<>(INVENTORY_1), List.of(HEALTH_POTION, MANA_POTION)),
         new EquippedItems(new Id<>(EQUIP_1)),
         new Level(level, new Experience(0), new Experience(xpToNext)),
         new AvatarHealth(new Health(DEFAULT_HEALTH), new Health(DEFAULT_HEALTH)),

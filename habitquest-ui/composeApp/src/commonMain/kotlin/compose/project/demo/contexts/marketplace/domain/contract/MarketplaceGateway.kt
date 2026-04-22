@@ -1,6 +1,8 @@
 package compose.project.demo.contexts.marketplace.domain.contract
 
+import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItemsResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceLoadResult
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceSellResult
@@ -19,13 +21,13 @@ interface MarketplaceGateway {
     suspend fun buyItem(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: MarketplaceItem,
         currentLevel: Int,
     ): MarketplaceBuyResult
 
     suspend fun sellItem(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: AvatarInventoryItem,
     ): MarketplaceSellResult
 }

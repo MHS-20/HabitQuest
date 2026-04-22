@@ -44,22 +44,27 @@ For each service:
 
 ## Workflow 2 — `build_ui.yml`: Build and Package Multiplatform UI
 This workflow is dedicated exclusively to the **HabitQuest UI** frontend, developed with **Kotlin Multiplatform (KMP)** and Compose Multiplatform.
-It is triggered only on push or PR that touch the `services/habitquest-ui/` directory.
+It is triggered only on push or PR that touch the `habitquest-ui/**` directory, plus the workflow file itself.
 
-The workflow is organized into four sequential jobs:
+The workflow is organized into five jobs:
 
 1. **`commit-lint`**: same Conventional Commits validation as the backend workflow.
 2. **`static-scan`**: static vulnerability scan of the source code (not the image) via `anchore/scan-action`, with SARIF report upload to GitHub Security.
 3. **`build`**: the central job executes the KMP build with Gradle. Since KMP targets also include Kotlin/JS, both JDK 21 and Node.js 18 are configured.
-4. **`lint-reports`**: downloads the build artifacts and re-uploads only the lint reports separately, making them easily accessible in the GitHub Actions UI.
+4. **`semantic-release`**: runs only on a successful push to `main` and emits a `repository_dispatch` event of type `ui_semantic_release`, passing only the service name (`habitquest-ui`) so the shared release workflow can detect the UI branch of the pipeline.
+5. **`ui-final-status`**: aggregates the results of all jobs and fails the workflow if any of them failed.
+
+This keeps PRs and branch pushes focused on validation, while the release step remains restricted to `main`.
 
 
 ## Workflow 3 — `semantic-release.yml`: Semantic Release
-This workflow is triggered exclusively by a `repository_dispatch` event emitted by `build.yml` at the end of a push on `main`.
+This workflow is triggered exclusively by `repository_dispatch` events emitted by the build workflows at the end of a successful push on `main`.
+It accepts both `microservice_semantic_release` and `ui_semantic_release` events.
 
 ### Semantic Versioning Calculation
 The workflow uses **`semantic-release`** with the **`semantic-release-monorepo`** plugin, which adapts the standard semantic-release behavior to monorepo repositories.
 Each service has its own independent versioning scope, with tags in the format `<service-name>-v<MAJOR>.<MINOR>.<PATCH>`.
+When the payload identifies `habitquest-ui`, the workflow sets `RELEASE_DIR=habitquest-ui`; for backend services it uses `services/<service-name>`.
 
 Versioning is calculated automatically by analyzing commit messages since the last tag:
 
@@ -75,7 +80,8 @@ Afterwards, semantic-release takes care of creating a new tag on git and on the 
 3. The new version is pushed to GHCR, alongside the already existing SHA and `latest` tags.
    If there are no relevant changes instead (e.g. only `chore:` or `docs:` commits), no tag is created and the workflow concludes without emitting subsequent events.
 
-At the end, if a new version has been calculated, a second `repository_dispatch` of type `update_manifest` is emitted with a payload containing the service name, image path and semantic version.
+For the UI release path, no image payload is provided, so the Docker retag/push steps are skipped and only the git release/tag is produced.
+For backend services, if a new version has been calculated, a second `repository_dispatch` of type `update_manifest` is emitted with a payload containing the service name, image path and semantic version.
 Each image is tagged with the **commit SHA** that generated it, guaranteeing bidirectional traceability: from an image running in the cluster it is always possible to trace back to the exact commit that produced it.
 The additional semantic tag instead provides human readability and allows versions to be communicated in a meaningful way.
 
@@ -117,10 +123,10 @@ and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two
 - **`deployObservability.sh`**: installs the observability stack (Prometheus, Grafana, Loki, Tempo).
 
 ## Overall Integration
-| Workflow | Responsibility | Trigger                                     |
-|---|---|---------------------------------------------|
-| `build.yml` | CI: build, test, scan, publish | Push / PR                                   |
-| `build_ui.yml` | CI: frontend KMP | Push on `services/habitquest-ui/`           |
-| `semantic-release.yml` | Automatic versioning | `repository_dispatch` from build              |
-| `update_manifest.yml` | GitOps: manifest update | `repository_dispatch` from semantic-release   |
+| Workflow | Responsibility | Trigger |
+|---|---|---|
+| `build.yml` | CI: build, test, scan, publish | Push / PR |
+| `build_ui.yml` | CI: frontend KMP and release trigger | Push / PR on `habitquest-ui/**`; `main` push dispatches `ui_semantic_release` |
+| `semantic-release.yml` | Automatic versioning | `repository_dispatch` from backend or UI builds |
+| `update_manifest.yml` | GitOps: manifest update | `repository_dispatch` from semantic-release |
 | `provision.yml` | IaC: infrastructure and deploy | Manual / `workflow_run` from update-manifest |

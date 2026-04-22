@@ -9,9 +9,8 @@ import habitquest.marketplace.domain.items.*;
 import habitquest.marketplace.domain.items.ItemCatalog;
 import habitquest.marketplace.domain.marketplace.Avatar;
 import habitquest.marketplace.domain.marketplace.Marketplace;
-import habitquest.marketplace.domain.marketplace.MarketplaceImpl;
 import habitquest.marketplace.domain.marketplace.Money;
-import habitquest.marketplace.infrastructure.dto.MarketplaceResponsesDto.*;
+import habitquest.marketplace.infrastructure.dto.MarketplaceQueries.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -104,7 +103,7 @@ public final class MarketplaceFixtures {
 
   // Marketplace factories
   public static Marketplace marketplace(ItemCatalog catalog) {
-    return new MarketplaceImpl(MARKETPLACE_ID, AVATAR_ID, catalog);
+    return new Marketplace(MARKETPLACE_ID, AVATAR_ID, catalog);
   }
 
   // Event factories
@@ -127,11 +126,11 @@ public final class MarketplaceFixtures {
   }
 
   public static ItemResponse swordResponse() {
-    return new ItemResponse("WEAPON", SWORD_NAME, "A sturdy iron sword", 30, 50);
+    return new ItemResponse("WEAPON", SWORD_NAME, "A sturdy iron sword", 30, 50, 1);
   }
 
   public static ItemResponse shieldResponse() {
-    return new ItemResponse("ARMOR", SHIELD_NAME, "A sturdy iron shield", 20, 40);
+    return new ItemResponse("ARMOR", SHIELD_NAME, "A sturdy iron shield", 20, 40, 1);
   }
 
   public static MarketplaceResponse marketplaceResponse() {
@@ -153,16 +152,14 @@ public final class MarketplaceFixtures {
     when(catalog.getItemsByType(ItemFilter.POTION)).thenReturn(List.of(hp, mp));
     when(catalog.getItemsByType(ItemFilter.HEALTH_POTION)).thenReturn(List.of(hp));
     when(catalog.getItemsByType(ItemFilter.MANA_POTION)).thenReturn(List.of(mp));
-    when(catalog.getItem(SWORD_NAME)).thenReturn(Optional.of(sword));
-    when(catalog.getItem(SHIELD_NAME)).thenReturn(Optional.of(shield));
-    when(catalog.getItem(HP_POTION_NAME)).thenReturn(Optional.of(hp));
-    when(catalog.getItem(MP_POTION_NAME)).thenReturn(Optional.of(mp));
-    when(catalog.getItem(UNKNOWN_ITEM_NAME)).thenReturn(Optional.empty());
-    when(catalog.contains(SWORD_NAME)).thenReturn(true);
-    when(catalog.contains(SHIELD_NAME)).thenReturn(true);
-    when(catalog.contains(HP_POTION_NAME)).thenReturn(true);
-    when(catalog.contains(MP_POTION_NAME)).thenReturn(true);
-    when(catalog.contains(UNKNOWN_ITEM_NAME)).thenReturn(false);
+    when(catalog.getItem(sword)).thenReturn(Optional.of(sword));
+    when(catalog.getItem(shield)).thenReturn(Optional.of(shield));
+    when(catalog.getItem(hp)).thenReturn(Optional.of(hp));
+    when(catalog.getItem(mp)).thenReturn(Optional.of(mp));
+    when(catalog.contains(sword)).thenReturn(true);
+    when(catalog.contains(shield)).thenReturn(true);
+    when(catalog.contains(hp)).thenReturn(true);
+    when(catalog.contains(mp)).thenReturn(true);
 
     return catalog;
   }

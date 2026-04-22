@@ -20,6 +20,8 @@ internal fun mapAvatarResponse(body: JsonObject): AvatarResult {
     val health = source["health"]?.jsonObject ?: buildJsonObject {}
     val mana = source["mana"]?.jsonObject ?: buildJsonObject {}
     val stats = source["stats"]?.jsonObject ?: buildJsonObject {}
+    val inventoryItems = source.inventoryItemsOrNull("inventory")
+    val equippedItems = source.inventoryItemsOrNull("equippedItems")
 
     val id = source.stringValue("id") ?: return AvatarResult.Error("Avatar response missing id")
     val name = source.stringValue("name") ?: return AvatarResult.Error("Avatar response missing name")
@@ -39,6 +41,8 @@ internal fun mapAvatarResponse(body: JsonObject): AvatarResult {
             strength = stats.intValue("strength"),
             defense = stats.intValue("defense"),
             intelligence = stats.intValue("intelligence"),
+            inventoryItems = inventoryItems,
+            equippedItems = equippedItems,
         )
     return AvatarResult.Success(data)
 }
@@ -85,7 +89,12 @@ internal fun buildInventoryActionPayload(item: AvatarInventoryItem): JsonObject 
         put("power", JsonPrimitive(item.power ?: 0))
     }
 
-internal fun buildPotionActionPayload(potionName: String): JsonObject = buildJsonObject { put("potionName", JsonPrimitive(potionName)) }
+internal fun buildPotionActionPayload(item: AvatarInventoryItem): JsonObject =
+    buildJsonObject {
+        put("name", JsonPrimitive(item.name))
+        put("description", JsonPrimitive(item.description))
+        put("power", JsonPrimitive(item.power ?: 0))
+    }
 
 private fun asInventoryItem(element: JsonElement): AvatarInventoryItem? {
     val raw = element as? JsonObject ?: return null
@@ -108,9 +117,19 @@ private fun asInventoryItem(element: JsonElement): AvatarInventoryItem? {
             source["quantity"]?.jsonPrimitive?.intOrNull
                 ?: source["amount"]?.jsonPrimitive?.intOrNull
                 ?: 1,
+        requiredLevel =
+            source["requiredLevel"]?.jsonPrimitive?.intOrNull
+                ?: source["levelRequired"]?.jsonPrimitive?.intOrNull
+                ?: source["minLevel"]?.jsonPrimitive?.intOrNull
+                ?: 1,
     )
 }
 
 private fun JsonObject.stringValue(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull
 
 private fun JsonObject.intValue(key: String): Int = (this[key] as? JsonPrimitive)?.intOrNull ?: 0
+
+private fun JsonObject.inventoryItemsOrNull(key: String): List<AvatarInventoryItem>? {
+    val element = this[key] ?: return null
+    return parseInventoryFromPayload(element)
+}

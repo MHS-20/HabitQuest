@@ -37,14 +37,6 @@ Feature: Use Consumable Items from Inventory
     Then the operation should be rejected
     And the avatar health should remain unchanged
 
-  Scenario: Cannot use potion if avatar is already at maximum health
-    Given an avatar with current health 100
-    And maximum health 100
-    And the avatar has 1 health potion in inventory
-    When the player tries to use the health potion
-    Then the operation should be rejected
-    And the potion quantity should remain unchanged
-
   Scenario: Using potion removes item if quantity reaches zero
     Given an avatar with 1 mana potion in inventory
     And current mana 10

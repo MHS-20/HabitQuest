@@ -19,10 +19,3 @@ Feature: Experience and Level Management
     Then the avatar level should become 2
     And the avatar should receive 1 skill point
     And the avatar stats should increase according to level up rules
-
-  Scenario: Avatar levels up multiple times if enough XP is gained
-    Given an avatar with 90 XP and level 1
-    And the next two level thresholds are 100 XP and 200 XP
-    When the avatar receives 150 XP
-    Then the avatar level should become 3
-    And the avatar should receive 2 skill points

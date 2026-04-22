@@ -8,7 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import habitquest.tracking.application.exceptions.HabitNotFoundException;
-import habitquest.tracking.application.port.in.HabitService;
+import habitquest.tracking.application.port.in.HabitCommandService;
+import habitquest.tracking.application.port.in.HabitQueryService;
 import habitquest.tracking.application.port.out.HabitLogger;
 import habitquest.tracking.domain.Habit;
 import habitquest.tracking.domain.Tag;
@@ -18,10 +19,11 @@ import habitquest.tracking.domain.reminder.DailyRecurrence;
 import habitquest.tracking.domain.reminder.MonthlyRecurrence;
 import habitquest.tracking.domain.reminder.WeeklyRecurrence;
 import habitquest.tracking.infrastructure.dto.HabitMapper;
+import habitquest.tracking.infrastructure.dto.HabitQueries.*;
 import habitquest.tracking.infrastructure.dto.HabitResponseAssembler;
-import habitquest.tracking.infrastructure.dto.HabitResponsesDto.*;
 import habitquest.tracking.infrastructure.exceptions.QuestCommunicationException;
-import habitquest.tracking.infrastructure.inbound.HabitController;
+import habitquest.tracking.infrastructure.inbound.HabitCommandController;
+import habitquest.tracking.infrastructure.inbound.HabitQueryController;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(HabitController.class)
+@WebMvcTest({HabitCommandController.class, HabitQueryController.class})
 @AutoConfigureMockMvc(addFilters = false)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisplayName("HabitController")
@@ -44,7 +46,8 @@ public class HabitControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private HabitService habitService;
+  @MockitoBean private HabitCommandService habitCommandService;
+  @MockitoBean private HabitQueryService habitQueryService;
   @MockitoBean private HabitResponseAssembler habitResponseAssembler;
   @MockitoBean private HabitLogger log;
 
@@ -55,7 +58,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 201 with the new habit id")
     void shouldReturn201WithId() throws Exception {
-      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitCommandService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
@@ -82,7 +85,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("delegates DAILY payload to service with DailyRecurrence")
     void shouldDelegateDailyPayloadToService() throws Exception {
-      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitCommandService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
@@ -103,7 +106,7 @@ public class HabitControllerIT {
                           .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isCreated());
 
-      verify(habitService)
+      verify(habitCommandService)
           .createHabit(
               eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION), eq(DAILY_RECURRENCE), isNull(), isNull());
     }
@@ -111,7 +114,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("delegates WEEKLY payload to service with WeeklyRecurrence")
     void shouldDelegateWeeklyPayloadToService() throws Exception {
-      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitCommandService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
@@ -133,7 +136,7 @@ public class HabitControllerIT {
                           .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isCreated());
 
-      verify(habitService)
+      verify(habitCommandService)
           .createHabit(
               eq(AVATAR_ID), eq(TITLE), eq(DESCRIPTION), eq(WEEKLY_RECURRENCE), isNull(), isNull());
     }
@@ -141,7 +144,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("delegates MONTHLY payload to service with MonthlyRecurrence")
     void shouldDelegateMonthlyPayloadToService() throws Exception {
-      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitCommandService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
@@ -163,7 +166,7 @@ public class HabitControllerIT {
                           .formatted(AVATAR_1, TITLE, DESCRIPTION, DEFAULT_DAY_OF_MONTH)))
           .andExpect(status().isCreated());
 
-      verify(habitService)
+      verify(habitCommandService)
           .createHabit(
               eq(AVATAR_ID),
               eq(TITLE),
@@ -193,15 +196,16 @@ public class HabitControllerIT {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Unknown recurrence type: YEARLY"));
 
-      verify(habitService, never()).createHabit(any(), any(), any(), any(), any(), any());
+      verify(habitCommandService, never()).createHabit(any(), any(), any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("applies tags when provided during creation")
     void shouldApplyTagsWhenProvided() throws Exception {
-      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitCommandService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
-      when(habitService.updateTags(eq(HABIT_ID), anyList())).thenReturn(hydrateHabitWithQuest());
+      when(habitCommandService.updateTags(eq(HABIT_ID), anyList()))
+          .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
 
@@ -222,7 +226,7 @@ public class HabitControllerIT {
                           .formatted(AVATAR_1, TITLE, DESCRIPTION, TAG_HEALTH, TAG_MINDSET)))
           .andExpect(status().isCreated());
 
-      verify(habitService)
+      verify(habitCommandService)
           .updateTags(
               eq(HABIT_ID),
               argThat(tags -> tags.equals(List.of(new Tag(TAG_HEALTH), new Tag(TAG_MINDSET)))));
@@ -231,7 +235,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("does not apply tags when request has no tags")
     void shouldNotApplyTagsWhenMissing() throws Exception {
-      when(habitService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
+      when(habitCommandService.createHabit(any(), anyString(), anyString(), any(), any(), any()))
           .thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toCreatedModel(any(Habit.class)))
           .thenReturn(EntityModel.of(new HabitCreatedResponse(HABIT_ID.value())));
@@ -252,7 +256,7 @@ public class HabitControllerIT {
                           .formatted(AVATAR_1, TITLE, DESCRIPTION)))
           .andExpect(status().isCreated());
 
-      verify(habitService, never()).updateTags(any(), anyList());
+      verify(habitCommandService, never()).updateTags(any(), anyList());
     }
   }
 
@@ -263,7 +267,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with habit data when found")
     void shouldReturn200WhenFound() throws Exception {
-      when(habitService.getHabitById(HABIT_ID)).thenReturn(hydrateHabitWithQuest());
+      when(habitQueryService.getHabitById(HABIT_ID)).thenReturn(hydrateHabitWithQuest());
       when(habitResponseAssembler.toModel(any(Habit.class)))
           .thenReturn(EntityModel.of(HabitMapper.toResponse(hydrateHabitWithQuest())));
 
@@ -282,7 +286,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 404 when habit does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
-      when(habitService.getHabitById(GHOST_ID))
+      when(habitQueryService.getHabitById(GHOST_ID))
           .thenThrow(new HabitNotFoundException(GHOST_ID.value()));
 
       mockMvc
@@ -298,7 +302,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with the avatar habits list")
     void shouldReturnHabitsForAvatar() throws Exception {
-      when(habitService.getHabitsByAvatarId(AVATAR_ID))
+      when(habitQueryService.getHabitsByAvatarId(AVATAR_ID))
           .thenReturn(List.of(hydrateHabitWithQuest(), hydrateHabit()));
 
       mockMvc
@@ -318,7 +322,7 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with merged avatar history")
     void shouldReturnHistoryForAvatar() throws Exception {
       var habit = hydrateHabitWithQuest();
-      when(habitService.getHistoryByAvatarId(AVATAR_ID))
+      when(habitQueryService.getHistoryByAvatarId(AVATAR_ID))
           .thenReturn(
               List.of(
                   new HabitHistoryEvent(
@@ -343,20 +347,20 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 on successful deletion")
     void shouldReturn204() throws Exception {
-      doNothing().when(habitService).deleteHabitById(HABIT_ID);
+      doNothing().when(habitCommandService).deleteHabitById(HABIT_ID);
 
       mockMvc
           .perform(delete("/api/v1/habits/{id}", HABIT_ID.value()))
           .andExpect(status().isNoContent());
 
-      verify(habitService).deleteHabitById(HABIT_ID);
+      verify(habitCommandService).deleteHabitById(HABIT_ID);
     }
 
     @Test
     @DisplayName("returns 404 when habit does not exist")
     void shouldReturn404WhenNotFound() throws Exception {
       doThrow(new HabitNotFoundException(GHOST_ID.value()))
-          .when(habitService)
+          .when(habitCommandService)
           .deleteHabitById(GHOST_ID);
 
       mockMvc
@@ -372,7 +376,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with habit title")
     void shouldReturnTitle() throws Exception {
-      when(habitService.getTitle(HABIT_ID)).thenReturn(TITLE);
+      when(habitQueryService.getTitle(HABIT_ID)).thenReturn(TITLE);
       when(habitResponseAssembler.toTitleModel(eq(HABIT_ID.value()), eq(TITLE)))
           .thenReturn(EntityModel.of(new TitleResponse(TITLE)));
 
@@ -390,7 +394,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with habit description")
     void shouldReturnDescription() throws Exception {
-      when(habitService.getDescription(HABIT_ID)).thenReturn(DESCRIPTION);
+      when(habitQueryService.getDescription(HABIT_ID)).thenReturn(DESCRIPTION);
       when(habitResponseAssembler.toDescriptionModel(eq(HABIT_ID.value()), eq(DESCRIPTION)))
           .thenReturn(EntityModel.of(new DescriptionResponse(DESCRIPTION)));
 
@@ -409,7 +413,7 @@ public class HabitControllerIT {
     @DisplayName("returns 200 with habit tags")
     void shouldReturnTags() throws Exception {
       List<Tag> tags = List.of(new Tag(TAG_HEALTH), new Tag("fitness"));
-      when(habitService.getTags(HABIT_ID)).thenReturn(tags);
+      when(habitQueryService.getTags(HABIT_ID)).thenReturn(tags);
       when(habitResponseAssembler.toTagsModel(eq(HABIT_ID.value()), eq(tags)))
           .thenReturn(EntityModel.of(new TagsResponse(List.of(TAG_HEALTH, "fitness"))));
 
@@ -428,7 +432,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with recurrence payload")
     void shouldReturnRecurrence() throws Exception {
-      when(habitService.getRecurrence(HABIT_ID)).thenReturn(WEEKLY_RECURRENCE);
+      when(habitQueryService.getRecurrence(HABIT_ID)).thenReturn(WEEKLY_RECURRENCE);
       when(habitResponseAssembler.toRecurrenceModel(
               eq(HABIT_ID.value()), any(RecurrenceResponse.class)))
           .thenReturn(
@@ -449,7 +453,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 200 with last attended date")
     void shouldReturnLastAttendedDate() throws Exception {
-      when(habitService.getLastAttendedDate(HABIT_ID)).thenReturn(ATTENDED_AT);
+      when(habitQueryService.getLastAttendedDate(HABIT_ID)).thenReturn(ATTENDED_AT);
       when(habitResponseAssembler.toLastAttendedDateModel(eq(HABIT_ID.value()), eq(ATTENDED_AT)))
           .thenReturn(EntityModel.of(new LastAttendedDateResponse(ATTENDED_AT)));
 
@@ -473,7 +477,7 @@ public class HabitControllerIT {
               new HabitAttended(habit, AVATAR_ID),
               NEXT_ATTENDED_AT,
               "attendedAt=" + NEXT_ATTENDED_AT);
-      when(habitService.getHistory(HABIT_ID)).thenReturn(List.of(event));
+      when(habitQueryService.getHistory(HABIT_ID)).thenReturn(List.of(event));
 
       HabitHistoryEventResponse eventResponse = HabitMapper.toResponse(event);
       when(habitResponseAssembler.toHistoryModel(eq(HABIT_ID.value()), anyList()))
@@ -497,7 +501,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and delegates title to service")
     void shouldReturn204AndDelegateTitle() throws Exception {
-      when(habitService.updateTitle(eq(HABIT_ID), anyString())).thenReturn(hydrateHabit());
+      when(habitCommandService.updateTitle(eq(HABIT_ID), anyString())).thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
@@ -506,7 +510,7 @@ public class HabitControllerIT {
                   .content("{\"title\":\"Read\"}"))
           .andExpect(status().isNoContent());
 
-      verify(habitService).updateTitle(HABIT_ID, "Read");
+      verify(habitCommandService).updateTitle(HABIT_ID, "Read");
     }
   }
 
@@ -517,7 +521,8 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and delegates description to service")
     void shouldReturn204AndDelegateDescription() throws Exception {
-      when(habitService.updateDescription(eq(HABIT_ID), anyString())).thenReturn(hydrateHabit());
+      when(habitCommandService.updateDescription(eq(HABIT_ID), anyString()))
+          .thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
@@ -526,7 +531,7 @@ public class HabitControllerIT {
                   .content("{\"description\":\"Read 20 pages\"}"))
           .andExpect(status().isNoContent());
 
-      verify(habitService).updateDescription(HABIT_ID, "Read 20 pages");
+      verify(habitCommandService).updateDescription(HABIT_ID, "Read 20 pages");
     }
   }
 
@@ -537,7 +542,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and maps tags to value objects")
     void shouldReturn204AndMapTags() throws Exception {
-      when(habitService.updateTags(eq(HABIT_ID), anyList())).thenReturn(hydrateHabit());
+      when(habitCommandService.updateTags(eq(HABIT_ID), anyList())).thenReturn(hydrateHabit());
 
       mockMvc
           .perform(
@@ -546,7 +551,7 @@ public class HabitControllerIT {
                   .content("{\"tags\":[\"%s\",\"%s\"]}".formatted(TAG_HEALTH, TAG_MINDSET)))
           .andExpect(status().isNoContent());
 
-      verify(habitService)
+      verify(habitCommandService)
           .updateTags(
               eq(HABIT_ID),
               argThat(tags -> tags.equals(List.of(new Tag(TAG_HEALTH), new Tag(TAG_MINDSET)))));
@@ -560,7 +565,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 for DAILY recurrence")
     void shouldReturn204ForDaily() throws Exception {
-      when(habitService.updateRecurrence(eq(HABIT_ID), any(DailyRecurrence.class)))
+      when(habitCommandService.updateRecurrence(eq(HABIT_ID), any(DailyRecurrence.class)))
           .thenReturn(hydrateHabit());
 
       mockMvc
@@ -570,13 +575,13 @@ public class HabitControllerIT {
                   .content("{\"type\":\"DAILY\"}"))
           .andExpect(status().isNoContent());
 
-      verify(habitService).updateRecurrence(eq(HABIT_ID), any(DailyRecurrence.class));
+      verify(habitCommandService).updateRecurrence(eq(HABIT_ID), any(DailyRecurrence.class));
     }
 
     @Test
     @DisplayName("returns 204 for WEEKLY recurrence")
     void shouldReturn204ForWeekly() throws Exception {
-      when(habitService.updateRecurrence(eq(HABIT_ID), any(WeeklyRecurrence.class)))
+      when(habitCommandService.updateRecurrence(eq(HABIT_ID), any(WeeklyRecurrence.class)))
           .thenReturn(hydrateHabit());
 
       mockMvc
@@ -590,14 +595,14 @@ public class HabitControllerIT {
 
       ArgumentCaptor<habitquest.tracking.domain.reminder.Recurrence> captor =
           ArgumentCaptor.forClass(habitquest.tracking.domain.reminder.Recurrence.class);
-      verify(habitService).updateRecurrence(eq(HABIT_ID), captor.capture());
+      verify(habitCommandService).updateRecurrence(eq(HABIT_ID), captor.capture());
       assertThat(captor.getValue()).isEqualTo(WEEKLY_RECURRENCE);
     }
 
     @Test
     @DisplayName("returns 204 for MONTHLY recurrence")
     void shouldReturn204ForMonthly() throws Exception {
-      when(habitService.updateRecurrence(eq(HABIT_ID), any(MonthlyRecurrence.class)))
+      when(habitCommandService.updateRecurrence(eq(HABIT_ID), any(MonthlyRecurrence.class)))
           .thenReturn(hydrateHabit());
 
       mockMvc
@@ -610,7 +615,7 @@ public class HabitControllerIT {
 
       ArgumentCaptor<habitquest.tracking.domain.reminder.Recurrence> captor =
           ArgumentCaptor.forClass(habitquest.tracking.domain.reminder.Recurrence.class);
-      verify(habitService).updateRecurrence(eq(HABIT_ID), captor.capture());
+      verify(habitCommandService).updateRecurrence(eq(HABIT_ID), captor.capture());
       assertThat(captor.getValue()).isEqualTo(MONTHLY_RECURRENCE);
     }
 
@@ -625,7 +630,7 @@ public class HabitControllerIT {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message").value("Unknown recurrence type: YEARLY"));
 
-      verify(habitService, never()).updateRecurrence(eq(HABIT_ID), any());
+      verify(habitCommandService, never()).updateRecurrence(eq(HABIT_ID), any());
     }
   }
 
@@ -636,7 +641,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 204 and delegates attend date")
     void shouldReturn204AndDelegateAttendDate() throws Exception {
-      when(habitService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
+      when(habitCommandService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
           .thenReturn(hydrateHabit());
 
       mockMvc
@@ -647,14 +652,14 @@ public class HabitControllerIT {
           .andExpect(status().isNoContent());
 
       ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
-      verify(habitService).attendHabit(eq(HABIT_ID), captor.capture());
+      verify(habitCommandService).attendHabit(eq(HABIT_ID), captor.capture());
       assertThat(captor.getValue()).isEqualTo(NEXT_ATTENDED_AT);
     }
 
     @Test
     @DisplayName("returns 400 when domain rejects attendance")
     void shouldReturn400OnDomainError() throws Exception {
-      when(habitService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
+      when(habitCommandService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
           .thenThrow(new IllegalStateException("Attendance date cannot be in the future"));
 
       mockMvc
@@ -669,7 +674,7 @@ public class HabitControllerIT {
     @Test
     @DisplayName("returns 502 when quest-service synchronization fails")
     void shouldReturn502OnQuestCommunicationError() throws Exception {
-      when(habitService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
+      when(habitCommandService.attendHabit(eq(HABIT_ID), any(LocalDateTime.class)))
           .thenThrow(
               new QuestCommunicationException(
                   "Failed to update quest progress for quest " + QUEST_1,

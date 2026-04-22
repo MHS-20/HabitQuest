@@ -9,7 +9,8 @@ import common.ddd.Id;
 import habitquest.guild.application.exceptions.BattleNotFoundException;
 import habitquest.guild.application.port.out.AvatarClientPort;
 import habitquest.guild.application.port.out.BattleRepository;
-import habitquest.guild.application.service.BattleServiceImpl;
+import habitquest.guild.application.service.BattleCommandServiceImpl;
+import habitquest.guild.application.service.BattleQueryServiceImpl;
 import habitquest.guild.domain.battle.Battle;
 import habitquest.guild.domain.battle.BattleOutcome;
 import habitquest.guild.domain.battle.DamageResult;
@@ -41,7 +42,8 @@ class BattleServiceImplTest {
   @Mock private BattleFactory battleFactory;
   @Mock private AvatarClientPort avatarPort;
 
-  @InjectMocks private BattleServiceImpl battleService;
+  @InjectMocks private BattleCommandServiceImpl battleCommandService;
+  @InjectMocks private BattleQueryServiceImpl battleQueryService;
 
   private Battle battle;
 
@@ -61,7 +63,8 @@ class BattleServiceImplTest {
     void shouldCreateAndReturnId() {
       when(battleFactory.create(any(), any(), any(), any())).thenReturn(battle);
 
-      Id<Battle> result = battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2, GUILD_MEMBERS);
+      Id<Battle> result =
+          battleCommandService.createBattle(GUILD_ID, BossType.MINOTAUR, 2, GUILD_MEMBERS);
 
       verify(battleRepository).save(battle);
       assertThat(result).isEqualTo(BATTLE_ID);
@@ -72,7 +75,7 @@ class BattleServiceImplTest {
     void shouldPublishBattleStartedEvent() {
       when(battleFactory.create(any(), any(), any(), any())).thenReturn(battle);
 
-      battleService.createBattle(GUILD_ID, BossType.MINOTAUR, 2, GUILD_MEMBERS);
+      battleCommandService.createBattle(GUILD_ID, BossType.MINOTAUR, 2, GUILD_MEMBERS);
 
       ArgumentCaptor<BattleEvent> captor = ArgumentCaptor.forClass(BattleEvent.class);
       verify(battleObserver).notifyBattleEvent(captor.capture());
@@ -93,7 +96,7 @@ class BattleServiceImplTest {
     void shouldReturnBattleWhenFound() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.getBattleById(BATTLE_ID)).isSameAs(battle);
+      assertThat(battleQueryService.getBattleById(BATTLE_ID)).isSameAs(battle);
     }
 
     @Test
@@ -101,7 +104,7 @@ class BattleServiceImplTest {
     void shouldThrowWhenNotFound() {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> battleService.getBattleById(BATTLE_ID))
+      assertThatThrownBy(() -> battleQueryService.getBattleById(BATTLE_ID))
           .isInstanceOf(BattleNotFoundException.class);
     }
   }
@@ -115,7 +118,7 @@ class BattleServiceImplTest {
     @Test
     @DisplayName("should delete the battle from repository")
     void shouldDeleteBattle() {
-      battleService.deleteBattle(BATTLE_ID);
+      battleCommandService.deleteBattle(BATTLE_ID);
       verify(battleRepository).deleteById(BATTLE_ID);
     }
   }
@@ -131,7 +134,7 @@ class BattleServiceImplTest {
     void shouldReturnBattleForGuild() {
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.getBattleByGuild(GUILD_ID)).contains(battle);
+      assertThat(battleQueryService.getBattleByGuild(GUILD_ID)).contains(battle);
     }
 
     @Test
@@ -139,7 +142,7 @@ class BattleServiceImplTest {
     void shouldReturnEmptyWhenNotFound() {
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.empty());
 
-      assertThat(battleService.getBattleByGuild(GUILD_ID)).isEmpty();
+      assertThat(battleQueryService.getBattleByGuild(GUILD_ID)).isEmpty();
     }
   }
 
@@ -154,7 +157,7 @@ class BattleServiceImplTest {
     void shouldReturnTrueWhenOngoing() throws BattleNotFoundException {
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.hasBattleInProgress(GUILD_ID)).isTrue();
+      assertThat(battleQueryService.hasBattleInProgress(GUILD_ID)).isTrue();
     }
 
     @Test
@@ -163,7 +166,7 @@ class BattleServiceImplTest {
       battle.dealDamageOnBoss(BATTLE_MEMBER_ID_1, BOSS_HEALTH);
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.hasBattleInProgress(GUILD_ID)).isFalse();
+      assertThat(battleQueryService.hasBattleInProgress(GUILD_ID)).isFalse();
     }
 
     @Test
@@ -173,7 +176,7 @@ class BattleServiceImplTest {
       battle.applyCounterattack(BATTLE_MEMBER_ID_2);
       when(battleRepository.findByGuildId(GUILD_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.hasBattleInProgress(GUILD_ID)).isFalse();
+      assertThat(battleQueryService.hasBattleInProgress(GUILD_ID)).isFalse();
     }
   }
 
@@ -188,7 +191,7 @@ class BattleServiceImplTest {
     void nextTurnShouldAdvanceAndSave() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      battleService.nextTurn(BATTLE_ID);
+      battleCommandService.nextTurn(BATTLE_ID);
 
       assertThat(battle.getCurrentTurn()).isEqualTo(1);
       verify(battleRepository).save(battle);
@@ -200,7 +203,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
       int before = battle.getNumOfTurns();
 
-      battleService.increaseNumOfTurn(BATTLE_ID, new Id<>("member-3"));
+      battleCommandService.increaseNumOfTurn(BATTLE_ID, new Id<>("member-3"));
 
       assertThat(battle.getNumOfTurns()).isEqualTo(before + 1);
       verify(battleRepository).save(battle);
@@ -218,7 +221,8 @@ class BattleServiceImplTest {
     void shouldReturnOngoingAndSaveWhenBossSurvives() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      BattleOutcome outcome = battleService.dealDamageOnBoss(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
+      BattleOutcome outcome =
+          battleCommandService.dealDamageOnBoss(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
       verify(battleRepository).save(battle);
@@ -231,7 +235,7 @@ class BattleServiceImplTest {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
       BattleOutcome outcome =
-          battleService.dealDamageOnBoss(BATTLE_ID, BATTLE_MEMBER_ID_1, BOSS_HEALTH);
+          battleCommandService.dealDamageOnBoss(BATTLE_ID, BATTLE_MEMBER_ID_1, BOSS_HEALTH);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Won.class);
       BattleOutcome.Won won = (BattleOutcome.Won) outcome;
@@ -257,7 +261,8 @@ class BattleServiceImplTest {
     void shouldThrowWhenBattleNotFound() {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> battleService.dealDamageOnBoss(BATTLE_ID, BATTLE_MEMBER_ID_1, 10))
+      assertThatThrownBy(
+              () -> battleCommandService.dealDamageOnBoss(BATTLE_ID, BATTLE_MEMBER_ID_1, 10))
           .isInstanceOf(BattleNotFoundException.class);
     }
   }
@@ -273,7 +278,8 @@ class BattleServiceImplTest {
     void shouldReturnOngoingAndSaveWhenNotAllFallen() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      BattleOutcome outcome = battleService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_1);
+      BattleOutcome outcome =
+          battleCommandService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_1);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
       verify(battleRepository).save(battle);
@@ -284,10 +290,10 @@ class BattleServiceImplTest {
     @DisplayName("should return Lost, publish BattleLost and delete when all members have fallen")
     void shouldReturnLostAndPublishEventWhenAllFallen() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
-      battleService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_1); // Ongoing
+      battleCommandService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_1); // Ongoing
 
       BattleOutcome outcome =
-          battleService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_2); // Lost
+          battleCommandService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_2); // Lost
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
       assertThat(((BattleOutcome.Lost) outcome).penalty()).isEqualTo(PENALTY);
@@ -309,7 +315,8 @@ class BattleServiceImplTest {
     void shouldThrowWhenBattleNotFound() {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> battleService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_1))
+      assertThatThrownBy(
+              () -> battleCommandService.applyCounterattack(BATTLE_ID, BATTLE_MEMBER_ID_1))
           .isInstanceOf(BattleNotFoundException.class);
     }
   }
@@ -325,7 +332,7 @@ class BattleServiceImplTest {
     void shouldReturnOngoingWhenNotAllFallen() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      BattleOutcome outcome = battleService.markAsFallen(BATTLE_ID, BATTLE_MEMBER_ID_1);
+      BattleOutcome outcome = battleCommandService.markAsFallen(BATTLE_ID, BATTLE_MEMBER_ID_1);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
       verify(battleRepository).save(battle);
@@ -336,9 +343,9 @@ class BattleServiceImplTest {
     @DisplayName("should return Lost and publish BattleLost when all members have fallen")
     void shouldReturnLostAndPublishEventWhenAllFallen() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
-      battleService.markAsFallen(BATTLE_ID, BATTLE_MEMBER_ID_1);
+      battleCommandService.markAsFallen(BATTLE_ID, BATTLE_MEMBER_ID_1);
 
-      BattleOutcome outcome = battleService.markAsFallen(BATTLE_ID, BATTLE_MEMBER_ID_2);
+      BattleOutcome outcome = battleCommandService.markAsFallen(BATTLE_ID, BATTLE_MEMBER_ID_2);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
 
@@ -365,7 +372,7 @@ class BattleServiceImplTest {
       when(avatarPort.applyDamage(BATTLE_MEMBER_ID_1.value(), 10))
           .thenReturn(new DamageResult(false));
 
-      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
+      BattleOutcome outcome = battleCommandService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
       verify(battleRepository, atLeastOnce()).save(battle); // nextTurn lo chiama internamente
@@ -379,7 +386,7 @@ class BattleServiceImplTest {
       when(avatarPort.applyDamage(BATTLE_MEMBER_ID_1.value(), 10))
           .thenReturn(new DamageResult(true));
 
-      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
+      BattleOutcome outcome = battleCommandService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Ongoing.class);
       verify(battleRepository, atLeastOnce()).save(battle);
@@ -395,7 +402,7 @@ class BattleServiceImplTest {
       when(avatarPort.applyDamage(BATTLE_MEMBER_ID_2.value(), 10))
           .thenReturn(new DamageResult(true));
 
-      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_2, 10);
+      BattleOutcome outcome = battleCommandService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_2, 10);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
       assertThat(((BattleOutcome.Lost) outcome).penalty()).isEqualTo(PENALTY);
@@ -413,7 +420,7 @@ class BattleServiceImplTest {
     @DisplayName("Boss a zero → Won, BattleWon event, exp+money distribuiti, deleteById")
     void shouldPublishWonAndGrantRewardsWhenBossDefeated() throws BattleNotFoundException {
       BattleOutcome outcome =
-          battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, BOSS_HEALTH);
+          battleCommandService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, BOSS_HEALTH);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Won.class);
 
@@ -437,7 +444,7 @@ class BattleServiceImplTest {
       battle.applyCounterattack(BATTLE_MEMBER_ID_1);
       battle.applyCounterattack(BATTLE_MEMBER_ID_2);
 
-      BattleOutcome outcome = battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 1);
+      BattleOutcome outcome = battleCommandService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 1);
 
       assertThat(outcome).isInstanceOf(BattleOutcome.Lost.class);
       verify(avatarPort).applyPenalty(BATTLE_MEMBER_ID_1.value(), PENALTY);
@@ -450,7 +457,8 @@ class BattleServiceImplTest {
     void shouldThrowWhenBattleNotFound() {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> battleService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10))
+      assertThatThrownBy(
+              () -> battleCommandService.processDamage(BATTLE_ID, BATTLE_MEMBER_ID_1, 10))
           .isInstanceOf(BattleNotFoundException.class);
     }
   }
@@ -466,7 +474,7 @@ class BattleServiceImplTest {
     void isBattleOverFalseWhenOngoing() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.isBattleOver(BATTLE_ID)).isFalse();
+      assertThat(battleQueryService.isBattleOver(BATTLE_ID)).isFalse();
     }
 
     @Test
@@ -475,7 +483,7 @@ class BattleServiceImplTest {
       battle.dealDamageOnBoss(BATTLE_MEMBER_ID_1, BOSS_HEALTH);
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.isBattleOver(BATTLE_ID)).isTrue();
+      assertThat(battleQueryService.isBattleOver(BATTLE_ID)).isTrue();
     }
 
     @Test
@@ -485,7 +493,7 @@ class BattleServiceImplTest {
       battle.applyCounterattack(BATTLE_MEMBER_ID_2);
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.isBattleOver(BATTLE_ID)).isTrue();
+      assertThat(battleQueryService.isBattleOver(BATTLE_ID)).isTrue();
     }
 
     @Test
@@ -493,7 +501,7 @@ class BattleServiceImplTest {
     void isBattleWonFalseWhenOngoing() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.isBattleWon(BATTLE_ID)).isFalse();
+      assertThat(battleQueryService.isBattleWon(BATTLE_ID)).isFalse();
     }
 
     @Test
@@ -502,7 +510,7 @@ class BattleServiceImplTest {
       battle.dealDamageOnBoss(BATTLE_MEMBER_ID_1, BOSS_HEALTH);
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.isBattleWon(BATTLE_ID)).isTrue();
+      assertThat(battleQueryService.isBattleWon(BATTLE_ID)).isTrue();
     }
 
     @Test
@@ -512,7 +520,7 @@ class BattleServiceImplTest {
       battle.applyCounterattack(BATTLE_MEMBER_ID_2);
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.isBattleWon(BATTLE_ID)).isFalse();
+      assertThat(battleQueryService.isBattleWon(BATTLE_ID)).isFalse();
     }
 
     @Test
@@ -520,7 +528,7 @@ class BattleServiceImplTest {
     void getBattleStatusShouldReturnOngoingInitially() throws BattleNotFoundException {
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.getBattleStatus(BATTLE_ID))
+      assertThat(battleQueryService.getBattleStatus(BATTLE_ID))
           .isInstanceOf(BattleOutcome.Ongoing.class);
     }
 
@@ -530,7 +538,8 @@ class BattleServiceImplTest {
       battle.dealDamageOnBoss(BATTLE_MEMBER_ID_1, BOSS_HEALTH);
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.getBattleStatus(BATTLE_ID)).isInstanceOf(BattleOutcome.Won.class);
+      assertThat(battleQueryService.getBattleStatus(BATTLE_ID))
+          .isInstanceOf(BattleOutcome.Won.class);
     }
 
     @Test
@@ -540,7 +549,8 @@ class BattleServiceImplTest {
       battle.applyCounterattack(BATTLE_MEMBER_ID_2);
       when(battleRepository.findById(BATTLE_ID)).thenReturn(Optional.of(battle));
 
-      assertThat(battleService.getBattleStatus(BATTLE_ID)).isInstanceOf(BattleOutcome.Lost.class);
+      assertThat(battleQueryService.getBattleStatus(BATTLE_ID))
+          .isInstanceOf(BattleOutcome.Lost.class);
     }
   }
 }

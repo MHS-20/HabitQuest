@@ -9,8 +9,9 @@ import common.ddd.Id;
 import habitquest.quest.application.exceptions.AvatarRewardException;
 import habitquest.quest.application.exceptions.QuestNotFoundException;
 import habitquest.quest.application.port.out.*;
+import habitquest.quest.application.service.QuestCommandServiceImpl;
 import habitquest.quest.application.service.QuestProgressView;
-import habitquest.quest.application.service.QuestServiceImpl;
+import habitquest.quest.application.service.QuestQueryServiceImpl;
 import habitquest.quest.domain.*;
 import habitquest.quest.domain.events.QuestCreated;
 import habitquest.quest.domain.events.QuestEvent;
@@ -30,7 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("QuestServiceImpl")
+@DisplayName("Quest Services")
 class QuestServiceImplTest {
 
   private static final String EVENING_ROUTINE = "Evening Routine";
@@ -43,441 +44,463 @@ class QuestServiceImplTest {
   @Mock private QuestObserver questObserver;
   @Mock private QuestFactory questFactory;
   @Mock private QuestLogger log;
-  @InjectMocks private QuestServiceImpl service;
+
+  @InjectMocks private QuestCommandServiceImpl commandService;
+  @InjectMocks private QuestQueryServiceImpl queryService;
 
   @Nested
-  @DisplayName("createQuest")
-  class CreateQuest {
+  @DisplayName("QuestCommandService")
+  class CommandServiceTests {
 
-    @Test
-    @DisplayName("saves and emits QuestCreated event")
-    void createsAndEmitsEvent() {
-      Quest quest = fullQuest();
-      when(questFactory.createQuest(QUEST_NAME, DEFAULT_DURATION)).thenReturn(quest);
-      when(questRepository.save(any(Quest.class)))
-          .thenAnswer(invocation -> invocation.getArgument(0));
+    @Nested
+    @DisplayName("createQuest")
+    class CreateQuest {
 
-      Quest created = service.createQuest(QUEST_NAME, DEFAULT_DURATION);
+      @Test
+      @DisplayName("saves and emits QuestCreated event")
+      void createsAndEmitsEvent() {
+        Quest quest = fullQuest();
+        when(questFactory.createQuest(QUEST_NAME, DEFAULT_DURATION)).thenReturn(quest);
+        when(questRepository.save(any(Quest.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-      assertThat(created.getId().value()).isNotBlank();
-      assertThat(created.getName()).isEqualTo(QUEST_NAME);
-      assertThat(created.getDuration()).isEqualTo(DEFAULT_DURATION);
-      verify(questRepository).save(created);
-      verify(questFactory).createQuest(QUEST_NAME, DEFAULT_DURATION);
+        Quest created = commandService.createQuest(QUEST_NAME, DEFAULT_DURATION);
 
-      ArgumentCaptor<QuestEvent> eventCaptor = ArgumentCaptor.forClass(QuestEvent.class);
-      verify(questObserver).notifyQuestEvent(eventCaptor.capture());
-      assertThat(eventCaptor.getValue()).isInstanceOf(QuestCreated.class);
-      assertThat(((QuestCreated) eventCaptor.getValue()).quest()).isSameAs(created);
+        assertThat(created.getId().value()).isNotBlank();
+        assertThat(created.getName()).isEqualTo(QUEST_NAME);
+        assertThat(created.getDuration()).isEqualTo(DEFAULT_DURATION);
+        verify(questRepository).save(created);
+        verify(questFactory).createQuest(QUEST_NAME, DEFAULT_DURATION);
+
+        ArgumentCaptor<QuestEvent> eventCaptor = ArgumentCaptor.forClass(QuestEvent.class);
+        verify(questObserver).notifyQuestEvent(eventCaptor.capture());
+        assertThat(eventCaptor.getValue()).isInstanceOf(QuestCreated.class);
+        assertThat(((QuestCreated) eventCaptor.getValue()).quest()).isSameAs(created);
+      }
+    }
+
+    @Nested
+    @DisplayName("updateQuest")
+    class UpdateQuest {
+
+      @Test
+      @DisplayName("checks existence and saves the provided quest")
+      void updates() {
+        Quest existing = fullQuest();
+        Quest replacement = new Quest(new Id<>("quest-2"), EVENING_ROUTINE);
+        when(questRepository.findById(QUEST_ID)).thenReturn(existing);
+        when(questRepository.save(replacement)).thenReturn(replacement);
+
+        Quest updated = commandService.updateQuest(QUEST_ID, replacement);
+
+        assertThat(updated).isSameAs(replacement);
+        verify(questRepository).findById(QUEST_ID);
+        verify(questRepository).save(replacement);
+        verify(questObserver, never()).notifyQuestEvent(any());
+      }
+    }
+
+    @Nested
+    @DisplayName("deleteQuest")
+    class DeleteQuest {
+
+      @Test
+      @DisplayName("delegates to repository delete")
+      void deletes() {
+        commandService.deleteQuest(QUEST_ID);
+        verify(questRepository).deleteById(QUEST_ID);
+        verify(questObserver, never()).notifyQuestEvent(any());
+      }
+    }
+
+    @Nested
+    @DisplayName("updateName")
+    class UpdateName {
+
+      @Test
+      @DisplayName("updates name and saves")
+      void updates() {
+        Quest quest = fullQuest();
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(questRepository.save(quest)).thenReturn(quest);
+
+        Quest updated = commandService.updateName(QUEST_ID, EVENING_ROUTINE);
+
+        assertThat(updated.getName()).isEqualTo(EVENING_ROUTINE);
+        verify(questRepository).save(quest);
+      }
+    }
+
+    @Nested
+    @DisplayName("updateDuration")
+    class UpdateDuration {
+
+      @Test
+      @DisplayName("updates duration and saves")
+      void updates() {
+        Quest quest = fullQuest();
+        Duration newDuration = Duration.ofMinutes(45);
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(questRepository.save(quest)).thenReturn(quest);
+
+        Quest updated = commandService.updateDuration(QUEST_ID, newDuration);
+
+        assertThat(updated.getDuration()).isEqualTo(newDuration);
+        verify(questRepository).save(quest);
+      }
+    }
+
+    @Nested
+    @DisplayName("updateReward")
+    class UpdateReward {
+
+      @Test
+      @DisplayName("updates reward and saves")
+      void updates() {
+        Quest quest = fullQuest();
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(questRepository.save(quest)).thenReturn(quest);
+
+        Quest updated = commandService.updateReward(QUEST_ID, DEFAULT_MONEY_REWARD);
+
+        assertThat(updated.getReward()).isEqualTo(DEFAULT_MONEY_REWARD);
+        verify(questRepository).save(quest);
+      }
+    }
+
+    @Nested
+    @DisplayName("addHabit")
+    class AddHabit {
+
+      @Test
+      @DisplayName("adds habit and saves")
+      void adds() {
+        Quest quest = fullQuest();
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(questRepository.save(quest)).thenReturn(quest);
+
+        Quest updated = commandService.addHabit(QUEST_ID, meditationHabit());
+
+        assertThat(updated.getHabits()).extracting(Habit::getId).contains(HABIT_ID_1, HABIT_ID_2);
+        verify(questRepository).save(quest);
+      }
+    }
+
+    @Nested
+    @DisplayName("removeHabit")
+    class RemoveHabit {
+
+      @Test
+      @DisplayName("removes habit and saves")
+      void removes() {
+        Quest quest = questWithMeditationHabit();
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(questRepository.save(quest)).thenReturn(quest);
+
+        Quest updated = commandService.removeHabit(QUEST_ID, HABIT_ID_2);
+
+        assertThat(updated.getHabits()).isEmpty();
+        verify(questRepository).save(quest);
+      }
+    }
+
+    @Nested
+    @DisplayName("recordHabitAttendance")
+    class RecordHabitAttendance {
+
+      @Test
+      @DisplayName("creates active quest progress when missing and stores attendance")
+      void createsProgressAndStoresAttendance() {
+        Quest quest = fullQuest();
+        LocalDate attendedOn = LocalDate.of(2026, 4, 2);
+
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
+            .thenReturn(Optional.empty());
+        when(activeQuestsRepository.save(any(ActiveQuests.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ActiveQuests updated =
+            commandService.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, attendedOn);
+
+        assertThat(updated.getQuestId()).isEqualTo(QUEST_ID);
+        assertThat(updated.getAvatarId()).isEqualTo(AVATAR_ID_1);
+        assertThat(updated.getAttendedOccurrences().get(HABIT_ID_1)).isEqualTo(1);
+        verify(activeQuestsRepository).save(any(ActiveQuests.class));
+      }
+
+      @Test
+      @DisplayName("emits QuestCompleted when progress reaches completion")
+      void emitsQuestCompletedOnCompletion() {
+        Quest quest = fullQuest();
+        LocalDate firstAttendance = LocalDate.of(2026, 4, 3);
+        LocalDate secondAttendance = LocalDate.of(2026, 4, 4);
+        ActiveQuests active =
+            ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, firstAttendance, quest);
+
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
+            .thenReturn(Optional.of(active));
+        when(activeQuestsRepository.save(any(ActiveQuests.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        commandService.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
+        commandService.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
+
+        verify(avatarClient).earnMoney(AVATAR_ID_1, DEFAULT_REWARD);
+        verify(questObserver)
+            .notifyQuestEvent(
+                argThat(event -> event instanceof habitquest.quest.domain.events.QuestCompleted));
+      }
+
+      @Test
+      @DisplayName("still emits QuestCompleted when reward granting fails")
+      void emitsQuestCompletedEvenWhenRewardFails() {
+        Quest quest = fullQuest();
+        LocalDate firstAttendance = LocalDate.of(2026, 4, 3);
+        LocalDate secondAttendance = LocalDate.of(2026, 4, 4);
+        ActiveQuests active =
+            ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, firstAttendance, quest);
+
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
+            .thenReturn(Optional.of(active));
+        when(activeQuestsRepository.save(any(ActiveQuests.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new AvatarRewardException("avatar down", new RuntimeException("cause")))
+            .when(avatarClient)
+            .earnMoney(AVATAR_ID_1, DEFAULT_REWARD);
+
+        commandService.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
+        commandService.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
+
+        verify(questObserver)
+            .notifyQuestEvent(
+                argThat(event -> event instanceof habitquest.quest.domain.events.QuestCompleted));
+        verify(log).error(any(), eq("Failed to grant quest completion money reward"), any());
+      }
+    }
+
+    @Nested
+    @DisplayName("joinQuest")
+    class JoinQuest {
+
+      @Test
+      @DisplayName("creates active quest and emits QuestJoined when avatar joins for first time")
+      void createsActiveQuestOnFirstJoin() {
+        Quest quest = fullQuest();
+        LocalDate joinedOn = LocalDate.of(2026, 4, 3);
+
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
+            .thenReturn(Optional.empty());
+        when(activeQuestsRepository.save(any(ActiveQuests.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ActiveQuests joined = commandService.joinQuest(QUEST_ID, AVATAR_ID_1, joinedOn);
+
+        assertThat(joined.getQuestId()).isEqualTo(QUEST_ID);
+        assertThat(joined.getAvatarId()).isEqualTo(AVATAR_ID_1);
+        verify(trackingHabitsClient)
+            .createQuestHabitsForAvatar(eq(AVATAR_ID_1), eq(QUEST_ID), anyList());
+        verify(activeQuestsRepository).save(any(ActiveQuests.class));
+        verify(questObserver)
+            .notifyQuestEvent(
+                argThat(event -> event instanceof habitquest.quest.domain.events.QuestJoined));
+      }
+
+      @Test
+      @DisplayName("returns existing active quest without emitting duplicate QuestJoined")
+      void returnsExistingJoinState() {
+        Quest quest = fullQuest();
+        LocalDate joinedOn = LocalDate.of(2026, 4, 3);
+        ActiveQuests existing =
+            ActiveQuests.fromQuest(new Id<>("active-existing"), AVATAR_ID_1, joinedOn, quest);
+
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
+            .thenReturn(Optional.of(existing));
+
+        ActiveQuests joined = commandService.joinQuest(QUEST_ID, AVATAR_ID_1, joinedOn);
+
+        assertThat(joined).isSameAs(existing);
+        verify(trackingHabitsClient, never()).createQuestHabitsForAvatar(any(), any(), anyList());
+        verify(activeQuestsRepository, never()).save(any(ActiveQuests.class));
+        verify(questObserver, never())
+            .notifyQuestEvent(
+                argThat(event -> event instanceof habitquest.quest.domain.events.QuestJoined));
+      }
     }
   }
 
   @Nested
-  @DisplayName("getAllQuests")
-  class GetAllQuests {
+  @DisplayName("QuestQueryService")
+  class QueryServiceTests {
 
-    @Test
-    @DisplayName("returns all quests from repository")
-    void returnsAll() {
-      Quest first = fullQuest();
-      Quest second = new Quest(new Id<>("quest-2"), EVENING_ROUTINE);
-      when(questRepository.findAll()).thenReturn(List.of(first, second));
+    @Nested
+    @DisplayName("getAllQuests")
+    class GetAllQuests {
 
-      List<Quest> quests = service.getAllQuests();
+      @Test
+      @DisplayName("returns all quests from repository")
+      void returnsAll() {
+        Quest first = fullQuest();
+        Quest second = new Quest(new Id<>("quest-2"), EVENING_ROUTINE);
+        when(questRepository.findAll()).thenReturn(List.of(first, second));
 
-      assertThat(quests).hasSize(2);
-      verify(questRepository).findAll();
-    }
-  }
+        List<Quest> quests = queryService.getAllQuests();
 
-  @Nested
-  @DisplayName("getQuest")
-  class GetQuest {
-
-    @Test
-    @DisplayName("returns quest when found")
-    void found() {
-      Quest quest = fullQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      assertThat(service.getQuest(QUEST_ID)).isSameAs(quest);
+        assertThat(quests).hasSize(2);
+        verify(questRepository).findAll();
+      }
     }
 
-    @Test
-    @DisplayName("throws QuestNotFoundException when id is unknown")
-    void notFound() {
-      when(questRepository.findById(UNKNOWN_ID))
-          .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
-      assertThatThrownBy(() -> service.getQuest(UNKNOWN_ID))
-          .isInstanceOf(QuestNotFoundException.class)
-          .hasMessage(UNKNOWN_ID.value());
-    }
-  }
+    @Nested
+    @DisplayName("getQuest")
+    class GetQuest {
 
-  @Nested
-  @DisplayName("updateQuest")
-  class UpdateQuest {
+      @Test
+      @DisplayName("returns quest when found")
+      void found() {
+        Quest quest = fullQuest();
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        assertThat(queryService.getQuest(QUEST_ID)).isSameAs(quest);
+      }
 
-    @Test
-    @DisplayName("checks existence and saves the provided quest")
-    void updates() {
-      Quest existing = fullQuest();
-      Quest replacement = new Quest(new Id<>("quest-2"), EVENING_ROUTINE);
-      when(questRepository.findById(QUEST_ID)).thenReturn(existing);
-      when(questRepository.save(replacement)).thenReturn(replacement);
-      Quest updated = service.updateQuest(QUEST_ID, replacement);
-      assertThat(updated).isSameAs(replacement);
-      verify(questRepository).findById(QUEST_ID);
-      verify(questRepository).save(replacement);
-      verify(questObserver, never()).notifyQuestEvent(any());
-    }
-  }
-
-  @Nested
-  @DisplayName("deleteQuest")
-  class DeleteQuest {
-
-    @Test
-    @DisplayName("delegates to repository delete")
-    void deletes() {
-      service.deleteQuest(QUEST_ID);
-      verify(questRepository).deleteById(QUEST_ID);
-      verify(questObserver, never()).notifyQuestEvent(any());
-    }
-  }
-
-  @Nested
-  @DisplayName("getter delegates")
-  class GetterDelegates {
-
-    @Test
-    @DisplayName("getName returns quest name")
-    void getName() {
-      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
-      assertThat(service.getName(QUEST_ID)).isEqualTo(QUEST_NAME);
+      @Test
+      @DisplayName("throws QuestNotFoundException when id is unknown")
+      void notFound() {
+        when(questRepository.findById(UNKNOWN_ID))
+            .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
+        assertThatThrownBy(() -> queryService.getQuest(UNKNOWN_ID))
+            .isInstanceOf(QuestNotFoundException.class)
+            .hasMessage(UNKNOWN_ID.value());
+      }
     }
 
-    @Test
-    @DisplayName("getDuration returns quest duration")
-    void getDuration() {
-      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
-      assertThat(service.getDuration(QUEST_ID)).isEqualTo(DEFAULT_DURATION);
+    @Nested
+    @DisplayName("getter delegates")
+    class GetterDelegates {
+
+      @Test
+      @DisplayName("getName returns quest name")
+      void getName() {
+        when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
+        assertThat(queryService.getName(QUEST_ID)).isEqualTo(QUEST_NAME);
+      }
+
+      @Test
+      @DisplayName("getDuration returns quest duration")
+      void getDuration() {
+        when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
+        assertThat(queryService.getDuration(QUEST_ID)).isEqualTo(DEFAULT_DURATION);
+      }
+
+      @Test
+      @DisplayName("getReward returns quest reward")
+      void getReward() {
+        when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
+        assertThat(queryService.getReward(QUEST_ID)).isEqualTo(DEFAULT_MONEY_REWARD);
+      }
+
+      @Test
+      @DisplayName("getHabits returns quest habits")
+      void getHabits() {
+        when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
+        assertThat(queryService.getHabits(QUEST_ID)).hasSize(1);
+        assertThat(queryService.getHabits(QUEST_ID).getFirst().getId()).isEqualTo(HABIT_ID_1);
+      }
+
+      @Test
+      @DisplayName("propagates QuestNotFoundException from repository")
+      void notFound() {
+        when(questRepository.findById(UNKNOWN_ID))
+            .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
+        assertThatThrownBy(() -> queryService.getName(UNKNOWN_ID))
+            .isInstanceOf(QuestNotFoundException.class)
+            .hasMessage(UNKNOWN_ID.value());
+      }
     }
 
-    @Test
-    @DisplayName("getReward returns quest reward")
-    void getReward() {
-      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
-      assertThat(service.getReward(QUEST_ID)).isEqualTo(DEFAULT_MONEY_REWARD);
-    }
+    @Nested
+    @DisplayName("getActiveQuestProgressByAvatar")
+    class GetActiveQuestProgressByAvatar {
 
-    @Test
-    @DisplayName("getHabits returns quest habits")
-    void getHabits() {
-      when(questRepository.findById(QUEST_ID)).thenReturn(fullQuest());
-      assertThat(service.getHabits(QUEST_ID)).hasSize(1);
-      assertThat(service.getHabits(QUEST_ID).getFirst().getId()).isEqualTo(HABIT_ID_1);
-    }
+      @Test
+      @DisplayName("returns quest progress with completion and per-habit counters")
+      void returnsQuestProgress() {
+        Quest quest = fullQuest();
+        LocalDate startedOn = LocalDate.of(2026, 4, 3);
+        ActiveQuests active =
+            ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
+        active.recordAttendance(HABIT_ID_1, startedOn);
 
-    @Test
-    @DisplayName("propagates QuestNotFoundException from repository")
-    void notFound() {
-      when(questRepository.findById(UNKNOWN_ID))
-          .thenThrow(new QuestNotFoundException(UNKNOWN_ID.value()));
-      assertThatThrownBy(() -> service.getName(UNKNOWN_ID))
-          .isInstanceOf(QuestNotFoundException.class)
-          .hasMessage(UNKNOWN_ID.value());
-    }
-  }
+        when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
 
-  @Nested
-  @DisplayName("updateName")
-  class UpdateName {
+        List<QuestProgressView> result = queryService.getActiveQuestProgressByAvatar(AVATAR_ID_1);
 
-    @Test
-    @DisplayName("updates name and saves")
-    void updates() {
-      Quest quest = fullQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.updateName(QUEST_ID, EVENING_ROUTINE);
-      assertThat(updated.getName()).isEqualTo(EVENING_ROUTINE);
-      verify(questRepository).save(quest);
-    }
-  }
+        assertThat(result).hasSize(1);
+        QuestProgressView first = result.getFirst();
+        assertThat(first.questId()).isEqualTo(QUEST_ID.value());
+        assertThat(first.completionPercentage()).isEqualTo(100);
+        assertThat(first.habits()).hasSize(1);
+        assertThat(first.habits().getFirst().remainingOccurrences()).isEqualTo(1);
+      }
 
-  @Nested
-  @DisplayName("updateDuration")
-  class UpdateDuration {
+      @Test
+      @DisplayName("applies damage when quest expires without being completed")
+      void appliesDamageOnQuestExpiration() {
+        Quest quest = fullQuest();
+        LocalDate startedOn = LocalDate.of(2026, 4, 3);
+        ActiveQuests active =
+            ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
 
-    @Test
-    @DisplayName("updates duration and saves")
-    void updates() {
-      Quest quest = fullQuest();
-      Duration newDuration = Duration.ofMinutes(45);
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.updateDuration(QUEST_ID, newDuration);
-      assertThat(updated.getDuration()).isEqualTo(newDuration);
-      verify(questRepository).save(quest);
-    }
-  }
+        when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
 
-  @Nested
-  @DisplayName("updateReward")
-  class UpdateReward {
+        queryService.getActiveQuestProgressByAvatar(AVATAR_ID_1);
 
-    @Test
-    @DisplayName("updates reward and saves")
-    void updates() {
-      Quest quest = fullQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.updateReward(QUEST_ID, DEFAULT_MONEY_REWARD);
-      assertThat(updated.getReward()).isEqualTo(DEFAULT_MONEY_REWARD);
-      verify(questRepository).save(quest);
-    }
-  }
+        verify(avatarClient).applyDamage(AVATAR_ID_1, 10);
+        verify(activeQuestsRepository).save(active);
+      }
 
-  @Nested
-  @DisplayName("addHabit")
-  class AddHabit {
+      @Test
+      @DisplayName("does not apply damage when quest expires but was completed")
+      void noDamageWhenQuestCompleted() {
+        Quest quest = fullQuest();
+        LocalDate startedOn = LocalDate.of(2026, 4, 3);
+        ActiveQuests active =
+            ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
+        active.recordAttendance(HABIT_ID_1, startedOn);
 
-    @Test
-    @DisplayName("adds habit and saves")
-    void adds() {
-      Quest quest = fullQuest();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.addHabit(QUEST_ID, meditationHabit());
-      assertThat(updated.getHabits()).extracting(Habit::getId).contains(HABIT_ID_1, HABIT_ID_2);
-      verify(questRepository).save(quest);
-    }
-  }
+        when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
 
-  @Nested
-  @DisplayName("removeHabit")
-  class RemoveHabit {
+        queryService.getActiveQuestProgressByAvatar(AVATAR_ID_1);
 
-    @Test
-    @DisplayName("removes habit and saves")
-    void removes() {
-      Quest quest = questWithMeditationHabit();
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(questRepository.save(quest)).thenReturn(quest);
-      Quest updated = service.removeHabit(QUEST_ID, HABIT_ID_2);
-      assertThat(updated.getHabits()).isEmpty();
-      verify(questRepository).save(quest);
-    }
-  }
+        verify(avatarClient, never()).applyDamage(any(), anyInt());
+      }
 
-  @Nested
-  @DisplayName("recordHabitAttendance")
-  class RecordHabitAttendance {
+      @Test
+      @DisplayName("handles damage application failures gracefully")
+      void handlesFailedDamageApplication() {
+        Quest quest = fullQuest();
+        LocalDate startedOn = LocalDate.of(2026, 4, 3);
+        ActiveQuests active =
+            ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
 
-    @Test
-    @DisplayName("creates active quest progress when missing and stores attendance")
-    void createsProgressAndStoresAttendance() {
-      Quest quest = fullQuest();
-      LocalDate attendedOn = LocalDate.of(2026, 4, 2);
+        when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
+        when(questRepository.findById(QUEST_ID)).thenReturn(quest);
+        doThrow(new AvatarRewardException("avatar down", new RuntimeException("cause")))
+            .when(avatarClient)
+            .applyDamage(AVATAR_ID_1, 10);
 
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
-          .thenReturn(Optional.empty());
-      when(activeQuestsRepository.save(any(ActiveQuests.class)))
-          .thenAnswer(invocation -> invocation.getArgument(0));
+        List<QuestProgressView> result = queryService.getActiveQuestProgressByAvatar(AVATAR_ID_1);
 
-      ActiveQuests updated =
-          service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, attendedOn);
-
-      assertThat(updated.getQuestId()).isEqualTo(QUEST_ID);
-      assertThat(updated.getAvatarId()).isEqualTo(AVATAR_ID_1);
-      assertThat(updated.getAttendedOccurrences().get(HABIT_ID_1)).isEqualTo(1);
-      verify(activeQuestsRepository).save(any(ActiveQuests.class));
-    }
-
-    @Test
-    @DisplayName("emits QuestCompleted when progress reaches completion")
-    void emitsQuestCompletedOnCompletion() {
-      Quest quest = fullQuest();
-      LocalDate firstAttendance = LocalDate.of(2026, 4, 3);
-      LocalDate secondAttendance = LocalDate.of(2026, 4, 4);
-      ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, firstAttendance, quest);
-
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
-          .thenReturn(Optional.of(active));
-      when(activeQuestsRepository.save(any(ActiveQuests.class)))
-          .thenAnswer(invocation -> invocation.getArgument(0));
-
-      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
-      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
-
-      verify(avatarClient).earnMoney(AVATAR_ID_1, DEFAULT_REWARD);
-      verify(questObserver)
-          .notifyQuestEvent(
-              argThat(event -> event instanceof habitquest.quest.domain.events.QuestCompleted));
-    }
-
-    @Test
-    @DisplayName("still emits QuestCompleted when reward granting fails")
-    void emitsQuestCompletedEvenWhenRewardFails() {
-      Quest quest = fullQuest();
-      LocalDate firstAttendance = LocalDate.of(2026, 4, 3);
-      LocalDate secondAttendance = LocalDate.of(2026, 4, 4);
-      ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>("active-1"), AVATAR_ID_1, firstAttendance, quest);
-
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
-          .thenReturn(Optional.of(active));
-      when(activeQuestsRepository.save(any(ActiveQuests.class)))
-          .thenAnswer(invocation -> invocation.getArgument(0));
-      doThrow(new AvatarRewardException("avatar down", new RuntimeException("cause")))
-          .when(avatarClient)
-          .earnMoney(AVATAR_ID_1, DEFAULT_REWARD);
-
-      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, firstAttendance);
-      service.recordHabitAttendance(QUEST_ID, AVATAR_ID_1, HABIT_ID_1, secondAttendance);
-
-      verify(questObserver)
-          .notifyQuestEvent(
-              argThat(event -> event instanceof habitquest.quest.domain.events.QuestCompleted));
-      verify(log).error(any(), eq("Failed to grant quest completion money reward"), any());
-    }
-  }
-
-  @Nested
-  @DisplayName("joinQuest")
-  class JoinQuest {
-
-    @Test
-    @DisplayName("creates active quest and emits QuestJoined when avatar joins for first time")
-    void createsActiveQuestOnFirstJoin() {
-      Quest quest = fullQuest();
-      LocalDate joinedOn = LocalDate.of(2026, 4, 3);
-
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
-          .thenReturn(Optional.empty());
-      when(activeQuestsRepository.save(any(ActiveQuests.class)))
-          .thenAnswer(invocation -> invocation.getArgument(0));
-
-      ActiveQuests joined = service.joinQuest(QUEST_ID, AVATAR_ID_1, joinedOn);
-
-      assertThat(joined.getQuestId()).isEqualTo(QUEST_ID);
-      assertThat(joined.getAvatarId()).isEqualTo(AVATAR_ID_1);
-      verify(trackingHabitsClient)
-          .createQuestHabitsForAvatar(eq(AVATAR_ID_1), eq(QUEST_ID), anyList());
-      verify(activeQuestsRepository).save(any(ActiveQuests.class));
-      verify(questObserver)
-          .notifyQuestEvent(
-              argThat(event -> event instanceof habitquest.quest.domain.events.QuestJoined));
-    }
-
-    @Test
-    @DisplayName("returns existing active quest without emitting duplicate QuestJoined")
-    void returnsExistingJoinState() {
-      Quest quest = fullQuest();
-      LocalDate joinedOn = LocalDate.of(2026, 4, 3);
-      ActiveQuests existing =
-          ActiveQuests.fromQuest(new Id<>("active-existing"), AVATAR_ID_1, joinedOn, quest);
-
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      when(activeQuestsRepository.findByQuestIdAndAvatarId(QUEST_ID, AVATAR_ID_1))
-          .thenReturn(Optional.of(existing));
-
-      ActiveQuests joined = service.joinQuest(QUEST_ID, AVATAR_ID_1, joinedOn);
-
-      assertThat(joined).isSameAs(existing);
-      verify(trackingHabitsClient, never()).createQuestHabitsForAvatar(any(), any(), anyList());
-      verify(activeQuestsRepository, never()).save(any(ActiveQuests.class));
-      verify(questObserver, never())
-          .notifyQuestEvent(
-              argThat(event -> event instanceof habitquest.quest.domain.events.QuestJoined));
-    }
-  }
-
-  @Nested
-  @DisplayName("getActiveQuestProgressByAvatar")
-  class GetActiveQuestProgressByAvatar {
-
-    @Test
-    @DisplayName("returns quest progress with completion and per-habit counters")
-    void returnsQuestProgress() {
-      Quest quest = fullQuest();
-      LocalDate startedOn = LocalDate.of(2026, 4, 3);
-      ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
-      active.recordAttendance(HABIT_ID_1, startedOn);
-
-      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-
-      List<QuestProgressView> result = service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
-
-      assertThat(result).hasSize(1);
-      QuestProgressView first = result.getFirst();
-      assertThat(first.questId()).isEqualTo(QUEST_ID.value());
-      assertThat(first.completionPercentage()).isEqualTo(100);
-      assertThat(first.habits()).hasSize(1);
-      assertThat(first.habits().getFirst().remainingOccurrences()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("applies damage when quest expires without being completed")
-    void appliesDamageOnQuestExpiration() {
-      Quest quest = fullQuest();
-      LocalDate startedOn = LocalDate.of(2026, 4, 3);
-      ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
-      // Not attending any habits so quest will expire incomplete
-
-      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-
-      service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
-
-      verify(avatarClient).applyDamage(AVATAR_ID_1, 10);
-      verify(activeQuestsRepository).save(active);
-    }
-
-    @Test
-    @DisplayName("does not apply damage when quest expires but was completed")
-    void noDamageWhenQuestCompleted() {
-      Quest quest = fullQuest();
-      LocalDate startedOn = LocalDate.of(2026, 4, 3);
-      ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
-      active.recordAttendance(HABIT_ID_1, startedOn);
-      // Simulate quest completion (though normally would not expire if completed)
-
-      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-
-      service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
-
-      verify(avatarClient, never()).applyDamage(any(), anyInt());
-    }
-
-    @Test
-    @DisplayName("handles damage application failures gracefully")
-    void handlesFailedDamageApplication() {
-      Quest quest = fullQuest();
-      LocalDate startedOn = LocalDate.of(2026, 4, 3);
-      ActiveQuests active =
-          ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
-
-      when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
-      when(questRepository.findById(QUEST_ID)).thenReturn(quest);
-      doThrow(new AvatarRewardException("avatar down", new RuntimeException("cause")))
-          .when(avatarClient)
-          .applyDamage(AVATAR_ID_1, 10);
-
-      List<QuestProgressView> result = service.getActiveQuestProgressByAvatar(AVATAR_ID_1);
-
-      assertThat(result).hasSize(1);
-      verify(log).error(any(), eq("Failed to apply quest penalty damage"), any());
+        assertThat(result).hasSize(1);
+        verify(log).error(any(), eq("Failed to apply quest penalty damage"), any());
+      }
     }
   }
 }

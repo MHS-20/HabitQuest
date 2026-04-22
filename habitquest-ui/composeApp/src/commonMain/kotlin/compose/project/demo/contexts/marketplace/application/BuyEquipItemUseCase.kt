@@ -5,6 +5,7 @@ import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryActionRe
 import compose.project.demo.contexts.avatar.domain.model.AvatarInventoryItem
 import compose.project.demo.contexts.marketplace.domain.contract.MarketplaceGateway
 import compose.project.demo.contexts.marketplace.domain.model.MarketplaceBuyResult
+import compose.project.demo.contexts.marketplace.domain.model.MarketplaceItem
 
 class BuyEquipItemUseCase(
     private val marketplaceGateway: MarketplaceGateway,
@@ -13,9 +14,9 @@ class BuyEquipItemUseCase(
     suspend fun buy(
         token: String,
         marketplaceId: String,
-        itemName: String,
+        item: MarketplaceItem,
         currentLevel: Int,
-    ): MarketplaceBuyResult = marketplaceGateway.buyItem(token, marketplaceId, itemName, currentLevel)
+    ): MarketplaceBuyResult = marketplaceGateway.buyItem(token, marketplaceId, item, currentLevel)
 
     suspend fun toggleEquip(
         token: String,

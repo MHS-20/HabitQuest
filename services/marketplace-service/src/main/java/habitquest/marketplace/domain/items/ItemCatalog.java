@@ -18,8 +18,16 @@ public class ItemCatalog {
           "MP Potion",
           new ManaPotion("MP Potion", "Restores MP", 30, new Money(12), new Level(1)));
 
-  public Optional<Item> getItem(String name) {
+  public Optional<Item> getItem(Item item) {
+    return Optional.ofNullable(items.get(item.name()));
+  }
+
+  public Optional<Item> getItemByName(String name) {
     return Optional.ofNullable(items.get(name));
+  }
+
+  public boolean contains(Item item) {
+    return items.containsKey(item.name());
   }
 
   public List<Item> getItemsByType(ItemFilter type) {
@@ -28,9 +36,5 @@ public class ItemCatalog {
 
   public List<Item> getAllItems() {
     return items.values().stream().toList();
-  }
-
-  public boolean contains(String name) {
-    return items.containsKey(name);
   }
 }

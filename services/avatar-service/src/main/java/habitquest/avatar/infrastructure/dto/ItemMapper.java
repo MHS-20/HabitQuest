@@ -1,23 +1,41 @@
 package habitquest.avatar.infrastructure.dto;
 
+import habitquest.avatar.domain.avatar.Damage;
 import habitquest.avatar.domain.avatar.Money;
 import habitquest.avatar.domain.items.*;
-import habitquest.avatar.infrastructure.dto.AvatarRequestsDto.*;
-import habitquest.avatar.infrastructure.dto.AvatarResponsesDto.*;
+import habitquest.avatar.infrastructure.dto.AvatarCommands.*;
+import habitquest.avatar.infrastructure.dto.AvatarQueries.*;
 import java.util.Locale;
 
 public final class ItemMapper {
 
   private ItemMapper() {}
 
-  public static Money toMoney(AmountRequest command) {
+  public static Money toMoney(MoneyCommand command) {
     if (command.amount() < 0) {
       throw new IllegalArgumentException("Money amount must be non-negative");
     }
     return new Money(command.amount());
   }
 
-  public static Item toDomain(ItemRequest command) {
+  public static Damage toDamage(ApplyDamageCommand command) {
+    if (command.amount() < 0) {
+      throw new IllegalArgumentException("Damage value must be non-negative");
+    }
+    return new Damage(command.amount());
+  }
+
+  public static HealthPotion toHealthPotion(UsePotionCommand command) {
+    int power = command.power() != null ? command.power() : 0;
+    return new HealthPotion(command.name(), command.description(), power);
+  }
+
+  public static ManaPotion toManaPotion(UsePotionCommand command) {
+    int power = command.power() != null ? command.power() : 0;
+    return new ManaPotion(command.name(), command.description(), power);
+  }
+
+  public static Item toDomain(ItemCommand command) {
     if (command.type() == null) {
       throw new IllegalArgumentException("Item type must not be null");
     }
@@ -31,7 +49,7 @@ public final class ItemMapper {
     };
   }
 
-  public static Equipment toEquipment(ItemRequest command) {
+  public static Equipment toEquipment(ItemCommand command) {
     if (command.type() == null) {
       throw new IllegalArgumentException("Item type must not be null");
     }

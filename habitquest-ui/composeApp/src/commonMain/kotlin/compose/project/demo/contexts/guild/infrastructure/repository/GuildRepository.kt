@@ -329,25 +329,22 @@ class GuildRepository {
         return when (response.status) {
             HttpStatusCode.OK -> {
                 val body = response.body<JsonObject>()
-
-                // Parse the response which may contain _embedded.avatarResponseList
                 val embedded = body["_embedded"]?.jsonObject
-                val avatarList = embedded?.get("avatarResponseList")?.jsonArray
+                val avatarList = embedded?.values?.firstNotNullOfOrNull { it as? JsonArray }
 
-                if (avatarList != null && avatarList.isNotEmpty()) {
-                    val firstAvatar =
-                        avatarList[0] as? JsonObject
-                            ?: return SearchAvatarResult.Error("Invalid avatar response")
-                    val id = firstAvatar["id"]?.jsonPrimitive?.contentOrNull
-                    val name = firstAvatar["name"]?.jsonPrimitive?.contentOrNull
+                if (avatarList.isNullOrEmpty()) return SearchAvatarResult.Error("Avatar not found")
 
-                    if (id != null && name != null) {
-                        SearchAvatarResult.Success(SearchAvatarData(id, name))
-                    } else {
-                        SearchAvatarResult.Error("Invalid avatar response")
-                    }
+                val firstAvatar =
+                    avatarList.firstOrNull() as? JsonObject
+                        ?: return SearchAvatarResult.Error("Invalid avatar response")
+                val source = firstAvatar["content"]?.jsonObject ?: firstAvatar
+                val id = source["id"]?.jsonPrimitive?.contentOrNull
+                val name = source["name"]?.jsonPrimitive?.contentOrNull
+
+                if (id != null && name != null) {
+                    SearchAvatarResult.Success(SearchAvatarData(id, name))
                 } else {
-                    SearchAvatarResult.Error("Avatar not found")
+                    SearchAvatarResult.Error("Invalid avatar response")
                 }
             }
 
@@ -483,15 +480,15 @@ class GuildRepository {
             }
 
             HttpStatusCode.NotFound -> {
-                AcceptInviteResult.Error("Invite or avatar not found")
+                return AcceptInviteResult.Error("Invite or avatar not found")
             }
 
             HttpStatusCode.Unauthorized -> {
-                AcceptInviteResult.Error("Session expired, please log in again")
+                return AcceptInviteResult.Error("Session expired, please log in again")
             }
 
             HttpStatusCode.BadRequest -> {
-                AcceptInviteResult.Error("Invalid invite request")
+                return AcceptInviteResult.Error("Invalid invite request")
             }
 
             else -> {

@@ -170,19 +170,31 @@ class AvatarRepository : AvatarGateway {
         item: AvatarInventoryItem,
     ): AvatarInventoryActionResult {
         val potionPath =
-            when (item.type.uppercase()) {
-                "HEALTH_POTION" -> "health/potion"
-                "MANA_POTION" -> "mana/potion"
-                else -> return AvatarInventoryActionResult.Error("Unsupported potion type: ${item.type}")
-            }
+            resolvePotionPath(item)
+                ?: return AvatarInventoryActionResult.Error("Unsupported potion type: ${item.type}")
 
         return sendPotionAction(
             token = token,
             avatarId = avatarId,
             path = potionPath,
-            potionName = item.name,
+            item = item,
             errorPrefix = "Use potion",
         )
+    }
+
+    private fun resolvePotionPath(item: AvatarInventoryItem): String? {
+        val type = item.type.trim().uppercase()
+        val name = item.name.trim().uppercase()
+
+        return when {
+            type in setOf("HEALTH_POTION", "POTION_HEALTH", "HEALTH", "HP_POTION") -> "health/potion"
+            type in setOf("MANA_POTION", "POTION_MANA", "MANA", "MP_POTION") -> "mana/potion"
+            type in setOf("POTION", "CONSUMABLE") && "MANA" in name -> "mana/potion"
+            type in setOf("POTION", "CONSUMABLE") && "HEALTH" in name -> "health/potion"
+            "MANA" in name -> "mana/potion"
+            "HEALTH" in name || "HP" in name -> "health/potion"
+            else -> null
+        }
     }
 
     override suspend fun increaseStrength(
@@ -300,7 +312,7 @@ class AvatarRepository : AvatarGateway {
         token: String,
         avatarId: String,
         path: String,
-        potionName: String,
+        item: AvatarInventoryItem,
         errorPrefix: String,
     ): AvatarInventoryActionResult {
         if (avatarId.isBlank()) {
@@ -312,7 +324,7 @@ class AvatarRepository : AvatarGateway {
                 client.post("${edgeServiceBaseUrl()}/api/v1/avatars/$avatarId/$path") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
-                    setBody(buildPotionActionPayload(potionName))
+                    setBody(buildPotionActionPayload(item))
                 }
             }.getOrElse {
                 return AvatarInventoryActionResult.Error("Unable to contact avatar-service")

@@ -1,14 +1,14 @@
 package habitquest.tracking.infrastructure.inbound;
 
-import habitquest.tracking.application.port.in.HabitService;
+import habitquest.tracking.application.port.in.HabitCommandService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class HabitCheckerJob {
-  private final HabitService service;
+  private final HabitCommandService service;
 
-  public HabitCheckerJob(HabitService service) {
+  public HabitCheckerJob(HabitCommandService service) {
     this.service = service;
   }
 
