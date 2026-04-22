@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>ADR-0002 — Kafka domain events as the integration channel between bounded contexts and the Notification Service - HabitQuest</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "ADR-0002 \u2014 Kafka domain events as the integration channel between bounded contexts and the Notification Service";
+        var mkdocs_page_input_path = "ddd/adr/adr2-asyncNotification.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/ci-cd/">CI/CD</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">ADR-0002 — Kafka domain events as the integration channel between bounded contexts and the Notification Service</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="adr-0002-kafka-domain-events-as-the-integration-channel-between-bounded-contexts-and-the-notification-service">ADR-0002 — Kafka domain events as the integration channel between bounded contexts and the Notification Service</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>ADR-0002</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><strong>Related ADRs</strong></td>
+<td>ADR-0001 (REST as primary inter-service communication)</td>
+</tr>
+<tr>
+<td><strong>Related patterns</strong></td>
+<td>Domain Events · DDD · Event-Driven Architecture</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-context">1. Context</h2>
+<p>ADR-0001 established that synchronous REST is the primary communication style between HabitQuest microservices. 
+That decision covers service-to-service interactions where an immediate response is required (e.g. an orchestrator calling <code>avatar</code> to grant XP as part of a SAGA).</p>
+<p>However, a dedicated <strong>Notification Service</strong> must be informed whenever a relevant domain event occurs inside any bounded context — for example:</p>
+<ul>
+<li>an avatar levels up (<code>LevelUp</code>)</li>
+<li>a guild invite is accepted (<code>GuildInviteAccepted</code>)</li>
+<li>an avatar is defeated in combat (<code>AvatarDefeated</code>)</li>
+</ul>
+<p>The Notification Service is responsible exclusively for delivering emails to users. 
+It does not own any domain data, does not participate in SAGAs, and never needs to reply to the originating service. 
+Its only requirement is to eventually receive the event and act on it.</p>
+<p>Extending the synchronous REST model to cover this use case would require the originating service (e.g. <code>avatar</code>) to know the address of the Notification Service and call it explicitly after completing its own domain logic. 
+This introduces coupling that creates a temporal dependency on an ancillary service during the critical path of a domain operation.</p>
+<h3 id="alternatives-considered">Alternatives considered</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A — Kafka domain events</strong> <em>(chosen)</em></td>
+<td>The originating service publishes a domain event to a Kafka topic after committing its own transaction. The Notification Service consumes the topic independently and is the only consumer.</td>
+</tr>
+<tr>
+<td><strong>B — Synchronous REST call to Notification Service</strong></td>
+<td>The originating service calls the Notification Service directly via HTTP after completing its domain logic, following the same pattern used for inter-service SAGA steps.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-decision">2. Decision</h2>
+<p><strong>Publish domain events to Kafka topics</strong> from within each bounded context whenever a significant domain event occurs. 
+The Notification Service is the sole consumer of these topics and operates entirely event-driven. No other service reads from these topics.</p>
+<p>This is a <strong>deliberate and bounded exception</strong> to the synchronous REST rule established in ADR-0001: asynchronous messaging is adopted only for the one-way, fire-and-forget integration with the Notification Service. 
+All other inter-service communication remains synchronous.</p>
+<h3 id="rationale">Rationale</h3>
+<p><strong>The Notification Service has fundamentally different communication semantics.</strong> Unlike service-to-service calls in a SAGA — where the caller needs a result to proceed — notifying a user is a side effect that requires no reply. Forcing it into a request/response model adds latency and failure surface to the originating service's critical path for no benefit.</p>
+<p><strong>Bounded-context isolation.</strong> With Kafka, the <code>avatar</code> service publishes an event (<code>LevelUp</code>) to a topic and is done. It has no knowledge of the Notification Service's existence, address, or availability. This preserves the bounded-context autonomy: the domain model is not polluted by cross-cutting notification concerns.</p>
+<p><strong>Resilience and availability decoupling.</strong> If the Notification Service is temporarily unavailable (restart, deployment, crash), events accumulate in the Kafka topic and are processed once the service recovers. With synchronous REST, a Notification Service outage would either propagate failure to the caller or require the caller to implement its own retry/circuit-breaker logic — adding complexity to every originating service.</p>
+<p><strong>Natural fit for an event-driven consumer.</strong> The Notification Service has no use for synchronous APIs: it reacts to things that happened, it never needs to ask for them. An event driven service is the most suitable representation of this contract.</p>
+<hr />
+<h2 id="3-consequences">3. Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ul>
+<li><strong>Zero coupling between bounded contexts and the Notification Service.</strong> Originating services need no knowledge of the consumer; adding or removing notification types requires no change to domain services.</li>
+<li><strong>Resilience by design.</strong> Kafka retains events; the Notification Service can restart, redeploy, or lag without causing failures in the originating service.</li>
+<li><strong>Notification logic stays in one place.</strong> All user-facing notification decisions (templates, channels, preferences) are encapsulated in the Notification Service, not scattered across bounded contexts.</li>
+<li><strong>Consistent with DDD domain events.</strong> Domain events are first-class citizens of the model; publishing them to Kafka is a natural externalisation of an already-existing concept.</li>
+<li><strong>Architectural clarity.</strong> The rule is simple and enforceable: REST for synchronous service-to-service calls; Kafka only for domain event fan-out to the Notification Service.</li>
+</ul>
+<h3 id="trade-offs">Trade-offs</h3>
+<ul>
+<li><strong>Operational overhead.</strong> Kafka requires a running broker, topic provisioning, consumer group management, and monitoring — infrastructure that does not exist in the purely synchronous REST model.</li>
+<li><strong>At-least-once delivery requires idempotent consumers.</strong> The Notification Service should handle duplicate events gracefully (e.g. deduplication by event ID) to avoid sending duplicate notifications.</li>
+<li><strong>Eventual delivery, not immediate.</strong> Notifications may arrive with a small delay after the domain event. This is acceptable for user-facing notifications but must be documented as a deliberate trade-off.</li>
+</ul>
+<hr />
+<h2 id="4-compliance">4. Compliance</h2>
+<h3 id="automated-fitness-functions">Automated fitness functions</h3>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No direct HTTP calls to Notification Service from domain/application layers</strong></td>
+<td>ArchUnit</td>
+<td>Verifies that no class in <code>..domain..</code> or <code>..application..</code> imports or references any HTTP client directed at the Notification Service. All notification triggers must go through the event publishing port.</td>
+</tr>
+<tr>
+<td><strong>Domain events published only through the outbox port</strong></td>
+<td>ArchUnit</td>
+<td>Verifies that no class outside the designated outbox adapter directly instantiates a Kafka producer or calls the Kafka client API. All publishing must go through the <code>DomainEventPublisher</code> port defined in the application layer.</td>
+</tr>
+<tr>
+<td><strong>Notification Service has no REST endpoints for domain data</strong></td>
+<td>ArchUnit (on <code>notification</code> module)</td>
+<td>Verifies that the Notification Service contains no <code>@RestController</code> or <code>@FeignClient</code> that targets another bounded context. Its only inbound channel must be Kafka consumers (<code>@KafkaListener</code>).</td>
+</tr>
+<tr>
+<td><strong>Event payload schema compatibility</strong></td>
+<td>CI pipeline — Schema Registry compatibility check</td>
+<td>On every change to an event class, the CI pipeline runs a schema compatibility check (BACKWARD compatible minimum) against the Schema Registry before allowing the build to proceed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="manual-periodic-review">Manual — periodic review</h3>
+<p>If a second service beyond the Notification Service needs to consume domain events, this ADR must be amended before adding that consumer: the current topology is intentionally single-consumer and the implications of a multi-consumer model (consumer group isolation, schema stability guarantees, ordering semantics) must be evaluated explicitly.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

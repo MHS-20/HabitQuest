@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Multiplatform UI - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Multiplatform UI";
+        var mkdocs_page_input_path = "implementation/multiplatform.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Multiplatform UI</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rationale-for-multiplatform">Rationale for Multiplatform</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#technology-stack">Technology Stack</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#multiplatform-target-support">Multiplatform Target Support</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-android-androidmain">1. Android (androidMain)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-ios-iosmain">2. iOS (iosMain)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-jvm-desktop-jvmmain">3. JVM (Desktop) (jvmMain)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-javascript-jsmain">4. JavaScript (jsMain)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#5-webassembly-wasmjsmain">5. WebAssembly (wasmJsMain)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#6-test-commontest">6. Test (commonTest)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#directory-hierarchy">Directory Hierarchy</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#within-each-context-directory">Within Each Context Directory</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#design-principles">Design Principles</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-domain-driven-design-ddd">1. Domain-Driven Design (DDD)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-hexagonal-architecture-ports-adapters">2. Hexagonal Architecture (Ports &amp; Adapters)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#domain-logic-has-zero-dependencies-on-ui-framework-or-external-services">Domain logic has zero dependencies on UI framework or external services.</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ddd-context-organization">DDD Context Organization</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#example-habits-context-detailed">Example: Habits Context (Detailed)</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#domain-layer-domain">Domain Layer (domain/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#application-layer-application">Application Layer (application/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#infrastructure-layer-infrastructure">Infrastructure Layer (infrastructure/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#presentation-layer-presentation">Presentation Layer (presentation/)</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#layered-architecture">Layered Architecture</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#clean-architecture-layers-per-context">Clean Architecture Layers (Per Context)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dependency-rule">Dependency Rule</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#shared-code-vs-platform-specific-code">Shared Code vs Platform-Specific Code</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#shared-code-commonmain">Shared Code (commonMain/)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#platform-specific-code">Platform-Specific Code</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#android-androidmain">Android (androidMain/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#ios-iosmain">iOS (iosMain/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#jvm-desktop-jvmmain">JVM Desktop (jvmMain/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#javascript-jsmain">JavaScript (jsMain/)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#webassembly-wasmjsmain">WebAssembly (wasmJsMain/)</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#gradle-configuration">Gradle Configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#key-configuration-file-buildgradlekts">Key Configuration File: build.gradle.kts</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#target-definitions">Target Definitions</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#platform-specific-dependencies">Platform-Specific Dependencies</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#build-phases">Build Phases</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#platform-entry-points">Platform Entry Points</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#android-androidmainmainactivitykt">Android (androidMain/MainActivity.kt)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ios-iosmainmainviewcontrollerkt">iOS (iosMain/MainViewController.kt)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#jvm-jvmmainmainkt">JVM (jvmMain/main.kt)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#javascript-jsmainmainkt-wasm-wasmjsmainmainkt">JavaScript (jsMain/main.kt) &amp; Wasm (wasmJsMain/main.kt)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cross-cutting-concerns">Cross-Cutting Concerns</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-serialization-mapping">1. Serialization &amp; Mapping</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-calendar-feature-integration-pattern">2. Calendar Feature Integration Pattern</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#shared-contract-habitcalendarlauncherkt">Shared Contract (HabitCalendarLauncher.kt)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#shared-presentation-habitspagekt">Shared Presentation (HabitsPage.kt)</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../ci-cd/">CI/CD</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">Multiplatform UI</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="habitquest-multiplatform-ui-architecture">HabitQuest Multiplatform UI Architecture</h1>
+<p>The HabitQuest UI is a <strong>Kotlin Multiplatform (KMP)</strong> application built with <strong>Jetpack Compose</strong> that targets multiple platforms from a single codebase. 
+The architecture combines <strong>Domain-Driven Design (DDD)</strong> principles with <strong>hexagonal architecture</strong> to achieve platform independence.</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<h3 id="rationale-for-multiplatform">Rationale for Multiplatform</h3>
+<p>The HabitQuest UI was designed as a multiplatform application to
+Maximize code sharing: Business logic, domain models, UI composition, and data layer are shared across all platforms</p>
+<h3 id="technology-stack">Technology Stack</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+<th>Version</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Kotlin</td>
+<td>2.x</td>
+<td>Type-safe, null-safe, coroutine-native</td>
+</tr>
+<tr>
+<td>UI Framework</td>
+<td>Jetpack Compose Multiplatform</td>
+<td>1.10.0</td>
+<td>Declarative UI, shared composables</td>
+</tr>
+<tr>
+<td>HTTP Client</td>
+<td>Ktor Client</td>
+<td>Latest</td>
+<td>Multiplatform HTTP with platform-specific engines</td>
+</tr>
+<tr>
+<td>Serialization</td>
+<td>Kotlinx Serialization</td>
+<td>Latest</td>
+<td>Type-safe JSON parsing without reflection</td>
+</tr>
+<tr>
+<td>Coroutines</td>
+<td>Kotlinx Coroutines</td>
+<td>Latest</td>
+<td>Async/await with structured concurrency</td>
+</tr>
+<tr>
+<td>DateTime</td>
+<td>Kotlinx DateTime</td>
+<td>Latest</td>
+<td>Multiplatform date/time without platform libraries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="multiplatform-target-support">Multiplatform Target Support</h2>
+<p>The project compiles to <strong>6 distinct platforms</strong> using KMP:</p>
+<h3 id="1-android-androidmain">1. <strong>Android</strong> (<code>androidMain</code>)</h3>
+<ul>
+<li><strong>Purpose</strong>: Primary mobile target</li>
+<li><strong>Build Tool</strong>: Gradle (AGP - Android Gradle Plugin)</li>
+<li><strong>Output</strong>: <code>.apk</code> debug / release binaries</li>
+<li><strong>Dependencies</strong>: Android-specific (OkHttp client, KalendarKit for calendar integration)</li>
+<li><strong>Entry Point</strong>: <code>MainActivity.kt</code> (ComponentActivity with Compose)</li>
+</ul>
+<h3 id="2-ios-iosmain">2. <strong>iOS</strong> (<code>iosMain</code>)</h3>
+<ul>
+<li><strong>Purpose</strong>: Secondary mobile target</li>
+<li><strong>Build Tool</strong>: Gradle (via Kotlin/Native)</li>
+<li><strong>Output</strong>: <code>ComposeApp.framework</code> (Kotlin framework bridged to SwiftUI)</li>
+<li><strong>Dependencies</strong>: Darwin HTTP client, KalendarKit for calendar integration via EventKit</li>
+<li><strong>Entry Point</strong>: <code>MainViewController.kt</code> (ComposeUIViewController)</li>
+<li><strong>Native Integration</strong>: <code>iosApp.xcodeproj</code> (Xcode project) hosts Swift UI wrapper</li>
+</ul>
+<h3 id="3-jvm-desktop-jvmmain">3. <strong>JVM (Desktop)</strong> (<code>jvmMain</code>)</h3>
+<ul>
+<li><strong>Purpose</strong>: Desktop application for testing and development</li>
+<li><strong>Build Tool</strong>: Gradle</li>
+<li><strong>Output</strong>: Standalone executable (Dmg/Msi/Deb)</li>
+<li><strong>Dependencies</strong>: Compose Desktop, OkHttp client, Swing integration</li>
+<li><strong>Entry Point</strong>: <code>main.kt</code> (Compose Desktop window application)</li>
+<li><strong>Note</strong>: Calendar feature unavailable on desktop (returns explicit failure)</li>
+</ul>
+<h3 id="4-javascript-jsmain">4. <strong>JavaScript</strong> (<code>jsMain</code>)</h3>
+<ul>
+<li><strong>Purpose</strong>: Web browser support</li>
+<li><strong>Build Tool</strong>: Gradle (Kotlin/JS via Node.js)</li>
+<li><strong>Output</strong>: JavaScript bundle (distributed via web server)</li>
+<li><strong>Dependencies</strong>: JavaScript HTTP client (fetch-based)</li>
+<li><strong>Entry Point</strong>: <code>main.kt</code> (ComposeViewport in DOM)</li>
+<li><strong>Note</strong>: Calendar feature unavailable on web</li>
+</ul>
+<h3 id="5-webassembly-wasmjsmain">5. <strong>WebAssembly</strong> (<code>wasmJsMain</code>)</h3>
+<ul>
+<li><strong>Purpose</strong>: Experimental web support with better performance than JS</li>
+<li><strong>Build Tool</strong>: Gradle (Kotlin/Wasm with Binaryen)</li>
+<li><strong>Output</strong>: WebAssembly module + JavaScript glue code</li>
+<li><strong>Dependencies</strong>: JavaScript HTTP client</li>
+<li><strong>Entry Point</strong>: <code>main.kt</code> (ComposeViewport in DOM)</li>
+<li><strong>Note</strong>: Calendar feature unavailable on Wasm</li>
+</ul>
+<h3 id="6-test-commontest">6. <strong>Test</strong> (<code>commonTest</code>)</h3>
+<ul>
+<li><strong>Purpose</strong>: Shared unit/integration tests</li>
+<li><strong>Build Tool</strong>: Gradle</li>
+<li><strong>Output</strong>: Test results (platform-agnostic)</li>
+<li><strong>Dependencies</strong>: Kotlin test framework</li>
+</ul>
+<hr />
+<h2 id="project-structure">Project Structure</h2>
+<h3 id="directory-hierarchy">Directory Hierarchy</h3>
+<pre><code>habitquest-ui/composeApp/
+├── build.gradle.kts                      # Kotlin Multiplatform build configuration
+├── src/
+│   ├── commonMain/                        # Shared code (100% platform-independent)
+│   │   └── kotlin/compose/project/demo/
+│   │       ├── App.kt                     # Root composition function
+│   │       ├── MainScaffold.kt            # Main navigation scaffold
+│   │       ├── Platform.kt                # Platform abstraction interface
+│   │       ├── NetworkConfig.kt           # Shared HTTP client setup
+│   │       ├── AchievementsPage.kt        # Shared UI screen
+│   │       ├── LegacyDomainAliases.kt     # Domain model re-exports
+│   │       └── contexts/                  # DDD-organized contexts
+│   │           ├── auth/                  # Authentication context
+│   │           ├── habits/                # Habits/tracking context
+│   │           ├── avatar/                # Character/avatar context
+│   │           ├── marketplace/           # Shop/inventory context
+│   │           ├── guild/                 # Social/guild context
+│   │           ├── quest/                 # Quests context
+│   │           └── dashboard/             # Dashboard context
+│   │
+│   ├── androidMain/                       # Android-only code
+│   │   └── kotlin/compose/project/demo/
+│   │       ├── MainActivity.kt            # Android entry point
+│   │       ├── Platform.android.kt        # Android Platform implementation
+│   │       └── contexts/                  # Context-specific Android overrides
+│   │
+│   ├── iosMain/                           # iOS-only code
+│   │   └── kotlin/compose/project/demo/
+│   │       ├── MainViewController.kt      # iOS entry point
+│   │       ├── Platform.ios.kt            # iOS Platform implementation
+│   │       └── contexts/                  # Context-specific iOS overrides
+│   │
+│   ├── jvmMain/                           # JVM Desktop code
+│   │   └── kotlin/compose/project/demo/
+│   │       ├── main.kt                    # Desktop entry point
+│   │       ├── Platform.jvm.kt            # JVM Platform implementation
+│   │       └── contexts/
+│   │
+│   ├── jsMain/                            # JavaScript/Browser code
+│   │   └── kotlin/compose/project/demo/
+│   │       ├── main.kt                    # Web entry point
+│   │       ├── Platform.js.kt             # JS Platform implementation
+│   │       └── contexts/
+│   │
+│   ├── wasmJsMain/                        # WebAssembly code
+│   │   └── kotlin/compose/project/demo/
+│   │       ├── main.kt                    # Wasm entry point
+│   │       ├── Platform.wasmJs.kt         # Wasm Platform implementation
+│   │       └── contexts/
+│   │
+│   ├── webMain/                           # Web-specific (minimal)
+│   │   └── kotlin/...
+│   │
+│   └── commonTest/                        # Shared test code
+│       └── kotlin/compose/project/demo/
+│
+├── iosApp/                                # Native iOS Xcode project
+│   ├── iosApp.xcodeproj/                 # Xcode project file
+│   ├── iosApp/
+│   │   ├── ContentView.swift             # SwiftUI wrapper around Kotlin Compose
+│   │   └── Info.plist                    # iOS app manifest + permissions
+│   └── Configuration/
+│       └── Config.xcconfig               # Build configuration
+│
+└── build/                                 # Generated build artifacts
+    ├── bin/                              # Binary outputs
+    │   ├── iosArm64/debugFramework/      # iOS framework (real device)
+    │   └── iosSimulatorArm64/            # iOS framework (simulator)
+    └── xcode-frameworks/                 # Frameworks for Xcode linking
+</code></pre>
+<h3 id="within-each-context-directory">Within Each Context Directory</h3>
+<p>Each DDD context (e.g., <code>contexts/habits/</code>) follows a consistent internal structure:</p>
+<pre><code>contexts/habits/
+├── application/                           # Use cases and application services
+│   └── *.kt                              # LoginUseCase, CreateHabitUseCase, etc.
+│
+├── domain/                                # Domain models and contracts
+│   ├── model/                            # Value objects and aggregates
+│   │   └── *.kt                          # HabitListItem, HabitCalendarEntry, etc.
+│   └── contract/                         # Domain abstractions
+│       └── *.kt                          # HabitResult sealed interfaces
+│
+├── infrastructure/                        # Technical implementations
+│   ├── repository/                       # API clients and data access
+│   │   └── HabitsApiRepository.kt        # REST client for habit management
+│   │
+│   ├── mapper/                           # DTO ↔ Domain model translation
+│   │   └── HabitDtoMapper.kt             # JSON parsing and mapping logic
+│   │
+│   ├── calendar/ (habits-specific)       # Platform-specific integrations
+│   │   ├── HabitCalendarLauncher.kt      # Shared calendar launcher interface
+│   │   ├── HabitCalendarLauncher.android.kt
+│   │   ├── HabitCalendarLauncher.ios.kt
+│   │   ├── HabitCalendarLauncher.jvm.kt
+│   │   ├── IOSCalendarPlatform.kt        # iOS-specific calendar manager
+│   │   └── ... (other platforms)
+│   │
+│   └── dto/                              # API response models
+│       └── (if present)
+│
+└── presentation/                          # UI layer
+    ├── screen/                           # Full-page composables
+    │   └── HabitsPage.kt                 # Habits list screen
+    │
+    └── component/                        # Reusable UI components
+        └── *.kt                          # Individual composable functions
+</code></pre>
+<hr />
+<h2 id="design-principles">Design Principles</h2>
+<h3 id="1-domain-driven-design-ddd">1. Domain-Driven Design (DDD)</h3>
+<p>The codebase is <strong>organized by business capability</strong>, not technical layer. Each bounded context represents a distinct business domain:</p>
+<ul>
+<li><strong>Auth Context</strong>: User identity and authentication (login, registration, token validation)</li>
+<li><strong>Habits Context</strong>: Habit creation, completion, recurrence (tracking domain)</li>
+<li><strong>Avatar Context</strong>: Character state management (stats, inventory, equipment)</li>
+<li><strong>Marketplace Context</strong>: Item trading, currency management (commerce)</li>
+<li><strong>Quest Context</strong>: Challenge definition and progression (meta-gaming)</li>
+<li><strong>Guild Context</strong>: Social organization and boss battles (multiplayer)</li>
+<li><strong>Dashboard Context</strong>: User home screen and aggregate views</li>
+</ul>
+<h3 id="2-hexagonal-architecture-ports-adapters">2. Hexagonal Architecture (Ports &amp; Adapters)</h3>
+<p>Each context is decoupled from external systems via clearly defined boundaries:</p>
+<pre><code>           UI LAYER (Presentation)
+              ↓
+    ┌─────────────────────┐
+    │   Composable Screens │
+    └──────────────┬──────┘
+                   ↓ (calls business logic)
+    ┌─────────────────────┐
+    │  Application Layer   │ ← Use cases
+    ├─────────────────────┤
+    │   Domain Layer       │ ← Models, contracts
+    ├──────────┬──────────┤
+    │ PRIMARY  │SECONDARY │
+    │  PORTS   │  PORTS   │
+    └──────────┴──────────┘
+                   ↓ (calls adapters)
+    ┌─────────────────────┐
+    │ Infrastructure Layer │ ← Repositories, mappers
+    │ (Adapters)          │
+    └─────────────────────┘
+                   ↓
+    ┌─────────────────────┐
+    │   External Systems  │ ← APIs, databases
+    └─────────────────────┘
+</code></pre>
+<ul>
+<li><strong>Primary Ports</strong> (inbound): Presentation layer uses these to invoke business logic</li>
+<li><strong>Secondary Ports</strong> (outbound): Domain defines these; infrastructure implements them</li>
+<li><strong>Adapters</strong>: Infrastructure layer implements ports via HTTP clients, local storage, etc.</li>
+</ul>
+<h2 id="domain-logic-has-zero-dependencies-on-ui-framework-or-external-services">Domain logic has zero dependencies on UI framework or external services.</h2>
+<h2 id="ddd-context-organization">DDD Context Organization</h2>
+<h3 id="example-habits-context-detailed">Example: Habits Context (Detailed)</h3>
+<h4 id="domain-layer-domain">Domain Layer (<code>domain/</code>)</h4>
+<p><strong>Models</strong> (<code>domain/model/</code>):</p>
+<pre><code class="language-kotlin">// Value object representing a habit entry in the user's list
+data class HabitListItem(
+    val id: String,
+    val title: String,
+    val description: String,
+    val tags: List&lt;String&gt;,
+    val recurrenceType: String,  // &quot;DAILY&quot;, &quot;WEEKLY&quot;, &quot;MONTHLY&quot;
+    val recurrenceDayOfWeek: String? = null,
+    val recurrenceDayOfMonth: Int? = null,
+    val lastAttendedDate: String?,
+    val nextRecurrenceDate: String?,
+    val associatedQuestId: String? = null,
+)
+
+// Calendar event ready for platform integration
+data class HabitCalendarEntry(
+    val title: String,
+    val description: String,
+    val startDateTime: LocalDateTime,
+    val durationMinutes: Int = 30,
+)
+</code></pre>
+<p><strong>Contracts</strong> (<code>domain/contract/</code>):</p>
+<pre><code class="language-kotlin">// Domain result types for habit operations
+sealed interface HabitListResult {
+    data class Success(val habits: List&lt;HabitListItem&gt;) : HabitListResult
+    data class Error(val message: String) : HabitListResult
+}
+
+sealed interface AttendHabitResult {
+    data object Success : AttendHabitResult
+    data class Error(val message: String) : AttendHabitResult
+}
+</code></pre>
+<h4 id="application-layer-application">Application Layer (<code>application/</code>)</h4>
+<p><strong>Use Cases</strong>:</p>
+<pre><code class="language-kotlin">// Orchestrates fetching habits for a given avatar
+class FetchHabitsUseCase(private val repository: HabitsRepository) {
+    suspend operator fun invoke(token: String, avatarId: String): HabitListResult {
+        return repository.fetchHabitsByAvatar(token, avatarId)
+    }
+}
+
+// Orchestrates marking a habit as completed
+class AttendHabitUseCase(private val repository: HabitsRepository) {
+    suspend operator fun invoke(token: String, habitId: String): AttendHabitResult {
+        return repository.attendHabit(token, habitId)
+    }
+}
+</code></pre>
+<h4 id="infrastructure-layer-infrastructure">Infrastructure Layer (<code>infrastructure/</code>)</h4>
+<p><strong>Repository</strong> (<code>infrastructure/repository/HabitsApiRepository.kt</code>):</p>
+<pre><code class="language-kotlin">class HabitsApiRepository {
+    suspend fun fetchHabitsByAvatar(token: String, avatarId: String): HabitListResult {
+        return try {
+            val response = client.get(&quot;$BASE_URL/api/v1/habits&quot;) {
+                bearerAuth(token)
+                parameter(&quot;avatarId&quot;, avatarId)
+            }
+            val habits = Json.decodeFromString&lt;List&lt;HabitDto&gt;&gt;(response.bodyAsText())
+            HabitListResult.Success(habits.map { it.toDomain() })
+        } catch (error: Exception) {
+            HabitListResult.Error(&quot;Failed to fetch habits: ${error.message}&quot;)
+        }
+    }
+}
+</code></pre>
+<p><strong>Mapper</strong> (<code>infrastructure/mapper/HabitDtoMapper.kt</code>):</p>
+<pre><code class="language-kotlin">internal fun parseHabitList(payload: JsonArray): List&lt;HabitListItem&gt; {
+    return payload.mapNotNull { element -&gt;
+        val obj = element as? JsonObject ?: return@mapNotNull null
+        val recurrence = obj[&quot;recurrence&quot;]?.jsonObject
+        HabitListItem(
+            id = obj[&quot;id&quot;]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null,
+            title = obj[&quot;title&quot;]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            // ... map remaining fields
+        )
+    }
+}
+</code></pre>
+<p><strong>Calendar Launcher</strong> (Platform-Specific):</p>
+<ul>
+<li><strong>Common Interface</strong> (<code>commonMain</code>): Defines contract and return type</li>
+<li><strong>Android</strong> (<code>androidMain</code>): Uses <code>CalendarEventManager</code> from KalendarKit</li>
+<li><strong>iOS</strong> (<code>iosMain</code>): Uses <code>CalendarEventManager</code> bridged to EventKit</li>
+<li><strong>Desktop/Web</strong> (<code>jvmMain</code>, <code>jsMain</code>, <code>wasmJsMain</code>): Returns explicit "unsupported" failure</li>
+</ul>
+<h4 id="presentation-layer-presentation">Presentation Layer (<code>presentation/</code>)</h4>
+<p><strong>Screen</strong> (<code>presentation/screen/HabitsPage.kt</code>):</p>
+<pre><code class="language-kotlin">@Composable
+fun HabitsScreen(
+    token: String,
+    avatarState: AvatarUiState,
+    onHabitAttended: () -&gt; Unit = {},
+    habitCalendarLauncher: HabitCalendarLauncher,  // Platform-provided
+) {
+    val habitRepository = remember { HabitsApiRepository() }
+    var uiState by remember { mutableStateOf&lt;HabitsUiState&gt;(HabitsUiState.Loading) }
+
+    LaunchedEffect(token, avatarState) {
+        // Load habits via use case
+    }
+
+    // Render UI based on state
+}
+</code></pre>
+<hr />
+<h2 id="layered-architecture">Layered Architecture</h2>
+<h3 id="clean-architecture-layers-per-context">Clean Architecture Layers (Per Context)</h3>
+<pre><code>┌─────────────────────────────────────────┐
+│      PRESENTATION LAYER (UI)            │
+│  • Composable functions                 │
+│  • UI state management                  │
+│  • Event handlers                       │
+├─────────────────────────────────────────┤
+│      APPLICATION LAYER                  │
+│  • Use cases (business orchestration)   │
+│  • Application services                 │
+├─────────────────────────────────────────┤
+│      DOMAIN LAYER                       │
+│  • Aggregates (entities + value objs)   │
+│  • Domain contracts (interfaces)        │
+│  • Business rules (pure logic)          │
+├─────────────────────────────────────────┤
+│      INFRASTRUCTURE LAYER               │
+│  • Repository implementations           │
+│  • DTO mappers                          │
+│  • HTTP clients (Ktor)                  │
+│  • Platform-specific adapters           │
+├─────────────────────────────────────────┤
+│      EXTERNAL SYSTEMS                   │
+│  • REST APIs (microservices)            │
+│  • Calendar systems (iOS EventKit, etc.)│
+│  • Local device storage                 │
+└─────────────────────────────────────────┘
+</code></pre>
+<h3 id="dependency-rule">Dependency Rule</h3>
+<ul>
+<li><strong>Upper layers</strong> (presentation) depend on <strong>lower layers</strong> (domain)</li>
+<li><strong>Lower layers</strong> (domain) have <strong>NO dependencies</strong> on upper layers</li>
+<li><strong>All dependencies</strong> point <strong>inward</strong> toward the domain</li>
+</ul>
+<p><strong>Result</strong>: Domain is testable and reusable; UI can be replaced without affecting business logic.</p>
+<hr />
+<h2 id="shared-code-vs-platform-specific-code">Shared Code vs Platform-Specific Code</h2>
+<h3 id="shared-code-commonmain">Shared Code (<code>commonMain/</code>)</h3>
+<p><strong>90%+ of the codebase</strong>:</p>
+<ul>
+<li>Domain models and business logic</li>
+<li>Composable UI functions (layouts, screen orchestration)</li>
+<li>HTTP client configuration and API calls</li>
+<li>Serialization and data mapping</li>
+<li>Navigation and state management</li>
+</ul>
+<p><strong>Why</strong>: These concerns are platform-agnostic and require only standard Kotlin libraries.</p>
+<h3 id="platform-specific-code">Platform-Specific Code</h3>
+<h4 id="android-androidmain">Android (<code>androidMain/</code>)</h4>
+<ul>
+<li><strong>Entry Point</strong>: <code>MainActivity.kt</code> – Android ComponentActivity</li>
+<li><strong>Calendar Integration</strong>: <code>HabitCalendarLauncher.android.kt</code> uses <code>CalendarEventManager</code></li>
+<li><strong>HTTP Client</strong>: OkHttp engine (configured in <code>networkConfig</code>)</li>
+<li><strong>Size</strong>: ~5% of total code</li>
+</ul>
+<h4 id="ios-iosmain">iOS (<code>iosMain/</code>)</h4>
+<ul>
+<li><strong>Entry Point</strong>: <code>MainViewController.kt</code> – ComposeUIViewController</li>
+<li><strong>Calendar Integration</strong>:</li>
+<li><code>HabitCalendarLauncher.ios.kt</code> uses <code>CalendarEventManager</code></li>
+<li><code>IOSCalendarPlatform.kt</code> bridges to iOS EventKit API</li>
+<li><code>iosApp/iosApp/Info.plist</code> declares <code>NSCalendarsUsageDescription</code> permission</li>
+<li><strong>HTTP Client</strong>: Darwin (native URLSession-based)</li>
+<li><strong>Size</strong>: ~5% of total code</li>
+</ul>
+<h4 id="jvm-desktop-jvmmain">JVM Desktop (<code>jvmMain/</code>)</h4>
+<ul>
+<li><strong>Entry Point</strong>: <code>main.kt</code> – Compose Desktop window</li>
+<li><strong>Calendar Integration</strong>: Unavailable (returns failure)</li>
+<li><strong>HTTP Client</strong>: OkHttp</li>
+<li><strong>Size</strong>: ~2% of total code</li>
+</ul>
+<h4 id="javascript-jsmain">JavaScript (<code>jsMain/</code>)</h4>
+<ul>
+<li><strong>Entry Point</strong>: <code>main.kt</code> – ComposeViewport</li>
+<li><strong>Calendar Integration</strong>: Unavailable (returns failure)</li>
+<li><strong>HTTP Client</strong>: JavaScript fetch API</li>
+<li><strong>Size</strong>: ~2% of total code</li>
+</ul>
+<h4 id="webassembly-wasmjsmain">WebAssembly (<code>wasmJsMain/</code>)</h4>
+<ul>
+<li><strong>Entry Point</strong>: <code>main.kt</code> – ComposeViewport</li>
+<li><strong>Calendar Integration</strong>: Unavailable (returns failure)</li>
+<li><strong>HTTP Client</strong>: JavaScript fetch API</li>
+<li><strong>Size</strong>: ~2% of total code</li>
+</ul>
+<hr />
+<h2 id="gradle-configuration">Gradle Configuration</h2>
+<h3 id="key-configuration-file-buildgradlekts">Key Configuration File: <code>build.gradle.kts</code></h3>
+<h4 id="target-definitions">Target Definitions</h4>
+<pre><code class="language-kotlin">kotlin {
+    // Android: Standard Android Gradle Plugin target
+    androidTarget { 
+        compilerOptions { jvmTarget.set(JvmTarget.JVM_11) } 
+    }
+
+    // iOS: Two targets for device and simulator
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget -&gt;
+        iosTarget.binaries.framework {
+            baseName = &quot;ComposeApp&quot;
+            isStatic = true
+        }
+    }
+
+    // Desktop: Standard JVM target
+    jvm()
+
+    // Web: JavaScript browser target
+    js {
+        browser {
+            testTask {
+                // Skip JS tests unless Chrome is configured
+                enabled = providers.environmentVariable(&quot;CHROME_BIN&quot;).isPresent
+            }
+        }
+        binaries.executable()
+    }
+
+    // WebAssembly: Experimental Wasm target
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            testTask {
+                enabled = providers.environmentVariable(&quot;CHROME_BIN&quot;).isPresent
+            }
+        }
+        binaries.executable()
+    }
+}
+</code></pre>
+<h4 id="platform-specific-dependencies">Platform-Specific Dependencies</h4>
+<pre><code class="language-kotlin">sourceSets {
+    // Shared by all platforms
+    commonMain.dependencies {
+        implementation(uiLibs.compose.runtime)
+        implementation(uiLibs.ktor.client.core)
+        implementation(uiLibs.kotlinx.serialization.json)
+    }
+
+    // Android only
+    androidMain.dependencies {
+        implementation(uiLibs.ktor.client.okhttp)
+        implementation(uiLibs.kalendar.kit)  // Calendar integration
+    }
+
+    // iOS only
+    iosMain.dependencies {
+        implementation(uiLibs.ktor.client.darwin)  // Native HTTP
+        implementation(uiLibs.kalendar.kit)
+    }
+
+    // Desktop only
+    jvmMain.dependencies {
+        implementation(compose.desktop.currentOs)
+        implementation(uiLibs.kotlinx.coroutinesSwing)
+    }
+
+    // Web only
+    jsMain.dependencies {
+        implementation(uiLibs.ktor.client.js)  // fetch-based HTTP
+    }
+}
+</code></pre>
+<h3 id="build-phases">Build Phases</h3>
+<ol>
+<li><strong>Compile Metadata</strong> (<code>compileCommonMainKotlinMetadata</code>)</li>
+<li>Validates shared code for all platforms</li>
+<li>
+<p>Generates expect/actual mappings</p>
+</li>
+<li>
+<p><strong>Platform-Specific Compilation</strong></p>
+</li>
+<li><code>compileKotlinAndroid</code> → Android bytecode</li>
+<li><code>compileKotlinIosArm64</code>, <code>compileKotlinIosSimulatorArm64</code> → Native binaries</li>
+<li><code>compileKotlinJvm</code> → JVM bytecode</li>
+<li><code>compileKotlinJs</code> → JavaScript</li>
+<li>
+<p><code>compileKotlinWasmJs</code> → WebAssembly</p>
+</li>
+<li>
+<p><strong>Framework Generation</strong> (iOS only)</p>
+</li>
+<li><code>linkDebugFrameworkIosSimulatorArm64</code> → Simulator framework</li>
+<li>
+<p><code>embedAndSignAppleFrameworkForXcode</code> → Link to Xcode project</p>
+</li>
+<li>
+<p><strong>Assembly</strong></p>
+</li>
+<li>Android: <code>assembleDebug</code> → APK</li>
+<li>iOS: Xcode build → IPA</li>
+<li>JVM: <code>jar</code> / <code>distZip</code> → Distributions</li>
+<li>Web: Bundle → Static files</li>
+</ol>
+<hr />
+<h2 id="platform-entry-points">Platform Entry Points</h2>
+<h3 id="android-androidmainmainactivitykt">Android (<code>androidMain/MainActivity.kt</code>)</h3>
+<pre><code class="language-kotlin">class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+
+        setContent { 
+            App(habitCalendarLauncher = rememberHabitCalendarLauncher())
+        }
+    }
+}
+</code></pre>
+<p><strong>What happens</strong>:
+1. Android system creates MainActivity
+2. Jetpack Compose replaces the entire view hierarchy
+3. Platform-specific calendar launcher is injected
+4. <code>App()</code> composable is rendered into the activity</p>
+<h3 id="ios-iosmainmainviewcontrollerkt">iOS (<code>iosMain/MainViewController.kt</code>)</h3>
+<pre><code class="language-kotlin">fun MainViewController() =
+  ComposeUIViewController {
+    App(habitCalendarLauncher = rememberHabitCalendarLauncher())
+  }
+    .also { viewController -&gt;
+      IOSCalendarPlatform.initializeCalendarEventManager(viewController)
+    }
+</code></pre>
+<p><strong>What happens</strong>:
+1. Kotlin/Native creates a <code>UIViewController</code>
+2. ComposeUIViewController wraps Compose rendering
+3. Calendar manager is initialized with the view controller (for event kit)
+4. SwiftUI wrapper (<code>ContentView.swift</code>) bridges the gap</p>
+<h3 id="jvm-jvmmainmainkt">JVM (<code>jvmMain/main.kt</code>)</h3>
+<pre><code class="language-kotlin">fun main() = application {
+    Window(onCloseRequest = ::exitApplication, title = &quot;HabitQuest&quot;) {
+        App()
+    }
+}
+</code></pre>
+<p><strong>What happens</strong>:
+1. Compose Desktop window is created
+2. Main menu bar and window chrome are rendered
+3. App composable fills the window
+4. Desktop-specific window management occurs</p>
+<h3 id="javascript-jsmainmainkt-wasm-wasmjsmainmainkt">JavaScript (<code>jsMain/main.kt</code>) &amp; Wasm (<code>wasmJsMain/main.kt</code>)</h3>
+<pre><code class="language-kotlin">fun main() {
+    ComposeViewport { App() }
+}
+</code></pre>
+<p><strong>What happens</strong>:
+1. Kotlin/JS or Kotlin/Wasm finds the HTML DOM element with ID "root"
+2. ComposeViewport renders Compose into the DOM
+3. CSS and JavaScript event handling bridge browser to Kotlin</p>
+<hr />
+<h2 id="cross-cutting-concerns">Cross-Cutting Concerns</h2>
+<h3 id="1-serialization-mapping">1. Serialization &amp; Mapping</h3>
+<p>All JSON ↔ Kotlin conversions happen in infrastructure mappers:</p>
+<pre><code class="language-kotlin">// Shared DTO parser
+internal fun parseHabitList(payload: JsonArray): List&lt;HabitListItem&gt; {
+    // Platform-independent parsing logic
+}
+
+// Used by all platforms when receiving API responses
+</code></pre>
+<p><strong>Benefit</strong>: Single source of truth for data transformation; easy to maintain.</p>
+<h3 id="2-calendar-feature-integration-pattern">2. Calendar Feature Integration Pattern</h3>
+<h4 id="shared-contract-habitcalendarlauncherkt">Shared Contract (<code>HabitCalendarLauncher.kt</code>)</h4>
+<pre><code class="language-kotlin">sealed interface HabitCalendarLaunchResult {
+    data object Success : HabitCalendarLaunchResult
+    data class Failure(val message: String) : HabitCalendarLaunchResult
+}
+
+typealias HabitCalendarLauncher = 
+    suspend (HabitCalendarEntry) -&gt; HabitCalendarLaunchResult
+
+fun defaultHabitCalendarLauncher(): HabitCalendarLauncher = {
+    HabitCalendarLaunchResult.Failure(&quot;Calendar integration not available&quot;)
+}
+</code></pre>
+<h4 id="shared-presentation-habitspagekt">Shared Presentation (<code>HabitsPage.kt</code>)</h4>
+<pre><code class="language-kotlin">onAddToCalendar = calendarEntry?.let { entry -&gt;
+    {
+        scope.launch {
+            when (val result = habitCalendarLauncher(entry)) {
+                HabitCalendarLaunchResult.Success -&gt;
+                    actionMessage = &quot;Calendar event added: ${habit.title}&quot;
+                is HabitCalendarLaunchResult.Failure -&gt;
+                    actionMessage = &quot;Calendar error: ${result.message}&quot;
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>How each platform implements it</strong>:</p>
+<p><strong>Android</strong> (<code>HabitCalendarLauncher.android.kt</code>):</p>
+<pre><code class="language-kotlin">@Composable
+fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
+    val context = LocalContext.current
+    val manager = remember(context) { 
+        CalendarEventManager().apply { setup(context) } 
+    }
+    return remember(manager) {
+        { entry -&gt;
+            try {
+                manager.createEvent(
+                    Event(
+                        title = entry.title,
+                        startDate = entry.startDateTime,
+                        endDate = ...,
+                        notes = entry.description,
+                    )
+                )
+                HabitCalendarLaunchResult.Success
+            } catch (error: Throwable) {
+                HabitCalendarLaunchResult.Failure(error.message ?: &quot;...&quot;)
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>iOS</strong> (<code>HabitCalendarLauncher.ios.kt</code>):</p>
+<pre><code class="language-kotlin">@Composable
+fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
+    val manager = remember { IOSCalendarPlatform.manager }
+    return remember(manager) {
+        { entry -&gt;
+            try {
+                manager.createEvent(Event(...))
+                HabitCalendarLaunchResult.Success
+            } catch (error: Throwable) {
+                HabitCalendarLaunchResult.Failure(...)
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>iOS Platform Setup</strong> (<code>IOSCalendarPlatform.kt</code>):</p>
+<pre><code class="language-kotlin">object IOSCalendarPlatform {
+    val manager: CalendarEventManager = CalendarEventManager()
+
+    fun initializeCalendarEventManager(viewController: UIViewController) {
+        manager.setPresentingViewController(viewController)
+    }
+}
+</code></pre>
+<p><strong>iOS Initialization</strong> (<code>MainViewController.kt</code>):</p>
+<pre><code class="language-kotlin">fun MainViewController() =
+    ComposeUIViewController { App(habitCalendarLauncher = ...) }
+        .also { viewController -&gt;
+            IOSCalendarPlatform.initializeCalendarEventManager(viewController)
+        }
+</code></pre>
+<p><strong>iOS Permissions</strong> (<code>Info.plist</code>):</p>
+<pre><code class="language-xml">&lt;key&gt;NSCalendarsUsageDescription&lt;/key&gt;
+&lt;string&gt;HabitQuest needs calendar access to add your scheduled habits as events.&lt;/string&gt;
+</code></pre>
+<p><strong>Desktop/Web</strong> (<code>HabitCalendarLauncher.jvm.kt</code>, etc.):</p>
+<pre><code class="language-kotlin">@Composable
+fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
+    return remember {
+        {
+            HabitCalendarLaunchResult.Failure(&quot;Calendar unavailable on this platform&quot;)
+        }
+    }
+}
+</code></pre>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>This architecture scales well as the team and application grow.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../ddd/adr/adr-index/" class="btn btn-neutral float-left" title="Architecture Decision Records"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../microservices-patterns/" class="btn btn-neutral float-right" title="Microservices Patterns">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../ddd/adr/adr-index/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../microservices-patterns/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

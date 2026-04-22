@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Guild - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Guild";
+        var mkdocs_page_input_path = "domain/guild.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Guild</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#organizational-structure">Organizational Structure</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#invite-system">Invite System</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#valid-state-transitions">Valid State Transitions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-invariants">Guild Invariants</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/ci-cd/">CI/CD</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Overview</li>
+      <li class="breadcrumb-item active">Guild</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="domain-guilds">Domain: Guilds</h1>
+<p>A <strong>Guild</strong> is a group of players who come together to collaborate and face common challenges.
+It is a social entity that allows players to:</p>
+<ul>
+<li>Join forces to fight boss enemies</li>
+<li>Compete with other guilds via a global leaderboard</li>
+<li>Organize themselves through roles and hierarchies</li>
+<li>Invite new members and manage membership</li>
+</ul>
+<p>Each guild member is identified by:</p>
+<ul>
+<li>A unique <strong>Avatar ID</strong> that identifies them in the system</li>
+<li>A <strong>Nickname</strong> visible to other members</li>
+<li>A <strong>Role</strong> within the guild</li>
+</ul>
+<h3 id="organizational-structure">Organizational Structure</h3>
+<p>Each guild has a hierarchical structure with three roles:</p>
+<ol>
+<li><strong>Leader</strong> (Guild Master)</li>
+<li>The one who created the guild</li>
+<li>Has full control over the guild</li>
+<li>Can invite new members</li>
+<li>Can remove members</li>
+<li>
+<p>Can promote members to other roles</p>
+</li>
+<li>
+<p><strong>Officer</strong></p>
+</li>
+<li>Intermediate role of trust</li>
+<li>Obtained through promotion by the Leader</li>
+<li>
+<p>Has no particular administrative powers</p>
+</li>
+<li>
+<p><strong>Member</strong></p>
+</li>
+<li>Base role of all new members</li>
+<li>Can participate in battles</li>
+<li>Can leave the guild voluntarily</li>
+</ol>
+<h3 id="invite-system">Invite System</h3>
+<p>The process of joining a guild works through an invite system:</p>
+<ol>
+<li>Only the <strong>Leader</strong> can send invites</li>
+<li>An invite is composed of:</li>
+<li>Unique invite ID</li>
+<li>ID of the inviting guild</li>
+<li>ID of the avatar to invite</li>
+<li>
+<p>Invite expiration date</p>
+</li>
+<li>
+<p>Invites remain <strong>pending</strong> until:</p>
+</li>
+<li>The invited player accepts</li>
+<li>They expire (via the expiration date)</li>
+<li>
+<p>They are rejected</p>
+</li>
+<li>
+<p>When an invite is accepted:</p>
+</li>
+<li>The invite is removed from the pending invites list</li>
+<li>The player becomes a guild member with the <strong>Member</strong> role</li>
+</ol>
+<h3 id="valid-state-transitions">Valid State Transitions</h3>
+<p><strong>For Guilds</strong>:</p>
+<ul>
+<li>Created → Active (with members)</li>
+<li>Active → With ongoing battle</li>
+<li>Active → Cancelled</li>
+</ul>
+<h3 id="guild-invariants">Guild Invariants</h3>
+<ol>
+<li><strong>Leader Uniqueness</strong>: each guild has exactly one Leader at the time of creation</li>
+<li><strong>Authorization</strong>: only the Leader can:</li>
+<li>Send invites</li>
+<li>Remove members</li>
+<li>Promote members</li>
+<li><strong>Duplicate Prevention</strong>: it is not possible to invite an avatar who is already a guild member</li>
+<li><strong>Invite Validity</strong>: an invite can only be accepted by the correct recipient</li>
+<li><strong>ID Immutability</strong>: the guild ID cannot be modified after creation</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../avatar/" class="btn btn-neutral float-left" title="Avatar"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../battle/" class="btn btn-neutral float-right" title="Battle">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../avatar/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../battle/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

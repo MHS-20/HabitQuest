@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Quality Attribute Scenarios - HabitQuest</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quality Attribute Scenarios";
+        var mkdocs_page_input_path = "ddd/specifications/quality_attributes_scenarios.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Quality Attribute Scenarios</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#edge-service-availability-login">Edge Service — Availability (Login)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#edge-service-correctness-registration">Edge Service — Correctness (Registration)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tracking-service-performance">Tracking Service — Performance</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-service-consistency-experience-grant">Avatar Service — Consistency (Experience Grant)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#marketplace-service-transactional-integrity">Marketplace Service — Transactional Integrity</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-service-inventory-update">Avatar Service — Inventory Update</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guild-service-scalability-invite-acceptance">Guild Service — Scalability (Invite Acceptance)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#battle-service-reliability-combat-action">Battle Service — Reliability (Combat Action)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#quest-service-responsiveness">Quest Service — Responsiveness</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/ci-cd/">CI/CD</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Driven Design</li>
+      <li class="breadcrumb-item active">Quality Attribute Scenarios</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quality-attribute-scenarios">Quality Attribute Scenarios</h1>
+<h2 id="edge-service-availability-login">Edge Service — Availability (Login)</h2>
+<ul>
+<li><strong>Stimulus:</strong> A login request arrives at the system.</li>
+<li><strong>Source:</strong> Mobile or web client.</li>
+<li><strong>Environment:</strong> Normal operation, regular load.</li>
+<li><strong>Artifact:</strong> Edge Service — authentication endpoint.</li>
+<li><strong>Response:</strong> The system verifies the user's credentials, generates a session token, and returns it to the client.</li>
+<li><strong>Response Measure:</strong> ≤ 300 ms for 95% of requests.</li>
+</ul>
+<hr />
+<h2 id="edge-service-correctness-registration">Edge Service — Correctness (Registration)</h2>
+<ul>
+<li><strong>Stimulus:</strong> A registration request arrives at the system.</li>
+<li><strong>Source:</strong> New user from a mobile or web client.</li>
+<li><strong>Environment:</strong> Normal operation.</li>
+<li><strong>Artifact:</strong> Edge Service — registration endpoint.</li>
+<li><strong>Response:</strong> The system creates the user account and the associated avatar profile as an atomic operation. If either creation fails, the entire operation is rolled back and an explicit error is returned.</li>
+<li><strong>Response Measure:</strong> No partial registration is observable by the client: either both resources are created, or neither is.</li>
+</ul>
+<hr />
+<h2 id="tracking-service-performance">Tracking Service — Performance</h2>
+<ul>
+<li><strong>Stimulus:</strong> A user requests the list of habits associated with their avatar.</li>
+<li><strong>Source:</strong> Authenticated user from a web or mobile client.</li>
+<li><strong>Environment:</strong> Typical usage load.</li>
+<li><strong>Artifact:</strong> Tracking Service — habit query endpoint.</li>
+<li><strong>Response:</strong> The system returns all habits belonging to the avatar, along with their full metadata.</li>
+<li><strong>Response Measure:</strong> ≤ 500 ms for 95% of requests.</li>
+</ul>
+<hr />
+<h2 id="avatar-service-consistency-experience-grant">Avatar Service — Consistency (Experience Grant)</h2>
+<ul>
+<li><strong>Stimulus:</strong> A user completes a habit.</li>
+<li><strong>Source:</strong> Tracking Service.</li>
+<li><strong>Environment:</strong> Normal operation, synchronous processing.</li>
+<li><strong>Artifact:</strong> Avatar Service — experience update endpoint.</li>
+<li><strong>Response:</strong> The system updates the avatar's experience points, checks for level-up conditions, and unlocks new abilities if applicable. State is persisted before any downstream notification is triggered.</li>
+<li><strong>Response Measure:</strong> State persisted within 500 ms of the request.</li>
+</ul>
+<hr />
+<h2 id="marketplace-service-transactional-integrity">Marketplace Service — Transactional Integrity</h2>
+<ul>
+<li><strong>Stimulus:</strong> A user purchases an item in the marketplace.</li>
+<li><strong>Source:</strong> Authenticated client.</li>
+<li><strong>Environment:</strong> Normal operating conditions.</li>
+<li><strong>Artifact:</strong> Marketplace Service — item purchase endpoint.</li>
+<li><strong>Response:</strong> The system deducts the required currency from the avatar, adds the item to the inventory, and updates the marketplace. If any step fails, all previously completed operations are compensated and an explicit error is returned.</li>
+<li><strong>Response Measure:</strong> No partial update is observable by the client: the purchase either succeeds completely or is fully rolled back.</li>
+</ul>
+<hr />
+<h2 id="avatar-service-inventory-update">Avatar Service — Inventory Update</h2>
+<ul>
+<li><strong>Stimulus:</strong> A purchase in the Marketplace is confirmed.</li>
+<li><strong>Source:</strong> Marketplace Service.</li>
+<li><strong>Environment:</strong> Synchronous processing within a purchase flow.</li>
+<li><strong>Artifact:</strong> Avatar Service — inventory management endpoint.</li>
+<li><strong>Response:</strong> The system adds the purchased item to the avatar's inventory and persists the updated state.</li>
+<li><strong>Response Measure:</strong> The updated inventory is reflected in subsequent queries within 500 ms of the request.</li>
+</ul>
+<hr />
+<h2 id="guild-service-scalability-invite-acceptance">Guild Service — Scalability (Invite Acceptance)</h2>
+<ul>
+<li><strong>Stimulus:</strong> 50 users concurrently submit an invite acceptance request to the same guild.</li>
+<li><strong>Source:</strong> Multiple authenticated users.</li>
+<li><strong>Environment:</strong> High but expected load.</li>
+<li><strong>Artifact:</strong> Guild Service — invite acceptance endpoint.</li>
+<li><strong>Response:</strong> The system handles concurrent requests while preserving guild state consistency (no duplicate members, no lost updates).</li>
+<li><strong>Response Measure:</strong> ≥ 95% of requests completed successfully within 1 second.</li>
+</ul>
+<hr />
+<h2 id="battle-service-reliability-combat-action">Battle Service — Reliability (Combat Action)</h2>
+<ul>
+<li><strong>Stimulus:</strong> A guild member performs an attack against the boss.</li>
+<li><strong>Source:</strong> Member of a guild with an active battle.</li>
+<li><strong>Environment:</strong> Active combat session.</li>
+<li><strong>Artifact:</strong> Battle Service — damage processing endpoint.</li>
+<li><strong>Response:</strong> The system verifies that it is the player's turn, computes the action outcome (ongoing, victory, or defeat), and updates the state of all involved avatars accordingly, distributing rewards or applying penalties.</li>
+<li><strong>Response Measure:</strong> Response to the combat action delivered within ≤ 300 ms.</li>
+</ul>
+<hr />
+<h2 id="quest-service-responsiveness">Quest Service — Responsiveness</h2>
+<ul>
+<li><strong>Stimulus:</strong> A user requests quest details or their current progress.</li>
+<li><strong>Source:</strong> Authenticated client.</li>
+<li><strong>Environment:</strong> Normal load.</li>
+<li><strong>Artifact:</strong> Quest Service — quest detail and progress endpoints.</li>
+<li><strong>Response:</strong> The system returns the requested quest data. For progress queries, it refreshes the status of active quests, applies any expiry penalties, and computes the completion percentage for each associated habit.</li>
+<li><strong>Response Measure:</strong> ≤ 600 ms for quest detail requests; ≤ 800 ms for progress requests (due to state refresh and interactions with the Avatar Service).</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quality_attributes/" class="btn btn-neutral float-left" title="Quality Attributes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../../domain/avatar/" class="btn btn-neutral float-right" title="Avatar">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../quality_attributes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../../domain/avatar/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

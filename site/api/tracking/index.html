@@ -43,43 +43,68 @@
                 <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
                 </li>
               </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/requirements/">Requirements</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
               </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes/">Quality Attributes</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
               </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/ci-cd/">CI/CD</a>
+                  </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/ubiquitous_language/">Ubiquitous Language</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/user_stories/">User Stories</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventFlows/event_flows/">Event Flows</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../interactions/interactions/">Interactions</a>
-                </li>
-              </ul>
-              <p class="caption"><span class="caption-text">API</span></p>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
                   </li>
@@ -121,6 +146,10 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#get-history">Get History</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-habits-by-avatar">Get Habits by Avatar</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-history-by-avatar">Get History by Avatar</a>
+    </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#attending-a-habit">Attending a Habit</a>
@@ -142,6 +171,15 @@
                   <li class="toctree-l1"><a class="reference internal" href="../notification/">Notifications</a>
                   </li>
               </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
@@ -156,7 +194,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">API</li>
+          <li class="breadcrumb-item">REST APIs</li>
       <li class="breadcrumb-item active">Habits (Tracking)</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -182,7 +220,10 @@
   &quot;description&quot;: &quot;string&quot;,
   &quot;recurrenceType&quot;: &quot;DAILY | WEEKLY | MONTHLY&quot;,
   &quot;dayOfWeek&quot;: &quot;MONDAY&quot;,
-  &quot;dayOfMonth&quot;: 1
+  &quot;dayOfMonth&quot;: 1,
+  &quot;tags&quot;: [&quot;health&quot;, &quot;exercise&quot;],
+  &quot;associatedQuestId&quot;: &quot;string&quot;,
+  &quot;sourceHabitId&quot;: &quot;string&quot;
 }
 </code></pre>
 <table>
@@ -224,9 +265,24 @@
 <td>Conditional</td>
 <td>Required when <code>recurrenceType</code> is <code>MONTHLY</code></td>
 </tr>
+<tr>
+<td><code>tags</code></td>
+<td>No</td>
+<td>Optional list of tags attached to the habit at creation time</td>
+</tr>
+<tr>
+<td><code>associatedQuestId</code></td>
+<td>No</td>
+<td>Links the habit to a quest when the habit originates from quest replication</td>
+</tr>
+<tr>
+<td><code>sourceHabitId</code></td>
+<td>No</td>
+<td>Identifies the upstream habit when this habit is cloned from another source</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Response <code>200 OK</code>:</strong></p>
+<p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
   &quot;_links&quot;: { ... }
@@ -251,6 +307,7 @@
   &quot;lastAttendedDate&quot;: &quot;2024-01-15T08:00:00&quot;,
   &quot;nextRecurrenceDate&quot;: &quot;2024-01-22T08:00:00&quot;,
   &quot;associatedQuestId&quot;: &quot;string | null&quot;,
+  &quot;sourceHabitId&quot;: &quot;string | null&quot;,
   &quot;_links&quot;: { ... }
 }
 </code></pre>
@@ -327,6 +384,14 @@
   ]
 }
 </code></pre>
+<h3 id="get-habits-by-avatar">Get Habits by Avatar</h3>
+<p><strong><code>GET /api/v1/habits/avatar/{avatarId}</code></strong></p>
+<p>Returns the active habits belonging to the avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Collection of habit objects.</p>
+<h3 id="get-history-by-avatar">Get History by Avatar</h3>
+<p><strong><code>GET /api/v1/habits/avatar/{avatarId}/history</code></strong></p>
+<p>Returns the aggregated habit history for the avatar across all of their habits.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Collection of habit history events.</p>
 <hr />
 <h2 id="attending-a-habit">Attending a Habit</h2>
 <h3 id="mark-habit-as-attended">Mark Habit as Attended</h3>

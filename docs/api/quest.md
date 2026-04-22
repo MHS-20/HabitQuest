@@ -23,7 +23,7 @@ Creates a new quest.
 }
 ```
 
-**Response `200 OK`:**
+**Response `201 Created`:**
 
 ```json
 {
@@ -180,6 +180,14 @@ Adds a habit (identified by `habitId`) to this quest, along with its metadata. T
 ```
 
 **Response `204 No Content`**
+
+### Get Active Quest Progress
+
+**`GET /api/v1/quests/progress/{avatarId}`**
+
+Returns the active quest progress for an avatar.
+
+**Response `200 OK`:** Collection of quest progress entries.
 
 ### Remove Habit from Quest
 
