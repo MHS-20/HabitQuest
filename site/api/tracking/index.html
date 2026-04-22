@@ -285,7 +285,9 @@
 <p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/habits/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -308,7 +310,9 @@
   &quot;nextRecurrenceDate&quot;: &quot;2024-01-22T08:00:00&quot;,
   &quot;associatedQuestId&quot;: &quot;string | null&quot;,
   &quot;sourceHabitId&quot;: &quot;string | null&quot;,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/habits/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -380,18 +384,53 @@
 <p>Returns the full completion history of the habit.</p>
 <pre><code class="language-json">{
   &quot;history&quot;: [
-    { &quot;date&quot;: &quot;2024-01-08T08:00:00&quot; }
+    {
+      &quot;eventType&quot;: &quot;HabitAttended&quot;,
+      &quot;habitId&quot;: &quot;string&quot;,
+      &quot;avatarId&quot;: &quot;string&quot;,
+      &quot;occurredAt&quot;: &quot;2024-01-08T08:00:00&quot;,
+      &quot;details&quot;: &quot;Completed a morning run&quot;
+    }
   ]
 }
 </code></pre>
 <h3 id="get-habits-by-avatar">Get Habits by Avatar</h3>
 <p><strong><code>GET /api/v1/habits/avatar/{avatarId}</code></strong></p>
 <p>Returns the active habits belonging to the avatar.</p>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of habit objects.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Plain JSON array of habit objects.</p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;string&quot;,
+    &quot;avatarId&quot;: &quot;string&quot;,
+    &quot;title&quot;: &quot;Morning Run&quot;,
+    &quot;description&quot;: &quot;Run 5km every morning.&quot;,
+    &quot;tags&quot;: [&quot;health&quot;, &quot;fitness&quot;],
+    &quot;recurrence&quot;: {
+      &quot;type&quot;: &quot;WEEKLY&quot;,
+      &quot;dayOfMonth&quot;: null,
+      &quot;dayOfWeek&quot;: &quot;MONDAY&quot;
+    },
+    &quot;lastAttendedDate&quot;: &quot;2024-01-15T08:00:00&quot;,
+    &quot;nextRecurrenceDate&quot;: &quot;2024-01-22T08:00:00&quot;,
+    &quot;associatedQuestId&quot;: &quot;string | null&quot;,
+    &quot;sourceHabitId&quot;: &quot;string | null&quot;
+  }
+]
+</code></pre>
 <h3 id="get-history-by-avatar">Get History by Avatar</h3>
 <p><strong><code>GET /api/v1/habits/avatar/{avatarId}/history</code></strong></p>
 <p>Returns the aggregated habit history for the avatar across all of their habits.</p>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of habit history events.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Plain JSON array of habit history events.</p>
+<pre><code class="language-json">[
+  {
+    &quot;eventType&quot;: &quot;HabitAttended&quot;,
+    &quot;habitId&quot;: &quot;string&quot;,
+    &quot;avatarId&quot;: &quot;string&quot;,
+    &quot;occurredAt&quot;: &quot;2024-01-08T08:00:00&quot;,
+    &quot;details&quot;: &quot;Completed a morning run&quot;
+  }
+]
+</code></pre>
 <hr />
 <h2 id="attending-a-habit">Attending a Habit</h2>
 <h3 id="mark-habit-as-attended">Mark Habit as Attended</h3>
@@ -414,6 +453,10 @@
 <tr>
 <td><code>400 Bad Request</code></td>
 <td>Invalid recurrence configuration or business rule violation</td>
+</tr>
+<tr>
+<td><code>502 Bad Gateway</code></td>
+<td>Downstream quest synchronization failed while processing habit attendance</td>
 </tr>
 <tr>
 <td><code>404 Not Found</code></td>
