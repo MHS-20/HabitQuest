@@ -9,13 +9,13 @@ public class AvatarCommands {
 
   public record UpdateNameCommand(String name) implements Command {}
 
-  public record MoneyCommand(int amount) {}
+  public record MoneyCommand(int amount)  implements Command {}
 
-  public record SpendManaCommand(int amount) {}
+  public record SpendManaCommand(int amount) implements Command {}
 
-  public record GrantExperienceCommand(int amount) {}
+  public record GrantExperienceCommand(int amount)  implements Command {}
 
-  public record ApplyDamageCommand(int amount) {}
+  public record ApplyDamageCommand(int amount) implements Command {}
 
   public record UsePotionCommand(String name, String description, Integer power)
       implements Command {}
