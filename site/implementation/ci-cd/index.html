@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>CI/CD - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "CI/CD";
+        var mkdocs_page_input_path = "implementation/ci-cd.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">CI/CD</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#workflow-1-buildyml-build-and-package">Workflow 1 — build.yml: Build and Package</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#validation">Validation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#modified-services-detection">Modified Services Detection</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#build-and-test">Build and Test</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#package-scan-and-publish">Package, Scan and Publish</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#workflow-2-build_uiyml-build-and-package-multiplatform-ui">Workflow 2 — build_ui.yml: Build and Package Multiplatform UI</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#workflow-3-semantic-releaseyml-semantic-release">Workflow 3 — semantic-release.yml: Semantic Release</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#semantic-versioning-calculation">Semantic Versioning Calculation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#docker-image-retag">Docker Image Retag</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#workflow-4-update_manifestyml-update-manifest">Workflow 4 — update_manifest.yml: Update Manifest</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#kustomize-manifest-update">Kustomize Manifest Update</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#workflow-5-provisionyml-terraform-provisioning">Workflow 5 — provision.yml: Terraform Provisioning</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#authentication-with-oidc">Authentication with OIDC</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#provisioning-with-terraform">Provisioning with Terraform</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#deploy-on-eks">Deploy on EKS</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#overall-integration">Overall Integration</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">CI/CD</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="cicd-pipeline-with-github-actions">CI/CD Pipeline with GitHub Actions</h1>
+<h2 id="introduction">Introduction</h2>
+<p>The Continuous Integration and Continuous Delivery system is entirely managed through <strong>GitHub Actions</strong> and is organized into five distinct workflows.
+The workflows are not isolated: they communicate with each other via the <strong><code>repository_dispatch</code></strong> mechanism, forming an end-to-end event-driven pipeline that goes from code commit all the way to infrastructure deployment on AWS EKS.</p>
+<h2 id="workflow-1-buildyml-build-and-package">Workflow 1 — <code>build.yml</code>: Build and Package</h2>
+<p>This is the main workflow, the entry point of the entire pipeline. It is executed on every <code>push</code> and every <code>pull_request</code> on any branch.</p>
+<h3 id="validation">Validation</h3>
+<p>Before any operation on the code, two parallel jobs act as <strong>quality gates</strong>:</p>
+<ul>
+<li><strong><code>commit-lint</code></strong>: verifies that every commit message complies with the <strong>Conventional Commits</strong> specification, a prerequisite for automatic semantic versioning calculation in the next workflow. The job is skipped for Dependabot commits.</li>
+<li><strong><code>k8s-validate</code></strong>: installs <code>kustomize</code> and <code>kubeconform</code> and validates the Kubernetes manifests present in the repository. <code>kustomize build k8s</code> generates the final manifest (including overlays) and <code>kubeconform</code> verifies structural correctness in strict mode against the official Kubernetes schema. This prevents the deployment of malformed manifests.</li>
+</ul>
+<h3 id="modified-services-detection">Modified Services Detection</h3>
+<p>One of the most significant aspects of the workflow is the <strong>incremental approach</strong>: not all microservices are recompiled on every push, but only those that have actually been modified.
+The <code>detect-changes</code> job uses a path filter to analyze the files changed in the commit and produces the list of only the affected services. This output is passed to the subsequent jobs.</p>
+<h3 id="build-and-test">Build and Test</h3>
+<p>The <code>build</code> job receives the list of modified services and launches a <strong>build matrix</strong>: a parallel job is executed for each modified service.
+For each service:</p>
+<ol>
+<li>JDK 21 is configured</li>
+<li>The Gradle build is executed, which includes compilation, tests and other quality checks (lint, checkstyle, etc.)</li>
+<li>The produced JAR is uploaded as a GitHub Actions <strong>artifact</strong>, uniquely identified by service name.</li>
+<li>The <code>build-aggregate</code> job acts as a synchronization point: it collects the results of all parallel jobs and fails the entire pipeline if even one has produced an error, ensuring that the next step only proceeds when all builds are green.</li>
+</ol>
+<h3 id="package-scan-and-publish">Package, Scan and Publish</h3>
+<p>This job, also in matrix, handles containerization and image publishing.
+It runs only if <code>build-aggregate</code> has succeeded.</p>
+<p>For each service:</p>
+<ol>
+<li><strong>Artifact download</strong>: retrieves the JAR produced by the previous job.</li>
+<li><strong>Authentication on GHCR</strong>: accesses the GitHub Container Registry using the automatic <code>GITHUB_TOKEN</code>.</li>
+<li><strong>Docker image build</strong>: builds the image using the individual service's <code>Dockerfile</code>, tagging it with the commit SHA (<code>github.sha</code>), which guarantees uniqueness and traceability between commit and image.</li>
+<li><strong>Vulnerability Scan with Grype</strong>: before pushing, the image is scanned with <strong>Grype</strong> for known vulnerabilities. The report is produced in SARIF format and uploaded to GitHub Security, visible in the repository's <em>Security</em> tab.</li>
+<li><strong>Image push</strong>: the image is published on GHCR with two tags: the <strong>commit SHA</strong> (for traceability) and <strong><code>latest</code></strong> (for quick reference).</li>
+<li><strong>Next workflow trigger</strong>: if the push occurred on the <code>main</code> branch, a <code>repository_dispatch</code> event of type <code>microservice_semantic_release</code> is emitted, passing the service name and the image path on GHCR as payload.</li>
+</ol>
+<h2 id="workflow-2-build_uiyml-build-and-package-multiplatform-ui">Workflow 2 — <code>build_ui.yml</code>: Build and Package Multiplatform UI</h2>
+<p>This workflow is dedicated exclusively to the <strong>HabitQuest UI</strong> frontend, developed with <strong>Kotlin Multiplatform (KMP)</strong> and Compose Multiplatform.
+It is triggered only on push or PR that touch the <code>habitquest-ui/**</code> directory, plus the workflow file itself.</p>
+<p>The workflow is organized into five jobs:</p>
+<ol>
+<li><strong><code>commit-lint</code></strong>: same Conventional Commits validation as the backend workflow.</li>
+<li><strong><code>static-scan</code></strong>: static vulnerability scan of the source code (not the image) via <code>anchore/scan-action</code>, with SARIF report upload to GitHub Security.</li>
+<li><strong><code>build</code></strong>: the central job executes the KMP build with Gradle. Since KMP targets also include Kotlin/JS, both JDK 21 and Node.js 18 are configured.</li>
+<li><strong><code>semantic-release</code></strong>: runs only on a successful push to <code>main</code> and emits a <code>repository_dispatch</code> event of type <code>ui_semantic_release</code>, passing only the service name (<code>habitquest-ui</code>) so the shared release workflow can detect the UI branch of the pipeline.</li>
+<li><strong><code>ui-final-status</code></strong>: aggregates the results of all jobs and fails the workflow if any of them failed.</li>
+</ol>
+<p>This keeps PRs and branch pushes focused on validation, while the release step remains restricted to <code>main</code>.</p>
+<h2 id="workflow-3-semantic-releaseyml-semantic-release">Workflow 3 — <code>semantic-release.yml</code>: Semantic Release</h2>
+<p>This workflow is triggered exclusively by <code>repository_dispatch</code> events emitted by the build workflows at the end of a successful push on <code>main</code>.
+It accepts both <code>microservice_semantic_release</code> and <code>ui_semantic_release</code> events.</p>
+<h3 id="semantic-versioning-calculation">Semantic Versioning Calculation</h3>
+<p>The workflow uses <strong><code>semantic-release</code></strong> with the <strong><code>semantic-release-monorepo</code></strong> plugin, which adapts the standard semantic-release behavior to monorepo repositories.
+Each service has its own independent versioning scope, with tags in the format <code>&lt;service-name&gt;-v&lt;MAJOR&gt;.&lt;MINOR&gt;.&lt;PATCH&gt;</code>.
+When the payload identifies <code>habitquest-ui</code>, the workflow sets <code>RELEASE_DIR=habitquest-ui</code>; for backend services it uses <code>services/&lt;service-name&gt;</code>.</p>
+<p>Versioning is calculated automatically by analyzing commit messages since the last tag:</p>
+<ul>
+<li><code>feat:</code> → <strong>MINOR</strong> increment</li>
+<li><code>fix:</code> → <strong>PATCH</strong> increment</li>
+<li><code>!</code> → <strong>MAJOR</strong> increment</li>
+</ul>
+<h3 id="docker-image-retag">Docker Image Retag</h3>
+<p>Afterwards, semantic-release takes care of creating a new tag on git and on the docker registry:</p>
+<ol>
+<li>The <code>latest</code> image is pulled from GHCR.</li>
+<li>The image is retagged with the calculated semantic version (e.g. <code>2.3.1</code>).</li>
+<li>The new version is pushed to GHCR, alongside the already existing SHA and <code>latest</code> tags.
+   If there are no relevant changes instead (e.g. only <code>chore:</code> or <code>docs:</code> commits), no tag is created and the workflow concludes without emitting subsequent events.</li>
+</ol>
+<p>For the UI release path, no image payload is provided, so the Docker retag/push steps are skipped and only the git release/tag is produced.
+For backend services, if a new version has been calculated, a second <code>repository_dispatch</code> of type <code>update_manifest</code> is emitted with a payload containing the service name, image path and semantic version.
+Each image is tagged with the <strong>commit SHA</strong> that generated it, guaranteeing bidirectional traceability: from an image running in the cluster it is always possible to trace back to the exact commit that produced it.
+The additional semantic tag instead provides human readability and allows versions to be communicated in a meaningful way.</p>
+<h2 id="workflow-4-update_manifestyml-update-manifest">Workflow 4 — <code>update_manifest.yml</code>: Update Manifest</h2>
+<p>This workflow, triggered by <code>repository_dispatch</code>, partly draws on the <strong>GitOps</strong> principle:
+the only source of truth for the state of the Kubernetes cluster is the Git repository.
+Updating the manifests in Git is equivalent to declaring the intention to deploy.
+However, fully automatic deployment has been disabled (commented out in the file),
+to avoid incurring costs on AWS, but the infrastructure would be ready to release a new version on every push to <code>main</code>.</p>
+<h3 id="kustomize-manifest-update">Kustomize Manifest Update</h3>
+<p>The <code>update</code> job modifies the image tag in the <code>kustomization.yaml</code> file of the affected service.
+Instead of committing directly to <code>main</code> (approach commented out in the file), the workflow opens a <strong>Pull Request</strong> on the <code>chore/auto-updates</code> branch.
+This introduces a human review gate (or ArgoCD approval) before the change reaches the main branch and is applied to the cluster.</p>
+<h2 id="workflow-5-provisionyml-terraform-provisioning">Workflow 5 — <code>provision.yml</code>: Terraform Provisioning</h2>
+<p>This workflow manages the provisioning of the cloud infrastructure and the deployment of platform components on Kubernetes.
+The <code>workflow_run</code> trigger links it automatically to the completion of <code>Update Manifest</code>.
+The <code>deploy</code> concurrency group with <code>cancel-in-progress: true</code> ensures that two deployments cannot run simultaneously.</p>
+<h3 id="authentication-with-oidc">Authentication with OIDC</h3>
+<p>Authentication on AWS is done via <strong>OpenID Connect (OIDC)</strong>, without the need to store AWS Access Keys as static secrets.
+GitHub Actions temporarily assumes an IAM role (<code>github-actions-terraform-role</code>), obtaining short-lived credentials.</p>
+<h3 id="provisioning-with-terraform">Provisioning with Terraform</h3>
+<p>The standard Terraform sequence is executed in the <code>./terraform</code> directory:</p>
+<ol>
+<li><strong><code>terraform init</code></strong>: initializes the remote backend (Terraform Cloud, configured via <code>TF_API_TOKEN</code>).</li>
+<li><strong><code>terraform validate</code></strong>: verifies the syntax and consistency of <code>.tf</code> files.</li>
+<li><strong><code>terraform plan</code></strong>: calculates the diff between the current state of the infrastructure and the desired state, producing a plan.</li>
+<li><strong><code>terraform apply</code></strong>: applies the plan non-interactively (<code>-auto-approve</code>).
+   The IAM role ARN is passed as a Terraform variable (<code>TF_VAR_terraform_role_arn</code>), keeping the configuration externalized.</li>
+</ol>
+<h3 id="deploy-on-eks">Deploy on EKS</h3>
+<p>After the infrastructure provisioning, <code>kubectl</code> and <code>helm</code> are installed on the runner,
+and access to the EKS cluster is configured via <code>aws eks update-kubeconfig</code>. Two shell scripts are then executed:</p>
+<ul>
+<li><strong><code>deployPlatform.sh</code></strong>: installs the platform components (likely Ingress Controller, cert-manager, and similar).</li>
+<li><strong><code>deployObservability.sh</code></strong>: installs the observability stack (Prometheus, Grafana, Loki, Tempo).</li>
+</ul>
+<h2 id="overall-integration">Overall Integration</h2>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Responsibility</th>
+<th>Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>build.yml</code></td>
+<td>CI: build, test, scan, publish</td>
+<td>Push / PR</td>
+</tr>
+<tr>
+<td><code>build_ui.yml</code></td>
+<td>CI: frontend KMP and release trigger</td>
+<td>Push / PR on <code>habitquest-ui/**</code>; <code>main</code> push dispatches <code>ui_semantic_release</code></td>
+</tr>
+<tr>
+<td><code>semantic-release.yml</code></td>
+<td>Automatic versioning</td>
+<td><code>repository_dispatch</code> from backend or UI builds</td>
+</tr>
+<tr>
+<td><code>update_manifest.yml</code></td>
+<td>GitOps: manifest update</td>
+<td><code>repository_dispatch</code> from semantic-release</td>
+</tr>
+<tr>
+<td><code>provision.yml</code></td>
+<td>IaC: infrastructure and deploy</td>
+<td>Manual / <code>workflow_run</code> from update-manifest</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../test-pyramid/" class="btn btn-neutral float-left" title="Test Pyramid"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../api/overview/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../test-pyramid/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../api/overview/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

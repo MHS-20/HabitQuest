@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Quest - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quest";
+        var mkdocs_page_input_path = "domain/quest.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Quest</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#quests-activequests">Quests &amp; ActiveQuests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#joining">Joining</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#progression-completion">Progression &amp; Completion</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#expiration">Expiration</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#domain-events">Domain Events</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/ci-cd/">CI/CD</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Overview</li>
+      <li class="breadcrumb-item active">Quest</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="domain-quest">Domain: Quest</h1>
+<p>A quest is a structured challenge that an Avatar can undertake:
+it consists of a set of habits to be respected within a defined time window,
+with a reward at stake for those who complete it.</p>
+<p>A quest is composed of:</p>
+<ul>
+<li><strong>Name</strong>: the mission title.</li>
+<li><strong>Duration</strong>: the time window within which it must be completed (expressed in days).</li>
+<li><strong>Required habits</strong>: the list of habits that the Avatar must respect during the quest. Each habit has a title, a description, optional tags and its own <strong>recurrence</strong> (daily, weekly or monthly), which determines how many times it will need to be completed over the total duration.</li>
+<li><strong>Reward</strong>: currently modeled as a <strong>monetary reward</strong>.</li>
+</ul>
+<p>The system automatically calculates the <strong>total number of required completions</strong> for each habit,
+taking into account the duration and the recurrence.</p>
+<h2 id="quests-activequests">Quests &amp; ActiveQuests</h2>
+<p>The quest exists on two distinct levels: the <strong>quest definition</strong> and the <strong>active progress</strong> of each Avatar who has joined the quest.
+<strong>The Quest (template)</strong> is the abstract definition: it has a name, a duration, a list of required habits and a reward.
+It exists independently of who is participating and their progress.
+It can be undertaken by multiple Avatars simultaneously.</p>
+<p><strong>ActiveQuests</strong> is the concrete instance of a quest for a specific Avatar:
+it is created when a specific Avatar joins the mission, keeps track of how many times each habit has been respected, and concludes when the mission is completed or expired.</p>
+<h2 id="joining">Joining</h2>
+<p>When an Avatar decides to participate in a quest, the system:</p>
+<ol>
+<li>Creates an <strong>ActiveQuests</strong> instance dedicated to that Avatar, with the start date equal to the day they join and the end date calculated by adding the quest duration.</li>
+<li>Calculates the <strong>required occurrences</strong> for each habit in the specified period.</li>
+<li>The corresponding habits are created in the Avatar's profile, linking them to the quest. This way the Avatar will find the new habits already ready in their daily tracker.</li>
+</ol>
+<p>If the Avatar has already joined the same quest previously, joining is idempotent:
+the existing instance is returned without creating a new one.</p>
+<h2 id="progression-completion">Progression &amp; Completion</h2>
+<p>Every time the completion of a habit associated with a quest is recorded,
+the attendance count in the corresponding <code>ActiveQuests</code> is updated.</p>
+<p>The system applies some validity rules:</p>
+<ul>
+<li>An attendance is accepted only if the quest is still <code>IN_PROGRESS</code>.</li>
+<li>The completion date must fall within the quest's time window (not before the start date, not beyond the end date).</li>
+<li>Attendances in excess of the required number for that habit are not counted.</li>
+</ul>
+<p>Every time an attendance is recorded, the system checks whether all habits have reached the required number of occurrences.
+In that case, the quest is marked as <strong>COMPLETED</strong> and the <code>QuestCompleted</code> event is generated.</p>
+<h3 id="expiration">Expiration</h3>
+<p>When an Avatar's progress is queried, the system automatically updates the state of active quests:
+if today's date is later than the end date and the quest is still in progress, the state transitions to <strong>EXPIRED</strong>.
+The quest expires without a reward.</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IN_PROGRESS</code></td>
+<td>The quest is active, attendances are counted</td>
+</tr>
+<tr>
+<td><code>COMPLETED</code></td>
+<td>All required habits have been respected within the deadline</td>
+</tr>
+<tr>
+<td><code>EXPIRED</code></td>
+<td>Time ran out before completion</td>
+</tr>
+</tbody>
+</table>
+<h2 id="domain-events">Domain Events</h2>
+<p>Every significant moment in the life of a quest generates an event:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When it is generated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QuestCreated</code></td>
+<td>At the creation of a new quest in the catalog</td>
+</tr>
+<tr>
+<td><code>QuestJoined</code></td>
+<td>When an Avatar joins a quest</td>
+</tr>
+<tr>
+<td><code>QuestCompleted</code></td>
+<td>When an Avatar completes all required habits</td>
+</tr>
+<tr>
+<td><code>QuestLeft</code></td>
+<td>When an Avatar abandons a quest (defined in the model, logic to be implemented)</td>
+</tr>
+<tr>
+<td><code>QuestNotCompleted</code></td>
+<td>Notification of an incomplete quest (defined in the model, logic to be implemented)</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../habit/" class="btn btn-neutral float-left" title="Habit"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../implementation/interactions/interactions/" class="btn btn-neutral float-right" title="Interactions">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../habit/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../implementation/interactions/interactions/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
