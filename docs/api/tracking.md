@@ -48,7 +48,9 @@ Creates a new habit for an avatar.
 ```json
 {
   "id": "string",
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/habits/string" }
+  }
 }
 ```
 
@@ -78,7 +80,9 @@ Returns full habit details.
   "nextRecurrenceDate": "2024-01-22T08:00:00",
   "associatedQuestId": "string | null",
   "sourceHabitId": "string | null",
-  "_links": { ... }
+  "_links": {
+    "self": { "href": "/api/v1/habits/string" }
+  }
 }
 ```
 
@@ -211,7 +215,13 @@ Returns the full completion history of the habit.
 ```json
 {
   "history": [
-    { "date": "2024-01-08T08:00:00" }
+    {
+      "eventType": "HabitAttended",
+      "habitId": "string",
+      "avatarId": "string",
+      "occurredAt": "2024-01-08T08:00:00",
+      "details": "Completed a morning run"
+    }
   ]
 }
 ```
@@ -222,7 +232,28 @@ Returns the full completion history of the habit.
 
 Returns the active habits belonging to the avatar.
 
-**Response `200 OK`:** Collection of habit objects.
+**Response `200 OK`:** Plain JSON array of habit objects.
+
+```json
+[
+  {
+    "id": "string",
+    "avatarId": "string",
+    "title": "Morning Run",
+    "description": "Run 5km every morning.",
+    "tags": ["health", "fitness"],
+    "recurrence": {
+      "type": "WEEKLY",
+      "dayOfMonth": null,
+      "dayOfWeek": "MONDAY"
+    },
+    "lastAttendedDate": "2024-01-15T08:00:00",
+    "nextRecurrenceDate": "2024-01-22T08:00:00",
+    "associatedQuestId": "string | null",
+    "sourceHabitId": "string | null"
+  }
+]
+```
 
 ### Get History by Avatar
 
@@ -230,7 +261,19 @@ Returns the active habits belonging to the avatar.
 
 Returns the aggregated habit history for the avatar across all of their habits.
 
-**Response `200 OK`:** Collection of habit history events.
+**Response `200 OK`:** Plain JSON array of habit history events.
+
+```json
+[
+  {
+    "eventType": "HabitAttended",
+    "habitId": "string",
+    "avatarId": "string",
+    "occurredAt": "2024-01-08T08:00:00",
+    "details": "Completed a morning run"
+  }
+]
+```
 
 ---
 
@@ -257,4 +300,5 @@ Records a habit completion event. This triggers gamification domain events (XP r
 | Status | Condition |
 |--------|-----------|
 | `400 Bad Request` | Invalid recurrence configuration or business rule violation |
+| `502 Bad Gateway` | Downstream quest synchronization failed while processing habit attendance |
 | `404 Not Found` | Habit not found |

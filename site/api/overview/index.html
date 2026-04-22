@@ -109,6 +109,8 @@
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#base-urls">Base URLs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#service-summary">Service Summary</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#authentication">Authentication</a>
     </li>
@@ -209,6 +211,49 @@
 </tr>
 </tbody>
 </table>
+<h2 id="service-summary">Service Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Typical create status</th>
+<th>Typical mutation status</th>
+<th>Response style notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Avatar</td>
+<td><code>201 Created</code></td>
+<td><code>204 No Content</code></td>
+<td>Mostly HATEOAS resources; <code>POST /health/damage</code> returns <code>200</code> with <code>{ "died": boolean }</code></td>
+</tr>
+<tr>
+<td>Tracking</td>
+<td><code>201 Created</code></td>
+<td><code>204 No Content</code></td>
+<td>Habit detail/property routes are HATEOAS; avatar-scoped habits/history routes return plain JSON arrays</td>
+</tr>
+<tr>
+<td>Quest</td>
+<td><code>201 Created</code></td>
+<td><code>204 No Content</code></td>
+<td>HATEOAS resources for quest endpoints, including progress wrapper resource</td>
+</tr>
+<tr>
+<td>Guild/Battle</td>
+<td><code>201 Created</code></td>
+<td><code>204 No Content</code></td>
+<td>HATEOAS resources for guild and battle queries</td>
+</tr>
+<tr>
+<td>Marketplace</td>
+<td><code>201 Created</code></td>
+<td><code>204 No Content</code></td>
+<td>HATEOAS resources for marketplace and item queries</td>
+</tr>
+</tbody>
+</table>
 <h3 id="authentication">Authentication</h3>
 <p>All endpoints are protected and require a JWT token, except for the authentication endpoints.
 The <code>/auth/login</code> and <code>/auth/register</code> endpoints authenticates users and issues JWT tokens for subsequent requests.
@@ -222,14 +267,15 @@ The login endpoint validates user credentials and returns a JWT token that encod
 <pre><code>Content-Type: application/json
 </code></pre>
 <h3 id="error-responses">Error Responses</h3>
-<p>All services follow a consistent error format:
+<p>Common status codes across services:
 | HTTP Status | Condition |
 |-------------|-----------|
 | <code>400 Bad Request</code> | Invalid input or business rule violation |
 | <code>403 Forbidden</code> | Caller lacks permission for the operation |
 | <code>404 Not Found</code> | Requested resource does not exist |
-| <code>502 Bad Gateway</code> | Downstream service communication failure |</p>
-<p><strong>Error response body:</strong></p>
+| <code>502 Bad Gateway</code> | Downstream service communication failure (for example quest/marketplace integrations) |</p>
+<p>Most <code>400</code> and <code>502</code> responses include a JSON body with a <code>message</code> field; some <code>404</code> paths return an empty body depending on service.</p>
+<p><strong>Typical error response body:</strong></p>
 <pre><code class="language-json">{
   &quot;message&quot;: &quot;Description of the error&quot;
 }

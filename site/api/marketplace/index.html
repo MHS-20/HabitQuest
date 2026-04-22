@@ -198,6 +198,7 @@
 <p><strong>Service:</strong> Marketplace Service<br />
 <strong>Base Path:</strong> <code>/api/v1/marketplaces</code></p>
 <p>The Marketplace Service provides each avatar with a personal shop. Avatars can browse available items filtered by type, purchase them using in-game currency, and sell owned items back. Buy and sell operations use a saga pattern to maintain consistency between the avatar's inventory and wallet.</p>
+<p>Responses are exposed as HATEOAS resources. The top-level marketplace response is an <code>EntityModel</code>, and item listings are returned as <code>CollectionModel&lt;EntityModel&lt;ItemResponse&gt;&gt;</code>.</p>
 <hr />
 <h2 id="endpoints">Endpoints</h2>
 <h3 id="create-marketplace">Create Marketplace</h3>
@@ -219,6 +220,7 @@
 <h3 id="get-marketplace">Get Marketplace</h3>
 <p><strong><code>GET /api/v1/marketplaces/{marketplaceId}</code></strong></p>
 <p>Returns marketplace details and its available items.</p>
+<p><code>GET /api/v1/marketplaces/by-avatar/{avatarId}</code> returns the same canonical marketplace resource for the avatar.</p>
 <p><strong>Response <code>200 OK</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
@@ -228,7 +230,8 @@
       &quot;name&quot;: &quot;Iron Sword&quot;,
       &quot;description&quot;: &quot;A sturdy iron sword.&quot;,
       &quot;power&quot;: 15,
-      &quot;price&quot;: 100
+      &quot;price&quot;: 100,
+      &quot;requiredLevel&quot;: 5
     }
   ],
   &quot;_links&quot;: { ... }
@@ -246,7 +249,8 @@
       &quot;name&quot;: &quot;Iron Sword&quot;,
       &quot;description&quot;: &quot;A sturdy iron sword.&quot;,
       &quot;power&quot;: 15,
-      &quot;price&quot;: 100
+      &quot;price&quot;: 100,
+      &quot;requiredLevel&quot;: 5
     }
   ],
   &quot;_links&quot;: { ... }
@@ -276,14 +280,15 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of item objects.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of available items.</p>
 <pre><code class="language-json">[
   {
     &quot;type&quot;: &quot;ARMOR&quot;,
     &quot;name&quot;: &quot;Leather Armor&quot;,
     &quot;description&quot;: &quot;Basic leather armor.&quot;,
     &quot;power&quot;: 5,
-    &quot;price&quot;: 50
+    &quot;price&quot;: 50,
+    &quot;requiredLevel&quot;: 1
   }
 ]
 </code></pre>
@@ -292,7 +297,7 @@
 <p><strong><code>GET /api/v1/marketplaces/{marketplaceId}/items/{itemName}</code></strong></p>
 <p>Returns a single available item by name.</p>
 <blockquote>
-<p>The current implementation expects an <code>ItemCommand</code> request body even for this lookup endpoint, because the controller resolves the item through the same mapper used for commerce commands.</p>
+<p>The current implementation expects an <code>ItemCommand</code> request body even for this lookup endpoint, because the controller resolves the item through the same mapper used for commerce commands. The <code>itemName</code> path variable is present, but the body drives the lookup today.</p>
 </blockquote>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{
@@ -304,13 +309,14 @@
   &quot;requiredLevel&quot;: 5
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong></p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS item resource.</p>
 <pre><code class="language-json">{
   &quot;type&quot;: &quot;WEAPON&quot;,
   &quot;name&quot;: &quot;Iron Sword&quot;,
   &quot;description&quot;: &quot;A sturdy iron sword.&quot;,
   &quot;power&quot;: 15,
-  &quot;price&quot;: 100
+  &quot;price&quot;: 100,
+  &quot;requiredLevel&quot;: 5
 }
 </code></pre>
 <hr />
@@ -318,13 +324,13 @@
 <h3 id="get-sold-items">Get Sold Items</h3>
 <p><strong><code>GET /api/v1/marketplaces/{marketplaceId}/sold-items</code></strong></p>
 <p>Returns items previously sold by the avatar (their inventory items listed for resale).</p>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of item objects.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of sold items.</p>
 <hr />
 <h3 id="get-sold-item-by-name">Get Sold Item by Name</h3>
 <p><strong><code>GET /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}</code></strong></p>
 <p>Returns a single sold item by name.</p>
 <blockquote>
-<p>As with available items, the current controller expects an <code>ItemCommand</code> body for this lookup.</p>
+<p>As with available items, the current controller expects an <code>ItemCommand</code> body for this lookup. The path variable is present, but the request body is what the controller converts into the item lookup value.</p>
 </blockquote>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{
@@ -336,7 +342,7 @@
   &quot;requiredLevel&quot;: 5
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong> Item object.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS item resource.</p>
 <hr />
 <h2 id="commerce">Commerce</h2>
 <h3 id="buy-item">Buy Item</h3>
@@ -370,6 +376,12 @@
 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
+<p>Errors for this endpoint map to:</p>
+<ul>
+<li><code>403 Forbidden</code> when the avatar level is below the item requirement</li>
+<li><code>404 Not Found</code> when the marketplace or item cannot be found</li>
+<li><code>502 Bad Gateway</code> when the avatar service cannot be reached</li>
+</ul>
 <hr />
 <h3 id="sell-item">Sell Item</h3>
 <p><strong><code>POST /api/v1/marketplaces/{marketplaceId}/sold-items/sell</code></strong></p>
@@ -385,6 +397,11 @@
 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
+<p>Errors for this endpoint map to:</p>
+<ul>
+<li><code>404 Not Found</code> when the marketplace or item cannot be found</li>
+<li><code>502 Bad Gateway</code> when the avatar service cannot be reached</li>
+</ul>
 <hr />
 <h2 id="error-responses">Error Responses</h2>
 <table>
@@ -396,8 +413,8 @@
 </thead>
 <tbody>
 <tr>
-<td><code>400 Bad Request</code></td>
-<td>Insufficient funds, item not found in inventory, or other business rule violation</td>
+<td><code>403 Forbidden</code></td>
+<td>Avatar level is below the item requirement (<code>InsufficientLevelException</code>)</td>
 </tr>
 <tr>
 <td><code>404 Not Found</code></td>
@@ -406,6 +423,10 @@
 <tr>
 <td><code>502 Bad Gateway</code></td>
 <td>Avatar Service communication failure during saga execution</td>
+</tr>
+<tr>
+<td><code>400 Bad Request</code></td>
+<td>Malformed request body or invalid query parameter values</td>
 </tr>
 </tbody>
 </table>

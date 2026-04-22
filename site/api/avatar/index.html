@@ -166,10 +166,6 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#unequip-item">Unequip Item</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#equip-item_1">Equip Item</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#unequip-item_1">Unequip Item</a>
-    </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#experience-level">Experience &amp; Level</a>
@@ -188,7 +184,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#take-damage">Take Damage</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#heal">Heal</a>
+    <li class="toctree-l3"><a class="reference internal" href="#use-health-potion">Use Health Potion</a>
     </li>
         </ul>
     </li>
@@ -198,7 +194,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#spend-mana">Spend Mana</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#restore-mana">Restore Mana</a>
+    <li class="toctree-l3"><a class="reference internal" href="#use-mana-potion">Use Mana Potion</a>
     </li>
         </ul>
     </li>
@@ -280,7 +276,9 @@
 <p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -296,10 +294,12 @@
   &quot;health&quot;: { &quot;current&quot;: 100, &quot;max&quot;: 100 },
   &quot;mana&quot;: { &quot;amount&quot;: 50, &quot;max&quot;: 50 },
   &quot;stats&quot;: { &quot;strength&quot;: 10, &quot;defense&quot;: 10, &quot;intelligence&quot;: 10 },
-  &quot;inventory&quot;: { &quot;id&quot;: &quot;string&quot;, &quot;items&quot;: [] },
-  &quot;equippedItems&quot;: { &quot;id&quot;: &quot;string&quot;, &quot;items&quot;: [] },
+  &quot;inventory&quot;: { &quot;items&quot;: [] },
+  &quot;equippedItems&quot;: { &quot;items&quot;: [] },
   &quot;spells&quot;: [],
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -318,13 +318,13 @@
   &quot;maxLevel&quot;: 10
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of avatar objects.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of avatar resources.</p>
 <hr />
 <h2 id="invites">Invites</h2>
 <h3 id="get-pending-invites">Get Pending Invites</h3>
 <p><strong><code>GET /api/v1/avatars/{id}/invites</code></strong></p>
 <p>Returns the pending guild invites for the avatar.</p>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of invite objects.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of invite resources.</p>
 <h3 id="receive-guild-invite">Receive Guild Invite</h3>
 <p><strong><code>POST /api/v1/avatars/{id}/invites</code></strong></p>
 <p>Stores a guild invite for the avatar.</p>
@@ -377,7 +377,6 @@
 <h3 id="get-inventory">Get Inventory</h3>
 <p><strong><code>GET /api/v1/avatars/{id}/inventory</code></strong></p>
 <pre><code class="language-json">{
-  &quot;id&quot;: &quot;string&quot;,
   &quot;items&quot;: [
     { &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
   ]
@@ -388,19 +387,20 @@
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
+<p><code>type</code> must be one of <code>WEAPON</code>, <code>ARMOR</code>, <code>HEALTH_POTION</code>, or <code>MANA_POTION</code>. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <h3 id="remove-item-from-inventory">Remove Item from Inventory</h3>
 <p><strong><code>DELETE /api/v1/avatars/{id}/inventory/items</code></strong></p>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
+<p><code>type</code> must be one of <code>WEAPON</code>, <code>ARMOR</code>, <code>HEALTH_POTION</code>, or <code>MANA_POTION</code>. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <h3 id="get-equipped-items">Get Equipped Items</h3>
 <p><strong><code>GET /api/v1/avatars/{id}/equipped-items</code></strong></p>
 <p>Returns the currently equipped items for the avatar.</p>
 <p><strong>Response <code>200 OK</code>:</strong></p>
 <pre><code class="language-json">{
-  &quot;id&quot;: &quot;string&quot;,
   &quot;items&quot;: [
     { &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
   ]
@@ -411,24 +411,14 @@
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
+<p><code>type</code> must be <code>WEAPON</code> or <code>ARMOR</code> for equip and unequip operations. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <h3 id="unequip-item">Unequip Item</h3>
 <p><strong><code>POST /api/v1/avatars/{id}/inventory/items/unequip</code></strong></p>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
-<p><strong>Response <code>204 No Content</code></strong></p>
-<h3 id="equip-item_1">Equip Item</h3>
-<p><strong><code>POST /api/v1/avatars/{id}/inventory/items/equip</code></strong></p>
-<p><strong>Request body:</strong></p>
-<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
-</code></pre>
-<p><strong>Response <code>204 No Content</code></strong></p>
-<h3 id="unequip-item_1">Unequip Item</h3>
-<p><strong><code>POST /api/v1/avatars/{id}/inventory/items/unequip</code></strong></p>
-<p><strong>Request body:</strong></p>
-<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
-</code></pre>
+<p><code>type</code> must be <code>WEAPON</code> or <code>ARMOR</code> for equip and unequip operations. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <h2 id="experience-level">Experience &amp; Level</h2>
 <h3 id="get-experience">Get Experience</h3>
@@ -459,11 +449,13 @@
 <p><strong>Response <code>200 OK</code>:</strong></p>
 <pre><code class="language-json">{ &quot;died&quot;: false }
 </code></pre>
-<h3 id="heal">Heal</h3>
-<p><strong><code>POST /api/v1/avatars/{id}/health/heal</code></strong></p>
+<h3 id="use-health-potion">Use Health Potion</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/health/potion</code></strong></p>
+<p>Uses a health potion from the avatar inventory to restore health.</p>
 <p><strong>Request body:</strong></p>
-<pre><code class="language-json">{ &quot;amount&quot;: 20 }
+<pre><code class="language-json">{ &quot;name&quot;: &quot;Health Potion&quot;, &quot;description&quot;: &quot;Restores health&quot;, &quot;power&quot;: 20 }
 </code></pre>
+<p><code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <hr />
 <h2 id="mana">Mana</h2>
@@ -477,11 +469,13 @@
 <pre><code class="language-json">{ &quot;amount&quot;: 10 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
-<h3 id="restore-mana">Restore Mana</h3>
-<p><strong><code>POST /api/v1/avatars/{id}/mana/restore</code></strong></p>
+<h3 id="use-mana-potion">Use Mana Potion</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/mana/potion</code></strong></p>
+<p>Uses a mana potion from the avatar inventory to restore mana.</p>
 <p><strong>Request body:</strong></p>
-<pre><code class="language-json">{ &quot;amount&quot;: 10 }
+<pre><code class="language-json">{ &quot;name&quot;: &quot;Mana Potion&quot;, &quot;description&quot;: &quot;Restores mana&quot;, &quot;power&quot;: 10 }
 </code></pre>
+<p><code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <hr />
 <h2 id="stats">Stats</h2>

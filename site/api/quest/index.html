@@ -120,6 +120,8 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#create-quest">Create Quest</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-all-quests">Get All Quests</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#get-quest">Get Quest</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#delete-quest">Delete Quest</a>
@@ -209,14 +211,35 @@
 <p>Creates a new quest.</p>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{
-  &quot;name&quot;: &quot;string&quot;
+  &quot;name&quot;: &quot;string&quot;,
+  &quot;durationDays&quot;: 30
 }
 </code></pre>
 <p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/quests/string&quot; }
+  }
 }
+</code></pre>
+<hr />
+<h3 id="get-all-quests">Get All Quests</h3>
+<p><strong><code>GET /api/v1/quests</code></strong></p>
+<p>Returns the list of quests in the system.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of quest objects.</p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;string&quot;,
+    &quot;name&quot;: &quot;string&quot;,
+    &quot;durationDays&quot;: 30,
+    &quot;reward&quot;: 100,
+    &quot;habitIds&quot;: [&quot;habit-id-1&quot;, &quot;habit-id-2&quot;],
+    &quot;_links&quot;: {
+      &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/quests/string&quot; }
+    }
+  }
+]
 </code></pre>
 <hr />
 <h3 id="get-quest">Get Quest</h3>
@@ -226,10 +249,12 @@
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
   &quot;name&quot;: &quot;string&quot;,
-  &quot;duration&quot;: &quot;P30D&quot;,
-  &quot;reward&quot;: { &quot;experience&quot;: 500, &quot;money&quot;: 100 },
+  &quot;durationDays&quot;: 30,
+  &quot;reward&quot;: 100,
   &quot;habitIds&quot;: [&quot;habit-id-1&quot;, &quot;habit-id-2&quot;],
-  &quot;_links&quot;: { ... }
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/quests/string&quot; }
+  }
 }
 </code></pre>
 <hr />
@@ -252,25 +277,28 @@
 <hr />
 <h3 id="get-duration">Get Duration</h3>
 <p><strong><code>GET /api/v1/quests/{id}/duration</code></strong></p>
-<p>Returns the quest duration as an ISO 8601 duration string.</p>
-<pre><code class="language-json">{ &quot;duration&quot;: &quot;P30D&quot; }
+<p>Returns the quest duration in days.</p>
+<pre><code class="language-json">{ &quot;durationDays&quot;: 30 }
 </code></pre>
 <h3 id="update-duration">Update Duration</h3>
 <p><strong><code>PATCH /api/v1/quests/{id}/duration</code></strong></p>
 <p><strong>Request body:</strong></p>
-<pre><code class="language-json">{ &quot;duration&quot;: &quot;P14D&quot; }
+<pre><code class="language-json">{ &quot;durationDays&quot;: 14 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <hr />
 <h3 id="get-reward">Get Reward</h3>
 <p><strong><code>GET /api/v1/quests/{id}/reward</code></strong></p>
-<pre><code class="language-json">{ &quot;experience&quot;: 500, &quot;money&quot;: 100 }
+<pre><code class="language-json">{ &quot;value&quot;: 100 }
 </code></pre>
 <h3 id="update-reward">Update Reward</h3>
 <p><strong><code>PATCH /api/v1/quests/{id}/reward</code></strong></p>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{ &quot;experience&quot;: 750, &quot;money&quot;: 200 }
 </code></pre>
+<blockquote>
+<p>The current command payload still accepts <code>experience</code>, but the controller maps the update to the quest's money reward value.</p>
+</blockquote>
 <p><strong>Response <code>204 No Content</code></strong></p>
 <hr />
 <h2 id="habits">Habits</h2>
@@ -284,7 +312,9 @@
       &quot;title&quot;: &quot;Morning Run&quot;,
       &quot;description&quot;: &quot;Run 5km&quot;,
       &quot;tags&quot;: [&quot;fitness&quot;],
-      &quot;recurrence&quot;: { &quot;type&quot;: &quot;DAILY&quot;, &quot;dayOfMonth&quot;: null, &quot;dayOfWeek&quot;: null }
+      &quot;recurrence&quot;: { &quot;type&quot;: &quot;DAILY&quot;, &quot;dayOfMonth&quot;: null, &quot;dayOfWeek&quot;: null },
+      &quot;nextRecurrenceDate&quot;: &quot;2026-04-03&quot;,
+      &quot;lastAttendedDate&quot;: &quot;2026-04-02&quot;
     }
   ]
 }
@@ -309,7 +339,28 @@
 <h3 id="get-active-quest-progress">Get Active Quest Progress</h3>
 <p><strong><code>GET /api/v1/quests/progress/{avatarId}</code></strong></p>
 <p>Returns the active quest progress for an avatar.</p>
-<p><strong>Response <code>200 OK</code>:</strong> Collection of quest progress entries.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS resource containing the avatar progress summary.</p>
+<pre><code class="language-json">{
+  &quot;avatarId&quot;: &quot;string&quot;,
+  &quot;quests&quot;: [
+    {
+      &quot;questId&quot;: &quot;string&quot;,
+      &quot;questName&quot;: &quot;Morning Routine&quot;,
+      &quot;status&quot;: &quot;IN_PROGRESS&quot;,
+      &quot;completionPercentage&quot;: 50,
+      &quot;habits&quot;: [
+        {
+          &quot;habitId&quot;: &quot;string&quot;,
+          &quot;title&quot;: &quot;Morning Run&quot;,
+          &quot;requiredOccurrences&quot;: 2,
+          &quot;attendedOccurrences&quot;: 1,
+          &quot;remainingOccurrences&quot;: 1
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
 <h3 id="remove-habit-from-quest">Remove Habit from Quest</h3>
 <p><strong><code>DELETE /api/v1/quests/{id}/habits</code></strong></p>
 <p>Removes a habit from this quest. Both <code>habitId</code> and <code>title</code> are required as they together identify the habit entry within the quest.</p>
