@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Observability - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Observability";
+        var mkdocs_page_input_path = "kubernetes/kubernetes-observability-layer.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/ci-cd/">CI/CD</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Observability</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#three-pillars-of-observability">Three Pillars of Observability</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-metrics-prometheus">1. Metrics (Prometheus)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-logs-loki-fluent-bit">2. Logs (Loki + Fluent Bit)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-traces-tempo">3. Traces (Tempo)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-grafana">4. Grafana</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Kubernetes Deployments</li>
+      <li class="breadcrumb-item active">Observability</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="observability-layer-kubernetes-deployment">Observability Layer - Kubernetes Deployment</h1>
+<p>The Observability Layer implements the complete stack for <strong>monitoring</strong>, <strong>logging</strong> and <strong>distributed tracing</strong> of the HabitQuest application.
+It follows the principles of the <strong>Three Pillars of Observability</strong>: Metrics, Logs and Traces.</p>
+<h2 id="three-pillars-of-observability">Three Pillars of Observability</h2>
+<h3 id="1-metrics-prometheus">1. Metrics (Prometheus)</h3>
+<ul>
+<li>Numerical time-series measurements (CPU, memory, request rate, latency)</li>
+<li>Prometheus scraping of <code>/actuator/prometheus</code>, metrics exposed via Spring Boot Actuator</li>
+<li>Namespace <code>prometheus-system</code></li>
+</ul>
+<p>Prometheus uses <strong>Kubernetes Service Discovery</strong> to automatically find the pods to scrape:
+<strong>Required pod annotations</strong>:</p>
+<pre><code class="language-yaml">metadata:
+  annotations:
+    prometheus.io/scrape: &quot;true&quot;
+    prometheus.io/port: &quot;8080&quot;
+    prometheus.io/path: &quot;/actuator/prometheus&quot;
+</code></pre>
+<h3 id="2-logs-loki-fluent-bit">2. Logs (Loki + Fluent Bit)</h3>
+<ul>
+<li>Log streams collected from application stdout</li>
+<li>Fluent Bit runs as a DaemonSet on every node, collects logs and forwards them to Loki.</li>
+<li>Loki is the log aggregator, allowing logs to be collected and queried</li>
+<li>Namespace <code>logging</code></li>
+</ul>
+<p><strong>Metadata added to each log</strong>:</p>
+<ul>
+<li><code>namespace</code>: Kubernetes namespace</li>
+<li><code>pod</code>: Pod name</li>
+<li><code>container</code>: Container name</li>
+<li><code>labels</code>: All Kubernetes labels of the pod</li>
+</ul>
+<h3 id="3-traces-tempo">3. Traces (Tempo)</h3>
+<ul>
+<li>Traces the distributed flow of requests across the various microservices</li>
+<li>Spring Boot sends traces using the OpenTelemetry standard</li>
+<li>Namespace <code>prometheus-system</code></li>
+</ul>
+<p>Spring Boot services send traces to Tempo via configuration:</p>
+<pre><code class="language-yaml">env:
+  - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+    value: http://tempo.prometheus-system:4318/v1/traces
+</code></pre>
+<p>Spring Boot Micrometer produces traces automatically:</p>
+<ol>
+<li>Instruments HTTP requests</li>
+<li>Propagates trace context</li>
+<li>Sends spans to Tempo via OTLP</li>
+</ol>
+<h3 id="4-grafana">4. Grafana</h3>
+<ul>
+<li>Unified visualization of metrics, logs and traces</li>
+<li>Dashboards configured for the main aspects of the application</li>
+<li>Namespace <code>logging</code></li>
+</ul>
+<p>Available dashboards:</p>
+<ul>
+<li><code>circuit-breaker.json</code>: Resilience4j circuit breakers statuses and metrics</li>
+<li><code>http-rest-controllers.json</code>: REST endpoint performance and http traffic</li>
+<li><code>jvm.json</code>: JVM heap, threads, GC metrics</li>
+<li><code>logs.json</code>: Log aggregation of all services</li>
+<li><code>spring-cloud-gateway.json</code>: Gateway routing metrics</li>
+<li><code>traces.json</code>: Distributed tracing visualization</li>
+</ul>
+<p>All components of the observability stack are deployed using parameterized Helm charts.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../kubernetes-application-layer/" class="btn btn-neutral float-left" title="Application"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../kubernetes-application-layer/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

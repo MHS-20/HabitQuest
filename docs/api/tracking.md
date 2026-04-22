@@ -24,7 +24,10 @@ Creates a new habit for an avatar.
   "description": "string",
   "recurrenceType": "DAILY | WEEKLY | MONTHLY",
   "dayOfWeek": "MONDAY",
-  "dayOfMonth": 1
+  "dayOfMonth": 1,
+  "tags": ["health", "exercise"],
+  "associatedQuestId": "string",
+  "sourceHabitId": "string"
 }
 ```
 
@@ -36,8 +39,11 @@ Creates a new habit for an avatar.
 | `recurrenceType` | Yes | `DAILY`, `WEEKLY`, or `MONTHLY` |
 | `dayOfWeek` | Conditional | Required when `recurrenceType` is `WEEKLY` |
 | `dayOfMonth` | Conditional | Required when `recurrenceType` is `MONTHLY` |
+| `tags` | No | Optional list of tags attached to the habit at creation time |
+| `associatedQuestId` | No | Links the habit to a quest when the habit originates from quest replication |
+| `sourceHabitId` | No | Identifies the upstream habit when this habit is cloned from another source |
 
-**Response `200 OK`:**
+**Response `201 Created`:**
 
 ```json
 {
@@ -71,6 +77,7 @@ Returns full habit details.
   "lastAttendedDate": "2024-01-15T08:00:00",
   "nextRecurrenceDate": "2024-01-22T08:00:00",
   "associatedQuestId": "string | null",
+  "sourceHabitId": "string | null",
   "_links": { ... }
 }
 ```
@@ -208,6 +215,22 @@ Returns the full completion history of the habit.
   ]
 }
 ```
+
+### Get Habits by Avatar
+
+**`GET /api/v1/habits/avatar/{avatarId}`**
+
+Returns the active habits belonging to the avatar.
+
+**Response `200 OK`:** Collection of habit objects.
+
+### Get History by Avatar
+
+**`GET /api/v1/habits/avatar/{avatarId}/history`**
+
+Returns the aggregated habit history for the avatar across all of their habits.
+
+**Response `200 OK`:** Collection of habit history events.
 
 ---
 

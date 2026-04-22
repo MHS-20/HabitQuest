@@ -43,43 +43,68 @@
                 <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
                 </li>
               </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/requirements/">Requirements</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
               </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes/">Quality Attributes</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
               </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/ci-cd/">CI/CD</a>
+                  </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/ubiquitous_language/">Ubiquitous Language</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/user_stories/">User Stories</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventFlows/event_flows/">Event Flows</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../interactions/interactions/">Interactions</a>
-                </li>
-              </ul>
-              <p class="caption"><span class="caption-text">API</span></p>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
                   </li>
@@ -123,6 +148,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#add-habit-to-quest">Add Habit to Quest</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-active-quest-progress">Get Active Quest Progress</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#remove-habit-from-quest">Remove Habit from Quest</a>
     </li>
         </ul>
@@ -136,6 +163,15 @@
                   <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
                   </li>
               </ul>
       </div>
@@ -152,7 +188,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">API</li>
+          <li class="breadcrumb-item">REST APIs</li>
       <li class="breadcrumb-item active">Quests</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -176,7 +212,7 @@
   &quot;name&quot;: &quot;string&quot;
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong></p>
+<p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
   &quot;_links&quot;: { ... }
@@ -270,6 +306,10 @@
 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="get-active-quest-progress">Get Active Quest Progress</h3>
+<p><strong><code>GET /api/v1/quests/progress/{avatarId}</code></strong></p>
+<p>Returns the active quest progress for an avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Collection of quest progress entries.</p>
 <h3 id="remove-habit-from-quest">Remove Habit from Quest</h3>
 <p><strong><code>DELETE /api/v1/quests/{id}/habits</code></strong></p>
 <p>Removes a habit from this quest. Both <code>habitId</code> and <code>title</code> are required as they together identify the habit entry within the quest.</p>

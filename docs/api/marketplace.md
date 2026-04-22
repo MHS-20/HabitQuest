@@ -23,7 +23,7 @@ Provisions a new marketplace for an avatar.
 }
 ```
 
-**Response `200 OK`:**
+**Response `201 Created`:**
 
 ```json
 {
@@ -40,6 +40,31 @@ Provisions a new marketplace for an avatar.
 **`GET /api/v1/marketplaces/{marketplaceId}`**
 
 Returns marketplace details and its available items.
+
+**Response `200 OK`:**
+
+```json
+{
+  "id": "string",
+  "items": [
+    {
+      "type": "WEAPON",
+      "name": "Iron Sword",
+      "description": "A sturdy iron sword.",
+      "power": 15,
+      "price": 100
+    }
+  ],
+  "_links": { ... }
+}
+```
+
+### Get Marketplace by Avatar
+
+**`GET /api/v1/marketplaces/by-avatar/{avatarId}`**
+
+Returns the marketplace owned by the avatar.
+
 
 **Response `200 OK`:**
 
@@ -97,6 +122,21 @@ Returns items available for purchase, optionally filtered by type.
 
 Returns a single available item by name.
 
+> The current implementation expects an `ItemCommand` request body even for this lookup endpoint, because the controller resolves the item through the same mapper used for commerce commands.
+
+**Request body:**
+
+```json
+{
+  "type": "WEAPON",
+  "itemName": "Iron Sword",
+  "description": "A sturdy iron sword.",
+  "power": 15,
+  "price": 100,
+  "requiredLevel": 5
+}
+```
+
 **Response `200 OK`:**
 
 ```json
@@ -129,6 +169,21 @@ Returns items previously sold by the avatar (their inventory items listed for re
 
 Returns a single sold item by name.
 
+> As with available items, the current controller expects an `ItemCommand` body for this lookup.
+
+**Request body:**
+
+```json
+{
+  "type": "WEAPON",
+  "itemName": "Iron Sword",
+  "description": "A sturdy iron sword.",
+  "power": 15,
+  "price": 100,
+  "requiredLevel": 5
+}
+```
+
 **Response `200 OK`:** Item object.
 
 ---
@@ -137,7 +192,7 @@ Returns a single sold item by name.
 
 ### Buy Item
 
-**`POST /api/v1/marketplaces/{marketplaceId}/items/{itemName}/buy`**
+**`POST /api/v1/marketplaces/{marketplaceId}/items/buy`**
 
 Purchases an item from the marketplace. Deducts the price from the avatar's wallet and adds the item to the inventory. Uses a saga pattern for transactional consistency.
 
@@ -147,15 +202,41 @@ Purchases an item from the marketplace. Deducts the price from the avatar's wall
 |-----------|------|-------------|
 | `currentLevel` | `Integer` | The avatar's current level (used to check purchase eligibility) |
 
+**Request body:**
+
+```json
+{
+  "type": "WEAPON",
+  "itemName": "Iron Sword",
+  "description": "A sturdy iron sword.",
+  "power": 15,
+  "price": 100,
+  "requiredLevel": 5
+}
+```
+
 **Response `204 No Content`**
 
 ---
 
 ### Sell Item
 
-**`POST /api/v1/marketplaces/{marketplaceId}/sold-items/{itemName}/sell`**
+**`POST /api/v1/marketplaces/{marketplaceId}/sold-items/sell`**
 
 Sells an item from the avatar's inventory. Removes the item from inventory and credits the avatar's wallet. Uses a saga pattern for transactional consistency.
+
+**Request body:**
+
+```json
+{
+  "type": "WEAPON",
+  "itemName": "Iron Sword",
+  "description": "A sturdy iron sword.",
+  "power": 15,
+  "price": 100,
+  "requiredLevel": 5
+}
+```
 
 **Response `204 No Content`**
 

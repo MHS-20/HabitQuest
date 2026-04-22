@@ -43,43 +43,68 @@
                 <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
                 </li>
               </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/requirements/">Requirements</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
               </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes/">Quality Attributes</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
               </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/ci-cd/">CI/CD</a>
+                  </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/ubiquitous_language/">Ubiquitous Language</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../specifications/user_stories/">User Stories</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../eventFlows/event_flows/">Event Flows</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../interactions/interactions/">Interactions</a>
-                </li>
-              </ul>
-              <p class="caption"><span class="caption-text">API</span></p>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
                   </li>
@@ -96,6 +121,16 @@
     <li class="toctree-l3"><a class="reference internal" href="#delete-avatar">Delete Avatar</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#search-avatars">Search Avatars</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#invites">Invites</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-pending-invites">Get Pending Invites</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#receive-guild-invite">Receive Guild Invite</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#accept-guild-invite">Accept Guild Invite</a>
     </li>
         </ul>
     </li>
@@ -125,11 +160,15 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#remove-item-from-inventory">Remove Item from Inventory</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-equipped-items">Get Equipped Items</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#equip-item">Equip Item</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#unequip-item">Unequip Item</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#get-equipped-items">Get Equipped Items</a>
+    <li class="toctree-l3"><a class="reference internal" href="#equip-item_1">Equip Item</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#unequip-item_1">Unequip Item</a>
     </li>
         </ul>
     </li>
@@ -190,6 +229,15 @@
                   <li class="toctree-l1"><a class="reference internal" href="../notification/">Notifications</a>
                   </li>
               </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
@@ -204,7 +252,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">API</li>
+          <li class="breadcrumb-item">REST APIs</li>
       <li class="breadcrumb-item active">Avatar</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -229,7 +277,7 @@
   &quot;name&quot;: &quot;string&quot;
 }
 </code></pre>
-<p><strong>Response <code>200 OK</code>:</strong></p>
+<p><strong>Response <code>201 Created</code>:</strong></p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;string&quot;,
   &quot;_links&quot;: { ... }
@@ -261,7 +309,7 @@
 <p><strong>Response <code>204 No Content</code></strong></p>
 <hr />
 <h3 id="search-avatars">Search Avatars</h3>
-<p><strong><code>GET /api/v1/avatars/search</code></strong></p>
+<p><strong><code>POST /api/v1/avatars/search</code></strong></p>
 <p>Searches for avatars by name and/or level range.</p>
 <p><strong>Request body:</strong></p>
 <pre><code class="language-json">{
@@ -271,6 +319,29 @@
 }
 </code></pre>
 <p><strong>Response <code>200 OK</code>:</strong> Collection of avatar objects.</p>
+<hr />
+<h2 id="invites">Invites</h2>
+<h3 id="get-pending-invites">Get Pending Invites</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/invites</code></strong></p>
+<p>Returns the pending guild invites for the avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Collection of invite objects.</p>
+<h3 id="receive-guild-invite">Receive Guild Invite</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/invites</code></strong></p>
+<p>Stores a guild invite for the avatar.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;inviteId&quot;: &quot;string&quot;,
+  &quot;guildId&quot;: &quot;string&quot;,
+  &quot;guildName&quot;: &quot;Guild Name&quot;,
+  &quot;expiresAt&quot;: &quot;2026-04-22T12:00:00Z&quot;
+}
+</code></pre>
+<p>If <code>expiresAt</code> is missing or blank, the service defaults the invite to expire 24 hours from receipt.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="accept-guild-invite">Accept Guild Invite</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/invites/{inviteId}/accept</code></strong></p>
+<p>Accepts a pending guild invite.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
 <hr />
 <h2 id="name">Name</h2>
 <h3 id="get-name">Get Name</h3>
@@ -324,6 +395,17 @@
 <pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="get-equipped-items">Get Equipped Items</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/equipped-items</code></strong></p>
+<p>Returns the currently equipped items for the avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;string&quot;,
+  &quot;items&quot;: [
+    { &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+  ]
+}
+</code></pre>
 <h3 id="equip-item">Equip Item</h3>
 <p><strong><code>POST /api/v1/avatars/{id}/inventory/items/equip</code></strong></p>
 <p><strong>Request body:</strong></p>
@@ -336,16 +418,18 @@
 <pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
 <p><strong>Response <code>204 No Content</code></strong></p>
-<h3 id="get-equipped-items">Get Equipped Items</h3>
-<p><strong><code>GET /api/v1/avatars/{id}/equipped-items</code></strong></p>
-<pre><code class="language-json">{
-  &quot;id&quot;: &quot;string&quot;,
-  &quot;items&quot;: [
-    { &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
-  ]
-}
+<h3 id="equip-item_1">Equip Item</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/inventory/items/equip</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
 </code></pre>
-<hr />
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="unequip-item_1">Unequip Item</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/inventory/items/unequip</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
 <h2 id="experience-level">Experience &amp; Level</h2>
 <h3 id="get-experience">Get Experience</h3>
 <p><strong><code>GET /api/v1/avatars/{id}/experience</code></strong></p>
