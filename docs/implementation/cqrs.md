@@ -60,7 +60,7 @@ Il flusso standard di ogni metodo di comando è:
 Esempio — `grantExperience`:
 
 ```java
-public void grantExperience(Id<Avatar> avatarId, Integer amount) throws AvatarNotFoundException {
+public void grantExperience(Id<Avatar> avatarId, Experience amount) throws AvatarNotFoundException {
     Avatar avatar = avatarRepository.findById(avatarId)
         .orElseThrow(() -> new AvatarNotFoundException(avatarId.value()));
 
