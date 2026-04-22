@@ -4,11 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 
 @Composable
-fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
-  return remember {
-    {
-      HabitCalendarLaunchResult.Failure("Calendar integration is unavailable on desktop")
+fun rememberHabitCalendarLauncher(): HabitCalendarLauncher =
+    remember {
+        {
+            HabitCalendarLaunchResult.Failure("Calendar integration is unavailable on desktop")
+        }
     }
-  }
-}
-
