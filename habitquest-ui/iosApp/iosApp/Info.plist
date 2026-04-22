@@ -4,5 +4,7 @@
     <dict>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
+        <key>NSCalendarsUsageDescription</key>
+        <string>HabitQuest needs calendar access to add your scheduled habits as events.</string>
     </dict>
 </plist>

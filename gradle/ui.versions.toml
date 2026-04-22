@@ -21,6 +21,7 @@ ktor = "3.1.2"
 kotlinx-serialization-json = "1.9.0"
 kotlinx-datetime = "0.7.1"
 detekt = "1.23.6"
+kalendar-kit = "1.1.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -49,6 +50,7 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kalendar-kit = { module = "be.vandeas:kalendar-kit", version.ref = "kalendar-kit" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
