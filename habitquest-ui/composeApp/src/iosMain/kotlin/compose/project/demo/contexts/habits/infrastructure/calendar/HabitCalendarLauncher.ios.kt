@@ -11,28 +11,27 @@ import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
-  val manager = remember { IOSCalendarPlatform.manager }
+    val manager = remember { IOSCalendarPlatform.manager }
 
-  return remember(manager) {
-    { entry ->
-      val zone = TimeZone.currentSystemDefault()
-      val startInstant = entry.startDateTime.toInstant(zone)
-      val endDateTime = (startInstant + entry.durationMinutes.minutes).toLocalDateTime(zone)
+    return remember(manager) {
+        { entry ->
+            val zone = TimeZone.currentSystemDefault()
+            val startInstant = entry.startDateTime.toInstant(zone)
+            val endDateTime = (startInstant + entry.durationMinutes.minutes).toLocalDateTime(zone)
 
-      try {
-        manager.createEvent(
-          Event(
-            title = entry.title,
-            startDate = entry.startDateTime,
-            endDate = endDateTime,
-            notes = entry.description,
-          )
-        )
-        HabitCalendarLaunchResult.Success
-      } catch (error: Throwable) {
-        HabitCalendarLaunchResult.Failure(error.message ?: "Unable to add event to calendar")
-      }
+            try {
+                manager.createEvent(
+                    Event(
+                        title = entry.title,
+                        startDate = entry.startDateTime,
+                        endDate = endDateTime,
+                        notes = entry.description,
+                    ),
+                )
+                HabitCalendarLaunchResult.Success
+            } catch (error: Throwable) {
+                HabitCalendarLaunchResult.Failure(error.message ?: "Unable to add event to calendar")
+            }
+        }
     }
-  }
 }
-

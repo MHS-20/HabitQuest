@@ -31,7 +31,7 @@ fun rememberHabitCalendarLauncher(): (HabitCalendarEntry) -> Unit {
                         startDate = entry.startDateTime,
                         endDate = endDateTime,
                         notes = entry.description,
-                    )
+                    ),
                 )
             }
         }
