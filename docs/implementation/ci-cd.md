@@ -97,31 +97,6 @@ The `update` job modifies the image tag in the `kustomization.yaml` file of the 
 Instead of committing directly to `main` (approach commented out in the file), the workflow opens a **Pull Request** on the `chore/auto-updates` branch.
 This introduces a human review gate (or ArgoCD approval) before the change reaches the main branch and is applied to the cluster.
 
-## Workflow 5 — `provision.yml`: Terraform Provisioning
-This workflow manages the provisioning of the cloud infrastructure and the deployment of platform components on Kubernetes.
-The `workflow_run` trigger links it automatically to the completion of `Update Manifest`.
-The `deploy` concurrency group with `cancel-in-progress: true` ensures that two deployments cannot run simultaneously.
-
-### Authentication with OIDC
-Authentication on AWS is done via **OpenID Connect (OIDC)**, without the need to store AWS Access Keys as static secrets.
-GitHub Actions temporarily assumes an IAM role (`github-actions-terraform-role`), obtaining short-lived credentials.
-
-### Provisioning with Terraform
-The standard Terraform sequence is executed in the `./terraform` directory:
-
-1. **`terraform init`**: initializes the remote backend (Terraform Cloud, configured via `TF_API_TOKEN`).
-2. **`terraform validate`**: verifies the syntax and consistency of `.tf` files.
-3. **`terraform plan`**: calculates the diff between the current state of the infrastructure and the desired state, producing a plan.
-4. **`terraform apply`**: applies the plan non-interactively (`-auto-approve`).
-   The IAM role ARN is passed as a Terraform variable (`TF_VAR_terraform_role_arn`), keeping the configuration externalized.
-
-### Deploy on EKS
-After the infrastructure provisioning, `kubectl` and `helm` are installed on the runner,
-and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two shell scripts are then executed:
-
-- **`deployPlatform.sh`**: installs the platform components (likely Ingress Controller, cert-manager, and similar).
-- **`deployObservability.sh`**: installs the observability stack (Prometheus, Grafana, Loki, Tempo).
-
 ## Overall Integration
 | Workflow | Responsibility | Trigger |
 |---|---|---|
@@ -129,4 +104,3 @@ and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two
 | `build_ui.yml` | CI: frontend KMP and release trigger | Push / PR on `habitquest-ui/**`; `main` push dispatches `ui_semantic_release` |
 | `semantic-release.yml` | Automatic versioning | `repository_dispatch` from backend or UI builds |
 | `update_manifest.yml` | GitOps: manifest update | `repository_dispatch` from semantic-release |
-| `provision.yml` | IaC: infrastructure and deploy | Manual / `workflow_run` from update-manifest |
