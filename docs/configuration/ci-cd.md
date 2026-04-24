@@ -44,17 +44,23 @@ For each service:
 
 ## Workflow 2 — `build_ui.yml`: Build and Package Multiplatform UI
 This workflow is dedicated exclusively to the **HabitQuest UI** frontend, developed with **Kotlin Multiplatform (KMP)** and Compose Multiplatform.
-It is triggered only on push or PR that touch the `habitquest-ui/**` directory, plus the workflow file itself.
+It is triggered on `push` and `pull_request`, but only when changes affect:
+
+- `habitquest-ui/**`
+- `.github/workflows/build_ui.yml`
 
 The workflow is organized into five jobs:
 
-1. **`commit-lint`**: same Conventional Commits validation as the backend workflow.
-2. **`static-scan`**: static vulnerability scan of the source code (not the image) via `anchore/scan-action`, with SARIF report upload to GitHub Security.
-3. **`build`**: the central job executes the KMP build with Gradle. Since KMP targets also include Kotlin/JS, both JDK 21 and Node.js 18 are configured.
-4. **`semantic-release`**: runs only on a successful push to `main` and emits a `repository_dispatch` event of type `ui_semantic_release`, passing only the service name (`habitquest-ui`) so the shared release workflow can detect the UI branch of the pipeline.
-5. **`ui-final-status`**: aggregates the results of all jobs and fails the workflow if any of them failed.
+1. **`commit-lint`**: validates Conventional Commits (skipped for Dependabot).
+2. **`static-scan`**: installs and updates **Grype**, scans the repository (`dir:${{ github.workspace }}`), generates a **SARIF** report, and uploads it to GitHub Security.
+3. **`build`**: runs after quality gates and executes a **matrix build** across three platforms:
+   - `web` on `ubuntu-22.04` (Node.js 18 + `:kotlinUpgradeYarnLock` + `:habitquest-ui:composeApp:jsBrowserProductionWebpack`)
+   - `android` on `ubuntu-22.04` (`:habitquest-ui:composeApp:assembleDebug`)
+   - `ios` on `macos-latest` (`:habitquest-ui:composeApp:linkDebugFrameworkIosSimulatorArm64`)
 
-This keeps PRs and branch pushes focused on validation, while the release step remains restricted to `main`.
+   Platform artifacts are uploaded separately for web, Android, and iOS.
+4. **`semantic-release`**: runs only for **pushes on `main`** and emits `repository_dispatch` with event type `ui_semantic_release` and payload `{ "service": "habitquest-ui" }`.
+5. **`ui-final-status`**: final aggregator job (`if: always()`) that fails only when one of the dependent jobs actually failed. This means PR builds are still valid even when `semantic-release` is skipped.
 
 
 ## Workflow 3 — `semantic-release.yml`: Semantic Release
@@ -126,7 +132,7 @@ and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two
 | Workflow | Responsibility | Trigger |
 |---|---|---|
 | `build.yml` | CI: build, test, scan, publish | Push / PR |
-| `build_ui.yml` | CI: frontend KMP and release trigger | Push / PR on `habitquest-ui/**`; `main` push dispatches `ui_semantic_release` |
+| `build_ui.yml` | CI: frontend KMP and release trigger | Push / PR on `habitquest-ui/**` or `.github/workflows/build_ui.yml`; `main` push dispatches `ui_semantic_release` |
 | `semantic-release.yml` | Automatic versioning | `repository_dispatch` from backend or UI builds |
 | `update_manifest.yml` | GitOps: manifest update | `repository_dispatch` from semantic-release |
 | `provision.yml` | IaC: infrastructure and deploy | Manual / `workflow_run` from update-manifest |
