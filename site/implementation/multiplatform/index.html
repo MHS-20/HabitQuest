@@ -129,8 +129,6 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#domain-logic-has-zero-dependencies-on-ui-framework-or-external-services">Domain logic has zero dependencies on UI framework or external services.</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#ddd-context-organization">DDD Context Organization</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#example-habits-context-detailed">Example: Habits Context (Detailed)</a>
@@ -167,7 +165,7 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#jvm-desktop-jvmmain">JVM Desktop (jvmMain/)</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#javascript-jsmain">JavaScript (jsMain/)</a>
+    <li class="toctree-l4"><a class="reference internal" href="#javascript-jsmain">JavaScript (jsMain)</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#webassembly-wasmjsmain">WebAssembly (wasmJsMain/)</a>
     </li>
@@ -214,8 +212,6 @@
         </ul>
     </li>
         </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a>
     </li>
     </ul>
                   </li>
@@ -551,7 +547,8 @@ Maximize code sharing: Business logic, domain models, UI composition, and data l
 <li><strong>Secondary Ports</strong> (outbound): Domain defines these; infrastructure implements them</li>
 <li><strong>Adapters</strong>: Infrastructure layer implements ports via HTTP clients, local storage, etc.</li>
 </ul>
-<h2 id="domain-logic-has-zero-dependencies-on-ui-framework-or-external-services">Domain logic has zero dependencies on UI framework or external services.</h2>
+<p>Domain logic has zero dependencies on UI framework or external services.</p>
+<hr />
 <h2 id="ddd-context-organization">DDD Context Organization</h2>
 <h3 id="example-habits-context-detailed">Example: Habits Context (Detailed)</h3>
 <h4 id="domain-layer-domain">Domain Layer (<code>domain/</code>)</h4>
@@ -712,6 +709,9 @@ fun HabitsScreen(
 </ul>
 <p><strong>Why</strong>: These concerns are platform-agnostic and require only standard Kotlin libraries.</p>
 <h3 id="platform-specific-code">Platform-Specific Code</h3>
+<p>Platform-specific API integration was required to implement calendar functionality.
+This feature allows users to add their scheduled habits as events in their device's calendar.</p>
+<p><img src="../Calendar-integration.gif" alt="Calendar integration demo" width="200" /></p>
 <h4 id="android-androidmain">Android (<code>androidMain/</code>)</h4>
 <ul>
 <li><strong>Entry Point</strong>: <code>MainActivity.kt</code> – Android ComponentActivity</li>
@@ -736,7 +736,7 @@ fun HabitsScreen(
 <li><strong>HTTP Client</strong>: OkHttp</li>
 <li><strong>Size</strong>: ~2% of total code</li>
 </ul>
-<h4 id="javascript-jsmain">JavaScript (<code>jsMain/</code>)</h4>
+<h4 id="javascript-jsmain">JavaScript (<code>jsMain</code>)</h4>
 <ul>
 <li><strong>Entry Point</strong>: <code>main.kt</code> – ComposeViewport</li>
 <li><strong>Calendar Integration</strong>: Unavailable (returns failure)</li>
@@ -924,7 +924,6 @@ internal fun parseHabitList(payload: JsonArray): List&lt;HabitListItem&gt; {
 
 // Used by all platforms when receiving API responses
 </code></pre>
-<p><strong>Benefit</strong>: Single source of truth for data transformation; easy to maintain.</p>
 <h3 id="2-calendar-feature-integration-pattern">2. Calendar Feature Integration Pattern</h3>
 <h4 id="shared-contract-habitcalendarlauncherkt">Shared Contract (<code>HabitCalendarLauncher.kt</code>)</h4>
 <pre><code class="language-kotlin">sealed interface HabitCalendarLaunchResult {
@@ -1026,9 +1025,6 @@ fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
     }
 }
 </code></pre>
-<hr />
-<h2 id="conclusion">Conclusion</h2>
-<p>This architecture scales well as the team and application grow.</p>
               
             </div>
           </div><footer>

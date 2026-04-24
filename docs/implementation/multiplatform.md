@@ -440,7 +440,7 @@ fun HabitsScreen(
 Platform-specific API integration was required to implement calendar functionality.
 This feature allows users to add their scheduled habits as events in their device's calendar.
 
-<img src="Calendar-integration.gif" alt="Calendar integration demo" width="200" />
+<img src="../Calendar-integration.gif" alt="Calendar integration demo" width="200" />
 
 #### Android (`androidMain/`)
 

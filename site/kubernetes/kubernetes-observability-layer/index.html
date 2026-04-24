@@ -139,7 +139,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#3-traces-tempo">3. Traces (Tempo)</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#4-grafana">4. Grafana</a>
+    <li class="toctree-l3"><a class="reference internal" href="#4-visualization-grafana">4. Visualization (Grafana)</a>
     </li>
         </ul>
     </li>
@@ -172,7 +172,8 @@
               
                 <h1 id="observability-layer-kubernetes-deployment">Observability Layer - Kubernetes Deployment</h1>
 <p>The Observability Layer implements the complete stack for <strong>monitoring</strong>, <strong>logging</strong> and <strong>distributed tracing</strong> of the HabitQuest application.
-It follows the principles of the <strong>Three Pillars of Observability</strong>: Metrics, Logs and Traces.</p>
+It follows the principles of the <strong>Three Pillars of Observability</strong>: Metrics, Logs and Traces.
+All components of the observability stack are deployed using parameterized Helm charts.</p>
 <h2 id="three-pillars-of-observability">Three Pillars of Observability</h2>
 <h3 id="1-metrics-prometheus">1. Metrics (Prometheus)</h3>
 <ul>
@@ -219,22 +220,36 @@ It follows the principles of the <strong>Three Pillars of Observability</strong>
 <li>Propagates trace context</li>
 <li>Sends spans to Tempo via OTLP</li>
 </ol>
-<h3 id="4-grafana">4. Grafana</h3>
+<h3 id="4-visualization-grafana">4. Visualization (Grafana)</h3>
 <ul>
 <li>Unified visualization of metrics, logs and traces</li>
 <li>Dashboards configured for the main aspects of the application</li>
-<li>Namespace <code>logging</code></li>
 </ul>
 <p>Available dashboards:</p>
 <ul>
-<li><code>circuit-breaker.json</code>: Resilience4j circuit breakers statuses and metrics</li>
-<li><code>http-rest-controllers.json</code>: REST endpoint performance and http traffic</li>
-<li><code>jvm.json</code>: JVM heap, threads, GC metrics</li>
-<li><code>logs.json</code>: Log aggregation of all services</li>
-<li><code>spring-cloud-gateway.json</code>: Gateway routing metrics</li>
-<li><code>traces.json</code>: Distributed tracing visualization</li>
+<li><strong>Circuit Breakers</strong>: Resilience4j circuit breakers statuses and metrics
+<img alt="Circuit Breakers" src="../circuitBreakers.png" /></li>
 </ul>
-<p>All components of the observability stack are deployed using parameterized Helm charts.</p>
+<p><br/></p>
+<ul>
+<li><strong>HTTP Traffic</strong>: REST endpoint performance and traffic
+<img alt="HTTP Traffic" src="../httpTraffic.png" /></li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>JVM Metrics</strong>: heap, threads, GC metrics, etc.
+<img alt="JVM Metrics" src="../jvmDashboard.png" /></li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Aggregate Logs</strong>: log aggregation of all services
+<img alt="Aggregate Logs" src="../aggregateLogs.png" /></li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Distributed Traces</strong>: tracing visualization
+<img alt="Distributed Traces" src="../traces.png" /></li>
+</ul>
               
             </div>
           </div><footer>
