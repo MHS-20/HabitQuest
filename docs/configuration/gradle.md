@@ -91,3 +91,50 @@ It has no sources of its own.
 **What it configures:**
 
 - Registers a **dynamic task rule** using `tasks.addRule`. When any task name is invoked on the container project, the rule automatically creates a task with that name that depends on the same-named task in every direct subproject.
+
+## KMP UI Module Gradle Configuration
+
+The UI build is split between **convention-level configuration** and **module-level configuration**:
+
+- `build-logic/src/main/kotlin/kmp-conventions.gradle.kts` defines common defaults for Kotlin Multiplatform + Android + Compose modules (plugins, linters, shared quality tasks).
+- `habitquest-ui/composeApp/build.gradle.kts` defines the concrete targets, source sets, Android packaging settings, and desktop distribution output for the UI app.
+- Version catalogs (`libs` and `uiLibs`) keep all dependency and plugin versions centralized and traceable
+
+### What `composeApp/build.gradle.kts` configures
+
+**Multiplatform targets**
+
+- Android target with JVM 11 bytecode (`androidTarget` + `JvmTarget.JVM_11`)
+- iOS frameworks for both device and simulator (`iosArm64`, `iosSimulatorArm64`) with `baseName = "ComposeApp"` and static linking
+- Desktop JVM target (`jvm()`)
+- Web JavaScript target (`js { browser { ... } }`) with executable binaries
+- WebAssembly target (`wasmJs`) with executable binaries
+
+**Browser test policy (JS/Wasm)**
+
+- JS and Wasm browser tests are enabled only when `CHROME_BIN` is available
+- This prevents failures in environments where no browser is configured by default
+
+**Source set dependencies**
+
+- `commonMain`: shared Compose UI stack, lifecycle integration, Ktor core/content-negotiation, serialization, and datetime
+- `androidMain`: Android activity integration, OkHttp engine, and KalendarKit
+- `iosMain`: Darwin Ktor engine and KalendarKit
+- `jvmMain`: Compose Desktop runtime, Swing coroutines, and OkHttp
+- `jsMain` and `wasmJsMain`: Ktor JS engine
+- `commonTest`: shared Kotlin test dependency
+
+**Android application block**
+
+- Namespace and applicationId are set to `habitquest.ui`
+- `compileSdk`, `minSdk`, and `targetSdk` are read from the `uiLibs` catalog
+- Release build keeps minification disabled
+- Java compatibility is pinned to 11
+- Standard resource excludes are configured for packaging
+
+**Desktop packaging**
+
+- Desktop entry point is `compose.project.demo.MainKt`
+- Native distributions are generated as `dmg`, `msi`, and `deb`
+
+For architecture and runtime behavior details per platform, see `docs/implementation/multiplatform.md`.
