@@ -238,7 +238,9 @@ Each context is decoupled from external systems via clearly defined boundaries:
 - **Secondary Ports** (outbound): Domain defines these; infrastructure implements them
 - **Adapters**: Infrastructure layer implements ports via HTTP clients, local storage, etc.
 
+
 Domain logic has zero dependencies on UI framework or external services.
+
 ---
 
 ## DDD Context Organization
@@ -435,6 +437,10 @@ fun HabitsScreen(
 **Why**: These concerns are platform-agnostic and require only standard Kotlin libraries.
 
 ### Platform-Specific Code
+Platform-specific API integration was required to implement calendar functionality.
+This feature allows users to add their scheduled habits as events in their device's calendar.
+
+<img src="Calendar-integration.gif" alt="Calendar integration demo" width="200" />
 
 #### Android (`androidMain/`)
 
@@ -460,7 +466,7 @@ fun HabitsScreen(
 - **HTTP Client**: OkHttp
 - **Size**: ~2% of total code
 
-#### JavaScript (`jsMain/`)
+#### JavaScript (`jsMain`)
 
 - **Entry Point**: `main.kt` – ComposeViewport
 - **Calendar Integration**: Unavailable (returns failure)
@@ -671,8 +677,6 @@ internal fun parseHabitList(payload: JsonArray): List<HabitListItem> {
 // Used by all platforms when receiving API responses
 ```
 
-**Benefit**: Single source of truth for data transformation; easy to maintain.
-
 ### 2. Calendar Feature Integration Pattern
 
 #### Shared Contract (`HabitCalendarLauncher.kt`)
@@ -793,7 +797,3 @@ fun rememberHabitCalendarLauncher(): HabitCalendarLauncher {
     }
 }
 ```
----
-## Conclusion
-This architecture scales well as the team and application grow.
-
