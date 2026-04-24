@@ -36,7 +36,6 @@ HabitQuest is here to support you on your journey to better habits.
   - [HATEOAS](implementation/hateoas.md)
   - [Event Sourcing](implementation/event-sourcing.md)
   - [Test Pyramid](implementation/test-pyramid.md)
-  - [CI/CD](implementation/ci-cd.md)
 
 ### REST APIs
   - [Overview](api/overview.md)
@@ -47,6 +46,9 @@ HabitQuest is here to support you on your journey to better habits.
   - [Guilds & Battles](api/guild.md)
   - [Marketplace](api/marketplace.md)
   - [Notifications](api/notification.md)
+
+### Configuration
+  - [CI/CD](configuration/ci-cd.md)
 
 ### Kubernetes Deployments
   - [Overview](kubernetes/kubernetes-deployment-overview.md)
