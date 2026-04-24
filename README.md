@@ -87,6 +87,7 @@ pip install httpx rich
 
 python ./e2e/load_test.py
 python ./e2e/e2e_test.py
+deactivate
 ```
 
 To stop and delete the cluster:

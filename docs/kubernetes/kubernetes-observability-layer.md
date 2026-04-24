@@ -2,6 +2,7 @@
 
 The Observability Layer implements the complete stack for **monitoring**, **logging** and **distributed tracing** of the HabitQuest application.
 It follows the principles of the **Three Pillars of Observability**: Metrics, Logs and Traces.
+All components of the observability stack are deployed using parameterized Helm charts.
 
 ## Three Pillars of Observability
 ### 1. Metrics (Prometheus)
@@ -52,18 +53,31 @@ Spring Boot Micrometer produces traces automatically:
 2. Propagates trace context
 3. Sends spans to Tempo via OTLP
 
-### 4. Grafana
+### 4. Visualization (Grafana)
 - Unified visualization of metrics, logs and traces
 - Dashboards configured for the main aspects of the application
-- Namespace `logging`
 
 Available dashboards:
 
-- `circuit-breaker.json`: Resilience4j circuit breakers statuses and metrics
-- `http-rest-controllers.json`: REST endpoint performance and http traffic
-- `jvm.json`: JVM heap, threads, GC metrics
-- `logs.json`: Log aggregation of all services
-- `spring-cloud-gateway.json`: Gateway routing metrics
-- `traces.json`: Distributed tracing visualization
+- **Circuit Breakers**: Resilience4j circuit breakers statuses and metrics
+![Circuit Breakers](circuitBreakers.png)
 
-All components of the observability stack are deployed using parameterized Helm charts.
+<br/>
+
+- **HTTP Traffic**: REST endpoint performance and traffic
+![HTTP Traffic](httpTraffic.png)
+
+<br/>
+
+- **JVM Metrics**: heap, threads, GC metrics, etc.
+![JVM Metrics](jvmDashboard.png)
+
+<br/>
+
+- **Aggregate Logs**: log aggregation of all services
+![Aggregate Logs](aggregateLogs.png)
+
+<br/>
+
+- **Distributed Traces**: tracing visualization
+![Distributed Traces](traces.png)
