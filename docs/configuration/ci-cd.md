@@ -26,7 +26,6 @@ For each service:
 1. JDK 21 is configured
 2. The Gradle build is executed, which includes compilation, tests and other quality checks (lint, checkstyle, etc.)
 3. The produced JAR is uploaded as a GitHub Actions **artifact**, uniquely identified by service name.
-4. The `build-aggregate` job acts as a synchronization point: it collects the results of all parallel jobs and fails the entire pipeline if even one has produced an error, ensuring that the next step only proceeds when all builds are green.
 
 ### Package, Scan and Publish
 This job, also in matrix, handles containerization and image publishing.
@@ -41,6 +40,8 @@ For each service:
 5. **Image push**: the image is published on GHCR with two tags: the **commit SHA** (for traceability) and **`latest`** (for quick reference).
 6. **Next workflow trigger**: if the push occurred on the `main` branch, a `repository_dispatch` event of type `microservice_semantic_release` is emitted, passing the service name and the image path on GHCR as payload.
 
+The `final-status` job is an aggregator that runs `if: always()`, meaning it executes regardless of the success or failure of the previous jobs. 
+It checks the status of the dependent jobs and fails only if at least one of them actually failed. This task is used to accept PRs. 
 
 ## Workflow 2 — `build_ui.yml`: Build and Package Multiplatform UI
 This workflow is dedicated exclusively to the **HabitQuest UI** frontend, developed with **Kotlin Multiplatform (KMP)** and Compose Multiplatform.
@@ -101,32 +102,8 @@ to avoid incurring costs on AWS, but the infrastructure would be ready to releas
 ### Kustomize Manifest Update
 The `update` job modifies the image tag in the `kustomization.yaml` file of the affected service.
 Instead of committing directly to `main` (approach commented out in the file), the workflow opens a **Pull Request** on the `chore/auto-updates` branch.
-This introduces a human review gate (or ArgoCD approval) before the change reaches the main branch and is applied to the cluster.
+This introduces a human review gate (or ArgoCD approval) before the change reaches the main branch and is applied to the cluster
 
-## Workflow 5 — `provision.yml`: Terraform Provisioning
-This workflow manages the provisioning of the cloud infrastructure and the deployment of platform components on Kubernetes.
-The `workflow_run` trigger links it automatically to the completion of `Update Manifest`.
-The `deploy` concurrency group with `cancel-in-progress: true` ensures that two deployments cannot run simultaneously.
-
-### Authentication with OIDC
-Authentication on AWS is done via **OpenID Connect (OIDC)**, without the need to store AWS Access Keys as static secrets.
-GitHub Actions temporarily assumes an IAM role (`github-actions-terraform-role`), obtaining short-lived credentials.
-
-### Provisioning with Terraform
-The standard Terraform sequence is executed in the `./terraform` directory:
-
-1. **`terraform init`**: initializes the remote backend (Terraform Cloud, configured via `TF_API_TOKEN`).
-2. **`terraform validate`**: verifies the syntax and consistency of `.tf` files.
-3. **`terraform plan`**: calculates the diff between the current state of the infrastructure and the desired state, producing a plan.
-4. **`terraform apply`**: applies the plan non-interactively (`-auto-approve`).
-   The IAM role ARN is passed as a Terraform variable (`TF_VAR_terraform_role_arn`), keeping the configuration externalized.
-
-### Deploy on EKS
-After the infrastructure provisioning, `kubectl` and `helm` are installed on the runner,
-and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two shell scripts are then executed:
-
-- **`deployPlatform.sh`**: installs the platform components (likely Ingress Controller, cert-manager, and similar).
-- **`deployObservability.sh`**: installs the observability stack (Prometheus, Grafana, Loki, Tempo).
 
 ## Overall Integration
 | Workflow | Responsibility | Trigger |
@@ -135,4 +112,3 @@ and access to the EKS cluster is configured via `aws eks update-kubeconfig`. Two
 | `build_ui.yml` | CI: frontend KMP and release trigger | Push / PR on `habitquest-ui/**` or `.github/workflows/build_ui.yml`; `main` push dispatches `ui_semantic_release` |
 | `semantic-release.yml` | Automatic versioning | `repository_dispatch` from backend or UI builds |
 | `update_manifest.yml` | GitOps: manifest update | `repository_dispatch` from semantic-release |
-| `provision.yml` | IaC: infrastructure and deploy | Manual / `workflow_run` from update-manifest |
