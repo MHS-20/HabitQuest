@@ -49,6 +49,8 @@ HabitQuest is here to support you on your journey to better habits.
 
 ### Configuration
   - [CI/CD](configuration/ci-cd.md)
+  - [Gradle Build Logic](configuration/gradle.md)
+  - [Git & GitHub](configuration/git-github.md)
 
 ### Kubernetes Deployments
   - [Overview](kubernetes/kubernetes-deployment-overview.md)

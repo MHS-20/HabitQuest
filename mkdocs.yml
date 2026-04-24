@@ -29,7 +29,6 @@ nav:
     - HATEOAS: implementation/hateoas.md
     - Event Sourcing: implementation/event-sourcing.md
     - Test Pyramid: implementation/test-pyramid.md
-
   - REST APIs:
     - Overview: api/overview.md
     - Authentication: api/auth.md
@@ -40,7 +39,9 @@ nav:
     - Marketplace: api/marketplace.md
     - Notifications: api/notification.md
   - Configuration:
+    - Gradle: configuration/gradle.md
     - CI/CD: configuration/ci-cd.md
+    - Git & Github: configuration/git-github.md
   - Kubernetes Deployments:
     - Overview: kubernetes/kubernetes-deployment-overview.md
     - Application: kubernetes/kubernetes-application-layer.md
