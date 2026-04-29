@@ -19,8 +19,9 @@ nav:
     - Habit: domain/habit.md
     - Quest: domain/quest.md
   - Architecture & Implementation:
+    - General Architecture: implementation/architecture/architecture.md
     - Interactions: implementation/interactions/interactions.md
-    - Hexagonal Architecture: implementation/hexagonal-architecture.md
+    - Hexagonal Architecture: implementation/hexagonal/hexagonal-architecture.md
     - Architecture Decision Records: ddd/adr/adr-index.md
     - Multiplatform UI: implementation/multiplatform.md
     - Microservices Patterns: implementation/microservices-patterns.md

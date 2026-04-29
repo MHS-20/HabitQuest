@@ -28,7 +28,8 @@ HabitQuest is here to support you on your journey to better habits.
 
 ### Architecture & Implementation
   - [Interactions](implementation/interactions/interactions.md)
-  - [Hexagonal Architecture](implementation/hexagonal-architecture.md)
+  - [General Architecture](implementation/architecture/architecture.md)
+  - [Hexagonal Architecture](implementation/hexagonal/hexagonal-architecture.md)
   - [Multiplatform UI Architecture](implementation/multiplatform.md)
   - [Microservices Patterns](implementation/microservices-patterns.md)
   - [CQRS](implementation/cqrs.md)

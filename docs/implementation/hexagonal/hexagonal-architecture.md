@@ -63,3 +63,5 @@ public record HabitAttended(Habit habit, Id<Avatar> avatarId)  implements HabitE
 public record HabitDeleted(Id<Habit> habitId, Id<Avatar> avatarId) implements HabitEvent {}
 public record HabitNotAttended(Habit habit, Id<Avatar> avatarId) implements HabitEvent {}
 ```
+
+![Hexagonal](./hexagonal-architecture.png)
