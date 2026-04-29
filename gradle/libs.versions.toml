@@ -13,7 +13,7 @@ archunit        = "1.1.0"
 jjwt        = "0.12.6"
 jakarta-servlet = "6.0.0"
 wiremock    = "3.5.4"
-rest-assured = "5.4.0"
+rest-assured = "6.0.0"
 greenmail = "2.1.2"
 
 [libraries]
