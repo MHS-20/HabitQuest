@@ -14,7 +14,7 @@ jjwt        = "0.12.6"
 jakarta-servlet = "6.0.0"
 wiremock    = "3.5.4"
 rest-assured = "5.4.0"
-greenmail = "2.1.2"
+greenmail = "2.1.8"
 
 [libraries]
 archunit = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
