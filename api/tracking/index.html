@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Habits (Tracking) - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Habits (Tracking)";
+        var mkdocs_page_input_path = "api/tracking.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Habits (Tracking)</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#endpoints">Endpoints</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#create-habit">Create Habit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-habit">Get Habit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#delete-habit">Delete Habit</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#habit-properties">Habit Properties</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-title">Get Title</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#update-title">Update Title</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-description">Get Description</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#update-description">Update Description</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-tags">Get Tags</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#update-tags">Update Tags</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-recurrence">Get Recurrence</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#update-recurrence">Update Recurrence</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-last-attended-date">Get Last Attended Date</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-history">Get History</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-habits-by-avatar">Get Habits by Avatar</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-history-by-avatar">Get History by Avatar</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#attending-a-habit">Attending a Habit</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#mark-habit-as-attended">Mark Habit as Attended</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#error-responses">Error Responses</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">REST APIs</li>
+      <li class="breadcrumb-item active">Habits (Tracking)</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="tracking-api-habits">Tracking API (Habits)</h1>
+<p><strong>Service:</strong> Tracking Service<br />
+<strong>Base Path:</strong> <code>/api/v1/habits</code></p>
+<p>The Tracking Service manages the lifecycle of habits. A habit belongs to an avatar and has a recurrence schedule (daily, weekly, or monthly). Attending a habit records a completion event and triggers gamification rewards via domain events.</p>
+<hr />
+<h2 id="endpoints">Endpoints</h2>
+<h3 id="create-habit">Create Habit</h3>
+<p><strong><code>POST /api/v1/habits</code></strong></p>
+<p>Creates a new habit for an avatar.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;avatarId&quot;: &quot;string&quot;,
+  &quot;title&quot;: &quot;string&quot;,
+  &quot;description&quot;: &quot;string&quot;,
+  &quot;recurrenceType&quot;: &quot;DAILY | WEEKLY | MONTHLY&quot;,
+  &quot;dayOfWeek&quot;: &quot;MONDAY&quot;,
+  &quot;dayOfMonth&quot;: 1,
+  &quot;tags&quot;: [&quot;health&quot;, &quot;exercise&quot;],
+  &quot;associatedQuestId&quot;: &quot;string&quot;,
+  &quot;sourceHabitId&quot;: &quot;string&quot;
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>avatarId</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>No</td>
+<td></td>
+</tr>
+<tr>
+<td><code>recurrenceType</code></td>
+<td>Yes</td>
+<td><code>DAILY</code>, <code>WEEKLY</code>, or <code>MONTHLY</code></td>
+</tr>
+<tr>
+<td><code>dayOfWeek</code></td>
+<td>Conditional</td>
+<td>Required when <code>recurrenceType</code> is <code>WEEKLY</code></td>
+</tr>
+<tr>
+<td><code>dayOfMonth</code></td>
+<td>Conditional</td>
+<td>Required when <code>recurrenceType</code> is <code>MONTHLY</code></td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>No</td>
+<td>Optional list of tags attached to the habit at creation time</td>
+</tr>
+<tr>
+<td><code>associatedQuestId</code></td>
+<td>No</td>
+<td>Links the habit to a quest when the habit originates from quest replication</td>
+</tr>
+<tr>
+<td><code>sourceHabitId</code></td>
+<td>No</td>
+<td>Identifies the upstream habit when this habit is cloned from another source</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response <code>201 Created</code>:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;string&quot;,
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/habits/string&quot; }
+  }
+}
+</code></pre>
+<hr />
+<h3 id="get-habit">Get Habit</h3>
+<p><strong><code>GET /api/v1/habits/{id}</code></strong></p>
+<p>Returns full habit details.</p>
+<p><strong>Response <code>200 OK</code>:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;string&quot;,
+  &quot;avatarId&quot;: &quot;string&quot;,
+  &quot;title&quot;: &quot;string&quot;,
+  &quot;description&quot;: &quot;string&quot;,
+  &quot;tags&quot;: [&quot;health&quot;, &quot;exercise&quot;],
+  &quot;recurrence&quot;: {
+    &quot;type&quot;: &quot;WEEKLY&quot;,
+    &quot;dayOfMonth&quot;: null,
+    &quot;dayOfWeek&quot;: &quot;MONDAY&quot;
+  },
+  &quot;lastAttendedDate&quot;: &quot;2024-01-15T08:00:00&quot;,
+  &quot;nextRecurrenceDate&quot;: &quot;2024-01-22T08:00:00&quot;,
+  &quot;associatedQuestId&quot;: &quot;string | null&quot;,
+  &quot;sourceHabitId&quot;: &quot;string | null&quot;,
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/habits/string&quot; }
+  }
+}
+</code></pre>
+<hr />
+<h3 id="delete-habit">Delete Habit</h3>
+<p><strong><code>DELETE /api/v1/habits/{id}</code></strong></p>
+<p>Permanently deletes the habit.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="habit-properties">Habit Properties</h2>
+<h3 id="get-title">Get Title</h3>
+<p><strong><code>GET /api/v1/habits/{id}/title</code></strong></p>
+<pre><code class="language-json">{ &quot;title&quot;: &quot;Morning Run&quot; }
+</code></pre>
+<h3 id="update-title">Update Title</h3>
+<p><strong><code>PATCH /api/v1/habits/{id}/title</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;title&quot;: &quot;Morning Run&quot; }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h3 id="get-description">Get Description</h3>
+<p><strong><code>GET /api/v1/habits/{id}/description</code></strong></p>
+<pre><code class="language-json">{ &quot;description&quot;: &quot;Run 5km every morning.&quot; }
+</code></pre>
+<h3 id="update-description">Update Description</h3>
+<p><strong><code>PATCH /api/v1/habits/{id}/description</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;description&quot;: &quot;Run 5km every morning.&quot; }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h3 id="get-tags">Get Tags</h3>
+<p><strong><code>GET /api/v1/habits/{id}/tags</code></strong></p>
+<pre><code class="language-json">{ &quot;tags&quot;: [&quot;health&quot;, &quot;fitness&quot;] }
+</code></pre>
+<h3 id="update-tags">Update Tags</h3>
+<p><strong><code>PATCH /api/v1/habits/{id}/tags</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;tags&quot;: [&quot;health&quot;, &quot;fitness&quot;, &quot;outdoor&quot;] }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h3 id="get-recurrence">Get Recurrence</h3>
+<p><strong><code>GET /api/v1/habits/{id}/recurrence</code></strong></p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;WEEKLY&quot;,
+  &quot;dayOfMonth&quot;: null,
+  &quot;dayOfWeek&quot;: &quot;MONDAY&quot;
+}
+</code></pre>
+<h3 id="update-recurrence">Update Recurrence</h3>
+<p><strong><code>PATCH /api/v1/habits/{id}/recurrence</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;MONTHLY&quot;,
+  &quot;dayOfWeek&quot;: null,
+  &quot;dayOfMonth&quot;: 15
+}
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h3 id="get-last-attended-date">Get Last Attended Date</h3>
+<p><strong><code>GET /api/v1/habits/{id}/last-attended-date</code></strong></p>
+<pre><code class="language-json">{ &quot;date&quot;: &quot;2024-01-15T08:00:00&quot; }
+</code></pre>
+<hr />
+<h3 id="get-history">Get History</h3>
+<p><strong><code>GET /api/v1/habits/{id}/history</code></strong></p>
+<p>Returns the full completion history of the habit.</p>
+<pre><code class="language-json">{
+  &quot;history&quot;: [
+    {
+      &quot;eventType&quot;: &quot;HabitAttended&quot;,
+      &quot;habitId&quot;: &quot;string&quot;,
+      &quot;avatarId&quot;: &quot;string&quot;,
+      &quot;occurredAt&quot;: &quot;2024-01-08T08:00:00&quot;,
+      &quot;details&quot;: &quot;Completed a morning run&quot;
+    }
+  ]
+}
+</code></pre>
+<h3 id="get-habits-by-avatar">Get Habits by Avatar</h3>
+<p><strong><code>GET /api/v1/habits/avatar/{avatarId}</code></strong></p>
+<p>Returns the active habits belonging to the avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Plain JSON array of habit objects.</p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;string&quot;,
+    &quot;avatarId&quot;: &quot;string&quot;,
+    &quot;title&quot;: &quot;Morning Run&quot;,
+    &quot;description&quot;: &quot;Run 5km every morning.&quot;,
+    &quot;tags&quot;: [&quot;health&quot;, &quot;fitness&quot;],
+    &quot;recurrence&quot;: {
+      &quot;type&quot;: &quot;WEEKLY&quot;,
+      &quot;dayOfMonth&quot;: null,
+      &quot;dayOfWeek&quot;: &quot;MONDAY&quot;
+    },
+    &quot;lastAttendedDate&quot;: &quot;2024-01-15T08:00:00&quot;,
+    &quot;nextRecurrenceDate&quot;: &quot;2024-01-22T08:00:00&quot;,
+    &quot;associatedQuestId&quot;: &quot;string | null&quot;,
+    &quot;sourceHabitId&quot;: &quot;string | null&quot;
+  }
+]
+</code></pre>
+<h3 id="get-history-by-avatar">Get History by Avatar</h3>
+<p><strong><code>GET /api/v1/habits/avatar/{avatarId}/history</code></strong></p>
+<p>Returns the aggregated habit history for the avatar across all of their habits.</p>
+<p><strong>Response <code>200 OK</code>:</strong> Plain JSON array of habit history events.</p>
+<pre><code class="language-json">[
+  {
+    &quot;eventType&quot;: &quot;HabitAttended&quot;,
+    &quot;habitId&quot;: &quot;string&quot;,
+    &quot;avatarId&quot;: &quot;string&quot;,
+    &quot;occurredAt&quot;: &quot;2024-01-08T08:00:00&quot;,
+    &quot;details&quot;: &quot;Completed a morning run&quot;
+  }
+]
+</code></pre>
+<hr />
+<h2 id="attending-a-habit">Attending a Habit</h2>
+<h3 id="mark-habit-as-attended">Mark Habit as Attended</h3>
+<p><strong><code>POST /api/v1/habits/{id}/attend</code></strong></p>
+<p>Records a habit completion event. This triggers gamification domain events (XP reward, etc.).</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;date&quot;: &quot;2024-01-15T08:00:00&quot; }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="error-responses">Error Responses</h2>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>400 Bad Request</code></td>
+<td>Invalid recurrence configuration or business rule violation</td>
+</tr>
+<tr>
+<td><code>502 Bad Gateway</code></td>
+<td>Downstream quest synchronization failed while processing habit attendance</td>
+</tr>
+<tr>
+<td><code>404 Not Found</code></td>
+<td>Habit not found</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../avatar/" class="btn btn-neutral float-left" title="Avatar"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../quest/" class="btn btn-neutral float-right" title="Quests">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../avatar/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../quest/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

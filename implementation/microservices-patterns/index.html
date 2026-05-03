@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Microservices Patterns - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Microservices Patterns";
+        var mkdocs_page_input_path = "implementation/microservices-patterns.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Microservices Patterns</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#patterns">Patterns</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-api-gateway-spring-cloud-gateway">1. API Gateway — Spring Cloud Gateway</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-event-driven-architecture-notification-service-with-apache-kafka">2. Event-Driven Architecture — Notification Service with Apache Kafka</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-observability-kubernetes-health-checks-spring-actuator-micrometer-prometheus-loki-tempo">3. Observability — Kubernetes Health Checks, Spring Actuator, Micrometer, Prometheus, Loki, Tempo</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-circuit-breaker-timeout-and-retry-spring-resilience4j">4. Circuit Breaker, Timeout and Retry — Spring Resilience4j</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#5-externalized-configuration-kustomize-and-spring-applicationyml">5. Externalized Configuration — Kustomize and Spring application.yml</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#6-service-discovery-kubernetes-dns">6. Service Discovery — Kubernetes DNS</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">Microservices Patterns</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="microservices-pattern-with-spring-boot-and-kubernetes">Microservices Pattern with Spring Boot and Kubernetes</h1>
+<p>The architecture adopts a consolidated set of patterns to guarantee scalability, resilience, observability and operational simplicity.
+Services communicate both synchronously (REST over HTTP) and asynchronously (via Apache Kafka),
+and the entire infrastructure is configured to run in a Docker/Kubernetes environment,
+with native support for service discovery, externalized configuration management and end-to-end monitoring.</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Technology</th>
+<th>Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Gateway</td>
+<td>Spring Cloud Gateway</td>
+<td>Single entry point, routing, rate limiting</td>
+</tr>
+<tr>
+<td>Event-Driven</td>
+<td>Apache Kafka</td>
+<td>Asynchronous communication, decoupling</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Actuator, Micrometer, Prometheus, Loki, Tempo, Grafana</td>
+<td>Metrics, logs and distributed traces</td>
+</tr>
+<tr>
+<td>Circuit Breaker / Retry / Timeout</td>
+<td>Spring Resilience4j</td>
+<td>Resilience and fault tolerance</td>
+</tr>
+<tr>
+<td>Externalized Configuration</td>
+<td>Kustomize, Spring profiles</td>
+<td>Config/code separation, multi-environment</td>
+</tr>
+<tr>
+<td>Service Discovery</td>
+<td>Kubernetes DNS</td>
+<td>Dynamic service location</td>
+</tr>
+</tbody>
+</table>
+<h2 id="patterns">Patterns</h2>
+<h3 id="1-api-gateway-spring-cloud-gateway">1. API Gateway — <em>Spring Cloud Gateway</em></h3>
+<p>The <strong>API Gateway</strong> acts as the single entry point for all incoming requests, preventing clients from knowing the internal topology.
+This way any reorganization of the microservices is transparent to the clients, which always interact exclusively with a stable endpoint.</p>
+<p>The gateway is built with <strong>Spring Cloud Gateway</strong>, a reactive framework.
+Each microservice exposes its own APIs, but these are accessible exclusively through the gateway:</p>
+<ul>
+<li><strong>Dynamic routing</strong>: requests are routed to the correct microservice based on the request path.</li>
+<li><strong>Centralization of routing policies</strong>: authentication, logging of incoming requests and rate limiting are managed at gateway level via filters, avoiding duplication of logic in individual services.</li>
+<li><strong>Rate Limiting</strong>: a custom <code>WebFilter</code> has been implemented in the gateway that limits the number of requests in a given time interval, protecting downstream services from unexpected overloads.</li>
+<li><strong>Circuit Breaker</strong>: the gateway is also configured with Resilience4j to protect downstream services, returning fallback responses in case of degradation.</li>
+</ul>
+<h3 id="2-event-driven-architecture-notification-service-with-apache-kafka">2. Event-Driven Architecture — <em>Notification Service with Apache Kafka</em></h3>
+<p>A dedicated <strong>Notification Service</strong> has been built, acting exclusively as a <strong>Kafka consumer</strong>.
+The other microservices publish events on specific Kafka topics whenever a relevant domain event occurs.
+The Notification Service listens on these topics and, upon receiving an event, sends an <strong>email notification</strong> to the affected user.
+This way the sending of notifications is asynchronous and does not block the control flow of the producer services.
+At the same time, by centralizing notifications in a separate service, it is easy to extend or evolve the notification logic to other communication channels as well.</p>
+<p>Communication follows the pattern below:</p>
+<pre><code>[Microservice A] --&gt; (event on Kafka topic) --&gt; [Kafka Broker] --&gt; [Notification Service] --&gt; (email)
+[Microservice B] --&gt; (event on Kafka topic) --&gt; [Kafka Broker] --&gt; [Notification Service] --&gt; (email)
+</code></pre>
+<ul>
+<li><strong>Temporal decoupling</strong>: producer services do not need to wait for the notification to be delivered.</li>
+<li><strong>Resilience</strong>: if the Notification Service is temporarily unavailable, messages remain in the Kafka topic and are processed upon recovery.</li>
+<li><strong>Scalability</strong>: the Notification Service can be scaled horizontally independently of the other services.</li>
+</ul>
+<hr />
+<h3 id="3-observability-kubernetes-health-checks-spring-actuator-micrometer-prometheus-loki-tempo">3. Observability — <em>Kubernetes Health Checks, Spring Actuator, Micrometer, Prometheus, Loki, Tempo</em></h3>
+<p><strong>Context and motivation</strong></p>
+<p>In a distributed system it is essential to have complete visibility into the state of the system at all times.
+<strong>Observability</strong> is traditionally organized into three pillars: <strong>metrics</strong>, <strong>logs</strong> and <strong>distributed traces</strong>.</p>
+<p>The observability stack has been built on multiple complementary layers:</p>
+<ol>
+<li>
+<p><strong>Health Checks with Kubernetes</strong>: Each microservice exposes the <code>/actuator/health/liveness</code> and <code>/actuator/health/readiness</code> endpoints via Spring Actuator.
+   Kubernetes uses these endpoints to configure <strong>liveness probes</strong> and <strong>readiness probes</strong>,
+   ensuring that traffic is routed only to actually operational instances and that non-functioning containers are automatically restarted.</p>
+</li>
+<li>
+<p><strong>Metrics with Spring Micrometer and Prometheus</strong>: Spring Micrometer acts as an abstraction layer for the collection of application metrics.
+   Metrics are exposed in the <strong>Prometheus</strong>-compatible format via the <code>/actuator/prometheus</code> endpoint.</p>
+</li>
+<li>
+<p><strong>Aggregated logs with Loki and FluentBit</strong>: Logs produced by all microservices are collected and aggregated in <strong>Loki</strong>, allowing searches across logs of different services on a single interface.</p>
+</li>
+<li>
+<p><strong>Distributed traces with Tempo</strong>: <strong>Distributed telemetry</strong> is enabled via integration with <strong>Tempo</strong>: each HTTP request generates a <code>trace ID</code> that is propagated across all involved microservices.
+   This allows the complete end-to-end path of a request to be reconstructed.</p>
+</li>
+</ol>
+<h3 id="4-circuit-breaker-timeout-and-retry-spring-resilience4j">4. Circuit Breaker, Timeout and Retry — <em>Spring Resilience4j</em></h3>
+<p>The <strong>Circuit Breaker</strong>, <strong>Timeout</strong> and <strong>Retry</strong> patterns collaborate to isolate faults and increase failure tolerance.
+<strong>Spring Resilience4j</strong> has been integrated in all microservices and in the gateway. Each HTTP call between services is protected by a combination of:</p>
+<ul>
+<li>
+<p><strong>Circuit Breaker</strong>: monitors calls towards a downstream service. When the error percentage exceeds a configured threshold,
+  the circuit opens and subsequent requests are immediately rejected with a fallback, without waiting for a timeout.
+  After a configured interval, the circuit enters a "half-open" state and tests whether the service has recovered.</p>
+</li>
+<li>
+<p><strong>Timeout</strong>: each HTTP call is subject to a maximum timeout. If the downstream service does not respond within the established time,
+  the call is interrupted and a fallback response is returned, preventing the caller's threads from remaining blocked indefinitely.</p>
+</li>
+<li>
+<p><strong>Retry</strong>: in case of transient errors, calls are automatically retried a configured number of times, with a backoff interval between one attempt and the next.</p>
+</li>
+</ul>
+<p>The configuration is applied both to communications <strong>between microservices</strong>
+(synchronous REST calls) and between the <strong>gateway and the microservices</strong>, ensuring that the entry point is also protected.</p>
+<ul>
+<li><strong>Fail-fast</strong>: clients receive immediate responses instead of waiting for long timeouts.</li>
+<li><strong>Fault isolation</strong>: the malfunction of a single service does not propagate to the entire system.</li>
+<li><strong>Auto-healing</strong>: the circuit closes automatically when the service becomes available again.</li>
+</ul>
+<p>Retries are configured as follows:</p>
+<ul>
+<li>A request is attempted 3 times in total</li>
+<li>After the first failure, 500ms are waited</li>
+<li>The wait time doubles for each new failed attempt.</li>
+</ul>
+<pre><code>resilience4j:
+  retry:
+    instances:
+      avatarClient:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+          - habitquest.guild.infrastructure.AvatarCommunicationException
+</code></pre>
+<p>CircuitBreakers are configured as follows:</p>
+<ul>
+<li><strong>Sliding Window</strong>: Analyzes the last 10 calls.</li>
+<li><strong>Failure Threshold</strong>: If 50% of calls in the window fail, the circuit switches to OPEN state.</li>
+<li><strong>Slowness Management</strong>: If 80% of calls take more than 3 seconds, the circuit opens.</li>
+<li><strong>OPEN State</strong>: The circuit remains open for 10 seconds. During this time, every request fails instantly.</li>
+<li><strong>HALF-OPEN State</strong>: After 10 seconds, the system allows 3 test calls. If these succeed, the circuit returns to CLOSED; otherwise it returns to OPEN.</li>
+</ul>
+<pre><code>  circuit-breaker:
+    instances:
+      avatarClient:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 3s
+        wait-duration-in-open-state: 10s
+        permitted-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+</code></pre>
+<h3 id="5-externalized-configuration-kustomize-and-spring-applicationyml">5. Externalized Configuration — <em>Kustomize and Spring <code>application.yml</code></em></h3>
+<p>Configuration must not be hardcoded in the source code nor in Docker images.
+The <strong>Externalized Configuration</strong> pattern allows the configuration to be separated from the application,
+making it possible to deploy the same artifact in different environments (development, staging, production) without code changes.</p>
+<p>Configuration management is structured on two levels:</p>
+<ol>
+<li>
+<p><strong>Application level — Spring <code>application.yml</code></strong>: Each microservice defines its own configuration in <code>application.yml</code> files.
+   Sensitive or environment-dependent variables (e.g. URLs) are parameterized via environment variables, which are injected at runtime by the Kubernetes layer.</p>
+</li>
+<li>
+<p><strong>Infrastructure level — Kustomize</strong>: Kustomize manages the customization of Kubernetes manifests for different environments without duplicating files.
+   Through a structure of <code>base</code> and <code>overlays</code>, it is possible to define a common configuration and apply specific patches for each environment (e.g. number of replicas, CPU/memory resources, environment variables).
+   This approach eliminates the need to create new manifests from scratch for each deployment environment.</p>
+</li>
+</ol>
+<h3 id="6-service-discovery-kubernetes-dns">6. Service Discovery — <em>Kubernetes DNS</em></h3>
+<p>Kubernetes provides <strong>native Service Discovery</strong> via its internal DNS system.
+Each microservice is associated with a Kubernetes <code>Service</code> object, which acts as a stable endpoint and is automatically registered in the cluster's DNS.
+When a microservice needs to communicate with another, it uses the <strong>DNS name of the Service</strong> instead of an IP address.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../multiplatform/" class="btn btn-neutral float-left" title="Multiplatform UI"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../cqrs/" class="btn btn-neutral float-right" title="CQRS">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../multiplatform/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../cqrs/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>ADR-0001 — Synchronous REST as primary integration style in the HabitQuest microservice platform - HabitQuest</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "ADR-0001 \u2014 Synchronous REST as primary integration style in the HabitQuest microservice platform";
+        var mkdocs_page_input_path = "ddd/adr/adr1-restApi.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">ADR-0001 — Synchronous REST as primary integration style in the HabitQuest microservice platform</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="adr-0001-synchronous-rest-as-primary-integration-style-in-the-habitquest-microservice-platform">ADR-0001 — Synchronous REST as primary integration style in the HabitQuest microservice platform</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>ADR-0001</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><strong>Related patterns</strong></td>
+<td>HATEOAS · CQRS · SAGA · DDD</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-context">1. Context</h2>
+<p>HabitQuest is a gamified habit-tracking platform decomposed into independently deployable microservices,
+each owning its bounded context as mandated by Domain-Driven Design.</p>
+<p>At the start of the project the team had to select a primary inter-service communication style. The platform must support:</p>
+<ul>
+<li>Fine-grained operations on domain aggregates (create avatar, equip item, apply damage, grant XP, …).</li>
+<li>Complex, multi-step workflows that span more than one service (e.g. completing a quest triggers XP gain, currency drop, and achievement unlock simultaneously).</li>
+</ul>
+<h3 id="alternatives-considered">Alternatives considered</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A — Synchronous REST + HATEOAS</strong> <em>(chosen)</em></td>
+<td>Each service exposes a versioned HTTP API. Clients discover available transitions via hypermedia links embedded in responses. SAGA orchestrates multi-service workflows.</td>
+</tr>
+<tr>
+<td><strong>B — Async messaging (e.g. Kafka)</strong></td>
+<td>Services communicate exclusively through domain events on a broker. Consumers react to events independently. Higher operational complexity; eventual consistency by default.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-decision">2. Decision</h2>
+<p><strong>Adopt synchronous REST with HATEOAS as the primary integration style</strong> across all HabitQuest microservices, 
+applying CQRS to segregate read and write endpoints within each service, and SAGA (orchestration variant) to manage multi-step cross-service workflows.</p>
+<h3 id="rationale">Rationale</h3>
+<ul>
+<li><strong>Fit with CQRS.</strong> Separating command and query controllers (<code>AvatarCommandController</code> vs <code>AvatarQueryController</code>) maps naturally to REST: commands mutate state via <code>POST</code> / <code>PATCH</code> / <code>DELETE</code> and return <code>204</code> or a creation response, while queries expose <code>GET</code> endpoints for individual sub-resources (<code>/health</code>, <code>/inventory</code>, <code>/stats</code>, …). This produces a uniform, self-describing API surface aligned with the CQRS read/write segregation.</li>
+<li><strong>Fit with HATEOAS.</strong> The <code>AvatarResponseAssembler</code> embeds typed hypermedia links (<code>earn</code>, <code>spend</code>, <code>damage</code>, <code>useHealthPotion</code>, …) directly in each response. Clients navigate the API by following links, eliminating hard-coded URL coupling and making the allowed state transitions explicit at runtime — a capability that async messaging cannot provide natively.</li>
+<li><strong>Fit with DDD bounded contexts.</strong> Each service owns its domain model and exposes it through a well-defined HTTP surface. REST resources map 1-to-1 to aggregate roots (<code>Avatar</code>, <code>Guild</code>, <code>Invite</code>), preserving context integrity without leaking domain internals across service boundaries.</li>
+<li><strong>Fit with SAGA.</strong> Long-running workflows that span services (e.g. quest completion → avatar XP → reward unlock) are coordinated by an orchestrator that calls each participant service synchronously, collects results, and issues compensating requests on failure. This gives deterministic, observable transaction progress — much easier to debug than choreography-based event chains.</li>
+<li><strong>Team and project constraints.</strong> The team has more experience with Spring MVC and prefer a simpler solution where services can be developed and tested in isolation without needing a running message broker or schema registry. The expected traffic volume is moderate, so the latency overhead of synchronous calls is acceptable for now.</li>
+</ul>
+<h2 id="3-consequences">3. Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ul>
+<li><strong>Uniform, self-describing API surface.</strong> HATEOAS links make state transitions discoverable without out-of-band documentation; clients never hard-code URLs.</li>
+<li><strong>Strong request/response traceability.</strong> Each call produces an HTTP trace, making debugging and distributed tracing (e.g. via OpenTelemetry / Spring Sleuth) straightforward.</li>
+<li><strong>Clear CQRS separation enforced at the boundary.</strong> Command and query paths are separated at the controller level, preventing accidental side-effects in read paths.</li>
+<li><strong>Simpler local development.</strong> Services can be run and tested individually without a running broker or schema registry.</li>
+<li><strong>Explicit SAGA compensations.</strong> Compensating transactions are synchronous and traceable, reducing the risk of phantom partial states in domain aggregates.</li>
+</ul>
+<h3 id="trade-offs">Trade-offs</h3>
+<ul>
+<li><strong>Temporal coupling.</strong> A caller blocks until the callee responds; a slow or unavailable downstream service propagates latency and failure upstream.</li>
+<li><strong>No built-in fan-out.</strong> Broadcasting a domain event to multiple consumers requires explicit orchestration or a secondary notification mechanism.</li>
+<li><strong>SAGA orchestrator as a coordination bottleneck.</strong> It must be made resilient (retries, idempotency tokens, timeouts) or overall workflow reliability degrades.</li>
+<li><strong>Scalability ceiling.</strong> Under very high throughput, synchronous HTTP call chains are harder to scale than decoupled event-driven pipelines. This trade-off is acceptable at the current traffic level but must be re-evaluated as the platform grows.</li>
+</ul>
+<h3 id="manual-periodic-review">Manual — periodic review</h3>
+<p>If the <strong>P99 latency on SAGA-orchestrated workflows exceeds 800 ms</strong>, or a fan-out use case emerges that cannot be satisfied by the synchronous orchestrator, 
+the team will re-evaluate introducing a message broker for that specific interaction and amend this ADR accordingly.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

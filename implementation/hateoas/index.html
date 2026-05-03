@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>HATEOAS - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "HATEOAS";
+        var mkdocs_page_input_path = "implementation/hateoas.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">HATEOAS</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-creation-post-apiv1avatars">Avatar creation (POST /api/v1/avatars)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-detail-get-apiv1avatarsid">Avatar detail (GET /api/v1/avatars/{id})</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#resources-with-contextual-operations">Resources with contextual operations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#collections-get-apiv1avatarssearch">Collections (GET /api/v1/avatars/search)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#structure-of-a-hateoas-response">Structure of a HATEOAS Response</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">HATEOAS</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="hateoas-in-the-habitquest-api">HATEOAS in the HabitQuest API</h1>
+<p>In Spring, the HATEOAS (Hypermedia As The Engine Of Application State) principle is implemented through the <strong>Spring HATEOAS</strong> library, which provides <code>EntityModel</code> (single resource with links) and <code>CollectionModel</code> (collection of resources with links), built via <code>WebMvcLinkBuilder</code>.
+This way the client does not need to know the URL structure in advance, but discovers it dynamically from the response itself.
+All REST Controllers use HATEOAS to make the API navigable and self-describing; below, only the AvatarController is shown as an example.</p>
+<p>As a result, the client can potentially contain no hardcoded URLs.
+If the server moves or renames an endpoint, it is sufficient to update the links in the responses: clients that correctly navigate the hypermedia adapt without any modifications.
+This is particularly useful in a microservices architecture where endpoints can evolve independently.</p>
+<p>A client can navigate the entire API starting from a single entry point (<code>/avatars/{id}</code>), progressively discovering resources and operations.
+Links are not just passive navigation: they also indicate which actions are available at any given moment. A <code>health</code> resource that exposes <code>heal</code> and <code>damage</code> implicitly communicates that these are the legal operations on it.</p>
+<p>Building links via <code>WebMvcLinkBuilder</code> and <code>methodOn()</code> ensures that the URLs in the links are always aligned with the controller's <code>@RequestMapping</code> annotations.
+There is no risk of broken links due to refactoring: if the path of a method changes, the link updates automatically.</p>
+<h3 id="avatar-creation-post-apiv1avatars">Avatar creation (<code>POST /api/v1/avatars</code>)</h3>
+<p>At creation, the response immediately includes links to the main child resources, so the client knows what it can do right after:</p>
+<pre><code class="language-java">EntityModel.of(
+    body,
+    selfLink(id.value()),
+    linkTo(methodOn(AvatarController.class).getAvatar(id.value())).withRel(&quot;avatar&quot;),
+    linkTo(methodOn(AvatarController.class).getLevel(id.value())).withRel(&quot;level&quot;),
+    linkTo(methodOn(AvatarController.class).getHealth(id.value())).withRel(&quot;health&quot;)
+);
+</code></pre>
+<h3 id="avatar-detail-get-apiv1avatarsid">Avatar detail (<code>GET /api/v1/avatars/{id}</code>)</h3>
+<p>This is the main entry point and returns the richest set of links: all resources navigable from the avatar.</p>
+<pre><code class="language-java">EntityModel.of(
+    dto,
+    selfLink(id),
+    linkTo(...getInventory(id)).withRel(&quot;inventory&quot;),
+    linkTo(...getEquippedItems(id)).withRel(&quot;equippedItems&quot;),
+    linkTo(...getStats(id)).withRel(&quot;stats&quot;),
+    linkTo(...getLevel(id)).withRel(&quot;level&quot;),
+    linkTo(...getHealth(id)).withRel(&quot;health&quot;),
+    linkTo(...getMana(id)).withRel(&quot;mana&quot;),
+    linkTo(...getMoney(id)).withRel(&quot;money&quot;),
+    linkTo(...deleteAvatar(id)).withRel(&quot;delete&quot;)
+);
+</code></pre>
+<p>This response acts as a <strong>navigation hub</strong>: a client that only knows the <code>/avatars/{id}</code> endpoint is able to reach the entire avatar API without additional documentation.</p>
+<h3 id="resources-with-contextual-operations">Resources with contextual operations</h3>
+<p>Some sub-resources include links to the operations that make sense on them, making the response self-describing with respect to the current state.
+<strong>Money</strong> — directly exposes the two available operations:</p>
+<pre><code class="language-java">linkTo(...earnMoney(id, null)).withRel(&quot;earn&quot;),
+linkTo(...spendMoney(id, null)).withRel(&quot;spend&quot;)
+</code></pre>
+<p><strong>Inventory</strong> — links the modification operations and navigation towards equipped items:</p>
+<pre><code class="language-java">linkTo(...addItem(id, null)).withRel(&quot;addItem&quot;),
+linkTo(...removeItem(id, null)).withRel(&quot;removeItem&quot;),
+linkTo(...getEquippedItems(id)).withRel(&quot;equippedItems&quot;)
+</code></pre>
+<p><strong>Health</strong> — exposes heal and damage as navigable actions:</p>
+<pre><code class="language-java">linkTo(...healAvatar(id, null)).withRel(&quot;heal&quot;),
+linkTo(...applyDamage(id, null)).withRel(&quot;damage&quot;)
+</code></pre>
+<p><strong>Stats</strong> — provides links to the three available upgrades:</p>
+<pre><code class="language-java">linkTo(...increaseStrength(id)).withRel(&quot;increaseStrength&quot;),
+linkTo(...increaseDefense(id)).withRel(&quot;increaseDefense&quot;),
+linkTo(...increaseIntelligence(id)).withRel(&quot;increaseIntelligence&quot;)
+</code></pre>
+<h3 id="collections-get-apiv1avatarssearch">Collections (<code>GET /api/v1/avatars/search</code>)</h3>
+<p>Collective responses also use HATEOAS. Each element in the list includes a link to itself and to its own avatar, and the entire collection carries the <code>self</code> link that identifies the query that produced it:</p>
+<pre><code class="language-java">CollectionModel.of(
+    avatarModels,
+    linkTo(methodOn(AvatarController.class).searchAvatars(query)).withSelfRel()
+);
+</code></pre>
+<h2 id="structure-of-a-hateoas-response">Structure of a HATEOAS Response</h2>
+<p>A typical response for <code>GET /api/v1/avatars/{id}/money</code> looks like this:</p>
+<pre><code class="language-json">{
+  &quot;amount&quot;: 150,
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/abc123&quot; },
+    &quot;avatar&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/abc123&quot; },
+    &quot;earn&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/abc123/money/earn&quot; },
+    &quot;spend&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/abc123/money/spend&quot; }
+  }
+}
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../saga/" class="btn btn-neutral float-left" title="SAGA"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../event-sourcing/" class="btn btn-neutral float-right" title="Event Sourcing">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../saga/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../event-sourcing/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

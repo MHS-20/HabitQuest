@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Quality Attributes - HabitQuest</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quality Attributes";
+        var mkdocs_page_input_path = "ddd/specifications/quality_attributes.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Quality Attributes</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#general-all-services">General (all services)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#scalability">Scalability</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#availability">Availability</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#1-edge-service">1. Edge Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#correctness">Correctness</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#security">Security</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-avatar-service">2. Avatar Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_1">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#consistency">Consistency</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#correctness_1">Correctness</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-tracking-service">3. Tracking Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_2">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#consistency_1">Consistency</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-marketplace-service">4. Marketplace Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_3">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#consistency-saga-compensation">Consistency (saga compensation)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-guild-service">5. Guild Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_4">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#consistency_2">Consistency</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#correctness_2">Correctness</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-battle-service">6. Battle Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_5">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#correctness_3">Correctness</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#consistency_3">Consistency</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-quest-service">7. Quest Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_6">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#consistency_4">Consistency</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-notification-service">8. Notification Service</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#performance_7">Performance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#correctness_4">Correctness</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Driven Design</li>
+      <li class="breadcrumb-item active">Quality Attributes</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quality-attributes-habit-rpg-microservices">Quality Attributes — Habit RPG Microservices</h1>
+<hr />
+<h2 id="general-all-services">General (all services)</h2>
+<h3 id="scalability">Scalability</h3>
+<ul>
+<li>Each microservice must be independently horizontally scalable by adding replicas without any code change or coordination between instances.</li>
+<li>Stateless design: no microservice may store user session state in memory; all persistent state must reside in the database.</li>
+</ul>
+<h3 id="availability">Availability</h3>
+<ul>
+<li>Each microservice must be available ≥ 99.5% of the time, measured on a monthly rolling window.</li>
+</ul>
+<hr />
+<h2 id="1-edge-service">1. Edge Service</h2>
+<h3 id="performance">Performance</h3>
+<ul>
+<li>Average response time for login and registration must be ≤ 500 ms.</li>
+<li>95% of login and registration requests must complete within 1 second.</li>
+<li>In case of an internal error, the service must return a valid HTTP response (4xx/5xx) within 2 seconds.</li>
+</ul>
+<h3 id="correctness">Correctness</h3>
+<ul>
+<li>Input validation (email format, password minimum length, non-blank fields) must be enforced at the API boundary before any business logic is executed.</li>
+<li>Duplicate email addresses must be rejected before any resource is created.</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li>The JWT must be validated for signature, expiry, and issuer on every protected request.</li>
+<li>Passwords must never be stored in plain text; only the hashed form is persisted.</li>
+</ul>
+<hr />
+<h2 id="2-avatar-service">2. Avatar Service</h2>
+<h3 id="performance_1">Performance</h3>
+<ul>
+<li>Retrieval of any avatar attribute must complete within 500 ms in 95% of cases.</li>
+<li>Any inventory mutation (add, remove, equip, unequip item) must complete within 500 ms in 95% of cases.</li>
+<li>Any stat or currency mutation (spend money, earn money, apply damage, grant experience, spend mana) must complete within 500 ms in 95% of cases.</li>
+</ul>
+<h3 id="consistency">Consistency</h3>
+<ul>
+<li>Every mutation (inventory, currency, health, experience, stats) must be performed as an atomic read-modify-write on the avatar aggregate</li>
+<li>After a successful mutation, the new state must be immediately visible to all subsequent read requests.</li>
+</ul>
+<h3 id="correctness_1">Correctness</h3>
+<ul>
+<li>Avatar creation also triggers the creation of a corresponding marketplace. If that call fails, the avatar creation must be considered failed.</li>
+<li>Item operations (equip, unequip, use potion) must enforce domain invariants (e.g. item must exist in inventory before it can be used or equipped); violations must result in a 4xx error.</li>
+</ul>
+<hr />
+<h2 id="3-tracking-service">3. Tracking Service</h2>
+<h3 id="performance_2">Performance</h3>
+<ul>
+<li>Creation or update of a habit must complete within 500 ms in 95% of cases.</li>
+<li>Retrieval of the habit list for an avatar must complete within 700 ms in 95% of cases.</li>
+</ul>
+<h3 id="consistency_1">Consistency</h3>
+<ul>
+<li>Habit state (title, description, tags, recurrence, last attended date) is persisted atomically before any downstream call or event notification is triggered.</li>
+</ul>
+<hr />
+<h2 id="4-marketplace-service">4. Marketplace Service</h2>
+<h3 id="performance_3">Performance</h3>
+<ul>
+<li>Item purchase or sale must complete within 700 ms in 95% of cases.</li>
+<li>Retrieval of available or sold item lists must complete within 500 ms in 95% of cases.</li>
+</ul>
+<h3 id="consistency-saga-compensation">Consistency (saga compensation)</h3>
+<ul>
+<li>A purchase involves three sequential calls to the Avatar Service: deduct currency, add item to inventory, and then update the marketplace state locally. Atomicity must be guaranteed.</li>
+<li>If adding the item to inventory fails after currency has been deducted, the currency deduction is compensated by crediting it back before the error is propagated.</li>
+<li>If any step fails, all previously completed steps must be compensated and an explicit error must be returned. No partial state (money deducted but item not added, or vice versa) must be observable by the client after the error response.</li>
+<li>A sale follows the same pattern in reverse: the item is removed from inventory first, then currency is credited. Compensation restores the item if the currency credit fails.</li>
+</ul>
+<hr />
+<h2 id="5-guild-service">5. Guild Service</h2>
+<h3 id="performance_4">Performance</h3>
+<ul>
+<li>Guild creation must complete within 500 ms in 95% of cases.</li>
+<li>Guild information retrieval must complete within 700 ms in 95% of cases.</li>
+</ul>
+<h3 id="consistency_2">Consistency</h3>
+<ul>
+<li>Guild membership changes (join, leave, remove, promote) must be performed as atomic read-modify-write.</li>
+<li>After a membership change, the new state must be immediately visible to all subsequent read requests.</li>
+<li>When a member accepts an invite, if a battle is currently in progress for that guild, the battle's turn count is incremented as part of the same operation.</li>
+<li>When a member leaves or is removed, if a battle is in progress, the battle's turn count is decremented. If the guild becomes empty as a result, the battle and the guild are both deleted.</li>
+</ul>
+<h3 id="correctness_2">Correctness</h3>
+<ul>
+<li>Role promotion and member removal enforce role-based authorization rules at the domain level before any state change is persisted.</li>
+</ul>
+<hr />
+<h2 id="6-battle-service">6. Battle Service</h2>
+<h3 id="performance_5">Performance</h3>
+<ul>
+<li>Response to a battle action (damage) must be delivered within 300 ms in 95% of cases.</li>
+<li>Battle state queries (current turn, boss health, attacker turn check) must complete within 300 ms in 95% of cases.</li>
+</ul>
+<h3 id="correctness_3">Correctness</h3>
+<ul>
+<li>A damage action is only accepted if it is the attacker's turn; requests out of turn must be rejected before any state mutation.</li>
+</ul>
+<h3 id="consistency_3">Consistency</h3>
+<ul>
+<li>Turn management is consistent with guild membership: joining a guild increments the turn count, leaving or being removed decrements it, ensuring the turn rotation always reflects the current member list.</li>
+</ul>
+<hr />
+<h2 id="7-quest-service">7. Quest Service</h2>
+<h3 id="performance_6">Performance</h3>
+<ul>
+<li>Quest detail retrieval must complete within 600 ms in 95% of cases.</li>
+<li>Joining a quest must complete within 800 ms in 95% of cases.</li>
+</ul>
+<h3 id="consistency_4">Consistency</h3>
+<ul>
+<li>Active quest state (attendance records, status) is persisted atomically before any reward or penalty call is issued.</li>
+<li>Progress responses always reflect the most up-to-date status as of the time of the request, including any status transitions and penalty applications triggered during the retrieval.</li>
+</ul>
+<hr />
+<h2 id="8-notification-service">8. Notification Service</h2>
+<h3 id="performance_7">Performance</h3>
+<ul>
+<li>Notification dispatch must be initiated within 500 ms of the triggering event.</li>
+</ul>
+<h3 id="correctness_4">Correctness</h3>
+<ul>
+<li>Notification failures must not affect the outcome of the business operation that triggered them.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../contextMap/context-map/" class="btn btn-neutral float-left" title="Context Map"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../quality_attributes_scenarios/" class="btn btn-neutral float-right" title="Quality Attribute Scenarios">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../contextMap/context-map/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../quality_attributes_scenarios/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Avatar - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Avatar";
+        var mkdocs_page_input_path = "domain/avatar.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Avatar</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#avatar-structure">Avatar Structure</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#progression-experience-and-level">Progression: Experience and Level</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#health-and-death">Health and Death</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mana-and-spells">Mana and Spells</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#stats">Stats</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inventory-and-equipped-items">Inventory and Equipped Items</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#money">Money</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#domain-events">Domain Events</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Overview</li>
+      <li class="breadcrumb-item active">Avatar</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="domain-avatar">Domain: Avatar</h1>
+<p>The Avatar is the heart of the project.
+It represents the game character associated with each user: an avatar is an entity that grows, fights, gains experience, accumulates items and learns spells as the user interacts with the application.
+The avatar encapsulates precise business rules that determine what can happen to the character, under what conditions and with what consequences.</p>
+<h2 id="avatar-structure">Avatar Structure</h2>
+<p>At creation, each avatar starts with a well-defined initial state:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Initial value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Level</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Experience</td>
+<td>0 / 100</td>
+</tr>
+<tr>
+<td>Health</td>
+<td>100 / 100</td>
+</tr>
+<tr>
+<td>Mana</td>
+<td>50 / 50</td>
+</tr>
+<tr>
+<td>Money</td>
+<td>100 coins</td>
+</tr>
+<tr>
+<td>Stats (Strength / Defense / Intelligence)</td>
+<td>10 / 10 / 10</td>
+</tr>
+<tr>
+<td>Inventory</td>
+<td>empty</td>
+</tr>
+<tr>
+<td>Equipped items</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Known spells</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<h2 id="progression-experience-and-level">Progression: Experience and Level</h2>
+<p>The avatar accumulates <strong>experience</strong> (XP) by performing activities in the game.
+When the experience reaches or exceeds the threshold required for the current level, a <strong>level up</strong> occurs automatically.
+The experience threshold required to level up grows with each advancement: going from level 1 to 2 requires 100 XP, but the next threshold doubles each time, making progression increasingly challenging.</p>
+<p>When the avatar levels up, three things happen automatically:</p>
+<ul>
+<li><strong>Maximum health</strong> increases by 10 points.</li>
+<li><strong>Maximum mana</strong> increases by 5 points.</li>
+<li>The avatar receives a bonus of <strong>100 coins</strong>.</li>
+</ul>
+<p>Additionally, at certain specific levels the character <strong>automatically learns a new spell</strong> (see Spells section).</p>
+<h2 id="health-and-death">Health and Death</h2>
+<p><strong>Health</strong> represents the character's vitality.
+It has a current value and a maximum value.
+The character can receive damage (which lowers current health) or be healed (which restores it, never exceeding the maximum).
+When health reaches zero, the avatar dies. Death has significant consequences:</p>
+<ul>
+<li>Health and mana are <strong>completely restored</strong>.</li>
+<li>The experience accumulated in the current level is <strong>reset</strong> (but the level remains unchanged).</li>
+<li><strong>100 coins are lost</strong>.</li>
+</ul>
+<p>Death is therefore a penalty that does not cause a level regression, but resets recent XP progress and inflicts an economic cost.</p>
+<h2 id="mana-and-spells">Mana and Spells</h2>
+<p><strong>Mana</strong> is the resource needed to cast spells. Like health, it has a current value and a maximum.
+It is consumed when a spell is used and can be restored via potions.
+The <strong>spells</strong> available in the game are currently three, each with different characteristics:</p>
+<table>
+<thead>
+<tr>
+<th>Spell</th>
+<th>Power</th>
+<th>Mana required</th>
+<th>Level required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fireball</td>
+<td>10</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Blizzard</td>
+<td>15</td>
+<td>7</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Thunder</td>
+<td>20</td>
+<td>10</td>
+<td>15</td>
+</tr>
+</tbody>
+</table>
+<p>An avatar learns a spell automatically when reaching the required level.
+It is not possible to know the same spell twice, nor to cast a spell that is not known.
+To cast a spell, sufficient mana is required; otherwise, the operation is rejected.</p>
+<h2 id="stats">Stats</h2>
+<p>The avatar has three statistics that describe its combat and magical capabilities:</p>
+<ul>
+<li><strong>Strength:</strong> influences physical attack capability.</li>
+<li><strong>Defense:</strong> influences damage resistance.</li>
+<li><strong>Intelligence:</strong> influences the effectiveness of spells.</li>
+</ul>
+<p>Each statistic can be manually incremented one point at a time, by spending skill points earned every time a level is gained.
+Each increment is notified to the rest of the system via an event (see Events section).</p>
+<h2 id="inventory-and-equipped-items">Inventory and Equipped Items</h2>
+<p>The avatar has two distinct containers for items:</p>
+<ul>
+<li><strong>Inventory:</strong> items that the character carries but is not using.</li>
+<li><strong>Equipped items:</strong> items actively worn or wielded.</li>
+</ul>
+<p>The items existing in the domain are of four types:</p>
+<ul>
+<li><strong>Weapon:</strong> has an attack power value.</li>
+<li><strong>Armor:</strong> has a defensive power value.</li>
+<li><strong>Health Potion:</strong> has a healing power value for health.</li>
+<li><strong>Mana Potion:</strong> has a regenerative power value for mana.</li>
+</ul>
+<p>The item management rules are: to <strong>equip</strong> an item, it must be in the inventory.
+When equipped, it is removed from the inventory and moved to the equipped items.
+When unequipped, it returns to the inventory.
+It is not possible to unequip an item that is not equipped or equip an item that is already equipped.
+Unequipped items can be sold for money.</p>
+<h2 id="money">Money</h2>
+<p>Money is a non-negative numerical resource.
+The avatar can earn it (for example by leveling up) or spend it (for example by purchasing items).
+It is not possible to spend more money than is owned, nor to reach a negative amount.
+As a death penalty, 100 coins are always deducted but the balance cannot drop below zero.
+Unequipped items can be sold for money.
+If an attempt is made to purchase an item without sufficient money, the operation is rejected.</p>
+<h2 id="domain-events">Domain Events</h2>
+<p>Some important actions generate <strong>events</strong> that are propagated to the rest of the system.
+The currently defined events are:</p>
+<ul>
+<li><strong>LevelUpped:</strong> emitted when the avatar levels up. Contains the new level reached.</li>
+<li><strong>Dead:</strong> emitted when the avatar dies. Signals to the system that the character has run out of health.</li>
+<li><strong>NewSpellLearned:</strong> emitted when the avatar automatically learns a new spell upon reaching the required level.</li>
+<li><strong>SkillPointAssigned:</strong> emitted when a stat is incremented (Strength, Defense or Intelligence). Contains the updated stat.</li>
+</ul>
+<p>These events are handled by an internal observer that logs them and forwards them to a notification system.
+Some events may be signaled to other services in the system, otherwise they are only notified to the user.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../ddd/specifications/quality_attributes_scenarios/" class="btn btn-neutral float-left" title="Quality Attribute Scenarios"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../guild/" class="btn btn-neutral float-right" title="Guild">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../ddd/specifications/quality_attributes_scenarios/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../guild/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

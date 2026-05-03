@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Test Pyramid - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Test Pyramid";
+        var mkdocs_page_input_path = "implementation/test-pyramid.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Test Pyramid</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#strategy-overview">Strategy Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-1-domain-unit-tests">Level 1 — Domain Unit Tests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-2-application-layer-tests">Level 2 — Application Layer Tests</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#mocks-used">Mocks used</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-3-infrastructure-integration-tests">Level 3 — Infrastructure Integration Tests</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#controller-it-webmvctest-mockitobean">Controller IT — @WebMvcTest + @MockitoBean</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#notifier-it-springboottest-kafkacontainer">Notifier IT — @SpringBootTest + KafkaContainer</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-4-end-to-end-and-load-tests">Level 4 — End-to-End and Load Tests</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#end-to-end">End-to-End</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#load-test">Load Test</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#architectural-tests-with-archunit">Architectural Tests with ArchUnit</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#bdd-specifications-with-gherkin">BDD Specifications with Gherkin</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">Test Pyramid</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="the-testing-pyramid-in-microservices">The Testing Pyramid in Microservices</h1>
+<h2 id="strategy-overview">Strategy Overview</h2>
+<p>The testing strategy follows a <strong>layered pyramid</strong>, where the base is composed of unit tests on the domain,
+the second level of application behavior tests,
+the third level of integration tests that validate the infrastructural adapters against mocks or real containers,
+and finally the apex where end-to-end and load tests are performed.
+Additionally, architectural tests with ArchUnit are present, which statically check the dependencies between layers
+to ensure that Clean Architecture is respected.
+The structure is systematically replicated in every microservice.</p>
+<h2 id="level-1-domain-unit-tests">Level 1 — Domain Unit Tests</h2>
+<p>Domain tests are unit tests that verify that business rules and invariants are respected.
+- <strong>Immutable Value Objects</strong>: <code>Money</code>, <code>Experience</code>, <code>Level</code>, <code>AvatarHealth</code>, <code>AvatarMana</code>, <code>AvatarStats</code> — valid construction, invariant guards, arithmetic operations.
+- <strong>Aggregate Root</strong>: <code>Avatar</code> — state transitions (<code>takeDamage</code>, <code>gainExperience</code>, <code>equipItem</code>, etc.) and complex business rules such as death, level-up, spell learning.</p>
+<pre><code class="language-java">// Example from AvatarHealthTest
+@Test
+@DisplayName(&quot;rejects current health above max&quot;)
+void currentAboveMax() {
+    assertThatThrownBy(() -&gt; new AvatarHealth(new Health(150), new Health(100)))
+        .isInstanceOf(IllegalArgumentException.class);
+}
+</code></pre>
+<h2 id="level-2-application-layer-tests">Level 2 — Application Layer Tests</h2>
+<p>Application layer tests verify the behavior of the <strong>use-case orchestrator</strong> — the class that implements the <code>@InBoundPort</code>.
+All collaborators (repository, observer, factory) are <strong>Mockito mocks</strong> injected via Dependency Injection.</p>
+<h3 id="mocks-used">Mocks used</h3>
+<table>
+<thead>
+<tr>
+<th>Mock</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AvatarRepository</code></td>
+<td><code>@OutBoundPort</code></td>
+<td>Replaces real persistence; stubbed with <code>when(...).thenReturn(...)</code></td>
+</tr>
+<tr>
+<td><code>AvatarObserver</code></td>
+<td>Domain interface</td>
+<td>Verifies that events are propagated correctly</td>
+</tr>
+<tr>
+<td><code>AvatarFactory</code></td>
+<td>DDD <code>Factory</code></td>
+<td>Controls aggregate construction without real ID logic</td>
+</tr>
+</tbody>
+</table>
+<p>Service tests focus on three distinct aspects:
+<strong>1. Delegation</strong>: the service calls the right ports with the right parameters.</p>
+<pre><code class="language-java">@Test
+@DisplayName(&quot;delegates to factory, saves, and returns the new id&quot;)
+void createsAndReturnsId() {
+    when(avatarFactory.create(AVATAR_ID, AVATAR_NAME)).thenReturn(avatar);
+    when(avatarRepository.save(avatar)).thenReturn(avatar);
+
+    Id&lt;Avatar&gt; id = service.createAvatar(AVATAR_ID, AVATAR_NAME);
+
+    assertThat(id.value()).isEqualTo(AVATAR_1);
+    verify(avatarRepository).save(avatar);
+}
+</code></pre>
+<p><strong>2. Event propagation</strong>: operations that modify the aggregate state publish the correct events towards the observer.</p>
+<pre><code class="language-java">@Test
+@DisplayName(&quot;fires LevelUpped event when avatar crosses the threshold&quot;)
+void levelUp() throws AvatarNotFoundException {
+    Avatar avatar = mutableAvatar();
+    when(avatarRepository.findById(AVATAR_ID)).thenReturn(Optional.of(avatar));
+
+    service.grantExperience(AVATAR_ID, DEFAULT_XP_TO_NEXT);
+
+    ArgumentCaptor&lt;AvatarEvent&gt; captor = ArgumentCaptor.forClass(AvatarEvent.class);
+    verify(avatarObserver).notifyAvatarEvent(captor.capture());
+    assertThat(captor.getValue()).isInstanceOf(LevelUpped.class);
+    assertThat(((LevelUpped) captor.getValue()).newLevel().levelNumber()).isEqualTo(2);
+}
+</code></pre>
+<p><strong>3. Number of interactions</strong>: in complex operations — such as level-up with spell learning —
+it is verified that the repository is called exactly the expected number of times, and that the observer receives exactly two events.</p>
+<pre><code class="language-java">verify(avatarRepository, times(2)).save(avatar);
+verify(avatarObserver, times(2)).notifyAvatarEvent(captor.capture());
+</code></pre>
+<p>Every operation that accesses the repository has a negative case that verifies the throwing of <code>AvatarNotFoundException</code> when the id does not exist.</p>
+<h2 id="level-3-infrastructure-integration-tests">Level 3 — Infrastructure Integration Tests</h2>
+<p>Integration tests verify the <strong>infrastructural adapters</strong> against real systems started in Docker containers via <strong>Testcontainers</strong>.
+Each adapter has its own IT that tests only itself, keeping the rest of the application mocked.</p>
+<h3 id="controller-it-webmvctest-mockitobean">Controller IT — <code>@WebMvcTest</code> + <code>@MockitoBean</code></h3>
+<p><code>AvatarControllerIT</code>: the test verifies the HTTP contract: status code, structure of the response JSON, mapping of domain exceptions to the correct HTTP statuses.</p>
+<pre><code class="language-java">@Test
+@DisplayName(&quot;returns 400 when domain rejects blank name&quot;)
+void shouldReturn400OnBlankName() throws Exception {
+    doThrow(new IllegalArgumentException(&quot;Name cannot be null or blank&quot;))
+        .when(avatarService).updateName(eq(AVATAR_ID), eq(&quot;&quot;));
+
+    mockMvc.perform(patch(&quot;/api/v1/avatars/{id}/name&quot;, AVATAR_1)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(&quot;{\&quot;name\&quot;: \&quot;\&quot;}&quot;))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Name cannot be null or blank&quot;));
+}
+</code></pre>
+<h3 id="notifier-it-springboottest-kafkacontainer">Notifier IT — <code>@SpringBootTest</code> + <code>KafkaContainer</code></h3>
+<p><code>AvatarNotifierImplIT</code> starts the entire Spring context with a real Kafka broker provided by Testcontainers.
+It tests that the Kafka adapter (<code>AvatarNotifierImpl</code>) publishes messages on the correct topics with the expected payload.</p>
+<pre><code class="language-java">@Container
+static final KafkaContainer KAFKA =
+    new KafkaContainer(DockerImageName.parse(&quot;apache/kafka:3.7.0&quot;));
+
+@DynamicPropertySource
+static void kafkaProperties(DynamicPropertyRegistry registry) {
+    registry.add(&quot;spring.cloud.stream.kafka.binder.brokers&quot;, KAFKA::getBootstrapServers);
+}
+</code></pre>
+<h2 id="level-4-end-to-end-and-load-tests">Level 4 — End-to-End and Load Tests</h2>
+<p>Fourth-level tests operate directly on the edge service exposed on port 9000,
+simulating the behavior of a real client without any mocks.
+The entire infrastructure must be active.</p>
+<h3 id="end-to-end">End-to-End</h3>
+<p>The E2E suite executes sequential scenarios with shared state:
+each flow feeds the next, as happens in a real user session.</p>
+<p>The covered flows are:</p>
+<ul>
+<li><strong>Auth flow</strong> — registration, login, JWT token validation, and verification of negative cases (wrong credentials → 401, duplicate email → 409).</li>
+<li><strong>Guild flow</strong> — creation of a guild, reading of members, consultation of the leaderboard, and verification of the 404 response for non-existent resources.</li>
+<li><strong>Battle flow</strong> — retrieval of available bosses, starting a battle, verification of the boss state and HP, dealing damage, and checking that a non-leader cannot start battles (→ 403).</li>
+<li><strong>Quest flow</strong> — creation of a quest, adding a habit, avatar enrollment, attendance registration and progress reading.</li>
+<li><strong>Marketplace flow</strong> — creation of the marketplace for an avatar, retrieval of the marketplace and available items.</li>
+<li><strong>Resilience</strong> — verification that the rate limiter activates correctly in case of high traffic, expecting at least one 429.</li>
+</ul>
+<h3 id="load-test">Load Test</h3>
+<p>The load suite operates asynchronously with a configurable virtual user pool (<code>--vus</code>, default 20)
+that overloads the endpoint for an established duration (<code>--duration</code>, default 10s per scenario).
+Results are classified into four distinct categories
+— 2xx responses, 429 (rate limited), other 4xx and 5xx/network errors —
+to distinguish true successes from gateway rejections.
+For each scenario, RPS, success percentage and latencies at the p50, p95 and p99 percentiles are reported.</p>
+<p>The planned scenarios cover the most heavily used paths in production:</p>
+<ul>
+<li><strong>auth</strong> — login burst with random credentials, to measure the gateway's capacity to absorb traffic on the authentication endpoint.</li>
+<li><strong>guild_reads</strong> — continuous leaderboard reading, a read-heavy endpoint without authentication.</li>
+<li><strong>battle_reads</strong> — retrieval of the boss list, analogous to the previous one but on the battle domain.</li>
+<li><strong>quest_reads</strong> — GET on all quests, to measure the response under load of the quest-service.</li>
+<li><strong>quest_write</strong> — create/delete cycle on quests, the most stressful scenario because it generates writes, potential conflicts and interaction with the circuit breaker.</li>
+</ul>
+<h2 id="architectural-tests-with-archunit">Architectural Tests with ArchUnit</h2>
+<p>These tests analyze the code and verify that the dependencies between layers respect the rules of Hexagonal Architecture.</p>
+<pre><code class="language-java">@AnalyzeClasses(packages = &quot;habitquest.avatar&quot;)
+class CleanArchitectureTest {
+
+    @ArchTest
+    private static ArchRule domainShouldNotDependOnSpring =
+        noClasses()
+            .that().resideInAPackage(&quot;..domain..&quot;)
+            .should().dependOnClassesThat()
+            .resideInAnyPackage(&quot;org.springframework..&quot;)
+            .because(&quot;Domain layer must be framework-agnostic&quot;);
+
+    @ArchTest
+    private static ArchRule applicationShouldNotDependOnAdapters =
+        noClasses()
+            .that().resideInAPackage(&quot;..application..&quot;)
+            .should().dependOnClassesThat()
+            .resideInAnyPackage(&quot;..adapter..&quot;, &quot;..infrastructure..&quot;);
+}
+</code></pre>
+<p>The verified rules are:</p>
+<ul>
+<li>The domain does not import classes from <code>application</code>, <code>infrastructure</code> or <code>adapter</code>.</li>
+<li>The domain does not use Spring annotations (<code>@Service</code>, <code>@Repository</code>, <code>@Controller</code>).</li>
+<li>The application layer does not depend on adapters or infrastructure.
+  These tests fail at compile-time on the first wrong import, acting as an <strong>automatic guard</strong> on the integrity of the architecture.</li>
+</ul>
+<h2 id="bdd-specifications-with-gherkin">BDD Specifications with Gherkin</h2>
+<p>The <code>.feature</code> files in <code>test/resources/features/</code> represent the <strong>acceptance specifications</strong> written in Gherkin.
+They describe the expected behaviors from the user's point of view, without technical details.</p>
+<pre><code class="language-gherkin">Scenario: Avatar levels up when reaching threshold
+  Given an avatar with 90 XP and level 1
+  And the level up threshold is 100 XP
+  When the avatar receives 20 XP
+  Then the avatar level should become 2
+  And the avatar should receive 1 skill point
+  And the avatar stats should increase according to level up rules
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../event-sourcing/" class="btn btn-neutral float-left" title="Event Sourcing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../api/overview/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../event-sourcing/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../api/overview/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

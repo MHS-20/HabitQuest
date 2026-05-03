@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>SAGA - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "SAGA";
+        var mkdocs_page_input_path = "implementation/saga.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">SAGA</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#purchase-saga-buyitem">Purchase saga (buyItem)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sale-saga-sellitem">Sale saga (sellItem)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#guarantees-and-limits-of-the-solution">Guarantees and limits of the solution</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">SAGA</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="saga-management-in-marketplacecontroller">Saga Management in <code>MarketplaceController</code></h1>
+<p>In the Marketplace controller, the purchase (<code>buyItem</code>) and sale (<code>sellItem</code>) operations coordinate two distinct systems:
+the <code>AvatarClient</code> service (external system) and the <code>MarketplaceService</code> (local domain).</p>
+<h2 id="purchase-saga-buyitem">Purchase saga (<code>buyItem</code>)</h2>
+<p>The operation is organized into three sequential steps, with two boolean flags — <code>moneySpent</code> and <code>inventoryAdded</code> — that track the progress state in order to build the exact rollback.</p>
+<ul>
+<li><strong>Step 0 — pre-condition:</strong> before starting the saga, it is verified that the avatar has a sufficient level via <code>canBuyItem()</code>. This is a synchronous guard: if it fails, a <code>403 Forbidden</code> is returned immediately without touching any system.</li>
+<li><strong>Step 1 — <code>spendMoney</code>:</strong> <code>avatarClient.spendMoney()</code> is called. If successful, the <code>moneySpent</code> flag is set to <code>true</code>.</li>
+<li><strong>Step 2 — <code>addItemToInventory</code>:</strong> the item is added to the avatar's inventory. If successful, <code>inventoryAdded</code> becomes <code>true</code>.</li>
+<li><strong>Step 3 — <code>buyItem</code>:</strong> only after completing both remote operations, the marketplace is updated locally via <code>marketplaceService.buyItem()</code>.</li>
+</ul>
+<p><strong>Compensation (rollback)</strong>: if any step throws a <code>RestClientException</code> or <code>AvatarCommunicationException</code>,
+the <code>catch</code> block performs <strong>selective</strong> rollback using the flags:</p>
+<ul>
+<li>if <code>inventoryAdded</code> is <code>true</code>: calls <code>removeItemFromInventory</code></li>
+<li>if <code>moneySpent</code> is <code>true</code>: calls <code>earnMoney</code></li>
+</ul>
+<p>The compensation itself can fail (nested catch):
+in that case an exception is raised with a message signaling the residual inconsistency, and the caller receives <code>502 Bad Gateway</code>.</p>
+<h2 id="sale-saga-sellitem">Sale saga (<code>sellItem</code>)</h2>
+<p>Same structure, reversed steps.</p>
+<ul>
+<li><strong>Step 1 — <code>removeItemFromInventory</code>:</strong> the item is removed from the avatar's inventory. If successful, <code>removedFromInventory</code> becomes <code>true</code>.</li>
+<li><strong>Step 2 — <code>earnMoney</code>:</strong> the avatar receives the money from the sale. If successful, <code>earnedMoney</code> becomes <code>true</code>.</li>
+<li><strong>Step 3 — <code>sellItem</code>:</strong> the marketplace is updated locally via <code>marketplaceService.sellItem()</code>.</li>
+</ul>
+<p><strong>Compensation (rollback)</strong>: if any step throws a <code>RestClientException</code> or <code>AvatarCommunicationException</code>, the <code>catch</code> block performs <strong>selective</strong> rollback using the flags:</p>
+<ul>
+<li>if <code>earnedMoney</code> is <code>true</code> → calls <code>spendMoney</code></li>
+<li>if <code>removedFromInventory</code> is <code>true</code> → calls <code>addItemToInventory</code></li>
+</ul>
+<h2 id="guarantees-and-limits-of-the-solution">Guarantees and limits of the solution</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Saga type</td>
+<td>Choreography-based with inline orchestration in the controller</td>
+</tr>
+<tr>
+<td>Guaranteed consistency</td>
+<td>Eventual consistency — no strong atomicity</td>
+</tr>
+<tr>
+<td>Idempotency</td>
+<td>Not guaranteed</td>
+</tr>
+<tr>
+<td>Durability</td>
+<td>None — a crash during compensation leaves the state inconsistent</td>
+</tr>
+<tr>
+<td>Logging</td>
+<td>Every step is tracked via <code>MarketplaceLogger</code></td>
+</tr>
+</tbody>
+</table>
+<p>The main weak point is the absence of <strong>saga persistence</strong>: if the server crashes between one step and the next, no automatic mechanism resumes the compensation.
+In a production system one would consider the use of a persistent saga log, or delegate orchestration to a message broker with delivery guarantees.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../cqrs/" class="btn btn-neutral float-left" title="CQRS"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../hateoas/" class="btn btn-neutral float-right" title="HATEOAS">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../cqrs/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../hateoas/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

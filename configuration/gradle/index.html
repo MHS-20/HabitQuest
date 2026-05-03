@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Gradle - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Gradle";
+        var mkdocs_page_input_path = "configuration/gradle.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Gradle</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#version-management">Version Management</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gradlelibsversionstoml">gradle/libs.versions.toml</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#gradleuiversionstoml">gradle/ui.versions.toml</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#versions-resolution">Versions Resolution</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#convention-plugins">Convention Plugins</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#java-conventions">java-conventions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#spring-conventions">spring-conventions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#kmp-conventions">kmp-conventions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#containerproject-conventions">containerProject-conventions</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#kmp-ui-module-gradle-configuration">KMP UI Module Gradle Configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#what-composeappbuildgradlekts-configures">What composeApp/build.gradle.kts configures</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Configuration</li>
+      <li class="breadcrumb-item active">Gradle</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="build-logic-module-documentation">Build Logic Module Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>This project uses a <strong>Gradle composite build</strong> with a dedicated <code>build-logic</code> included build. 
+This pattern centralizes all build configuration — plugins, conventions, and toolchain settings — in one place, 
+making it easy to maintain consistency across every subproject without repeating boilerplate.</p>
+<h2 id="version-management">Version Management</h2>
+<p>The project uses <strong>two TOML version catalogs</strong>:</p>
+<h3 id="gradlelibsversionstoml"><code>gradle/libs.versions.toml</code></h3>
+<p>Used for backend/service dependencies. Manages versions for:
+- Spring Boot and Spring Cloud
+- Testcontainers
+- Micrometer observability stack
+- Static analysis tools: Checkstyle, PMD, Spotless, SpotBugs</p>
+<h3 id="gradleuiversionstoml"><code>gradle/ui.versions.toml</code></h3>
+<p>Used for KMP and Android UI modules. Manages versions for:
+- Kotlin (including the multiplatform and Compose compiler plugins)
+- Android Gradle Plugin (AGP)
+- Compose Multiplatform
+- Detekt and ktlint (Kotlin linters)</p>
+<h3 id="versions-resolution">Versions Resolution</h3>
+<p>The <code>build-logic/settings.gradle.kts</code> imports <strong>both</strong> catalogs into the build-logic classpath:
+The <code>build-logic/build.gradle.kts</code> then <strong>reads plugin versions directly from the catalogs</strong> at configuration time and pins them into the <code>dependencies</code> block:</p>
+<pre><code class="language-kotlin">val catalog = extensions.getByType&lt;VersionCatalogsExtension&gt;().named(&quot;libs&quot;)
+private val springBoot = catalog.findVersion(&quot;spring-boot&quot;).get().requiredVersion
+
+dependencies {
+    implementation(&quot;org.springframework.boot:org.springframework.boot.gradle.plugin:$springBoot&quot;)
+    // ...
+}
+</code></pre>
+<p>This means <strong>the TOML files are the single source of truth</strong> for every plugin and library version across both the build-logic and the main build. 
+Updating a version in one place propagates everywhere.</p>
+<h2 id="convention-plugins">Convention Plugins</h2>
+<h3 id="java-conventions"><code>java-conventions</code></h3>
+<p>Baseline configuration for every Java service module. 
+Any module that compiles Java code applies this convention first.</p>
+<p><strong>What it configures:</strong></p>
+<ul>
+<li><strong>Plugins applied:</strong> <code>java</code>, <code>spotless</code>, <code>spotbugs</code>, <code>checkstyle</code>, <code>pmd</code></li>
+<li><strong>Java toolchain:</strong> Forces Java 21 for all compilation and execution, regardless of the JDK installed locally or on CI.</li>
+<li><strong>Spotless:</strong> Formats all <code>src/**/*.java</code> files using <code>googleJavaFormat</code>, removes unused imports, trims trailing whitespace, and ensures files end with a newline. Build artifacts and generated sources are excluded.</li>
+<li><strong>Checkstyle:</strong> Configured with a shared <code>config/checkstyle/checkstyle.xml</code> at the root. The version is pinned from the <code>libs</code> catalog.</li>
+<li><strong>PMD:</strong> Applied and version-pinned from the <code>libs</code> catalog.</li>
+<li><strong>SpotBugs:</strong> Applied but disabled by default (individual modules can re-enable it as needed).</li>
+<li><strong>Task wiring:</strong> a <code>checkQuality</code> task aggregates <code>test</code>, <code>checkstyleMain</code>, <code>checkstyleTest</code>, <code>pmdMain</code>, <code>pmdTest</code>, and <code>spotlessCheck</code>.</li>
+</ul>
+<h3 id="spring-conventions"><code>spring-conventions</code></h3>
+<p>Full configuration for a Spring Boot microservice. 
+Extends <code>java-conventions</code> and adds everything needed to build and run a Spring Boot application.</p>
+<p><strong>What it configures:</strong></p>
+<ul>
+<li><strong>Plugins applied:</strong> <code>java-conventions</code>, <code>org.springframework.boot</code>, <code>io.spring.dependency-management</code></li>
+<li><strong>BOM imports:</strong> Three Maven BOMs are imported for managed dependency resolution:<ul>
+<li><code>testcontainers-bom</code> — all Testcontainers modules at a unified version</li>
+<li><code>spring-cloud-dependencies</code> — all Spring Cloud modules</li>
+<li><code>micrometer-bom</code> — Micrometer core and registry modules</li>
+<li><code>:common</code> project dependency (internal shared module)</li>
+</ul>
+</li>
+<li><strong>Default dependencies</strong> pre-wired into every Spring service using versions from the <code>libs.versions.toml</code></li>
+<li><strong>Plain JAR disabled:</strong> <code>tasks.named&lt;Jar&gt;("jar") { enabled = false }</code> ensures only the fat executable JAR produced by the Spring Boot plugin is published, avoiding confusion between the two artifacts.</li>
+</ul>
+<h3 id="kmp-conventions"><code>kmp-conventions</code></h3>
+<p>Configuration for a Kotlin Multiplatform (KMP) Android application module with Compose UI and code quality tooling.</p>
+<p><strong>What it configures:</strong></p>
+<ul>
+<li><strong>Plugins applied:</strong> <code>detekt</code>, <code>org.jetbrains.kotlin.multiplatform</code>, <code>com.android.application</code>, <code>org.jetbrains.compose</code>, <code>org.jetbrains.kotlin.plugin.compose</code>, <code>org.jlleitschuh.gradle.ktlint</code></li>
+<li><strong>Detekt:</strong> Configured with the version from <code>uiLibs</code>, a shared config file at <code>config/detekt/detekt.yml</code>, and <code>buildUponDefaultConfig = true</code>. Auto-correction is disabled (analysis only).</li>
+<li><strong>ktlint:</strong> Configured with the version from <code>uiLibs</code>, Android mode enabled, failure suppressed.</li>
+<li><strong><code>checkQuality</code> task:</strong> Aggregates <code>detekt</code> and <code>ktlintFormat</code> so that a single task can run the full Kotlin quality gate.</li>
+</ul>
+<h3 id="containerproject-conventions"><code>containerProject-conventions</code></h3>
+<p>Configures a container or aggregator project — a project whose only job is to group subprojects together and delegate tasks to them. 
+It has no sources of its own.</p>
+<p><strong>What it configures:</strong></p>
+<ul>
+<li>Registers a <strong>dynamic task rule</strong> using <code>tasks.addRule</code>. When any task name is invoked on the container project, the rule automatically creates a task with that name that depends on the same-named task in every direct subproject.</li>
+</ul>
+<h2 id="kmp-ui-module-gradle-configuration">KMP UI Module Gradle Configuration</h2>
+<p>The UI build is split between <strong>convention-level configuration</strong> and <strong>module-level configuration</strong>:</p>
+<ul>
+<li><code>build-logic/src/main/kotlin/kmp-conventions.gradle.kts</code> defines common defaults for Kotlin Multiplatform + Android + Compose modules (plugins, linters, shared quality tasks).</li>
+<li><code>habitquest-ui/composeApp/build.gradle.kts</code> defines the concrete targets, source sets, Android packaging settings, and desktop distribution output for the UI app.</li>
+<li>Version catalogs (<code>libs</code> and <code>uiLibs</code>) keep all dependency and plugin versions centralized and traceable</li>
+</ul>
+<h3 id="what-composeappbuildgradlekts-configures">What <code>composeApp/build.gradle.kts</code> configures</h3>
+<p><strong>Multiplatform targets</strong></p>
+<ul>
+<li>Android target with JVM 11 bytecode (<code>androidTarget</code> + <code>JvmTarget.JVM_11</code>)</li>
+<li>iOS frameworks for both device and simulator (<code>iosArm64</code>, <code>iosSimulatorArm64</code>) with <code>baseName = "ComposeApp"</code> and static linking</li>
+<li>Desktop JVM target (<code>jvm()</code>)</li>
+<li>Web JavaScript target (<code>js { browser { ... } }</code>) with executable binaries</li>
+<li>WebAssembly target (<code>wasmJs</code>) with executable binaries</li>
+</ul>
+<p><strong>Browser test policy (JS/Wasm)</strong></p>
+<ul>
+<li>JS and Wasm browser tests are enabled only when <code>CHROME_BIN</code> is available</li>
+<li>This prevents failures in environments where no browser is configured by default</li>
+</ul>
+<p><strong>Source set dependencies</strong></p>
+<ul>
+<li><code>commonMain</code>: shared Compose UI stack, lifecycle integration, Ktor core/content-negotiation, serialization, and datetime</li>
+<li><code>androidMain</code>: Android activity integration, OkHttp engine, and KalendarKit</li>
+<li><code>iosMain</code>: Darwin Ktor engine and KalendarKit</li>
+<li><code>jvmMain</code>: Compose Desktop runtime, Swing coroutines, and OkHttp</li>
+<li><code>jsMain</code> and <code>wasmJsMain</code>: Ktor JS engine</li>
+<li><code>commonTest</code>: shared Kotlin test dependency</li>
+</ul>
+<p><strong>Android application block</strong></p>
+<ul>
+<li>Namespace and applicationId are set to <code>habitquest.ui</code></li>
+<li><code>compileSdk</code>, <code>minSdk</code>, and <code>targetSdk</code> are read from the <code>uiLibs</code> catalog</li>
+<li>Release build keeps minification disabled</li>
+<li>Java compatibility is pinned to 11</li>
+<li>Standard resource excludes are configured for packaging</li>
+</ul>
+<p><strong>Desktop packaging</strong></p>
+<ul>
+<li>Desktop entry point is <code>compose.project.demo.MainKt</code></li>
+<li>Native distributions are generated as <code>dmg</code>, <code>msi</code>, and <code>deb</code></li>
+</ul>
+<p>For architecture and runtime behavior details per platform, see <code>docs/implementation/multiplatform.md</code>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../api/notification/" class="btn btn-neutral float-left" title="Notifications"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../ci-cd/" class="btn btn-neutral float-right" title="CI/CD">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../api/notification/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../ci-cd/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

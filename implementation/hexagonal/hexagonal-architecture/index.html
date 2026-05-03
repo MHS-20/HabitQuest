@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Hexagonal Architecture - HabitQuest</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Hexagonal Architecture";
+        var mkdocs_page_input_path = "implementation/hexagonal/hexagonal-architecture.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Hexagonal Architecture</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#hexagonal-structure-of-microservices">Hexagonal Structure of Microservices</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#integration-with-ddd">Integration with DDD</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">Hexagonal Architecture</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="hexagonal-architecture-ddd">Hexagonal Architecture &amp; DDD</h1>
+<p>In this project, the hexagonal architecture is realized through <strong>three custom annotations</strong> that act as semantic markers,
+paired with the interfaces of the <code>application</code> package and their concrete implementations in the <code>infrastructure</code> package (adapter).</p>
+<pre><code>common/
+└── hexagonal/ 
+    ├── @InBoundPort
+    ├── @OutBoundPort
+    └── @Adapter
+
+habitquest/tracking/
+├── domain/         ← Core
+├── application/    ← Ports (InBound + OutBound)
+└── infrastructure/ ← Adapters
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Role</th>
+<th>Who uses it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@InBoundPort</code></td>
+<td>Exposes the operations that the domain makes available to the outside world</td>
+<td>Service interfaces (<code>HabitService</code>)</td>
+</tr>
+<tr>
+<td><code>@OutBoundPort</code></td>
+<td>Defines the dependencies that the domain requires from the infrastructure</td>
+<td>Repository, notifier, logger interfaces</td>
+</tr>
+<tr>
+<td><code>@Adapter</code></td>
+<td>Concrete implementation of a port, connecting the domain to a specific technology</td>
+<td><code>HabitServiceImpl</code>, infrastructural implementations</td>
+</tr>
+</tbody>
+</table>
+<h2 id="hexagonal-structure-of-microservices">Hexagonal Structure of Microservices</h2>
+<p>This architecture is systematically applied to every microservice in the project.
+The pattern to follow is:</p>
+<p><strong>1. InBoundPort</strong> — one <code>@InBoundPort</code> interface for each main use-case of the service (e.g. <code>QuestService</code>, <code>AvatarService</code>), which exposes operations on the domain.
+<strong>2. OutBoundPort</strong> — one <code>@OutBoundPort</code> interface for each external dependency:
+- <code>XyzRepository</code> (persistence)
+- <code>XyzNotifier</code> (messaging towards other services)
+- <code>XyzRestClient</code> (HTTP calls towards other microservices)
+- <code>XyzLogger</code> (decoupled logging)
+<strong>3. Adapter</strong> — one <code>@Adapter @Service</code> implementation of the InBoundPort, plus the <code>@Adapter @Component</code> implementations of all OutBoundPorts in the infrastructural layer (Notifier, Repository, RestClient, Logger).
+<strong>4. Observer</strong> — an <code>XyzObserver</code> interface in the domain and its <code>XyzObserverImpl</code> implementation in the application layer, which acts as a dispatcher of events towards the <code>XyzNotifier</code>.</p>
+<h2 id="integration-with-ddd">Integration with DDD</h2>
+<p>The entire structure relies on the <strong>DDD marker interfaces</strong> defined in <code>common.ddd</code>.
+These interfaces add no behavior, but make the roles of types in the model explicit:</p>
+<pre><code class="language-java">public interface Aggregate&lt;T&gt; extends Entity&lt;T&gt; { T getId(); }
+public interface DomainEvent extends ValueObject {}
+public interface Repository {}
+public interface Factory {}
+public interface ValueObject {}
+</code></pre>
+<p>In general, there is at least one Aggregate per microservice, which allows access to all domain values and contains the core of the business logic.
+Additionally, numerous Value Objects, Entities and Domain Events are present.
+Domain events are all <strong>immutable Java records</strong> that implement the same interface, for example <code>HabitEvent extends DomainEvent</code>.
+Each event carries the relevant state at the moment of its creation.</p>
+<pre><code class="language-java">public interface HabitEvent extends DomainEvent {}
+
+public record HabitCreated(Habit habit, Id&lt;Avatar&gt; avatarId)   implements HabitEvent {}
+public record HabitUpdated(Habit habit, Id&lt;Avatar&gt; avatarId)   implements HabitEvent {}
+public record HabitAttended(Habit habit, Id&lt;Avatar&gt; avatarId)  implements HabitEvent {}
+public record HabitDeleted(Id&lt;Habit&gt; habitId, Id&lt;Avatar&gt; avatarId) implements HabitEvent {}
+public record HabitNotAttended(Habit habit, Id&lt;Avatar&gt; avatarId) implements HabitEvent {}
+</code></pre>
+<p><img alt="Hexagonal" src="../hexagonal-architecture.png" /></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../interactions/interactions/" class="btn btn-neutral float-left" title="Interactions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../../ddd/adr/adr-index/" class="btn btn-neutral float-right" title="Architecture Decision Records">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../interactions/interactions/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../../ddd/adr/adr-index/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

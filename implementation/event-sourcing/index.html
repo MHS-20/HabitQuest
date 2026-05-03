@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Event Sourcing - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Event Sourcing";
+        var mkdocs_page_input_path = "implementation/event-sourcing.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Event Sourcing</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-base-event-habitevent">The base event: HabitEvent</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-wrapper-habithistoryevent">The wrapper: HabitHistoryEvent</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#event-production">Event Production</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#map-of-operations-and-emitted-events">Map of Operations and Emitted Events</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-repository-append-only">The Repository: Append-Only</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#deduplication-of-habitnotattended-events">Deduplication of HabitNotAttended Events</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#exposure-via-api">Exposure via API</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture & Implementation</li>
+      <li class="breadcrumb-item active">Event Sourcing</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="event-sourcing-applied-to-habit-history">Event Sourcing Applied to Habit History</h1>
+<p>In the context of HabitQuest, the EventSourcing pattern is applied in <strong>append-only</strong> form to the <code>HabitHistoryEvent</code> object,
+which tracks every relevant operation performed on a habit.
+Each habit carries with it the complete trace of what has happened to it: creation, attendance, modifications, etc.
+The history is immutable and grows over time, providing a complete audit trail.</p>
+<h3 id="the-base-event-habitevent">The base event: <code>HabitEvent</code></h3>
+<pre><code class="language-java">public interface HabitEvent extends DomainEvent {}
+</code></pre>
+<p><code>HabitEvent</code> extends <code>DomainEvent</code>, which in turn extends <code>ValueObject</code>.
+All events are implemented as <code>Record</code> and are therefore immutable.</p>
+<p>Five concrete events are defined:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Payload</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HabitCreated</code></td>
+<td><code>Habit</code>, <code>Id&lt;Avatar&gt;</code></td>
+<td>A habit has been created</td>
+</tr>
+<tr>
+<td><code>HabitUpdated</code></td>
+<td><code>Habit</code>, <code>Id&lt;Avatar&gt;</code></td>
+<td>Title, description, tags or recurrence have changed</td>
+</tr>
+<tr>
+<td><code>HabitAttended</code></td>
+<td><code>Habit</code>, <code>Id&lt;Avatar&gt;</code></td>
+<td>The avatar has marked the habit as completed</td>
+</tr>
+<tr>
+<td><code>HabitNotAttended</code></td>
+<td><code>Habit</code>, <code>Id&lt;Avatar&gt;</code></td>
+<td>The habit has expired without being completed</td>
+</tr>
+<tr>
+<td><code>HabitDeleted</code></td>
+<td><code>Id&lt;Habit&gt;</code>, <code>Id&lt;Avatar&gt;</code></td>
+<td>The habit has been deleted</td>
+</tr>
+<tr>
+<td>Note that <code>HabitDeleted</code> carries only the IDs and not the entire <code>Habit</code> object, because at the time of deletion the entity is no longer available.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-wrapper-habithistoryevent">The wrapper: <code>HabitHistoryEvent</code></h3>
+<pre><code class="language-java">public record HabitHistoryEvent(HabitEvent event, LocalDateTime occurredAt, String details) {}
+</code></pre>
+<p><code>HabitHistoryEvent</code> is the <strong>log entry</strong>. It wraps a <code>HabitEvent</code> adding:</p>
+<ul>
+<li><code>occurredAt</code> — the precise timestamp of the occurrence</li>
+<li><code>details</code> — a free string with contextual metadata</li>
+</ul>
+<hr />
+<h2 id="event-production">Event Production</h2>
+<p>Event production happens entirely in <code>HabitServiceImpl</code>, via the private method <code>appendHistory</code>:</p>
+<pre><code class="language-java">private void appendHistory(HabitEvent event, String details) {
+  historyRepository.append(new HabitHistoryEvent(event, LocalDateTime.now(), details));
+}
+</code></pre>
+<p>Every domain operation calls <code>appendHistory</code> <strong>after</strong> completing the modification to the current state,
+ensuring that the history reflects only successfully completed operations.</p>
+<h3 id="map-of-operations-and-emitted-events">Map of Operations and Emitted Events</h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Emitted event</th>
+<th><code>details</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>createDailyHabit</code></td>
+<td><code>HabitCreated</code></td>
+<td><code>"daily recurrence"</code></td>
+</tr>
+<tr>
+<td><code>createWeeklyHabit</code></td>
+<td><code>HabitCreated</code></td>
+<td><code>"weekly recurrence day=&lt;day&gt;"</code></td>
+</tr>
+<tr>
+<td><code>createMonthlyHabit</code></td>
+<td><code>HabitCreated</code></td>
+<td><code>"monthly recurrence day=&lt;day&gt;"</code></td>
+</tr>
+<tr>
+<td><code>updateTitle</code></td>
+<td><code>HabitUpdated</code></td>
+<td><code>"title=&lt;value&gt;"</code></td>
+</tr>
+<tr>
+<td><code>updateDescription</code></td>
+<td><code>HabitUpdated</code></td>
+<td><code>"description updated"</code></td>
+</tr>
+<tr>
+<td><code>updateTags</code></td>
+<td><code>HabitUpdated</code></td>
+<td><code>"tags updated count=&lt;n&gt;"</code></td>
+</tr>
+<tr>
+<td><code>updateRecurrence</code></td>
+<td><code>HabitUpdated</code></td>
+<td><code>"recurrence=&lt;type&gt;"</code></td>
+</tr>
+<tr>
+<td><code>attendHabit</code></td>
+<td><code>HabitAttended</code></td>
+<td><code>"attendedAt=&lt;timestamp&gt;"</code></td>
+</tr>
+<tr>
+<td><code>deleteHabitById</code></td>
+<td><code>HabitDeleted</code></td>
+<td><code>"habit deleted"</code></td>
+</tr>
+<tr>
+<td><code>detectOverdueHabits</code></td>
+<td><code>HabitNotAttended</code></td>
+<td><code>"never-attended"</code> or <code>"expectedAt=&lt;timestamp&gt;"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-repository-append-only">The Repository: Append-Only</h2>
+<p>The <code>HabitHistoryRepository</code> interface defines a deliberately restricted contract:</p>
+<pre><code class="language-java">void append(HabitHistoryEvent event);
+List&lt;HabitHistoryEvent&gt; findByHabitId(Id&lt;Habit&gt; habitId);
+</code></pre>
+<p>There are no <code>update</code>, <code>delete</code> or <code>save</code> methods.
+The history is <strong>write-progressive and read-only</strong>: no event can be removed or modified after being written.
+The current implementation is in-memory (<code>InMemoryHabitHistoryRepository</code>), with a <code>ConcurrentHashMap</code> that associates each <code>Id&lt;Habit&gt;</code> with its own list of events:</p>
+<pre><code class="language-java">private final Map&lt;Id&lt;Habit&gt;, List&lt;HabitHistoryEvent&gt;&gt; store = new ConcurrentHashMap&lt;&gt;();
+
+@Override
+public void append(HabitHistoryEvent event) {
+  store.computeIfAbsent(event.habitId(), unused -&gt; new ArrayList&lt;&gt;()).add(event);
+}
+
+@Override
+public List&lt;HabitHistoryEvent&gt; findByHabitId(Id&lt;Habit&gt; habitId) {
+  return List.copyOf(store.getOrDefault(habitId, List.of()));
+}
+</code></pre>
+<p><code>List.copyOf</code> ensures that the caller receives an immutable defensive copy, preventing accidental modifications to the internal list.</p>
+<hr />
+<h2 id="deduplication-of-habitnotattended-events">Deduplication of <code>HabitNotAttended</code> Events</h2>
+<p>An interesting aspect is the handling of non-attendance events. The <code>detectOverdueHabits</code> method is called periodically by a scheduler; without a guard, each execution would produce a new <code>HabitNotAttended</code> for the same already-overdue habit.
+The <code>appendNotAttendedHistoryIfNew</code> method solves the problem by verifying that the last recorded event is not already a <code>HabitNotAttended</code> with the same <code>details</code>:</p>
+<pre><code class="language-java">private void appendNotAttendedHistoryIfNew(Habit habit, String marker, HabitNotAttended event) {
+  List&lt;HabitHistoryEvent&gt; history = historyRepository.findByHabitId(habit.getId());
+  HabitHistoryEvent last = history.isEmpty() ? null : history.getLast();
+  if (last == null
+      || !(last.event() instanceof HabitNotAttended)
+      || !Objects.equals(last.details(), marker)) {
+    appendHistory(event, marker);
+  }
+}
+</code></pre>
+<p>This deduplication logic is necessary precisely because events are never updated: the only way to avoid duplicates is to not insert them in the first place.</p>
+<h2 id="exposure-via-api">Exposure via API</h2>
+<p>The history is exposed through the <code>GET /api/v1/habits/{id}/history</code> endpoint, which returns the list of events serialized via <code>HabitHistoryEventResponse</code>:</p>
+<pre><code class="language-java">public record HabitHistoryEventResponse(
+    String eventType,
+    String habitId,
+    String avatarId,
+    LocalDateTime occurredAt,
+    String details
+) {}
+</code></pre>
+<p>The <code>eventType</code> field is the simple class name of the event (<code>"HabitCreated"</code>, <code>"HabitAttended"</code>, etc.).
+The <code>history</code> link is included in the HATEOAS response of each habit, both at creation and at retrieval.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../hateoas/" class="btn btn-neutral float-left" title="HATEOAS"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../test-pyramid/" class="btn btn-neutral float-right" title="Test Pyramid">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../hateoas/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../test-pyramid/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

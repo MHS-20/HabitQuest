@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Battle - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Battle";
+        var mkdocs_page_input_path = "domain/battle.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Battle</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-enemy-boss">The Enemy Boss</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#battle-mechanics">Battle Mechanics</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#turn-based-system">Turn-Based System</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#battle-states">Battle States</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#damage-mechanics">Damage Mechanics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fallen-members">Fallen Members</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#dynamic-participation">Dynamic Participation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#battle-events">Battle Events</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#battle-invariants">Battle Invariants</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#valid-state-transitions">Valid State Transitions</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Overview</li>
+      <li class="breadcrumb-item active">Battle</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="domain-battles">Domain: Battles</h2>
+<p>A <strong>Battle</strong> is a cooperative event in which the members of a guild face a <strong>Boss</strong> together.
+It is a turn-based activity where players take turns attacking the boss and trying to defeat it before all members fall in battle.</p>
+<h3 id="the-enemy-boss">The Enemy Boss</h3>
+<p>The boss is the enemy that the guild must defeat.</p>
+<p>Each Boss has the following characteristics:</p>
+<ul>
+<li><strong>Name</strong>: boss identifier (e.g. "Minotaur")</li>
+<li><strong>Combat stats</strong>:<ul>
+<li><strong>Health</strong>: total hit points of the boss (e.g. 100 HP)</li>
+<li><strong>Strength</strong>: offensive capability (e.g. 150)</li>
+<li><strong>Defense</strong>: defensive capability (e.g. 50)</li>
+</ul>
+</li>
+</ul>
+<p>Each Boss entails Rewards and Penalties:</p>
+<ul>
+<li><strong>Money Reward</strong>: coins the guild obtains by defeating the boss (e.g. 100 coins)</li>
+<li><strong>Experience Reward</strong>: experience points assigned individually (e.g. 200 XP)</li>
+<li><strong>Penalty</strong>: damage/loss suffered if the guild loses (e.g. -50 coins)</li>
+</ul>
+<p>Each guild can have only one active battle at a time.
+Only the leader can decide to start a battle by choosing a boss to fight.
+Bosses are statically predefined in the system, but it easily supports the addition of new boss types.</p>
+<h3 id="battle-mechanics">Battle Mechanics</h3>
+<h4 id="turn-based-system">Turn-Based System</h4>
+<p>The battle works with a <strong>rotating turn system</strong>:</p>
+<ol>
+<li>When the battle starts, the <strong>number of turns</strong> is defined based on the participating members</li>
+<li>There is always a <strong>current turn</strong> that identifies which member can act</li>
+<li>After each action, the turn passes to the next member (circular rotation)</li>
+<li>If a member has fallen, they are automatically skipped in the rotation</li>
+</ol>
+<h4 id="battle-states">Battle States</h4>
+<p>A battle can be in three states:</p>
+<ol>
+<li>
+<p><strong>Ongoing</strong></p>
+<ul>
+<li>The battle is active</li>
+<li>Members can perform actions</li>
+<li>Neither the boss nor all members have been defeated</li>
+</ul>
+</li>
+<li>
+<p><strong>Won</strong></p>
+<ul>
+<li>The boss has been reduced to 0 HP</li>
+<li>The guild receives experience and money rewards</li>
+<li>The battle ends</li>
+</ul>
+</li>
+<li>
+<p><strong>Lost</strong></p>
+<ul>
+<li>All guild members have fallen</li>
+<li>The guild suffers the boss penalty</li>
+<li>The battle ends</li>
+</ul>
+</li>
+</ol>
+<h4 id="damage-mechanics">Damage Mechanics</h4>
+<p><strong>Damage to the Boss:</strong></p>
+<ul>
+<li>During their turn, a member can deal damage to the boss</li>
+<li>Damage reduces the boss's remaining health</li>
+<li>When health reaches 0, the battle is won</li>
+</ul>
+<p><strong>Boss Counterattack:</strong></p>
+<ul>
+<li>The boss automatically counterattacks whoever attacks it</li>
+<li>Counterattack damage can cause the guild member to fall</li>
+<li>Fallen members can no longer participate in the battle</li>
+</ul>
+<h4 id="fallen-members">Fallen Members</h4>
+<p>When a member falls:</p>
+<ul>
+<li>They are added to the list of <strong>fallen members</strong></li>
+<li>They can no longer perform actions</li>
+<li>They are skipped in the turn rotation</li>
+<li>If <strong>all</strong> members fall, the battle is lost</li>
+</ul>
+<h3 id="dynamic-participation">Dynamic Participation</h3>
+<p>The battle supports dynamic joining and leaving of members:</p>
+<p>Increase in Participants:</p>
+<ul>
+<li>A new member can join an ongoing battle</li>
+<li>The number of turns increases</li>
+<li>The new member is added to the rotation</li>
+</ul>
+<p>Reduction in Participants:</p>
+<ul>
+<li>A member can leave the battle</li>
+<li>The number of turns decreases</li>
+<li>The member is removed from the rotation and from the fallen list</li>
+</ul>
+<h3 id="battle-events">Battle Events</h3>
+<p>The possible events related to the battle are:</p>
+<ul>
+<li><strong>BattleStarted</strong>: the battle has started</li>
+<li><strong>AttackPerformed</strong>: a member has attacked</li>
+<li><strong>SpellCasted</strong>: a spell has been cast</li>
+<li><strong>BattleWon</strong>: the battle has been won</li>
+<li><strong>BattleLost</strong>: the battle has been lost</li>
+</ul>
+<h3 id="battle-invariants">Battle Invariants</h3>
+<ol>
+<li><strong>One Battle per Guild</strong>: each guild can have at most one active battle</li>
+<li><strong>Non-Negative Health</strong>: the boss's health cannot drop below zero (it stops at 0)</li>
+<li><strong>Valid Turn</strong>: the current turn must always point to an existing and non-fallen member</li>
+<li><strong>Minimum Turns</strong>: there must be at least 1 turn (at least one participant)</li>
+<li><strong>Victory Condition</strong>: battle won if and only if boss health = 0</li>
+<li><strong>Defeat Condition</strong>: battle lost if and only if all members have fallen</li>
+<li><strong>Boss Immutability</strong>: the boss's characteristics (except remaining health) do not change during the battle</li>
+</ol>
+<h3 id="valid-state-transitions">Valid State Transitions</h3>
+<p><strong>For Battles:</strong></p>
+<ul>
+<li>Created → Ongoing (automatic)</li>
+<li>Ongoing → Won (boss defeated)</li>
+<li>Ongoing → Lost (all fallen)</li>
+<li>Won/Lost → Cancelled</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../guild/" class="btn btn-neutral float-left" title="Guild"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../marketplace/" class="btn btn-neutral float-right" title="Marketplace">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../guild/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../marketplace/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>User Stories - HabitQuest</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "User Stories";
+        var mkdocs_page_input_path = "ddd/specifications/user_stories.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">User Stories</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Driven Design</li>
+      <li class="breadcrumb-item active">User Stories</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="equipment-feature">Equipment Feature</h2>
+<pre><code class="language-gherkin">Feature: Equipment Management
+
+  As a player
+  I want to equip or remove weapons and armor
+  So that my avatar stats change accordingly
+
+  Scenario: Equip a weapon
+    Given an avatar with strength equal to 10
+    And a weapon that grants +3 strength
+    When the player equips the weapon
+    Then the avatar strength should become 13
+    And the weapon should be marked as equipped
+
+  Scenario: Equip an armor
+    Given an avatar with robustness equal to 12
+    And an armor that grants +5 robustness
+    When the player equips the armor
+    Then the avatar robustness should become 17
+    And the armor should be marked as equipped
+
+  Scenario: Remove equipped weapon
+    Given an avatar with a weapon equipped that grants +3 strength
+    And base strength equal to 10
+    When the player removes the weapon
+    Then the avatar strength should return to 10
+    And the weapon should no longer be equipped
+</code></pre>
+<h2 id="invetory-feature">Invetory Feature</h2>
+<pre><code class="language-gherkin">Feature: Use Consumable Items from Inventory
+
+  As a player
+  I want to use consumable items from my inventory
+  So that I can restore health or mana during gameplay
+
+  Scenario: Use health potion successfully
+    Given an avatar with current health 40
+    And maximum health 100
+    And a health potion that restores 30 health points
+    And the avatar has 1 health potion in inventory
+    When the player uses the health potion
+    Then the avatar current health should become 70
+    And the health potion quantity should decrease by 1
+
+  Scenario: Health cannot exceed maximum value
+    Given an avatar with current health 90
+    And maximum health 100
+    And a health potion that restores 30 health points
+    And the avatar has 1 health potion in inventory
+    When the player uses the health potion
+    Then the avatar current health should become 100
+    And the health potion quantity should decrease by 1
+
+  Scenario: Use mana potion successfully
+    Given an avatar with current mana 20
+    And maximum mana 80
+    And a mana potion that restores 40 mana points
+    And the avatar has 2 mana potions in inventory
+    When the player uses a mana potion
+    Then the avatar current mana should become 60
+    And the mana potion quantity should decrease by 1
+
+  Scenario: Cannot use potion if none available
+    Given an avatar with 0 health potions in inventory
+    When the player tries to use a health potion
+    Then the operation should be rejected
+    And the avatar health should remain unchanged
+
+  Scenario: Using potion removes item if quantity reaches zero
+    Given an avatar with 1 mana potion in inventory
+    And current mana 10
+    And maximum mana 100
+    And the mana potion restores 50 mana points
+    When the player uses the mana potion
+    Then the avatar current mana should become 60
+    And the mana potion should no longer exist in inventory
+</code></pre>
+<h2 id="levelup-feature">Levelup Feature</h2>
+<pre><code class="language-gherkin">Feature: Experience and Level Management
+
+  As a player
+  I want my avatar to gain experience and level up
+  So that I can increase my stats and unlock skill points
+
+  Scenario: Avatar gains experience without leveling up
+    Given an avatar with 80 XP and level 1
+    And the level up threshold is 100 XP
+    When the avatar receives 10 XP
+    Then the avatar total XP should be 90
+    And the avatar level should remain 1
+    And no skill point should be awarded
+
+  Scenario: Avatar levels up when reaching threshold
+    Given an avatar with 90 XP and level 1
+    And the level up threshold is 100 XP
+    When the avatar receives 20 XP
+    Then the avatar level should become 2
+    And the avatar should receive 1 skill point
+    And the avatar stats should increase according to level up rules
+</code></pre>
+<h2 id="skillpoint-feature">Skillpoint Feature</h2>
+<pre><code class="language-gherkin">Feature: Skill Point Allocation
+
+  As a player
+  I want to spend skill points to increase my avatar stats
+  So that I can specialize my character
+
+  Scenario: Spend skill point to increase strength
+    Given an avatar with 1 available skill point
+    And strength equal to 10
+    When the player allocates 1 point to strength
+    Then strength should become 11
+    And available skill points should become 0
+
+  Scenario: Spend skill point to increase intelligence
+    Given an avatar with 2 available skill points
+    And intelligence equal to 8
+    When the player allocates 1 point to intelligence
+    Then intelligence should become 9
+    And available skill points should become 1
+
+  Scenario: Spend skill point to increase robustness
+    Given an avatar with 1 available skill point
+    And robustness equal to 12
+    When the player allocates 1 point to robustness
+    Then robustness should become 13
+    And available skill points should become 0
+
+  Scenario: Cannot allocate skill point if none are available
+    Given an avatar with 0 available skill points
+    When the player tries to allocate 1 point to strength
+    Then the operation should be rejected
+    And strength should remain unchanged
+</code></pre>
+<h2 id="login-feature">Login Feature</h2>
+<pre><code class="language-gherkin">Feature: User registration and authentication
+
+  Scenario: Successful user registration
+    Given a non-registered user
+    When the user provides a valid email and password
+    Then the system creates a new account
+    And returns a valid authentication token
+
+  Scenario: Successful login
+    Given a registered user
+    When the user provides correct credentials
+    Then the system returns a valid authentication token
+
+  Scenario: Login with invalid credentials
+    Given a registered user
+    When the user provides an incorrect password
+    Then the system denies authentication
+
+</code></pre>
+<h2 id="battle-feature">Battle Feature</h2>
+<pre><code class="language-gherkin">Feature: Guild boss fight
+
+  Scenario: Start a boss fight
+    Given an active guild
+    When the guild leader starts a boss fight
+    Then the system creates a boss with initial HP
+
+  Scenario: Attack the boss
+    Given an active boss fight
+    When a guild member performs an attack
+    Then the system calculates the damage
+    And reduces the boss's HP
+
+  Scenario: Cast a spell
+    Given a guild member with sufficient mana
+    When the member casts a spell
+    Then the system consumes mana
+    And applies damage or effects
+
+  Scenario: Defeat the boss
+    Given a boss with zero HP
+    When the system verifies the state
+    Then it publishes a BattleWon event
+    And distributes rewards to guild members
+
+</code></pre>
+<h2 id="guild-feature">Guild Feature</h2>
+<pre><code class="language-gherkin">Feature: Guild management
+
+  Scenario: Create a guild
+    Given an authenticated user
+    When the user creates a guild
+    Then the system registers the guild
+    And assigns the Leader role to the creator
+
+  Scenario: Invite to join a guild
+    Given an existing guild
+    When the leader send a join request to an avatar
+    Then the system records the request
+
+  Scenario: Accept a guild invitation
+    Given a pending guild invitation
+    When the avatar accepts the invitation
+    Then the system adds the avatar to the guild
+    And assigns the Member role to the avatar
+
+  Scenario: Promote a guild member
+    Given a guild leader
+    When the leader promotes a member to Officer
+    Then the system updates the member's role
+
+</code></pre>
+<h2 id="marketplace-feature">Marketplace Feature</h2>
+<pre><code class="language-gherkin">Feature: Marketplace management
+
+  Scenario: View all available items in the catalog
+    Given an authenticated user with a marketplace
+    When the user requests the list of available items
+    Then the system returns all items not yet purchased
+
+  Scenario: View available items filtered by type
+    Given an authenticated user with a marketplace
+    When the user requests items filtered by type
+    Then the system returns only items of that type that are still available
+
+  Scenario: Purchase item with sufficient currency and required level
+    Given a user with enough in-game currency and the required level
+    When the user purchases an item
+    Then the system deducts the currency from the avatar
+    And adds the item to the avatar's inventory
+    And marks the item as sold in the marketplace
+    And publishes an ItemBought event
+
+  Scenario: Purchase item with insufficient currency
+    Given a user with insufficient currency
+    When the user attempts to purchase an item
+    Then the system rejects the purchase
+    And rolls back any partial changes
+
+  Scenario: Purchase item with insufficient level
+    Given a user whose level is below the item's required level
+    When the user attempts to purchase an item
+    Then the system rejects the purchase with an insufficient level error
+
+  Scenario: Sell a previously purchased item
+    Given a user who has previously purchased an item in the marketplace
+    When the user sells the item back
+    Then the system removes the item from the avatar's inventory
+    And credits the avatar with the item's price
+    And marks the item as available again in the marketplace
+    And publishes an ItemSold event
+
+</code></pre>
+<h2 id="quest-feature">Quest Feature</h2>
+<pre><code class="language-gherkin">Feature: Quest management
+
+  Scenario: Create a quest
+    Given an authenticated user
+    When the user creates a quest with a name and a duration in days
+    Then the system persists the quest with a default money reward of 100
+    And publishes a QuestCreated event
+
+  Scenario: Delete a quest
+    Given an existing quest
+    When the user deletes the quest
+    Then the system removes the quest permanently
+    And returns a success response
+
+  Scenario: Add a habit to a quest
+    Given an existing quest
+    When the user adds a habit with a recurrence rule to the quest
+    Then the system appends the habit to the quest's habit list
+    And returns a success response
+
+  Scenario: Join a quest
+    Given an existing quest with at least one habit
+    When an avatar joins the quest
+    Then the system creates an ActiveQuests record in IN_PROGRESS status
+    And adds the quest habits to the avatar's habit tracking plan
+    And publishes a QuestJoined event
+
+  Scenario: Join a quest that the avatar has already joined
+    Given an avatar who has already joined a quest
+    When the avatar joins the same quest again
+    Then the system returns the existing ActiveQuests record without creating a duplicate
+
+  Scenario: Record habit attendance that completes the quest
+    Given an avatar participating in a quest
+    And the avatar has attended all required habit occurrences except one
+    When the avatar records the final habit attendance
+    Then the system marks the ActiveQuests as COMPLETED
+    And grants the money reward to the avatar via the avatar service
+    And publishes a QuestCompleted event
+
+  Scenario: Record habit attendance without completing the quest
+    Given an avatar participating in a quest with multiple required habit occurrences
+    When the avatar records a habit attendance that does not yet fulfill all requirements
+    Then the system increments the attended occurrences
+    And the ActiveQuests status remains IN_PROGRESS
+
+  Scenario: Record habit attendance after the quest window has elapsed
+    Given an avatar whose active quest window has ended without completion
+    When the system refreshes the quest status
+    Then the ActiveQuests status transitions to EXPIRED
+
+</code></pre>
+<h2 id="gamification-feature">Gamification Feature</h2>
+<pre><code class="language-gherkin">Feature: Character progression system
+
+  Scenario: Gain experience after habit completion
+    Given a HabitCompleted event is received
+    When the system calculates experience based on difficulty
+    Then the character's XP increases
+
+  Scenario: Apply penalty after missed habit
+    Given a HabitMissed event is received
+    When the system applies the penalty
+    Then the character's HP decreases
+    And HP does not go below zero
+
+</code></pre>
+<h2 id="habit-feature">Habit Feature</h2>
+<pre><code class="language-gherkin">Feature: Habit management
+
+  Scenario: Create a new habit
+    Given an authenticated user
+    When the user creates a habit with title, description, and recurrence
+    Then the habit is stored
+    And a HabitCreated event is appended to the habit history
+
+  Scenario: Create a habit linked to a quest
+    Given an authenticated user
+    When the user creates a habit with an associated quest ID
+    Then the habit is stored with the quest reference
+    And attendance will be reported to the quest service when completed
+
+  Scenario: Attend a habit
+    Given an active habit belonging to a user
+    When the user marks the habit as attended on a given date
+    Then the system records the attendance date
+    And grants experience to the avatar
+    And publishes a HabitAttended event
+
+  Scenario: Attend a quest-linked habit
+    Given an active habit associated with a quest
+    When the user marks the habit as attended
+    Then the system records the attendance to the quest service
+
+  Scenario: Missed habit detection
+    Given an active habit whose next recurrence has passed without attendance
+    When the scheduled job runs
+    Then the system records the habit as not attended
+    And applies damage to the avatar
+    And publishes a HabitNotAttended event
+
+  Scenario: Missed habit deduplication
+    Given a habit that was already recorded as not attended in the last check
+    When the scheduled job runs again without any new attendance
+    Then the system does not apply damage again
+    And does not publish a duplicate HabitNotAttended event
+
+  Scenario: Update habit title
+    Given an existing habit
+    When the user updates the habit title
+    Then the system stores the new title
+    And appends a HabitUpdated event to the history
+
+  Scenario: Update habit recurrence
+    Given an existing habit
+    When the user updates the habit recurrence
+    Then the system stores the new recurrence schedule
+    And appends a HabitUpdated event to the history
+
+  Scenario: Delete a habit
+    Given an existing habit
+    When the user deletes the habit
+    Then the habit is removed from the repository
+    And a HabitDeleted event is published
+
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../useCases/use_cases/" class="btn btn-neutral float-left" title="Use Cases"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../conponentsAndConnectors/components-and-connectors/" class="btn btn-neutral float-right" title="Components & Connectors">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../useCases/use_cases/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../conponentsAndConnectors/components-and-connectors/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

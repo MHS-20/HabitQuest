@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Avatar - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Avatar";
+        var mkdocs_page_input_path = "api/avatar.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Avatar</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#endpoints">Endpoints</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#create-avatar">Create Avatar</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-avatar">Get Avatar</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#delete-avatar">Delete Avatar</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#search-avatars">Search Avatars</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#invites">Invites</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-pending-invites">Get Pending Invites</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#receive-guild-invite">Receive Guild Invite</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#accept-guild-invite">Accept Guild Invite</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#name">Name</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-name">Get Name</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#update-name">Update Name</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#money">Money</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-money">Get Money</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#earn-money">Earn Money</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#spend-money">Spend Money</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inventory">Inventory</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-inventory">Get Inventory</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#add-item-to-inventory">Add Item to Inventory</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#remove-item-from-inventory">Remove Item from Inventory</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-equipped-items">Get Equipped Items</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#equip-item">Equip Item</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#unequip-item">Unequip Item</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#experience-level">Experience &amp; Level</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-experience">Get Experience</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#grant-experience">Grant Experience</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-level">Get Level</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#health">Health</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-health">Get Health</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#take-damage">Take Damage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-health-potion">Use Health Potion</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mana">Mana</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-mana">Get Mana</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#spend-mana">Spend Mana</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-mana-potion">Use Mana Potion</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#stats">Stats</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-stats">Get Stats</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#increase-strength">Increase Strength</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#increase-defense">Increase Defense</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#increase-intelligence">Increase Intelligence</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#error-responses">Error Responses</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">REST APIs</li>
+      <li class="breadcrumb-item active">Avatar</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="avatar-api">Avatar API</h1>
+<p><strong>Service:</strong> Avatar Service<br />
+<strong>Base Path:</strong> <code>/api/v1/avatars</code></p>
+<p>The Avatar Service manages the player character for each user. It handles creation and retrieval of avatars as well as all character state: money, inventory, equipped items, experience, level, health, mana, and stats.</p>
+<hr />
+<h2 id="endpoints">Endpoints</h2>
+<h3 id="create-avatar">Create Avatar</h3>
+<p><strong><code>POST /api/v1/avatars</code></strong></p>
+<p>Creates a new avatar.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;string&quot;,
+  &quot;name&quot;: &quot;string&quot;
+}
+</code></pre>
+<p><strong>Response <code>201 Created</code>:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;string&quot;,
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/string&quot; }
+  }
+}
+</code></pre>
+<hr />
+<h3 id="get-avatar">Get Avatar</h3>
+<p><strong><code>GET /api/v1/avatars/{id}</code></strong></p>
+<p>Returns full avatar details.</p>
+<p><strong>Response <code>200 OK</code>:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;string&quot;,
+  &quot;name&quot;: &quot;string&quot;,
+  &quot;money&quot;: { &quot;amount&quot;: 100 },
+  &quot;level&quot;: { &quot;levelNumber&quot;: 1, &quot;currentExperience&quot;: 0, &quot;experienceRequired&quot;: 100 },
+  &quot;health&quot;: { &quot;current&quot;: 100, &quot;max&quot;: 100 },
+  &quot;mana&quot;: { &quot;amount&quot;: 50, &quot;max&quot;: 50 },
+  &quot;stats&quot;: { &quot;strength&quot;: 10, &quot;defense&quot;: 10, &quot;intelligence&quot;: 10 },
+  &quot;inventory&quot;: { &quot;items&quot;: [] },
+  &quot;equippedItems&quot;: { &quot;items&quot;: [] },
+  &quot;spells&quot;: [],
+  &quot;_links&quot;: {
+    &quot;self&quot;: { &quot;href&quot;: &quot;/api/v1/avatars/string&quot; }
+  }
+}
+</code></pre>
+<hr />
+<h3 id="delete-avatar">Delete Avatar</h3>
+<p><strong><code>DELETE /api/v1/avatars/{id}</code></strong></p>
+<p>Permanently deletes the avatar.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h3 id="search-avatars">Search Avatars</h3>
+<p><strong><code>POST /api/v1/avatars/search</code></strong></p>
+<p>Searches for avatars by name and/or level range.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;string (optional)&quot;,
+  &quot;minLevel&quot;: 1,
+  &quot;maxLevel&quot;: 10
+}
+</code></pre>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of avatar resources.</p>
+<hr />
+<h2 id="invites">Invites</h2>
+<h3 id="get-pending-invites">Get Pending Invites</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/invites</code></strong></p>
+<p>Returns the pending guild invites for the avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong> HATEOAS collection of invite resources.</p>
+<h3 id="receive-guild-invite">Receive Guild Invite</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/invites</code></strong></p>
+<p>Stores a guild invite for the avatar.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;inviteId&quot;: &quot;string&quot;,
+  &quot;guildId&quot;: &quot;string&quot;,
+  &quot;guildName&quot;: &quot;Guild Name&quot;,
+  &quot;expiresAt&quot;: &quot;2026-04-22T12:00:00Z&quot;
+}
+</code></pre>
+<p>If <code>expiresAt</code> is missing or blank, the service defaults the invite to expire 24 hours from receipt.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="accept-guild-invite">Accept Guild Invite</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/invites/{inviteId}/accept</code></strong></p>
+<p>Accepts a pending guild invite.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="name">Name</h2>
+<h3 id="get-name">Get Name</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/name</code></strong></p>
+<pre><code class="language-json">{ &quot;name&quot;: &quot;string&quot; }
+</code></pre>
+<h3 id="update-name">Update Name</h3>
+<p><strong><code>PATCH /api/v1/avatars/{id}/name</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;name&quot;: &quot;string&quot; }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="money">Money</h2>
+<h3 id="get-money">Get Money</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/money</code></strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 100 }
+</code></pre>
+<h3 id="earn-money">Earn Money</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/money/earn</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 50 }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="spend-money">Spend Money</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/money/spend</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 25 }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="inventory">Inventory</h2>
+<h3 id="get-inventory">Get Inventory</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/inventory</code></strong></p>
+<pre><code class="language-json">{
+  &quot;items&quot;: [
+    { &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+  ]
+}
+</code></pre>
+<h3 id="add-item-to-inventory">Add Item to Inventory</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/inventory/items</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+</code></pre>
+<p><code>type</code> must be one of <code>WEAPON</code>, <code>ARMOR</code>, <code>HEALTH_POTION</code>, or <code>MANA_POTION</code>. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="remove-item-from-inventory">Remove Item from Inventory</h3>
+<p><strong><code>DELETE /api/v1/avatars/{id}/inventory/items</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+</code></pre>
+<p><code>type</code> must be one of <code>WEAPON</code>, <code>ARMOR</code>, <code>HEALTH_POTION</code>, or <code>MANA_POTION</code>. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="get-equipped-items">Get Equipped Items</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/equipped-items</code></strong></p>
+<p>Returns the currently equipped items for the avatar.</p>
+<p><strong>Response <code>200 OK</code>:</strong></p>
+<pre><code class="language-json">{
+  &quot;items&quot;: [
+    { &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+  ]
+}
+</code></pre>
+<h3 id="equip-item">Equip Item</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/inventory/items/equip</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+</code></pre>
+<p><code>type</code> must be <code>WEAPON</code> or <code>ARMOR</code> for equip and unequip operations. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="unequip-item">Unequip Item</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/inventory/items/unequip</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;WEAPON&quot;, &quot;name&quot;: &quot;Iron Sword&quot;, &quot;description&quot;: &quot;...&quot;, &quot;power&quot;: 10 }
+</code></pre>
+<p><code>type</code> must be <code>WEAPON</code> or <code>ARMOR</code> for equip and unequip operations. <code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h2 id="experience-level">Experience &amp; Level</h2>
+<h3 id="get-experience">Get Experience</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/experience</code></strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 250 }
+</code></pre>
+<h3 id="grant-experience">Grant Experience</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/experience/grant</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 50 }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="get-level">Get Level</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/level</code></strong></p>
+<pre><code class="language-json">{ &quot;levelNumber&quot;: 3, &quot;currentExperience&quot;: 50, &quot;experienceRequired&quot;: 200 }
+</code></pre>
+<hr />
+<h2 id="health">Health</h2>
+<h3 id="get-health">Get Health</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/health</code></strong></p>
+<pre><code class="language-json">{ &quot;current&quot;: 80, &quot;max&quot;: 100 }
+</code></pre>
+<h3 id="take-damage">Take Damage</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/health/damage</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 20 }
+</code></pre>
+<p><strong>Response <code>200 OK</code>:</strong></p>
+<pre><code class="language-json">{ &quot;died&quot;: false }
+</code></pre>
+<h3 id="use-health-potion">Use Health Potion</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/health/potion</code></strong></p>
+<p>Uses a health potion from the avatar inventory to restore health.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;name&quot;: &quot;Health Potion&quot;, &quot;description&quot;: &quot;Restores health&quot;, &quot;power&quot;: 20 }
+</code></pre>
+<p><code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="mana">Mana</h2>
+<h3 id="get-mana">Get Mana</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/mana</code></strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 30, &quot;max&quot;: 50 }
+</code></pre>
+<h3 id="spend-mana">Spend Mana</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/mana/spend</code></strong></p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;amount&quot;: 10 }
+</code></pre>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="use-mana-potion">Use Mana Potion</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/mana/potion</code></strong></p>
+<p>Uses a mana potion from the avatar inventory to restore mana.</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{ &quot;name&quot;: &quot;Mana Potion&quot;, &quot;description&quot;: &quot;Restores mana&quot;, &quot;power&quot;: 10 }
+</code></pre>
+<p><code>power</code> is optional and defaults to <code>0</code> when omitted.</p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="stats">Stats</h2>
+<h3 id="get-stats">Get Stats</h3>
+<p><strong><code>GET /api/v1/avatars/{id}/stats</code></strong></p>
+<pre><code class="language-json">{ &quot;strength&quot;: 12, &quot;defense&quot;: 10, &quot;intelligence&quot;: 8 }
+</code></pre>
+<h3 id="increase-strength">Increase Strength</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/stats/strength</code></strong></p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="increase-defense">Increase Defense</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/stats/defense</code></strong></p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<h3 id="increase-intelligence">Increase Intelligence</h3>
+<p><strong><code>POST /api/v1/avatars/{id}/stats/intelligence</code></strong></p>
+<p><strong>Response <code>204 No Content</code></strong></p>
+<hr />
+<h2 id="error-responses">Error Responses</h2>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>400 Bad Request</code></td>
+<td>Invalid request data or business rule violation (e.g. insufficient mana/health)</td>
+</tr>
+<tr>
+<td><code>404 Not Found</code></td>
+<td>Avatar not found</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../auth/" class="btn btn-neutral float-left" title="Authentication"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../tracking/" class="btn btn-neutral float-right" title="Habits (Tracking)">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../auth/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../tracking/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

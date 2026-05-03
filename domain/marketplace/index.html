@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Marketplace - HabitQuest</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Marketplace";
+        var mkdocs_page_input_path = "domain/marketplace.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> HabitQuest
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Driven Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/requirements/">Requirements</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/ubiquitous_language/">Ubiquitous Language</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/eventStorming/event_storming/">Event Storming</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/useCases/use_cases/">Use Cases</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/user_stories/">User Stories</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/conponentsAndConnectors/components-and-connectors/">Components & Connectors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/contextMap/context-map/">Context Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes/">Quality Attributes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/specifications/quality_attributes_scenarios/">Quality Attribute Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Domain Overview</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../guild/">Guild</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../battle/">Battle</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Marketplace</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#items">Items</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#money">Money</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#dynamics-and-business-logic">Dynamics and Business Logic</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#purchasing-an-item">Purchasing an Item</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#selling-an-item">Selling an Item</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#browsing-the-catalog">Browsing the Catalog</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#domain-events">Domain Events</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#itembought">ItemBought</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#itemsold">ItemSold</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#domain-structure">Domain Structure</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../habit/">Habit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../quest/">Quest</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture & Implementation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/architecture/architecture/">General Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/interactions/interactions/">Interactions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hexagonal/hexagonal-architecture/">Hexagonal Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ddd/adr/adr-index/">Architecture Decision Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/multiplatform/">Multiplatform UI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/microservices-patterns/">Microservices Patterns</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/cqrs/">CQRS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/saga/">SAGA</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/hateoas/">HATEOAS</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/event-sourcing/">Event Sourcing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../implementation/test-pyramid/">Test Pyramid</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">REST APIs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/auth/">Authentication</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/avatar/">Avatar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tracking/">Habits (Tracking)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/quest/">Quests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/guild/">Guilds & Battles</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/marketplace/">Marketplace</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/notification/">Notifications</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/gradle/">Gradle</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/ci-cd/">CI/CD</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/git-github/">Git & Github</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Kubernetes Deployments</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-deployment-overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-application-layer/">Application</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/kubernetes-observability-layer/">Observability</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">HabitQuest</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Domain Overview</li>
+      <li class="breadcrumb-item active">Marketplace</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="domain-marketplace">Domain: Marketplace</h1>
+<p>The Marketplace is the virtual shop of the HabitQuest game.
+Each avatar in the game has their own personal marketplace, where they can buy and sell items — weapons, armor and potions — using the in-game currency.
+The service entirely manages this lifecycle: from browsing the available catalog, to purchasing and returning items, to notifying significant events.</p>
+<p>The marketplace does not directly manage the avatar (which belongs to another service),
+but each marketplace is <strong>uniquely associated with an avatar</strong>:
+there is no marketplace shared between multiple avatars, nor an avatar that owns more than one.</p>
+<p>The <strong>Marketplace</strong> keeps track of two fundamental pieces of information:</p>
+<ul>
+<li>which items are <strong>available</strong> for purchase (i.e. present in the catalog but not yet bought),</li>
+<li>which items have been <strong>purchased</strong> (i.e. are in the avatar's possession).</li>
+</ul>
+<p>For a given marketplace <strong>an item can be in only one of the two states</strong>: available or purchased.
+The marketplace is created with a predefined set of purchasable items (ItemCatalog).
+The distinction between "available" and "purchased" is managed by the marketplace itself, not by the catalog.</p>
+<h3 id="items">Items</h3>
+<p>Items are <strong>value objects</strong>: they have no identity of their own, but are identified by their name.</p>
+<p>Each item has:</p>
+<ul>
+<li>a <strong>unique name</strong> (used as a key in all operations),</li>
+<li>a <strong>description</strong>,</li>
+<li>a <strong>price</strong> in coins,</li>
+<li>a <strong>minimum level required</strong> to be able to purchase it,</li>
+<li>a <strong>specific stat</strong> that varies depending on the type.</li>
+</ul>
+<p>There are no items without a level requirement.
+There are three item families:</p>
+<ul>
+<li><strong>Weapons:</strong> grant an attack power value.</li>
+<li><strong>Armor:</strong> grants a defensive power value.</li>
+<li><strong>Potions:</strong> divided into two subtypes:</li>
+<li><em>Health Potion</em> — restores hit points (HP).</li>
+<li><em>Mana Potion</em> — restores mana points (MP).</li>
+</ul>
+<h3 id="money">Money</h3>
+<p><strong>Money</strong> is the monetary value used in the marketplace.
+It is a value object that guarantees the amount is always non-negative.
+It supports addition and subtraction operations, but prevents dropping below zero (subtracting an amount greater than the available balance is an illegal operation).</p>
+<h2 id="dynamics-and-business-logic">Dynamics and Business Logic</h2>
+<h3 id="purchasing-an-item">Purchasing an Item</h3>
+<p>When an avatar wants to purchase an item, the system verifies that:</p>
+<ol>
+<li>The item exists in the marketplace catalog.</li>
+<li>The item has not already been purchased (it is not in the "sold" state).</li>
+<li>The avatar has a sufficient level to purchase the item.</li>
+</ol>
+<p>If both conditions are satisfied, the item transitions from the "available" state to the "purchased" state.
+An item <strong>cannot be purchased twice</strong>: attempting to buy something already in the avatar's possession is a forbidden operation.</p>
+<h3 id="selling-an-item">Selling an Item</h3>
+<p>Selling allows the avatar to <strong>return</strong> a previously purchased item,
+making it available again in the catalog and receiving its monetary value in exchange.</p>
+<p>The system verifies that:</p>
+<ol>
+<li>The item exists in the catalog.</li>
+<li>The item is effectively in the "purchased" state by the avatar.</li>
+</ol>
+<p>If the conditions are met, the item becomes available again.
+Attempting to sell an item that is not owned is not permitted.</p>
+<h3 id="browsing-the-catalog">Browsing the Catalog</h3>
+<p>The marketplace exposes several browsing modes:</p>
+<ul>
+<li><strong>All available items</strong> — those in the catalog that have not yet been bought.</li>
+<li><strong>Available items by type</strong> — filtering by Weapon, Armor, Potion, etc.</li>
+<li><strong>A single available item by name</strong> — if it exists and has not been bought.</li>
+<li><strong>All purchased items</strong> — those currently in the avatar's possession.</li>
+<li><strong>A single purchased item by name</strong>.</li>
+</ul>
+<h2 id="domain-events">Domain Events</h2>
+<p>When relevant operations occur in the marketplace, the system emits <strong>domain events</strong> that inform the rest of the system of what has happened.
+Events are immutable and carry all the information necessary to be processed by other services.</p>
+<h3 id="itembought">ItemBought</h3>
+<p>Emitted when an avatar successfully purchases an item. Contains:</p>
+<ul>
+<li>the marketplace identifier,</li>
+<li>the name of the purchased item,</li>
+<li>the avatar identifier.</li>
+</ul>
+<p>This event signals to the system that the avatar has obtained a new item and that the marketplace state has changed.</p>
+<h3 id="itemsold">ItemSold</h3>
+<p>Emitted when an avatar returns a previously purchased item.
+Contains the same information as ItemBought (marketplace, item name, avatar).
+This event signals that the item has become available again in the avatar's marketplace.</p>
+<h2 id="domain-structure">Domain Structure</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Nature</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Marketplace</td>
+<td>Aggregate</td>
+<td>Manages the state of items (available / purchased) for an avatar</td>
+</tr>
+<tr>
+<td>ItemCatalog</td>
+<td>Domain component</td>
+<td>Contains the static list of all sellable items</td>
+</tr>
+<tr>
+<td>Item (Weapon, Armor, Potion)</td>
+<td>Value Object</td>
+<td>Describes the characteristics of an item</td>
+</tr>
+<tr>
+<td>Money</td>
+<td>Value Object</td>
+<td>Represents a non-negative monetary amount</td>
+</tr>
+<tr>
+<td>Level</td>
+<td>Value Object</td>
+<td>Represents a game level (≥ 1)</td>
+</tr>
+<tr>
+<td>Avatar</td>
+<td>External reference</td>
+<td>Identifies the owner of the marketplace</td>
+</tr>
+<tr>
+<td>ItemBought / ItemSold</td>
+<td>Domain events</td>
+<td>Notify the system of completed transactions</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../battle/" class="btn btn-neutral float-left" title="Battle"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../habit/" class="btn btn-neutral float-right" title="Habit">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../battle/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../habit/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
