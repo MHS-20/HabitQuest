@@ -8,12 +8,11 @@ patches:
 - path: patch-env.yml
 - path: patch-resources.yml
 
-images:
-- name: quest-service
   # newName: ghcr.io/mhs-20/quest-service
   # newTag: b0e526ffefcbe501118caaced29b87203a8187f7
-  newName: quest-service
-  newTag: latest
+images:
+- name: quest-service
+  newName: ghcr.io/ghcr.io/mhs-20/habitquest/quest-service/quest-service
 
 replicas:
 - count: 1
