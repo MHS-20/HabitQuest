@@ -31,6 +31,7 @@ HabitQuest is here to support you on your journey to better habits.
   - [General Architecture](implementation/architecture/architecture.md)
   - [Hexagonal Architecture](implementation/hexagonal/hexagonal-architecture.md)
   - [Multiplatform UI Architecture](implementation/multiplatform.md)
+  - [Architecture Decision Records](ddd/adr/adr-index.md)
   - [Microservices Patterns](implementation/microservices-patterns.md)
   - [CQRS](implementation/cqrs.md)
   - [SAGA](implementation/saga.md)
