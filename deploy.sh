@@ -3,6 +3,7 @@ set -e
 find . -type f -name "*.sh" -exec chmod +x {} \;
 
 ./deployment/kubernetes/minikube-setup.sh
+helm repo add stable https://charts.helm.sh/stable --force-update
 ./deployment/kubernetes/build-images.sh
 ./deployment/kubernetes/platform/deployPlatform.sh
 ./deployment/kubernetes/observability/deployObservability.sh
