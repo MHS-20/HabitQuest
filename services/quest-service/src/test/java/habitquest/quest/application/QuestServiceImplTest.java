@@ -443,7 +443,7 @@ class QuestServiceImplTest {
         assertThat(result).hasSize(1);
         QuestProgressView first = result.getFirst();
         assertThat(first.questId()).isEqualTo(QUEST_ID.value());
-        assertThat(first.completionPercentage()).isEqualTo(100);
+        assertThat(first.completionPercentage()).isEqualTo(50);
         assertThat(first.habits()).hasSize(1);
         assertThat(first.habits().getFirst().remainingOccurrences()).isEqualTo(1);
       }
@@ -473,6 +473,7 @@ class QuestServiceImplTest {
         ActiveQuests active =
             ActiveQuests.fromQuest(new Id<>(ACTIVE_PROGRESS_ID), AVATAR_ID_1, startedOn, quest);
         active.recordAttendance(HABIT_ID_1, startedOn);
+        active.recordAttendance(HABIT_ID_1, startedOn.plusDays(1));
 
         when(activeQuestsRepository.findByAvatarId(AVATAR_ID_1)).thenReturn(List.of(active));
         when(questRepository.findById(QUEST_ID)).thenReturn(quest);

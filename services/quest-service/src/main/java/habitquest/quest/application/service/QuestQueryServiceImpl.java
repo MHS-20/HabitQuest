@@ -91,13 +91,18 @@ public class QuestQueryServiceImpl implements QuestQueryService {
                   quest.getHabits().stream()
                       .collect(Collectors.toMap(Habit::getId, Habit::getTitle));
 
-              int totalHabits = active.getRequiredOccurrences().size();
-              long attendedHabits =
+              int totalRequiredOccurrences =
+                  active.getRequiredOccurrences().values().stream()
+                      .mapToInt(Integer::intValue)
+                      .sum();
+              int attendedOccurrences =
                   active.getAttendedOccurrences().values().stream()
-                      .filter(attended -> attended > 0)
-                      .count();
+                      .mapToInt(Integer::intValue)
+                      .sum();
               int completion =
-                  totalHabits == 0 ? 0 : (int) Math.round((attendedHabits * 100.0) / totalHabits);
+                  totalRequiredOccurrences == 0
+                      ? 0
+                      : (int) Math.round((attendedOccurrences * 100.0) / totalRequiredOccurrences);
 
               List<QuestProgressView.HabitProgressView> habitProgress =
                   active.getRequiredOccurrences().entrySet().stream()

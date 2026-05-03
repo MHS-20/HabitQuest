@@ -27,13 +27,9 @@ class ActiveQuestsTest {
   }
 
   @Test
-  @DisplayName("quest is completed only after every habit is attended at least once")
+  @DisplayName("quest is completed only after every required occurrence is attended")
   void completesOnlyWhenEveryHabitIsAttended() {
-    Quest quest = questWithDuration("quest-2", 2);
-    Habit h1 = morningRunHabit();
-    Habit h2 = meditationHabit();
-    quest.addHabit(h1);
-    quest.addHabit(h2);
+    Quest quest = fullQuest();
 
     ActiveQuests active =
         ActiveQuests.fromQuest(new Id<>("active-2"), AVATAR_ID_1, START_DATE, quest);
@@ -41,7 +37,7 @@ class ActiveQuestsTest {
     active.recordAttendance(HABIT_ID_1, START_DATE);
     assertThat(active.getStatus()).isEqualTo(ActiveQuests.Status.IN_PROGRESS);
 
-    active.recordAttendance(HABIT_ID_2, START_DATE.plusDays(1));
+    active.recordAttendance(HABIT_ID_1, START_DATE.plusDays(1));
     assertThat(active.getStatus()).isEqualTo(ActiveQuests.Status.COMPLETED);
   }
 

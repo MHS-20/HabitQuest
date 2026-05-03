@@ -133,8 +133,9 @@ public final class ActiveQuests implements Aggregate<Id<ActiveQuests>> {
     }
 
     for (Map.Entry<Id<Habit>, Integer> required : requiredOccurrences.entrySet()) {
+      int requiredCount = required.getValue();
       int done = attendedOccurrences.getOrDefault(required.getKey(), 0);
-      if (done <= 0) {
+      if (done < requiredCount) {
         return false;
       }
     }
