@@ -36,7 +36,7 @@ public class BattleCommandServiceImpl implements BattleCommandService {
     this.avatarPort = avatarPort;
   }
 
-  private Battle getBattle(Id<Battle> battleId) throws BattleNotFoundException {
+  private Battle getBattle(final Id<Battle> battleId) throws BattleNotFoundException {
     return battleRepository
         .findById(battleId)
         .orElseThrow(() -> new BattleNotFoundException(battleId.value()));
@@ -44,8 +44,12 @@ public class BattleCommandServiceImpl implements BattleCommandService {
 
   @Override
   public Id<Battle> createBattle(
-      Id<Guild> guildId, BossType bossType, Integer numOfTurns, List<Id<GuildMember>> members) {
-    Battle battle = battleFactory.create(guildId, bossType, numOfTurns, members);
+      final Id<Guild> guildId,
+      final BossType bossType,
+      final Integer numOfTurns,
+      final List<Id<GuildMember>> members
+  ) {
+    final Battle battle = battleFactory.create(guildId, bossType, numOfTurns, members);
     battleRepository.save(battle);
     battleObserver.notifyBattleEvent(new BattleStarted(battle.getId(), battle.getGuildId()));
     return battle.getId();
